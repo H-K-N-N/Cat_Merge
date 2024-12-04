@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 4440387383682111487}
   - component: {fileID: -3185705115251794711}
   - component: {fileID: 6581758322604903725}
-  - component: {fileID: 8884134694865118318}
   m_Layer: 5
   m_Name: Cat Prefab
   m_TagString: Untagged
@@ -104,16 +103,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   catData: {fileID: 0}
---- !u!114 &8884134694865118318
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4442190507333617709}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ebe91ce040d4a69428fb621bc49aca6a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cat: {fileID: 0}
+  rectTransform: {fileID: 0}

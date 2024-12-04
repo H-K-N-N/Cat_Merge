@@ -3,8 +3,8 @@ using UnityEngine.UI;
 
 public class CatUI : MonoBehaviour
 {
-    [SerializeField] private Cat catData;           // 고양이 데이터
-    private Image catImage;                         // 고양이 이미지
+    private Cat catData;           // 고양이 데이터
+    private Image catImage;        // 고양이 이미지
 
     private void Awake()
     {

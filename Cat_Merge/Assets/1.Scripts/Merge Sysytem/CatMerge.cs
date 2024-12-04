@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class CatMerge : MonoBehaviour
 {
-    [SerializeField] private Cat[] allCatData;  // 모든 고양이 데이터
+    private Cat[] allCatData;           // 모든 고양이 데이터
 
     public Cat[] AllCatData => allCatData;
 
@@ -15,7 +15,6 @@ public class CatMerge : MonoBehaviour
     private void LoadAllCats()
     {
         allCatData = Resources.LoadAll<Cat>("Cats");
-        Debug.Log($"총 {allCatData.Length}개의 고양이 데이터가 로드되었습니다.");
     }
 
     // 고양이 Merge 함수

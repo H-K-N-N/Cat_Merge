@@ -3,12 +3,14 @@ using UnityEngine.UI;
 
 public class CatUI : MonoBehaviour
 {
-    private Cat catData;           // 고양이 데이터
-    private Image catImage;        // 고양이 이미지
+    private Cat catData;                    // 고양이 데이터
+    private Image catImage;                 // 고양이 이미지
+    private CatDragAndDrop catDragAndDrop;
 
     private void Awake()
     {
         catImage = GetComponent<Image>();
+        catDragAndDrop = GetComponentInParent<CatDragAndDrop>();
     }
 
     private void Start()
@@ -18,6 +20,10 @@ public class CatUI : MonoBehaviour
 
     public void UpdateCatUI()
     {
+        if (catDragAndDrop != null)
+        {
+            catDragAndDrop.catData = catData;
+        }
         catImage.sprite = catData.CatImage;
     }
 

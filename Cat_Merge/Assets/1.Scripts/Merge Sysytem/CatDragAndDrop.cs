@@ -123,7 +123,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IDropHandler
     // CatUI °»½Å
     public void UpdateCatUI()
     {
-        GetComponentInChildren<CatUI>()?.SetCatData(catData);
+        GetComponentInChildren<CatData>()?.SetCatData(catData);
     }
 
 }

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CatUI : MonoBehaviour
+public class CatData : MonoBehaviour
 {
     private Cat catData;                    // 고양이 데이터
     private Image catImage;                 // 고양이 이미지

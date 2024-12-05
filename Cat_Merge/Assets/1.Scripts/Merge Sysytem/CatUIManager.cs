@@ -33,8 +33,8 @@ public class CatUIManager : MonoBehaviour
         {
             GameObject catUIObject = Instantiate(catPrefab, catUIParent);
 
-            CatUI catUI = catUIObject.GetComponent<CatUI>();
-            catUI.SetCatData(allCatData[0]);
+            CatData catData = catUIObject.GetComponent<CatData>();
+            catData.SetCatData(allCatData[0]);
 
             Vector2 randomPos = GetRandomPosition(panelRectTransform);
             catUIObject.GetComponent<RectTransform>().anchoredPosition = randomPos;

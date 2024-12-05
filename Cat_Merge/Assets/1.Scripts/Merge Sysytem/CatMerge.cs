@@ -2,8 +2,7 @@ using UnityEngine;
 
 public class CatMerge : MonoBehaviour
 {
-    private Cat[] allCatData;           // 모든 고양이 데이터
-
+    private Cat[] allCatData;               // 모든 고양이 데이터
     public Cat[] AllCatData => allCatData;
 
     private void Awake()
@@ -49,4 +48,6 @@ public class CatMerge : MonoBehaviour
         }
         return null;
     }
+
+
 }

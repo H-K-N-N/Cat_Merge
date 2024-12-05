@@ -46,24 +46,9 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, ID
             // 동일한 ID 확인 후 합성 처리
             if (nearbyCat.catData.CatId == this.catData.CatId)
             {
-                // 합성 처리
-                Cat mergedCat = FindObjectOfType<CatMerge>().MergeCats(this.catData, nearbyCat.catData);
-
-                if (mergedCat != null)
-                {
-                    Debug.Log($"합성 성공: {mergedCat.CatName}");
-                    this.catData = mergedCat;
-                    UpdateCatUI();
-
-                    // 근처에서 합성재료로 쓰인 고양이 삭제
-                    Destroy(nearbyCat.gameObject);
-                    return;
-                }
-                else
-                {
-                    Debug.LogWarning("합성 실패");
-                    return;
-                }
+                // nearbyCat 끌려오기 코루틴 실행
+                StartCoroutine(PullNearbyCat(nearbyCat));
+                return;
             }
             else
             {
@@ -73,6 +58,40 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, ID
         else
         {
             Debug.Log("드랍한 위치에 배치");
+        }
+    }
+
+    // 합성시 고양이가 끌려오는 애니메이션 처리
+    private System.Collections.IEnumerator PullNearbyCat(CatDragAndDrop nearbyCat)
+    {
+        float duration = 0.1f;  // 끌려오는 시간
+        float elapsed = 0f;
+        Vector3 startPosition = nearbyCat.rectTransform.localPosition;
+        Vector3 targetPosition = rectTransform.localPosition;
+
+        // nearbyCat을 드래그된 객체로 끌려오게 설정
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration;
+            nearbyCat.rectTransform.localPosition = Vector3.Lerp(startPosition, targetPosition, t);
+            yield return null;
+        }
+
+        // 끌려온 후 합성 처리
+        Cat mergedCat = FindObjectOfType<CatMerge>().MergeCats(this.catData, nearbyCat.catData);
+        if (mergedCat != null)
+        {
+            Debug.Log($"합성 성공: {mergedCat.CatName}");
+            this.catData = mergedCat;
+            UpdateCatUI();
+
+            // 합성된 nearbyCat 삭제
+            Destroy(nearbyCat.gameObject);
+        }
+        else
+        {
+            Debug.LogWarning("합성 실패");
         }
     }
 

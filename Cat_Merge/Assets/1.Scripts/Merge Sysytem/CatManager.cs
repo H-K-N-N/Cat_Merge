@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class CatUIManager : MonoBehaviour
+public class CatManager : MonoBehaviour
 {
     [SerializeField] private GameObject catPrefab;      // 고양이 UI 프리팹
     [SerializeField] private Transform catUIParent;     // 고양이를 배치할 부모 Transform (UI Panel 등)

@@ -5,8 +5,8 @@ using UnityEngine.EventSystems;
 public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IDropHandler
 {
     public Cat catData;                             // 드래그하는 고양이의 데이터
-    public RectTransform rectTransform;             // 
-    private Canvas parentCanvas;                    // 
+    public RectTransform rectTransform;             // RectTransform 참조
+    private Canvas parentCanvas;                    // 부모 Canvas 참조
 
     private void Awake()
     {
@@ -40,7 +40,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, ID
     // 드롭 시
     public void OnDrop(PointerEventData eventData)
     {
-        // 드랍한 위치에 근처의 CatPrefab을 찾기
+        // 드랍 위치에 근처의 catPrefab 찾기
         CatDragAndDrop nearbyCat = FindNearbyCat();
         if (nearbyCat != null && nearbyCat != this)
         {
@@ -73,18 +73,16 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, ID
     // 합성시 고양이가 끌려오는 애니메이션 처리
     private IEnumerator PullNearbyCat(CatDragAndDrop nearbyCat)
     {
-        // 끌려오는 시간
-        float duration = 0.1f;
-        float elapsed = 0f;
         Vector3 startPosition = nearbyCat.rectTransform.localPosition;
         Vector3 targetPosition = rectTransform.localPosition;
+        float elapsed = 0f;
+        float duration = 0.1f;
 
         // nearbyCat을 드래그된 객체로 끌려오게 설정
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            float t = elapsed / duration;
-            nearbyCat.rectTransform.localPosition = Vector3.Lerp(startPosition, targetPosition, t);
+            nearbyCat.rectTransform.localPosition = Vector3.Lerp(startPosition, targetPosition, elapsed / duration);
             yield return null;
         }
 
@@ -95,8 +93,6 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, ID
             Debug.Log($"합성 성공: {mergedCat.CatName}");
             this.catData = mergedCat;
             UpdateCatUI();
-
-            // 합성된 nearbyCat 삭제
             Destroy(nearbyCat.gameObject);
         }
         else
@@ -126,7 +122,6 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, ID
                 // Rect 간 충돌 확인
                 if (thisRect.Overlaps(otherRect))
                 {
-                    // 충돌하는 첫 번째 CatPrefab 반환
                     return otherCat;
                 }
             }

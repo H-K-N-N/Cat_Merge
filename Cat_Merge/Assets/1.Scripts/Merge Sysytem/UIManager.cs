@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
-    [SerializeField] private AutoMerge autoMerge;
+    [SerializeField] private AutoMerge autoMerge;       // AutoMerge ÂüÁ¶
 
     private void Start()
     {

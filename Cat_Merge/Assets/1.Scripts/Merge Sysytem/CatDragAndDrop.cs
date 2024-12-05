@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class CatDragAndDrop : MonoBehaviour, IDragHandler, IDropHandler
+public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IDropHandler
 {
     public Cat catData;                             // 드래그하는 고양이의 데이터
     public RectTransform rectTransform;                
@@ -11,6 +11,13 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IDropHandler
     {
         rectTransform = GetComponent<RectTransform>();
         parentCanvas = GetComponentInParent<Canvas>();
+    }
+
+    // 드래그 시작
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        // 드래그하는 객체를 부모의 자식 객체 중 최상단으로 이동 (드래그중인 객체가 UI상 제일 위로 보여질 수 있게)
+        rectTransform.SetAsLastSibling();
     }
 
     // 드래그 중
@@ -45,11 +52,11 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IDropHandler
                 if (mergedCat != null)
                 {
                     Debug.Log($"합성 성공: {mergedCat.CatName}");
-                    nearbyCat.catData = mergedCat;
-                    nearbyCat.UpdateCatUI();
+                    this.catData = mergedCat;
+                    UpdateCatUI();
 
-                    // 현재 드래그 중인 CatPrefab 삭제
-                    Destroy(this.gameObject);
+                    // 근처에서 합성재료로 쓰인 고양이 삭제
+                    Destroy(nearbyCat.gameObject);
                     return;
                 }
                 else

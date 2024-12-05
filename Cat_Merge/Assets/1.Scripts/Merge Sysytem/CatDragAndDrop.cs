@@ -1,11 +1,12 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IDropHandler
 {
     public Cat catData;                             // 드래그하는 고양이의 데이터
-    public RectTransform rectTransform;                
-    private Canvas parentCanvas;
+    public RectTransform rectTransform;             // 
+    private Canvas parentCanvas;                    // 
 
     private void Awake()
     {
@@ -46,13 +47,21 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, ID
             // 동일한 ID 확인 후 합성 처리
             if (nearbyCat.catData.CatId == this.catData.CatId)
             {
-                // nearbyCat 끌려오기 코루틴 실행
-                StartCoroutine(PullNearbyCat(nearbyCat));
-                return;
+                // 합성할 고양이의 다음 등급이 존재하는지 확인
+                Cat nextCat = FindObjectOfType<CatMerge>().GetCatById(this.catData.CatId + 1);
+                if (nextCat != null)
+                {
+                    // nextCat이 존재할 경우에만 애니메이션 시작
+                    StartCoroutine(PullNearbyCat(nearbyCat));
+                }
+                else
+                {
+                    Debug.LogWarning("다음 등급의 고양이가 없음");
+                }
             }
             else
             {
-                Debug.Log("다른 고양이가 존재");
+                Debug.LogWarning("등급이 다름");
             }
         }
         else
@@ -62,9 +71,10 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, ID
     }
 
     // 합성시 고양이가 끌려오는 애니메이션 처리
-    private System.Collections.IEnumerator PullNearbyCat(CatDragAndDrop nearbyCat)
+    private IEnumerator PullNearbyCat(CatDragAndDrop nearbyCat)
     {
-        float duration = 0.1f;  // 끌려오는 시간
+        // 끌려오는 시간
+        float duration = 0.1f;
         float elapsed = 0f;
         Vector3 startPosition = nearbyCat.rectTransform.localPosition;
         Vector3 targetPosition = rectTransform.localPosition;
@@ -101,7 +111,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, ID
         RectTransform parentRect = rectTransform.parent.GetComponent<RectTransform>();
         Rect thisRect = GetWorldRect(rectTransform);
 
-        // 현재 Rect 크기를 줄여서 감지 범위 조정 / 감지 범위 조정 비율
+        // 현재 Rect 크기를 줄여서 감지 범위 조정 (감지 범위 조정 비율)
         thisRect = ShrinkRect(thisRect, 0.2f);
 
         foreach (Transform child in parentRect)

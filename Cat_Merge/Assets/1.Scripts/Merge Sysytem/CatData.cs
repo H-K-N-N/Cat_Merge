@@ -5,7 +5,7 @@ public class CatData : MonoBehaviour
 {
     private Cat catData;                    // 고양이 데이터
     private Image catImage;                 // 고양이 이미지
-    private CatDragAndDrop catDragAndDrop;
+    private CatDragAndDrop catDragAndDrop;  // 
 
     private void Awake()
     {

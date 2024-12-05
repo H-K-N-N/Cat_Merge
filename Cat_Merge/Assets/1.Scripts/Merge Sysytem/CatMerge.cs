@@ -40,7 +40,7 @@ public class CatMerge : MonoBehaviour
     }
 
     // 고양이 ID 반환 함수
-    private Cat GetCatById(int id)
+    public Cat GetCatById(int id)
     {
         foreach (Cat cat in allCatData)
         {

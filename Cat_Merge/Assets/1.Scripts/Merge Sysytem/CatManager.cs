@@ -4,6 +4,7 @@ public class CatManager : MonoBehaviour
 {
     [SerializeField] private GameObject catPrefab;      // 고양이 UI 프리팹
     [SerializeField] private Transform catUIParent;     // 고양이를 배치할 부모 Transform (UI Panel 등)
+    private int catCount = 10;                          // 
 
     private void Start()
     {
@@ -29,7 +30,7 @@ public class CatManager : MonoBehaviour
             return;
         }
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < catCount; i++)
         {
             GameObject catUIObject = Instantiate(catPrefab, catUIParent);
 

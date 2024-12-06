@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 299155544}
   - component: {fileID: 299155543}
   - component: {fileID: 299155542}
+  - component: {fileID: 299155545}
   m_Layer: 5
   m_Name: Spawn
   m_TagString: Untagged
@@ -202,8 +203,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 331588640}
-        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+      - m_Target: {fileID: 299155545}
+        m_TargetAssemblyTypeName: CatSpawn, Assembly-CSharp
         m_MethodName: Spawn
         m_Mode: 1
         m_Arguments:
@@ -252,6 +253,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 299155540}
   m_CullTransparentMesh: 1
+--- !u!114 &299155545
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 299155540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a837ce248d199b842928592c00e6984f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  catPrefab: {fileID: 4442190507333617709, guid: ccdb76008f8b1c84f8d18ee5ff732586, type: 3}
+  catUIParent: {fileID: 1808509785}
 --- !u!1 &331588638
 GameObject:
   m_ObjectHideFlags: 0

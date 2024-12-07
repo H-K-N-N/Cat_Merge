@@ -4,17 +4,34 @@ using System.Linq;
 
 public class AutoMerge : MonoBehaviour
 {
-    private float autoMergeDuration = 3.0f;             // 자동 머지 지속 시간
+    private float startTime;                            // 자동 머지 시작 시간
+    private float autoMergeDuration = 3.0f;             // 자동 머지 기본 지속 시간
+    private float currentAutoMergeDuration;             // 현재 자동 머지 지속 시간
+    private float plusAutoMergeDuration;                // 자동 머지 추가 시간
     private float autoMergeInterval = 0.5f;             // 자동 머지 간격
     private float moveDuration = 0.2f;                  // 고양이가 이동하는 데 걸리는 시간 (이동 속도)
     private bool isAutoMergeActive = false;             // 자동 머지 활성화 상태
+
+    private void Awake()
+    {
+        plusAutoMergeDuration = autoMergeDuration;
+        currentAutoMergeDuration = autoMergeDuration;
+    }
 
     // 자동 머지 시작
     public void StartAutoMerge()
     {
         if (!isAutoMergeActive)
         {
+            Debug.Log("자동머지시작");
+            startTime = Time.time;
+            currentAutoMergeDuration = autoMergeDuration;
             StartCoroutine(AutoMergeCoroutine());
+        }
+        else
+        {
+            Debug.Log($"{plusAutoMergeDuration}초 추가");
+            currentAutoMergeDuration += plusAutoMergeDuration;
         }
     }
 
@@ -22,22 +39,17 @@ public class AutoMerge : MonoBehaviour
     private IEnumerator AutoMergeCoroutine()
     {
         isAutoMergeActive = true;
-        float elapsedTime = 0f;
 
-        while (elapsedTime < autoMergeDuration)
+        while (Time.time - startTime - currentAutoMergeDuration < 0)
         {
-            //yield return new WaitForSeconds(autoMergeInterval);
-
-            // 시간 업데이트
-            elapsedTime += autoMergeInterval;
-
             // 고양이들 등급별로 묶기
             var allCats = FindObjectsOfType<CatDragAndDrop>().OrderBy(cat => cat.catData.CatId).ToList();
             var groupedCats = allCats.GroupBy(cat => cat.catData.CatId).Where(group => group.Count() > 1).ToList();
 
-            // 합성할 고양이가 없다면 계속 기다림
+            // 합성 가능한 고양이가 없으면 일정 시간 대기
             if (!groupedCats.Any())
             {
+                yield return new WaitForSeconds(autoMergeInterval);
                 continue;
             }
 
@@ -47,16 +59,18 @@ public class AutoMerge : MonoBehaviour
                 var catsInGroup = group.ToList();
 
                 // 2개 이상의 고양이가 있으면 합성
-                while (catsInGroup.Count >= 2)
+                while (catsInGroup.Count >= 2 && (Time.time - startTime - currentAutoMergeDuration < 0))
                 {
-                    CatDragAndDrop cat1 = catsInGroup[0];
-                    CatDragAndDrop cat2 = catsInGroup[1];
+                    var cat1 = catsInGroup[0];
+                    var cat2 = catsInGroup[1];
 
                     // 다음 등급의 고양이 확인
                     Cat nextCat = FindObjectOfType<CatMerge>().GetCatById(cat1.catData.CatId + 1);
                     if (nextCat == null)
                     {
                         Debug.LogWarning("다음 등급의 고양이가 없음");
+                        catsInGroup.Remove(cat1);
+                        catsInGroup.Remove(cat2);
                         break;
                     }
 
@@ -64,11 +78,9 @@ public class AutoMerge : MonoBehaviour
                     RectTransform parentRect = cat1.rectTransform.parent.GetComponent<RectTransform>();
                     Vector2 mergePosition = GetRandomPosition(parentRect);
 
-                    // 고양이 이동
+                    // 두 고양이가 모두 합성 지점에 도달했을 때 합성 시작
                     StartCoroutine(MoveCatSmoothly(cat1, mergePosition));
                     StartCoroutine(MoveCatSmoothly(cat2, mergePosition));
-
-                    // 두 고양이가 모두 도달했을 때 합성 시작
                     yield return new WaitUntil(() => cat1.rectTransform.anchoredPosition == mergePosition && cat2.rectTransform.anchoredPosition == mergePosition);
 
                     // 합성 처리
@@ -87,10 +99,11 @@ public class AutoMerge : MonoBehaviour
                     // 합성 후 자동 머지 간격만큼 대기
                     yield return new WaitForSeconds(autoMergeInterval);
                 }
+                if (Time.time - startTime - currentAutoMergeDuration >= 0) break;
             }
+            yield return null;
         }
 
-        // 자동 머지 종료
         isAutoMergeActive = false;
         Debug.Log("자동 머지 종료");
     }

@@ -69,17 +69,17 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, ID
                 }
                 else
                 {
-                    Debug.LogWarning("다음 등급의 고양이가 없음");
+                    //Debug.LogWarning("다음 등급의 고양이가 없음");
                 }
             }
             else
             {
-                Debug.LogWarning("등급이 다름");
+                //Debug.LogWarning("등급이 다름");
             }
         }
         else
         {
-            Debug.Log("드랍한 위치에 배치");
+            //Debug.Log("드랍한 위치에 배치");
         }
     }
 

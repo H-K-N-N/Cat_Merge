@@ -21,7 +21,7 @@ public class CatMerge : MonoBehaviour
     {
         if (cat1.CatId != cat2.CatId)
         {
-            Debug.LogWarning("등급이 다름");
+            //Debug.LogWarning("등급이 다름");
             return null;
         }
 
@@ -33,7 +33,7 @@ public class CatMerge : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("더 높은 등급의 고양이가 없음");
+            //Debug.LogWarning("더 높은 등급의 고양이가 없음");
             return null;
         }
     }

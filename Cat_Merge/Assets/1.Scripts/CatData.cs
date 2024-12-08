@@ -9,12 +9,14 @@ public class CatData : MonoBehaviour
     private Image catImage;                     // 고양이 이미지
 
     private RectTransform rectTransform;        // RectTransform 참조
+    private CatDragAndDrop catDragAndDrop;      // CatDragAndDrop 참조
     private bool isAnimating = false;           // 애니메이션 중인지 확인 플래그
 
     private void Awake()
     {
         catImage = GetComponent<Image>();
         rectTransform = GetComponent<RectTransform>();
+        catDragAndDrop = GetComponentInParent<CatDragAndDrop>();
     }
 
     private void Start()
@@ -26,8 +28,6 @@ public class CatData : MonoBehaviour
     // CatUI 최신화
     public void UpdateCatUI()
     {
-        CatDragAndDrop catDragAndDrop = GetComponentInParent<CatDragAndDrop>();
-
         if (catDragAndDrop != null)
         {
             catDragAndDrop.catData = catData;
@@ -49,7 +49,7 @@ public class CatData : MonoBehaviour
         {
             yield return new WaitForSeconds(10f);
 
-            if (!isAnimating)
+            if (!isAnimating && (catDragAndDrop == null || !catDragAndDrop.isDragging))
             {
                 Vector3 randomDirection = GetRandomDirection();
                 Vector3 targetPosition = (Vector3)rectTransform.anchoredPosition + randomDirection;

@@ -1,25 +1,28 @@
-using System.Collections;
 using UnityEngine;
 
+// 고양이 스폰 버튼 관련 스크립트
 public class CatSpawn : MonoBehaviour
 {
     [SerializeField] private GameObject catPrefab;      // 고양이 UI 프리팹
     [SerializeField] private Transform catUIParent;     // 고양이를 배치할 부모 Transform (UI Panel 등)
-    RectTransform panelRectTransform;                   // Panel의 크기 정보 (배치할 범위)
+    private RectTransform panelRectTransform;           // Panel의 크기 정보 (배치할 범위)
+    private GameManager gameManager;                    // GameManager
 
-    // 스폰 버튼 누를 시 스폰
-    public void Spawn()
+    private void Start()
     {
-        // 고양이 데이터를 들고 있어서 가져옴
-        CatMerge catMerge = FindObjectOfType<CatMerge>();
+        gameManager = FindObjectOfType<GameManager>();
         panelRectTransform = catUIParent.GetComponent<RectTransform>();
         if (panelRectTransform == null)
         {
             Debug.LogError("catUIParent가 RectTransform을 가지고 있지 않습니다.");
             return;
         }
+    }
 
-        LoadAndDisplayCats(catMerge.AllCatData);
+    // 고양이 스폰 버튼
+    public void OnClickedSpawn()
+    {
+        LoadAndDisplayCats(gameManager.AllCatData);
     }
 
     // Panel내 랜덤 위치 계산
@@ -35,25 +38,17 @@ public class CatSpawn : MonoBehaviour
         return respawnPos;
     }
 
+    // Panel내 랜덤 위치 배치 : 현재 최하 등급 고양이 스폰 (업그레이드 시스템 도입 시 코드 일부 수정 예정)
     private void LoadAndDisplayCats(Cat[] allCatData)
     {
-        // Panel의 크기 정보 (배치할 범위)
-        RectTransform panelRectTransform = catUIParent.GetComponent<RectTransform>();
-        if (panelRectTransform == null)
-        {
-            Debug.LogError("catUIParent가 RectTransform을 가지고 있지 않습니다.");
-            return;
-        }
+        GameObject catUIObject = Instantiate(catPrefab, catUIParent);
 
-        for (int i = 0; i < 1; i++)
-        {
-            GameObject catUIObject = Instantiate(catPrefab, catUIParent);
+        CatData catData = catUIObject.GetComponent<CatData>();
+        catData.SetCatData(allCatData[0]);
 
-            CatData catData = catUIObject.GetComponent<CatData>();
-            catData.SetCatData(allCatData[0]);
-
-            Vector2 randomPos = GetRandomPosition(panelRectTransform);
-            catUIObject.GetComponent<RectTransform>().anchoredPosition = randomPos;
-        }
+        Vector2 randomPos = GetRandomPosition(panelRectTransform);
+        catUIObject.GetComponent<RectTransform>().anchoredPosition = randomPos;
     }
+
+
 }

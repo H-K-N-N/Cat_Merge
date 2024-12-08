@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
 
+// 자동 머지 관련 스크립트
 public class AutoMerge : MonoBehaviour
 {
     private float startTime;                            // 자동 머지 시작 시간
@@ -22,7 +23,7 @@ public class AutoMerge : MonoBehaviour
     }
 
     // 자동 머지 시작
-    public void StartAutoMerge()
+    public void OnClickedAutoMerge()
     {
         if (!isAutoMergeActive)
         {
@@ -51,6 +52,9 @@ public class AutoMerge : MonoBehaviour
 
         while (Time.time - startTime - currentAutoMergeDuration < 0)
         {
+            // mergingCats 상태 정리
+            mergingCats.RemoveWhere(cat => cat == null || cat.isDragging);
+
             var allCats = FindObjectsOfType<CatDragAndDrop>().OrderBy(cat => cat.catData.CatId).ToList();
             var groupedCats = allCats.GroupBy(cat => cat.catData.CatId).Where(group => group.Count() > 1).ToList();
 
@@ -69,7 +73,15 @@ public class AutoMerge : MonoBehaviour
                     var cat1 = catsInGroup[0];
                     var cat2 = catsInGroup[1];
 
-                    // 예외 처리: 드래그 중인 고양이, 이미 머지 중인 고양이 확인
+                    // 최고 등급 고양이인지 확인
+                    if (IsMaxLevelCat(cat1.catData) || IsMaxLevelCat(cat2.catData))
+                    {
+                        catsInGroup.Remove(cat1);
+                        catsInGroup.Remove(cat2);
+                        continue;
+                    }
+
+                    // 고양이 상태 확인
                     if (cat1 == null || cat2 == null || cat1.isDragging || cat2.isDragging ||
                         mergingCats.Contains(cat1) || mergingCats.Contains(cat2))
                     {
@@ -81,21 +93,9 @@ public class AutoMerge : MonoBehaviour
                     mergingCats.Add(cat1);
                     mergingCats.Add(cat2);
 
-                    Cat nextCat = FindObjectOfType<CatMerge>().GetCatById(cat1.catData.CatId + 1);
-                    if (nextCat == null)
-                    {
-                        // 예외 처리 : 합성할 고양이 없음
-                        mergingCats.Remove(cat1);
-                        mergingCats.Remove(cat2);
-                        catsInGroup.Remove(cat1);
-                        catsInGroup.Remove(cat2);
-                        break;
-                    }
-
                     RectTransform parentRect = cat1.rectTransform?.parent?.GetComponent<RectTransform>();
                     if (parentRect == null)
                     {
-                        // 예외 처리 : 부모 RectTransform이 없음
                         mergingCats.Remove(cat1);
                         mergingCats.Remove(cat2);
                         catsInGroup.Remove(cat1);
@@ -107,11 +107,14 @@ public class AutoMerge : MonoBehaviour
 
                     StartCoroutine(MoveCatSmoothly(cat1, mergePosition));
                     StartCoroutine(MoveCatSmoothly(cat2, mergePosition));
-                    yield return new WaitUntil(() => cat1 != null && cat2 != null &&
-                                                     cat1.rectTransform.anchoredPosition == mergePosition &&
-                                                     cat2.rectTransform.anchoredPosition == mergePosition);
 
-                    if (cat1 != null && cat2 != null)
+                    yield return new WaitUntil(() =>
+                        cat1 == null || cat2 == null ||
+                        (!mergingCats.Contains(cat1) && !mergingCats.Contains(cat2)) ||
+                        (cat1.rectTransform.anchoredPosition == mergePosition && cat2.rectTransform.anchoredPosition == mergePosition)
+                    );
+
+                    if (cat1 != null && cat2 != null && mergingCats.Contains(cat1) && mergingCats.Contains(cat2))
                     {
                         Cat mergedCat = FindObjectOfType<CatMerge>().MergeCats(cat1.catData, cat2.catData);
                         if (mergedCat != null)
@@ -130,8 +133,10 @@ public class AutoMerge : MonoBehaviour
 
                     yield return new WaitForSeconds(autoMergeInterval);
                 }
+
                 if (Time.time - startTime - currentAutoMergeDuration >= 0) break;
             }
+
             yield return null;
         }
 
@@ -166,6 +171,25 @@ public class AutoMerge : MonoBehaviour
             cat.rectTransform.anchoredPosition = Vector2.Lerp(startPos, targetPosition, t);
             yield return null;
         }
+    }
+
+    // 최대 레벨 고양이 확인 함수
+    private bool IsMaxLevelCat(Cat catData)
+    {
+        GameManager gameManager = FindObjectOfType<GameManager>();
+
+        if (gameManager == null || gameManager.AllCatData == null)
+        {
+            return false;
+        }
+
+        return gameManager.AllCatData.All(cat => cat.CatId != catData.CatId + 1);
+    }
+
+    // 특정 고양이의 mergingCats 상태 제거
+    public void StopMerging(CatDragAndDrop cat)
+    {
+        mergingCats.Remove(cat);
     }
 
 

@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+// 고양이 드래그 앤 드랍 관련 스크립트
 public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IDropHandler
 {
     public Cat catData;                             // 드래그하는 고양이의 데이터

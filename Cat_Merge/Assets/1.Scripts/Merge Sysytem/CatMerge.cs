@@ -1,21 +1,8 @@
 using UnityEngine;
 
+// 고양이 머지 관련 Script
 public class CatMerge : MonoBehaviour
 {
-    private Cat[] allCatData;               // 모든 고양이 데이터
-    public Cat[] AllCatData => allCatData;
-
-    private void Awake()
-    {
-        LoadAllCats();
-    }
-
-    // 고양이 정보 Load
-    private void LoadAllCats()
-    {
-        allCatData = Resources.LoadAll<Cat>("Cats");
-    }
-
     // 고양이 Merge 함수
     public Cat MergeCats(Cat cat1, Cat cat2)
     {
@@ -41,7 +28,9 @@ public class CatMerge : MonoBehaviour
     // 고양이 ID 반환 함수
     public Cat GetCatById(int id)
     {
-        foreach (Cat cat in allCatData)
+        GameManager gameManager = FindObjectOfType<GameManager>();
+
+        foreach (Cat cat in gameManager.AllCatData)
         {
             if (cat.CatId == id)
                 return cat;

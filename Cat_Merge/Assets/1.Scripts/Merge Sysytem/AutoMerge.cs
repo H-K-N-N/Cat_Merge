@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
 
+// 자동 머지 관련 스크립트
 public class AutoMerge : MonoBehaviour
 {
     private float startTime;                            // 자동 머지 시작 시간
@@ -22,7 +23,7 @@ public class AutoMerge : MonoBehaviour
     }
 
     // 자동 머지 시작
-    public void StartAutoMerge()
+    public void OnClickedAutoMerge()
     {
         if (!isAutoMergeActive)
         {

@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 
 // 고양이 스폰 버튼 관련 스크립트
@@ -11,7 +10,6 @@ public class CatSpawn : MonoBehaviour
 
     private void Start()
     {
-        // 모든 고양이 데이터 가져오기
         gameManager = FindObjectOfType<GameManager>();
         panelRectTransform = catUIParent.GetComponent<RectTransform>();
         if (panelRectTransform == null)
@@ -40,20 +38,13 @@ public class CatSpawn : MonoBehaviour
         return respawnPos;
     }
 
-    // Panel내 랜덤 위치 배치
+    // Panel내 랜덤 위치 배치 : 현재 최하 등급 고양이 스폰 (업그레이드 시스템 도입 시 코드 일부 수정 예정)
     private void LoadAndDisplayCats(Cat[] allCatData)
     {
-        RectTransform panelRectTransform = catUIParent.GetComponent<RectTransform>();
-        if (panelRectTransform == null)
-        {
-            Debug.LogError("catUIParent가 RectTransform을 가지고 있지 않습니다.");
-            return;
-        }
-
         GameObject catUIObject = Instantiate(catPrefab, catUIParent);
 
         CatData catData = catUIObject.GetComponent<CatData>();
-        catData.SetCatData(allCatData[0]);                          // 1레벨 고양이 스폰 (업그레이드 시스템 도입 시 코드 일부 수정 예정)
+        catData.SetCatData(allCatData[0]);
 
         Vector2 randomPos = GetRandomPosition(panelRectTransform);
         catUIObject.GetComponent<RectTransform>().anchoredPosition = randomPos;

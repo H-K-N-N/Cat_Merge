@@ -173,6 +173,7 @@ public class AutoMerge : MonoBehaviour
         }
     }
 
+    // 최대 레벨 고양이 확인 함수
     private bool IsMaxLevelCat(Cat catData)
     {
         GameManager gameManager = FindObjectOfType<GameManager>();

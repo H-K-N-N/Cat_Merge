@@ -22,6 +22,13 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, ID
     {
         isDragging = true;
 
+        // 드래그된 고양이를 mergingCats에서 제거
+        AutoMerge autoMerge = FindObjectOfType<AutoMerge>();
+        if (autoMerge != null && autoMerge.IsMerging(this))
+        {
+            autoMerge.StopMerging(this);
+        }
+
         // 드래그하는 객체를 부모의 자식 객체 중 최상단으로 이동 (드래그중인 객체가 UI상 제일 위로 보여질 수 있게)
         rectTransform.SetAsLastSibling();
     }
@@ -47,14 +54,13 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, ID
     {
         isDragging = false;
 
-        // 드랍 위치에 근처의 catPrefab 찾기
         CatDragAndDrop nearbyCat = FindNearbyCat();
         if (nearbyCat != null && nearbyCat != this)
         {
             // 자동 머지 중인지 확인
             if (IsAutoMerging(nearbyCat))
             {
-                Debug.LogWarning("자동 머지 중인 고양이와 합성할 수 없습니다.");
+                Debug.Log("자동 머지 중인 고양이와 합성할 수 없습니다.");
                 return;
             }
 

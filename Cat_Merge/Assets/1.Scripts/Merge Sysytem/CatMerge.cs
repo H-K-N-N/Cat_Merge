@@ -15,7 +15,7 @@ public class CatMerge : MonoBehaviour
         Cat nextCat = GetCatById(cat1.CatId + 1);
         if (nextCat != null)
         {
-            Debug.Log($"钦己 己傍 : {nextCat.CatName}");
+            //Debug.Log($"钦己 己傍 : {nextCat.CatName}");
             return nextCat;
         }
         else

@@ -45,6 +45,22 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, ID
             out localPointerPosition
         );
 
+        // GamePanel RectTransform 가져오기
+        RectTransform parentRect = rectTransform.parent.GetComponent<RectTransform>();
+
+        // GamePanel의 클리핑 범위를 가져오기
+        Rect panelRect = new Rect(
+            -parentRect.rect.width / 2,
+            -parentRect.rect.height / 2,
+            parentRect.rect.width,
+            parentRect.rect.height
+        );
+
+        // 드래그 위치를 패널 범위 내로 제한
+        localPointerPosition.x = Mathf.Clamp(localPointerPosition.x, panelRect.xMin, panelRect.xMax);
+        localPointerPosition.y = Mathf.Clamp(localPointerPosition.y, panelRect.yMin, panelRect.yMax);
+
+
         // 드래그 위치 업데이트 (UI의 localPosition 사용)
         rectTransform.localPosition = localPointerPosition;
     }
@@ -53,6 +69,8 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, ID
     public void OnDrop(PointerEventData eventData)
     {
         isDragging = false;
+
+        CheckEdgeDrop();
 
         CatDragAndDrop nearbyCat = FindNearbyCat();
         if (nearbyCat != null && nearbyCat != this)
@@ -88,6 +106,57 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, ID
         {
             //Debug.Log("드랍한 위치에 배치");
         }
+    }
+
+    // 가장자리 드랍여부 확인 함수
+    private void CheckEdgeDrop()
+    {
+        // GamePanel RectTransform 가져오기
+        RectTransform parentRect = rectTransform.parent.GetComponent<RectTransform>();
+
+        // GamePanel의 클리핑 범위를 가져오기
+        Rect panelRect = new Rect(
+            -parentRect.rect.width / 2,
+            -parentRect.rect.height / 2,
+            parentRect.rect.width,
+            parentRect.rect.height
+        );
+
+        Vector2 currentPos = rectTransform.localPosition;
+
+        // 가장자리에 맞닿아 있는지 확인
+        bool isNearLeft = Mathf.Abs(currentPos.x - panelRect.xMin) < 10;
+        bool isNearRight = Mathf.Abs(currentPos.x - panelRect.xMax) < 10;
+        bool isNearTop = Mathf.Abs(currentPos.y - panelRect.yMax) < 10;
+        bool isNearBottom = Mathf.Abs(currentPos.y - panelRect.yMin) < 10;
+
+        Vector3 targetPos = currentPos;
+
+        // 가장자리에 가까우면 중심 방향으로 이동
+        if (isNearLeft) targetPos.x += 30;
+        if (isNearRight) targetPos.x -= 30;
+        if (isNearTop) targetPos.y -= 30;
+        if (isNearBottom) targetPos.y += 30;
+
+        // 위치 보정 애니메이션 실행
+        StartCoroutine(SmoothMoveToPosition(targetPos));
+    }
+
+    // 가장자리에서 안쪽으로 부드럽게 이동하는 애니메이션 코루틴
+    private IEnumerator SmoothMoveToPosition(Vector3 targetPosition)
+    {
+        Vector3 startPosition = rectTransform.localPosition;
+        float elapsed = 0f;
+        float duration = 0.2f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            rectTransform.localPosition = Vector3.Lerp(startPosition, targetPosition, elapsed / duration);
+            yield return null;
+        }
+
+        rectTransform.localPosition = targetPosition;
     }
 
     // 자동 머지 중인지 확인

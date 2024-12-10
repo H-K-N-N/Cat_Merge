@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 // 고양이 드래그 앤 드랍 관련 스크립트
-public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IDropHandler
+public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
     public Cat catData;                             // 드래그하는 고양이의 데이터
     public RectTransform rectTransform;             // RectTransform 참조
@@ -47,8 +47,6 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, ID
 
         // GamePanel RectTransform 가져오기
         RectTransform parentRect = rectTransform.parent.GetComponent<RectTransform>();
-
-        // GamePanel의 클리핑 범위를 가져오기
         Rect panelRect = new Rect(
             -parentRect.rect.width / 2,
             -parentRect.rect.height / 2,
@@ -60,13 +58,12 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, ID
         localPointerPosition.x = Mathf.Clamp(localPointerPosition.x, panelRect.xMin, panelRect.xMax);
         localPointerPosition.y = Mathf.Clamp(localPointerPosition.y, panelRect.yMin, panelRect.yMax);
 
-
         // 드래그 위치 업데이트 (UI의 localPosition 사용)
         rectTransform.localPosition = localPointerPosition;
     }
 
-    // 드롭 시
-    public void OnDrop(PointerEventData eventData)
+    // 드래그 종료
+    public void OnEndDrag(PointerEventData eventData)
     {
         isDragging = false;
 
@@ -113,8 +110,6 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, ID
     {
         // GamePanel RectTransform 가져오기
         RectTransform parentRect = rectTransform.parent.GetComponent<RectTransform>();
-
-        // GamePanel의 클리핑 범위를 가져오기
         Rect panelRect = new Rect(
             -parentRect.rect.width / 2,
             -parentRect.rect.height / 2,

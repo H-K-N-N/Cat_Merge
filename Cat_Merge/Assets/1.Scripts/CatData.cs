@@ -138,4 +138,14 @@ public class CatData : MonoBehaviour
         isAnimating = false;
     }
 
+    // 고양이가 삭제될때 고양이 수 감소
+    private void OnDestroy()
+    {
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        if (gameManager != null)
+        {
+            gameManager.DeleteCatCount();
+        }
+    }
+
 }

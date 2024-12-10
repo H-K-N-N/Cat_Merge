@@ -65,8 +65,6 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
     // 드래그 종료
     public void OnEndDrag(PointerEventData eventData)
     {
-        Debug.Log("호출");
-
         isDragging = false;
 
         CheckEdgeDrop();

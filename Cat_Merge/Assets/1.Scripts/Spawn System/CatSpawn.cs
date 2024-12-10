@@ -22,7 +22,15 @@ public class CatSpawn : MonoBehaviour
     // 고양이 스폰 버튼
     public void OnClickedSpawn()
     {
-        LoadAndDisplayCats(gameManager.AllCatData);
+        if (gameManager.CanSpawnCat())
+        {
+            LoadAndDisplayCats(gameManager.AllCatData);
+            gameManager.AddCatCount();
+        }
+        else
+        {
+            Debug.Log("고양이 최대 보유 갯수에 도달했습니다!");
+        }
     }
 
     // Panel내 랜덤 위치 계산

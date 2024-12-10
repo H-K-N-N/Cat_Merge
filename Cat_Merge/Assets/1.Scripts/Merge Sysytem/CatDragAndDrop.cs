@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-// 고양이 드래그 앤 드랍 관련 스크립트
+// 고양이 드래그 앤 드랍 Script
 public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
     public Cat catData;                             // 드래그하는 고양이의 데이터
@@ -17,7 +17,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         parentCanvas = GetComponentInParent<Canvas>();
     }
 
-    // 드래그 시작
+    // 드래그 시작 함수
     public void OnBeginDrag(PointerEventData eventData)
     {
         isDragging = true;
@@ -33,7 +33,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         rectTransform.SetAsLastSibling();
     }
 
-    // 드래그 중
+    // 드래그 진행중 함수
     public void OnDrag(PointerEventData eventData)
     {
         // 화면 좌표를 UI 좌표로 변환
@@ -62,7 +62,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         rectTransform.localPosition = localPointerPosition;
     }
 
-    // 드래그 종료
+    // 드래그 종료 함수
     public void OnEndDrag(PointerEventData eventData)
     {
         isDragging = false;
@@ -154,14 +154,14 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         rectTransform.localPosition = targetPosition;
     }
 
-    // 자동 머지 중인지 확인
+    // 자동 머지 중인지 확인하는 함수
     private bool IsAutoMerging(CatDragAndDrop nearbyCat)
     {
         AutoMerge autoMerge = FindObjectOfType<AutoMerge>();
         return autoMerge != null && autoMerge.IsMerging(nearbyCat);
     }
 
-    // 합성시 고양이가 끌려오는 애니메이션 처리
+    // 합성시 고양이가 끌려오는 애니메이션 코루틴
     private IEnumerator PullNearbyCat(CatDragAndDrop nearbyCat)
     {
         Vector3 startPosition = nearbyCat.rectTransform.localPosition;
@@ -192,7 +192,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         }
     }
 
-    // 범위 내에서 가장 가까운 CatPrefab 찾기
+    // 범위 내에서 가장 가까운 CatPrefab을 찾는 함수
     private CatDragAndDrop FindNearbyCat()
     {
         RectTransform parentRect = rectTransform.parent.GetComponent<RectTransform>();
@@ -220,7 +220,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         return null;
     }
 
-    // RectTransform의 월드 좌표 기반 Rect 반환
+    // RectTransform의 월드 좌표 기반 Rect를 반환하는 함수
     private Rect GetWorldRect(RectTransform rectTransform)
     {
         Vector3[] corners = new Vector3[4];
@@ -228,7 +228,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         return new Rect(corners[0].x, corners[0].y, corners[2].x - corners[0].x, corners[2].y - corners[0].y);
     }
 
-    // Rect 크기를 줄이는 메서드
+    // Rect 크기를 줄이는 함수 (고양이 드랍시 합성 범위)
     private Rect ShrinkRect(Rect rect, float scale)
     {
         float widthReduction = rect.width * (1 - scale) / 2;
@@ -242,7 +242,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         );
     }
 
-    // CatUI 갱신
+    // CatUI 갱신하는 함수
     public void UpdateCatUI()
     {
         GetComponentInChildren<CatData>()?.SetCatData(catData);

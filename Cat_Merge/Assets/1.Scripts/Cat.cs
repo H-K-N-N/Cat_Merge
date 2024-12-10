@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// Cat Scriptable Object
+// Cat Scriptable Object Script
 [CreateAssetMenu(fileName = "CatData", menuName = "ScriptableObjects/Cat", order = 1)]
 public class Cat : ScriptableObject
 {

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// 고양이 스폰 버튼 관련 스크립트
+// 고양이 스폰 Script
 public class CatSpawn : MonoBehaviour
 {
     [SerializeField] private GameObject catPrefab;      // 고양이 UI 프리팹
@@ -19,12 +19,14 @@ public class CatSpawn : MonoBehaviour
         }
     }
 
-    // 고양이 스폰 버튼
+    // 고양이 스폰 버튼 클릭
     public void OnClickedSpawn()
     {
         if (gameManager.CanSpawnCat())
         {
-            LoadAndDisplayCats(gameManager.AllCatData);
+            // 업그레이드 시스템 확장성을 위해 변경한 고양이 생성 코드
+            Cat catData = GetCatDataForSpawn();
+            LoadAndDisplayCats(catData);
             gameManager.AddCatCount();
         }
         else
@@ -33,7 +35,57 @@ public class CatSpawn : MonoBehaviour
         }
     }
 
-    // Panel내 랜덤 위치 계산
+    // 자동머지시 고양이 스폰 함수
+    public void SpawnCat()
+    {
+        if (!gameManager.CanSpawnCat()) return;
+
+        // 업그레이드 시스템 확장성을 위해 변경한 고양이 생성 코드
+        Cat catData = GetCatDataForSpawn();
+        GameObject newCat = LoadAndDisplayCats(catData);
+
+        CatDragAndDrop catDragAndDrop = newCat.GetComponent<CatDragAndDrop>();
+        if (catDragAndDrop != null)
+        {
+            catDragAndDrop.catData = gameManager.AllCatData[0];
+            catDragAndDrop.UpdateCatUI();
+        }
+
+        gameManager.AddCatCount();
+    }
+
+    // 고양이 스폰 데이터를 선택하는 함수 (업그레이드 시스템 대비)
+    private Cat GetCatDataForSpawn()
+    {
+        // 예시: 랜덤으로 고양이 등급을 선택하거나 상점 업그레이드를 고려하여 선택
+        // return gameManager.GetRandomCatForSpawn();  // 이 부분은 나중에 업그레이드 시스템에 맞게 수정
+        return gameManager.AllCatData[0];
+    }
+
+    // Panel내 랜덤 위치에 고양이 배치하는 함수
+    private GameObject LoadAndDisplayCats(Cat catData)
+    {
+        GameObject catUIObject = Instantiate(catPrefab, catUIParent);
+
+        // CatData 설정
+        CatData catUIData = catUIObject.GetComponent<CatData>();
+        if (catUIData != null)
+        {
+            catUIData.SetCatData(catData);
+        }
+
+        // 랜덤 위치 설정
+        Vector2 randomPos = GetRandomPosition(panelRectTransform);
+        RectTransform catRectTransform = catUIObject.GetComponent<RectTransform>();
+        if (catRectTransform != null)
+        {
+            catRectTransform.anchoredPosition = randomPos;
+        }
+
+        return catUIObject;
+    }
+
+    // Panel내 랜덤 위치 계산하는 함수
     Vector3 GetRandomPosition(RectTransform panelRectTransform)
     {
         float panelWidth = panelRectTransform.rect.width;
@@ -44,18 +96,6 @@ public class CatSpawn : MonoBehaviour
 
         Vector3 respawnPos = new Vector3(randomX, randomY, 0f);
         return respawnPos;
-    }
-
-    // Panel내 랜덤 위치 배치 : 현재 최하 등급 고양이 스폰 (업그레이드 시스템 도입 시 코드 일부 수정 예정)
-    private void LoadAndDisplayCats(Cat[] allCatData)
-    {
-        GameObject catUIObject = Instantiate(catPrefab, catUIParent);
-
-        CatData catData = catUIObject.GetComponent<CatData>();
-        catData.SetCatData(allCatData[0]);
-
-        Vector2 randomPos = GetRandomPosition(panelRectTransform);
-        catUIObject.GetComponent<RectTransform>().anchoredPosition = randomPos;
     }
 
 

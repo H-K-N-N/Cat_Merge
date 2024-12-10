@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-// 고양이 본인들의 정보
+// 고양이 본인들의 정보를 담은 Script
 public class CatData : MonoBehaviour
 {
     private Cat catData;                        // 고양이 데이터
@@ -28,7 +28,7 @@ public class CatData : MonoBehaviour
         StartCoroutine(AutoMove());
     }
 
-    // CatUI 최신화
+    // CatUI 최신화하는 함수
     public void UpdateCatUI()
     {
         if (catDragAndDrop != null)
@@ -38,7 +38,7 @@ public class CatData : MonoBehaviour
         catImage.sprite = catData.CatImage;
     }
 
-    // Cat 데이터 설정
+    // Cat 데이터 설정 함수
     public void SetCatData(Cat cat)
     {
         catData = cat;
@@ -138,7 +138,7 @@ public class CatData : MonoBehaviour
         isAnimating = false;
     }
 
-    // 고양이가 삭제될때 고양이 수 감소
+    // 고양이가 파괴될때 고양이 수 감소시키는 함수
     private void OnDestroy()
     {
         GameManager gameManager = FindObjectOfType<GameManager>();

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// 고양이 머지 관련 Script
+// 고양이 머지 Script
 public class CatMerge : MonoBehaviour
 {
     // 고양이 Merge 함수

@@ -18,7 +18,17 @@ public class GameManager : MonoBehaviour
     // UI
     [SerializeField] private TextMeshProUGUI catCountText;      // 고양이 수 텍스트
 
-    [Header ("Auto Move")]
+    // Merge On/Off
+    [Header("Merge On/Off")]
+    [SerializeField] private Button openMergePanelButton;       // 머지 패널 열기 버튼
+    [SerializeField] private GameObject mergePanel;             // 머지 On/Off 패널
+    [SerializeField] private Button closeMergePanelButton;      // 머지 패널 닫기 버튼
+    [SerializeField] private Button mergeStateButton;           // 머지 상태 변경 버튼
+    [SerializeField] private TextMeshProUGUI mergeStateText;    // 머지 현재 상태 텍스트
+    private bool isMergeEnabled = true;
+
+    // AutoMove On/Off
+    [Header ("AutoMove On/Off")]
     [SerializeField] private Button openAutoMovePanelButton;    // 자동 이동 패널 열기 버튼
     [SerializeField] private GameObject autoMovePanel;          // 자동 이동 On/Off 패널
     [SerializeField] private Button closeAutoMovePanelButton;   // 자동 이동 패널 닫기 버튼
@@ -42,12 +52,19 @@ public class GameManager : MonoBehaviour
         LoadAllCats();
         UpdateCatCountText();
 
-        // 자동이동 관련
+        // 자동이동 On/Off 관련
         UpdateAutoMoveStateText();
         UpdateOpenButtonColor();
         openAutoMovePanelButton.onClick.AddListener(OpenAutoMovePanel);
         closeAutoMovePanelButton.onClick.AddListener(CloseAutoMovePanel);
         autoMoveStateButton.onClick.AddListener(ToggleAutoMove);
+
+        // 머지 On/Off 관련
+        UpdateMergeStateText();
+        UpdateMergeButtonColor();
+        openMergePanelButton.onClick.AddListener(OpenMergePanel);
+        closeMergePanelButton.onClick.AddListener(CloseMergePanel);
+        mergeStateButton.onClick.AddListener(ToggleMergeState);
     }
 
     // 고양이 정보 Load 함수
@@ -91,16 +108,68 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // 자동 이동 상태 Text
-    private void UpdateAutoMoveStateText()
+
+
+    // 머지 패널 열기
+    private void OpenMergePanel()
     {
-        if (autoMoveStateText != null)
+        if (mergePanel != null)
         {
-            autoMoveStateText.text = isAutoMoveEnabled ? "OFF" : "ON";
+            mergePanel.SetActive(true);
         }
     }
 
-    // 자동 이동 패널 열기
+    // 머지 상태 전환 함수
+    private void ToggleMergeState()
+    {
+        isMergeEnabled = !isMergeEnabled;
+        UpdateMergeStateText();
+        UpdateMergeButtonColor();
+        CloseMergePanel();
+    }
+
+    // 머지 상태 Text 업데이트 함수
+    private void UpdateMergeStateText()
+    {
+        if (mergeStateText != null)
+        {
+            mergeStateText.text = isMergeEnabled ? "OFF" : "ON";
+        }
+    }
+
+    // 머지 버튼 색상 업데이트
+    private void UpdateMergeButtonColor()
+    {
+        if (openMergePanelButton != null)
+        {
+            Color normalColor = isMergeEnabled ? new Color(1f, 1f, 1f, 1f) : new Color(0.5f, 0.5f, 0.5f, 1f);
+            ColorBlock colors = openMergePanelButton.colors;
+            colors.normalColor = normalColor;
+            colors.highlightedColor = normalColor;
+            colors.pressedColor = normalColor;
+            colors.selectedColor = normalColor;
+            openMergePanelButton.colors = colors;
+        }
+    }
+
+    // 머지 패널 닫기
+    public void CloseMergePanel()
+    {
+        if (mergePanel != null)
+        {
+            mergePanel.SetActive(false);
+        }
+    }
+
+    // 머지 상태 반환 함수
+    public bool IsMergeEnabled()
+    {
+        return isMergeEnabled;
+    }
+
+
+
+    // 자동이동 패널 열기
     private void OpenAutoMovePanel()
     {
         if (autoMovePanel != null)
@@ -109,7 +178,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // 자동 이동 상태 전환
+    // 자동이동 상태 전환
     public void ToggleAutoMove()
     {
         isAutoMoveEnabled = !isAutoMoveEnabled;
@@ -129,7 +198,16 @@ public class GameManager : MonoBehaviour
         CloseAutoMovePanel();
     }
 
-    // 버튼 색상 업데이트
+    // 자동이동 상태 Text 업데이트 함수
+    private void UpdateAutoMoveStateText()
+    {
+        if (autoMoveStateText != null)
+        {
+            autoMoveStateText.text = isAutoMoveEnabled ? "OFF" : "ON";
+        }
+    }
+
+    // 자동이동 버튼 색상 업데이트
     private void UpdateOpenButtonColor()
     {
         if (openAutoMovePanelButton != null)
@@ -144,7 +222,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // 패널 닫기
+    // 자동이동 패널 닫기
     public void CloseAutoMovePanel()
     {
         if (autoMovePanel != null)
@@ -153,7 +231,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // 현재 상태 반환 (필요 시 외부에서 확인 가능)
+    // 자동이동 현재 상태 반환
     public bool IsAutoMoveEnabled()
     {
         return isAutoMoveEnabled;

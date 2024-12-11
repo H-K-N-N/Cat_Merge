@@ -67,6 +67,12 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
     {
         isDragging = false;
 
+        // 머지 상태가 OFF일 경우 머지 X
+        if (!GameManager.Instance.IsMergeEnabled())
+        {
+            return;
+        }
+
         CheckEdgeDrop();
 
         CatDragAndDrop nearbyCat = FindNearbyCat();
@@ -181,14 +187,14 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         Cat mergedCat = FindObjectOfType<CatMerge>().MergeCats(this.catData, nearbyCat.catData);
         if (mergedCat != null)
         {
-            Debug.Log($"합성 성공: {mergedCat.CatName}");
+            //Debug.Log($"합성 성공: {mergedCat.CatName}");
             this.catData = mergedCat;
             UpdateCatUI();
             Destroy(nearbyCat.gameObject);
         }
         else
         {
-            Debug.LogWarning("합성 실패");
+            //Debug.LogWarning("합성 실패");
         }
     }
 

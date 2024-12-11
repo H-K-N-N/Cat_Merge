@@ -10,7 +10,7 @@ public class CatSpawn : MonoBehaviour
 
     private void Start()
     {
-        gameManager = FindObjectOfType<GameManager>();
+        gameManager = GameManager.Instance;
         panelRectTransform = catUIParent.GetComponent<RectTransform>();
         if (panelRectTransform == null)
         {
@@ -74,7 +74,6 @@ public class CatSpawn : MonoBehaviour
             catUIData.SetCatData(catData);
 
             // 자동 이동 상태를 GameManager와 동기화
-            GameManager gameManager = FindObjectOfType<GameManager>();
             if (gameManager != null)
             {
                 catUIData.SetAutoMoveState(gameManager.IsAutoMoveEnabled());

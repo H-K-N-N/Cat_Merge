@@ -5,6 +5,9 @@ using UnityEngine.UI;
 // GameManager Script
 public class GameManager : MonoBehaviour
 {
+    // Singleton instance
+    public static GameManager Instance { get; private set; }    // SingleTon
+
     // Data
     private Cat[] allCatData;                                   // 모든 고양이 데이터 보유
     public Cat[] AllCatData => allCatData;
@@ -25,6 +28,17 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         LoadAllCats();
         UpdateCatCountText();
 

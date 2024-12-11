@@ -21,7 +21,7 @@ public class AutoMerge : MonoBehaviour
     {
         plusAutoMergeDuration = autoMergeDuration;
         currentAutoMergeDuration = autoMergeDuration;
-        gameManager = FindObjectOfType<GameManager>();
+        gameManager = GameManager.Instance;
     }
 
     // 자동 머지 버튼 클릭

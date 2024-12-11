@@ -72,6 +72,13 @@ public class CatSpawn : MonoBehaviour
         if (catUIData != null)
         {
             catUIData.SetCatData(catData);
+
+            // 자동 이동 상태를 GameManager와 동기화
+            GameManager gameManager = FindObjectOfType<GameManager>();
+            if (gameManager != null)
+            {
+                catUIData.SetAutoMoveState(gameManager.IsAutoMoveEnabled());
+            }
         }
 
         // 랜덤 위치 설정

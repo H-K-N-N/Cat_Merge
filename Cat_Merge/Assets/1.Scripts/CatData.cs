@@ -13,6 +13,7 @@ public class CatData : MonoBehaviour
     private CatDragAndDrop catDragAndDrop;      // CatDragAndDrop 참조
 
     private bool isAnimating = false;           // 애니메이션 중인지 확인 플래그
+    private bool isAutoMoveEnabled = true;      // 자동 이동 활성화 상태
 
     private void Awake()
     {
@@ -25,7 +26,11 @@ public class CatData : MonoBehaviour
     private void Start()
     {
         UpdateCatUI();
-        StartCoroutine(AutoMove());
+
+        if (isAutoMoveEnabled)
+        {
+            StartCoroutine(AutoMove());
+        }
     }
 
     // CatUI 최신화하는 함수
@@ -43,6 +48,25 @@ public class CatData : MonoBehaviour
     {
         catData = cat;
         UpdateCatUI();
+    }
+
+    // 자동 이동을 활성화/비활성화하는 함수
+    public void SetAutoMoveState(bool isEnabled)
+    {
+        isAutoMoveEnabled = isEnabled;
+
+        // 자동 이동을 활성화하려면 코루틴 시작
+        if (isAutoMoveEnabled)
+        {
+            if (!isAnimating)
+            {
+                StartCoroutine(AutoMove());
+            }
+        }
+        else
+        {
+            StopAllCoroutines(); // 자동 이동 비활성화 시 코루틴 중지
+        }
     }
 
     // 10초마다 자동으로 이동하는 코루틴

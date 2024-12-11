@@ -29,7 +29,7 @@ public class AutoMerge : MonoBehaviour
     {
         if (!isAutoMergeActive)
         {
-            Debug.Log("자동머지시작");
+            Debug.Log("자동 머지 시작");
             startTime = Time.time;
             currentAutoMergeDuration = autoMergeDuration;
             StartCoroutine(AutoMergeCoroutine());

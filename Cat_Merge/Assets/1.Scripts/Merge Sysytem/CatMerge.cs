@@ -28,7 +28,7 @@ public class CatMerge : MonoBehaviour
     // 고양이 ID 반환 함수
     public Cat GetCatById(int id)
     {
-        GameManager gameManager = FindObjectOfType<GameManager>();
+        GameManager gameManager = GameManager.Instance;
 
         foreach (Cat cat in gameManager.AllCatData)
         {

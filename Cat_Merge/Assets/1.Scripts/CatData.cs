@@ -165,7 +165,7 @@ public class CatData : MonoBehaviour
     // 고양이가 파괴될때 고양이 수 감소시키는 함수
     private void OnDestroy()
     {
-        GameManager gameManager = FindObjectOfType<GameManager>();
+        GameManager gameManager = GameManager.Instance;
         if (gameManager != null)
         {
             gameManager.DeleteCatCount();

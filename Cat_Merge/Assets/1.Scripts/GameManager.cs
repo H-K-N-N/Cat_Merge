@@ -12,11 +12,20 @@ public class GameManager : MonoBehaviour
     private Cat[] allCatData;                                   // 모든 고양이 데이터 보유
     public Cat[] AllCatData => allCatData;
 
-    private int maxCats = 8;                                    // 화면 내 최대 고양이 수
-    private int currentCatCount = 0;                            // 화면 내 고양이 수
-
-    // UI
+    // Main UI Text
+    [Header("Main UI Text")]
+    // 고양이수/최대고양이수
     [SerializeField] private TextMeshProUGUI catCountText;      // 고양이 수 텍스트
+    private int currentCatCount = 0;                            // 화면 내 고양이 수
+    private int maxCats = 8;                                    // 최대 고양이 수
+
+    // 기본 재화
+    [SerializeField] private TextMeshProUGUI coinText;          // 기본재화 텍스트
+    private int coin = 5000;                                    // 기본재화
+
+    // 캐쉬 재화
+    [SerializeField] private TextMeshProUGUI cashText;          // 캐쉬재화 텍스트
+    private int cash = 1000;                                    // 캐쉬재화
 
     // Merge On/Off
     [Header("Merge On/Off")]
@@ -51,6 +60,8 @@ public class GameManager : MonoBehaviour
 
         LoadAllCats();
         UpdateCatCountText();
+        UpdateCoinText();
+        UpdateCashText();
 
         // 자동이동 On/Off 관련
         UpdateAutoMoveStateText();
@@ -105,6 +116,29 @@ public class GameManager : MonoBehaviour
         if (catCountText != null)
         {
             catCountText.text = $"{currentCatCount} / {maxCats}";
+        }
+    }
+
+
+
+    // 기본재화 텍스트 UI 업데이트하는 함수
+    private void UpdateCoinText()
+    {
+        if (coinText != null)
+        {
+            coinText.text = $"{coin}";
+        }
+    }
+
+
+
+    // 캐쉬재화 텍스트 UI 업데이트하는 함수
+    private void UpdateCashText()
+    {
+        if (cashText != null)
+        {
+            // 숫자를 3자리마다 콤마를 추가하여 표시
+            cashText.text = cash.ToString("N0");
         }
     }
 

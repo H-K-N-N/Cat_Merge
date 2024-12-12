@@ -14,13 +14,15 @@ public class AutoMerge : MonoBehaviour
     private float moveDuration = 0.2f;                  // 고양이가 이동하는 데 걸리는 시간 (이동 속도)
     private bool isAutoMergeActive = false;             // 자동 머지 활성화 상태
 
-    private HashSet<CatDragAndDrop> mergingCats = new HashSet<CatDragAndDrop>(); // 머지 중인 고양이 추적
+    private HashSet<CatDragAndDrop> mergingCats;        // 머지 중인 고양이 추적
     private GameManager gameManager;                    // gameManager
 
     private void Awake()
     {
         plusAutoMergeDuration = autoMergeDuration;
         currentAutoMergeDuration = autoMergeDuration;
+
+        mergingCats = new HashSet<CatDragAndDrop>();
         gameManager = GameManager.Instance;
     }
 

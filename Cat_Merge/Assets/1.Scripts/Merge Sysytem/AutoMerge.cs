@@ -7,7 +7,7 @@ using System.Collections.Generic;
 public class AutoMerge : MonoBehaviour
 {
     private float startTime;                            // 자동 머지 시작 시간
-    private float autoMergeDuration = 3.0f;             // 자동 머지 기본 지속 시간
+    private float autoMergeDuration = 10.0f;            // 자동 머지 기본 지속 시간
     private float currentAutoMergeDuration;             // 현재 자동 머지 지속 시간
     private float plusAutoMergeDuration;                // 자동 머지 추가 시간
     private float autoMergeInterval = 0.5f;             // 자동 머지 간격
@@ -26,14 +26,36 @@ public class AutoMerge : MonoBehaviour
         gameManager = GameManager.Instance;
     }
 
-    // 자동 머지 버튼 클릭
+    private void Update()
+    {
+        if (isAutoMergeActive)
+        {
+            // 남은 시간 계산
+            float remainingTime = currentAutoMergeDuration - (Time.time - startTime);
+            remainingTime = Mathf.Max(remainingTime, 0);
+
+            // 타이머 업데이트
+            gameManager.UpdateAutoMergeTimerText((int)remainingTime);
+
+            // 자동 머지 종료 처리
+            if (remainingTime <= 0)
+            {
+                isAutoMergeActive = false;
+                gameManager.UpdateAutoMergeTimerVisibility(false);
+            }
+        }
+    }
+
+    // 자동 머지 시작 함수
     public void OnClickedAutoMerge()
     {
         if (!isAutoMergeActive)
         {
             Debug.Log("자동 머지 시작");
             startTime = Time.time;
+            isAutoMergeActive = true;
             currentAutoMergeDuration = autoMergeDuration;
+            gameManager.UpdateAutoMergeTimerVisibility(true);
             StartCoroutine(AutoMergeCoroutine());
         }
         else
@@ -52,8 +74,6 @@ public class AutoMerge : MonoBehaviour
     // 자동 머지 코루틴
     private IEnumerator AutoMergeCoroutine()
     {
-        isAutoMergeActive = true;
-
         // 최대 고양이 생성 유지 루프
         StartCoroutine(SpawnCatsWhileAutoMerge());
 
@@ -147,6 +167,7 @@ public class AutoMerge : MonoBehaviour
         }
 
         isAutoMergeActive = false;
+        gameManager.UpdateAutoMergeTimerVisibility(false);
         Debug.Log("자동 머지 종료");
     }
 

@@ -12,18 +12,27 @@ public class GameManager : MonoBehaviour
     private Cat[] allCatData;                                   // 모든 고양이 데이터 보유
     public Cat[] AllCatData => allCatData;
 
-    private int maxCats = 8;                                    // 화면 내 최대 고양이 수
-    private int currentCatCount = 0;                            // 화면 내 고양이 수
-
-    // UI
+    // Main UI Text
+    [Header("Main UI Text")]
+    // 고양이수/최대고양이수
     [SerializeField] private TextMeshProUGUI catCountText;      // 고양이 수 텍스트
+    private int currentCatCount = 0;                            // 화면 내 고양이 수
+    private int maxCats = 8;                                    // 최대 고양이 수
+
+    // 기본 재화
+    [SerializeField] private TextMeshProUGUI coinText;          // 기본재화 텍스트
+    private int coin = 5000;                                    // 기본재화
+
+    // 캐쉬 재화
+    [SerializeField] private TextMeshProUGUI cashText;          // 캐쉬재화 텍스트
+    private int cash = 1000;                                    // 캐쉬재화
 
     // Merge On/Off
     [Header("Merge On/Off")]
     [SerializeField] private Button openMergePanelButton;       // 머지 패널 열기 버튼
     [SerializeField] private GameObject mergePanel;             // 머지 On/Off 패널
     [SerializeField] private Button closeMergePanelButton;      // 머지 패널 닫기 버튼
-    [SerializeField] private Button mergeStateButton;           // 머지 상태 변경 버튼
+    [SerializeField] private Button mergeStateButton;           // 머지 상태 버튼
     [SerializeField] private TextMeshProUGUI mergeStateText;    // 머지 현재 상태 텍스트
     private bool isMergeEnabled = true;
 
@@ -32,9 +41,19 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Button openAutoMovePanelButton;    // 자동 이동 패널 열기 버튼
     [SerializeField] private GameObject autoMovePanel;          // 자동 이동 On/Off 패널
     [SerializeField] private Button closeAutoMovePanelButton;   // 자동 이동 패널 닫기 버튼
-    [SerializeField] private Button autoMoveStateButton;        // 자동 이동 상태 변경 버튼
+    [SerializeField] private Button autoMoveStateButton;        // 자동 이동 상태 버튼
     [SerializeField] private TextMeshProUGUI autoMoveStateText; // 자동 이동 현재 상태 텍스트
     private bool isAutoMoveEnabled = true;                      // 자동 이동 활성화 상태
+
+    // AutoMerge
+    [Header ("AutoMerge")]
+    [SerializeField] private Button openAutoMergePanelButton;   // 자동 머지 패널 열기 버튼
+    [SerializeField] private GameObject autoMergePanel;         // 자동 머지 패널
+    [SerializeField] private Button closeAutoMergePanelButton;  // 자동 머지 패널 닫기 버튼
+    [SerializeField] private Button autoMergeStateButton;       // 자동 머지 상태 버튼
+    [SerializeField] private TextMeshProUGUI autoMergeCostText; // 자동 머지 상태 버튼
+    [SerializeField] private TextMeshProUGUI autoMergeTimerText;// 자동 머지 타이머 텍스트
+    private int autoMergeCost = 30;                             // 자동 머지 비용
 
     private void Awake()
     {
@@ -49,8 +68,11 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        // 기본 세팅
         LoadAllCats();
         UpdateCatCountText();
+        UpdateCoinText();
+        UpdateCashText();
 
         // 자동이동 On/Off 관련
         UpdateAutoMoveStateText();
@@ -65,6 +87,13 @@ public class GameManager : MonoBehaviour
         openMergePanelButton.onClick.AddListener(OpenMergePanel);
         closeMergePanelButton.onClick.AddListener(CloseMergePanel);
         mergeStateButton.onClick.AddListener(ToggleMergeState);
+
+        // 자동머지 관련
+        UpdateAutoMergeCostText();
+        openAutoMergePanelButton.onClick.AddListener(OpenAutoMergePanel);
+        closeAutoMergePanelButton.onClick.AddListener(CloseAutoMergePanel);
+        autoMergeStateButton.onClick.AddListener(StartAutoMerge);
+        UpdateAutoMergeTimerVisibility(false);
     }
 
     // 고양이 정보 Load 함수
@@ -72,6 +101,8 @@ public class GameManager : MonoBehaviour
     {
         allCatData = Resources.LoadAll<Cat>("Cats");
     }
+
+    // ============================================================================================
 
     // 고양이 수 판별 함수
     public bool CanSpawnCat()
@@ -108,9 +139,32 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // ============================================================================================
 
+    // 기본재화 텍스트 UI 업데이트하는 함수
+    private void UpdateCoinText()
+    {
+        if (coinText != null)
+        {
+            coinText.text = $"{coin}";
+        }
+    }
 
-    // 머지 패널 열기
+    // ============================================================================================
+
+    // 캐쉬재화 텍스트 UI 업데이트하는 함수
+    private void UpdateCashText()
+    {
+        if (cashText != null)
+        {
+            // 숫자를 3자리마다 콤마를 추가하여 표시
+            cashText.text = cash.ToString("N0");
+        }
+    }
+
+    // ============================================================================================
+
+    // 머지 On/Off 패널 여는 함수
     private void OpenMergePanel()
     {
         if (mergePanel != null)
@@ -137,7 +191,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // 머지 버튼 색상 업데이트
+    // 머지 버튼 색상 업데이트 함수
     private void UpdateMergeButtonColor()
     {
         if (openMergePanelButton != null)
@@ -152,7 +206,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // 머지 패널 닫기
+    // 머지 패널 닫는 함수
     public void CloseMergePanel()
     {
         if (mergePanel != null)
@@ -167,9 +221,9 @@ public class GameManager : MonoBehaviour
         return isMergeEnabled;
     }
 
+    // ============================================================================================
 
-
-    // 자동이동 패널 열기
+    // 자동이동 패널 여는 함수
     private void OpenAutoMovePanel()
     {
         if (autoMovePanel != null)
@@ -178,7 +232,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // 자동이동 상태 전환
+    // 자동이동 상태 전환 함수
     public void ToggleAutoMove()
     {
         isAutoMoveEnabled = !isAutoMoveEnabled;
@@ -207,7 +261,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // 자동이동 버튼 색상 업데이트
+    // 자동이동 버튼 색상 업데이트 함수
     private void UpdateOpenButtonColor()
     {
         if (openAutoMovePanelButton != null)
@@ -222,7 +276,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // 자동이동 패널 닫기
+    // 자동이동 패널 닫는 함수
     public void CloseAutoMovePanel()
     {
         if (autoMovePanel != null)
@@ -231,10 +285,77 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // 자동이동 현재 상태 반환
+    // 자동이동 현재 상태 반환하는 함수
     public bool IsAutoMoveEnabled()
     {
         return isAutoMoveEnabled;
+    }
+
+    // ============================================================================================
+
+    // 자동머지 비용 Text 업데이트 함수
+    private void UpdateAutoMergeCostText()
+    {
+        if (autoMergeCostText != null)
+        {
+            autoMergeCostText.text = $"{autoMergeCost}";
+        }
+    }
+
+    // 자동머지 패널 여는 함수
+    private void OpenAutoMergePanel()
+    {
+        if (autoMergePanel != null)
+        {
+            autoMergePanel.SetActive(true);
+        }
+    }
+
+    // 자동머지 패널 닫는 함수
+    private void CloseAutoMergePanel()
+    {
+        if (autoMergePanel != null)
+        {
+            autoMergePanel.SetActive(false);
+        }
+    }
+
+    // 자동머지 시작 함수
+    private void StartAutoMerge()
+    {
+        if (cash >= autoMergeCost)
+        {
+            cash -= autoMergeCost;
+            UpdateCashText();
+
+            AutoMerge autoMergeScript = FindObjectOfType<AutoMerge>();
+            if (autoMergeScript != null)
+            {
+                autoMergeScript.OnClickedAutoMerge();
+            }
+        }
+        else
+        {
+            Debug.Log("Not enough coins to start AutoMerge!");
+        }
+    }
+
+    // 자동머지 상태에 따라 타이머 텍스트 가시성 업데이트 함수
+    public void UpdateAutoMergeTimerVisibility(bool isVisible)
+    {
+        if (autoMergeTimerText != null)
+        {
+            autoMergeTimerText.gameObject.SetActive(isVisible);
+        }
+    }
+
+    // 자동머지 타이머 업데이트 함수
+    public void UpdateAutoMergeTimerText(int remainingTime)
+    {
+        if (autoMergeTimerText != null)
+        {
+            autoMergeTimerText.text = $"{remainingTime}";
+        }
     }
 
 }

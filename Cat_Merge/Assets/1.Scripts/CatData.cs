@@ -5,7 +5,7 @@ using UnityEngine.UI;
 // 고양이 본인들의 정보를 담은 Script
 public class CatData : MonoBehaviour
 {
-    private Cat catData;                        // 고양이 데이터
+    public Cat catData;                        // 고양이 데이터
     private Image catImage;                     // 고양이 이미지
 
     private RectTransform rectTransform;        // RectTransform 참조

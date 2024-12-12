@@ -1,59 +1,66 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System.Collections;
+using System.Collections.Generic;
 
 // GameManager Script
 public class GameManager : MonoBehaviour
 {
     // Singleton instance
-    public static GameManager Instance { get; private set; }    // SingleTon
+    public static GameManager Instance { get; private set; }        // SingleTon
 
     // Data
-    private Cat[] allCatData;                                   // 모든 고양이 데이터 보유
+    private Cat[] allCatData;                                       // 모든 고양이 데이터 보유
     public Cat[] AllCatData => allCatData;
 
     // Main UI Text
     [Header("Main UI Text")]
     // 고양이수/최대고양이수
-    [SerializeField] private TextMeshProUGUI catCountText;      // 고양이 수 텍스트
-    private int currentCatCount = 0;                            // 화면 내 고양이 수
-    private int maxCats = 8;                                    // 최대 고양이 수
+    [SerializeField] private TextMeshProUGUI catCountText;          // 고양이 수 텍스트
+    private int currentCatCount = 0;                                // 화면 내 고양이 수
+    private int maxCats = 8;                                        // 최대 고양이 수
 
     // 기본 재화
-    [SerializeField] private TextMeshProUGUI coinText;          // 기본재화 텍스트
-    private int coin = 5000;                                    // 기본재화
+    [SerializeField] private TextMeshProUGUI coinText;              // 기본재화 텍스트
+    private int coin = 5000;                                        // 기본재화
 
     // 캐쉬 재화
-    [SerializeField] private TextMeshProUGUI cashText;          // 캐쉬재화 텍스트
-    private int cash = 1000;                                    // 캐쉬재화
+    [SerializeField] private TextMeshProUGUI cashText;              // 캐쉬재화 텍스트
+    private int cash = 1000;                                        // 캐쉬재화
 
     // Merge On/Off
     [Header("Merge On/Off")]
-    [SerializeField] private Button openMergePanelButton;       // 머지 패널 열기 버튼
-    [SerializeField] private GameObject mergePanel;             // 머지 On/Off 패널
-    [SerializeField] private Button closeMergePanelButton;      // 머지 패널 닫기 버튼
-    [SerializeField] private Button mergeStateButton;           // 머지 상태 버튼
-    [SerializeField] private TextMeshProUGUI mergeStateText;    // 머지 현재 상태 텍스트
+    [SerializeField] private Button openMergePanelButton;           // 머지 패널 열기 버튼
+    [SerializeField] private GameObject mergePanel;                 // 머지 On/Off 패널
+    [SerializeField] private Button closeMergePanelButton;          // 머지 패널 닫기 버튼
+    [SerializeField] private Button mergeStateButton;               // 머지 상태 버튼
+    [SerializeField] private TextMeshProUGUI mergeStateText;        // 머지 현재 상태 텍스트
     private bool isMergeEnabled = true;
 
     // AutoMove On/Off
     [Header ("AutoMove On/Off")]
-    [SerializeField] private Button openAutoMovePanelButton;    // 자동 이동 패널 열기 버튼
-    [SerializeField] private GameObject autoMovePanel;          // 자동 이동 On/Off 패널
-    [SerializeField] private Button closeAutoMovePanelButton;   // 자동 이동 패널 닫기 버튼
-    [SerializeField] private Button autoMoveStateButton;        // 자동 이동 상태 버튼
-    [SerializeField] private TextMeshProUGUI autoMoveStateText; // 자동 이동 현재 상태 텍스트
-    private bool isAutoMoveEnabled = true;                      // 자동 이동 활성화 상태
+    [SerializeField] private Button openAutoMovePanelButton;        // 자동 이동 패널 열기 버튼
+    [SerializeField] private GameObject autoMovePanel;              // 자동 이동 On/Off 패널
+    [SerializeField] private Button closeAutoMovePanelButton;       // 자동 이동 패널 닫기 버튼
+    [SerializeField] private Button autoMoveStateButton;            // 자동 이동 상태 버튼
+    [SerializeField] private TextMeshProUGUI autoMoveStateText;     // 자동 이동 현재 상태 텍스트
+    private bool isAutoMoveEnabled = true;                          // 자동 이동 활성화 상태
 
     // AutoMerge
     [Header ("AutoMerge")]
-    [SerializeField] private Button openAutoMergePanelButton;   // 자동 머지 패널 열기 버튼
-    [SerializeField] private GameObject autoMergePanel;         // 자동 머지 패널
-    [SerializeField] private Button closeAutoMergePanelButton;  // 자동 머지 패널 닫기 버튼
-    [SerializeField] private Button autoMergeStateButton;       // 자동 머지 상태 버튼
-    [SerializeField] private TextMeshProUGUI autoMergeCostText; // 자동 머지 상태 버튼
-    [SerializeField] private TextMeshProUGUI autoMergeTimerText;// 자동 머지 타이머 텍스트
-    private int autoMergeCost = 30;                             // 자동 머지 비용
+    [SerializeField] private Button openAutoMergePanelButton;       // 자동 머지 패널 열기 버튼
+    [SerializeField] private GameObject autoMergePanel;             // 자동 머지 패널
+    [SerializeField] private Button closeAutoMergePanelButton;      // 자동 머지 패널 닫기 버튼
+    [SerializeField] private Button autoMergeStateButton;           // 자동 머지 상태 버튼
+    [SerializeField] private TextMeshProUGUI autoMergeCostText;     // 자동 머지 상태 버튼
+    [SerializeField] private TextMeshProUGUI autoMergeTimerText;    // 자동 머지 타이머 텍스트
+    private int autoMergeCost = 30;                                 // 자동 머지 비용
+
+    // Sort System
+    [Header("Sort")]
+    [SerializeField] private Button sortButton;                     // 정렬 버튼
+    [SerializeField] private Transform gamePanel;                   // GamePanel
 
     private void Awake()
     {
@@ -87,6 +94,9 @@ public class GameManager : MonoBehaviour
         openMergePanelButton.onClick.AddListener(OpenMergePanel);
         closeMergePanelButton.onClick.AddListener(CloseMergePanel);
         mergeStateButton.onClick.AddListener(ToggleMergeState);
+
+        // 정렬 관련
+        sortButton.onClick.AddListener(SortCats);
 
         // 자동머지 관련
         UpdateAutoMergeCostText();
@@ -289,6 +299,89 @@ public class GameManager : MonoBehaviour
     public bool IsAutoMoveEnabled()
     {
         return isAutoMoveEnabled;
+    }
+
+    // ============================================================================================
+
+    // 고양이 정렬 함수
+    private void SortCats()
+    {
+        StartCoroutine(SortCatsCoroutine());
+    }
+
+    // 고양이들을 정렬된 위치에 배치하는 코루틴
+    private IEnumerator SortCatsCoroutine()
+    {
+        // 고양이 객체들을 모두 부드럽게 정렬하는 코루틴을 동시에 실행
+        List<Coroutine> moveCoroutines = new List<Coroutine>();
+
+        // 고양이 객체들을 등급을 기준으로 정렬 (높은 등급이 먼저 오도록)
+        List<GameObject> sortedCats = new List<GameObject>();
+
+        // 게임 패널 내 모든 자식 고양이 객체들에 대해
+        foreach (Transform child in gamePanel)
+        {
+            sortedCats.Add(child.gameObject);
+        }
+
+        // 등급 기준으로 고양이 객체 정렬 (내림차순)
+        sortedCats.Sort((cat1, cat2) =>
+        {
+            int grade1 = GetCatGrade(cat1);
+            int grade2 = GetCatGrade(cat2);
+
+            if (grade1 == grade2) return 0;
+            return grade1 > grade2 ? -1 : 1;
+        });
+
+        // 정렬된 고양이 객체들을 부드럽게 이동
+        for (int i = 0; i < sortedCats.Count; i++)
+        {
+            GameObject cat = sortedCats[i];
+            Coroutine moveCoroutine = StartCoroutine(MoveCatToPosition(cat, i));
+            moveCoroutines.Add(moveCoroutine);
+        }
+
+        // 모든 고양이가 이동을 마칠 때까지 기다리기
+        foreach (Coroutine coroutine in moveCoroutines)
+        {
+            yield return coroutine;
+        }
+    }
+
+    // 고양이의 등급을 반환하는 함수
+    private int GetCatGrade(GameObject catObject)
+    {
+        int grade = catObject.GetComponent<CatData>().catData.CatId;
+        return grade;
+    }
+
+    // 고양이들을 부드럽게 정렬된 위치로 이동시키는 함수
+    private IEnumerator MoveCatToPosition(GameObject catObject, int index)
+    {
+        RectTransform rectTransform = catObject.GetComponent<RectTransform>();
+
+        // 목표 위치 계산 (index는 정렬된 순서)
+        float targetX = (index % 7 - 3) * (rectTransform.rect.width + 10);
+        float targetY = (index / 7) * (rectTransform.rect.height + 10);
+        Vector2 targetPosition = new Vector2(targetX, -targetY);
+
+        // 현재 위치와 목표 위치의 차이를 계산하여 부드럽게 이동
+        float elapsedTime = 0f;
+        float duration = 0.1f;          // 이동 시간 (초)
+
+        Vector2 initialPosition = rectTransform.anchoredPosition;
+
+        // 목표 위치로 부드럽게 이동
+        while (elapsedTime < duration)
+        {
+            rectTransform.anchoredPosition = Vector2.Lerp(initialPosition, targetPosition, elapsedTime / duration);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        // 이동이 끝났을 때 정확한 목표 위치에 도달
+        rectTransform.anchoredPosition = targetPosition;
     }
 
     // ============================================================================================

@@ -312,19 +312,23 @@ public class GameManager : MonoBehaviour
     // 고양이들을 정렬된 위치에 배치하는 코루틴
     private IEnumerator SortCatsCoroutine()
     {
-        // 고양이 객체들을 모두 부드럽게 정렬하는 코루틴을 동시에 실행
-        List<Coroutine> moveCoroutines = new List<Coroutine>();
+        // 정렬 전 자동 이동 잠시 중지 (현재 자동이동이 진행중인 고양이도 중지 = CatData의 AutoMove가 실행중이어도 중지)
+        foreach (Transform child in gamePanel)
+        {
+            CatData catData = child.GetComponent<CatData>();
+            if (catData != null)
+            {
+                catData.SetAutoMoveState(false); // 자동 이동 비활성화
+            }
+        }
 
         // 고양이 객체들을 등급을 기준으로 정렬 (높은 등급이 먼저 오도록)
         List<GameObject> sortedCats = new List<GameObject>();
-
-        // 게임 패널 내 모든 자식 고양이 객체들에 대해
         foreach (Transform child in gamePanel)
         {
             sortedCats.Add(child.gameObject);
         }
 
-        // 등급 기준으로 고양이 객체 정렬 (내림차순)
         sortedCats.Sort((cat1, cat2) =>
         {
             int grade1 = GetCatGrade(cat1);
@@ -334,7 +338,8 @@ public class GameManager : MonoBehaviour
             return grade1 > grade2 ? -1 : 1;
         });
 
-        // 정렬된 고양이 객체들을 부드럽게 이동
+        // 고양이 이동 코루틴 실행
+        List<Coroutine> moveCoroutines = new List<Coroutine>();
         for (int i = 0; i < sortedCats.Count; i++)
         {
             GameObject cat = sortedCats[i];
@@ -346,6 +351,16 @@ public class GameManager : MonoBehaviour
         foreach (Coroutine coroutine in moveCoroutines)
         {
             yield return coroutine;
+        }
+
+        // 정렬 후 자동 이동 상태 복구 (정렬이 완료되고 고양이들이 다시 주기마다 자동이동이 가능하게 원래상태로 복구)
+        foreach (Transform child in gamePanel)
+        {
+            CatData catData = child.GetComponent<CatData>();
+            if (catData != null)
+            {
+                catData.SetAutoMoveState(isAutoMoveEnabled);
+            }
         }
     }
 

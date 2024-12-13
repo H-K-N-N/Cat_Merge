@@ -5,7 +5,7 @@ using UnityEngine.UI;
 // 고양이 본인들의 정보를 담은 Script
 public class CatData : MonoBehaviour
 {
-    public Cat catData;                        // 고양이 데이터
+    public Cat catData;                         // 고양이 데이터
     private Image catImage;                     // 고양이 이미지
 
     private RectTransform rectTransform;        // RectTransform 참조
@@ -26,11 +26,6 @@ public class CatData : MonoBehaviour
     private void Start()
     {
         UpdateCatUI();
-
-        if (isAutoMoveEnabled)
-        {
-            StartCoroutine(AutoMove());
-        }
     }
 
     // CatUI 최신화하는 함수
@@ -65,16 +60,17 @@ public class CatData : MonoBehaviour
         }
         else
         {
-            StopAllCoroutines(); // 자동 이동 비활성화 시 코루틴 중지
+            StopAllCoroutines();
+            isAnimating = false;
         }
     }
 
     // 10초마다 자동으로 이동하는 코루틴
-    private IEnumerator AutoMove()
+    public IEnumerator AutoMove()
     {
         while (true)
         {
-            yield return new WaitForSeconds(10f);
+            yield return new WaitForSeconds(5f);
 
             if (!isAnimating && (catDragAndDrop == null || !catDragAndDrop.isDragging))
             {

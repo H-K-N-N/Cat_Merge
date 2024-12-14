@@ -67,14 +67,15 @@ public class GameManager : MonoBehaviour
     // ============================================================================================
     // ItemMenu Select Button
     [Header("ItemMenu")]
-    [SerializeField] private Button bottomItemButton;                     // 아이템 버튼
-    [SerializeField] private Image bottomItemButtonImg;                   // 아이템 버튼 이미지
+    [SerializeField] private Button bottomItemButton;               // 아이템 버튼
+    [SerializeField] private Image bottomItemButtonImg;             // 아이템 버튼 이미지
 
 
     [SerializeField] private GameObject itemMenuPanel;              // 아이템 메뉴 판넬
-                     private bool isOnToggle;                       // 아이템 메뉴 판넬 토글
+    private bool isOnToggle;                                        // 아이템 메뉴 판넬 토글
     [SerializeField] private Button itemBackButton;                 // 아이템 뒤로가기 버튼
 
+    // 아이템 메뉴 버튼 그룹(배열로 관리함)
     enum EitemMenuButton
     {
         itemMenuButton = 0,
@@ -83,6 +84,7 @@ public class GameManager : MonoBehaviour
         goldenSomethingMenuButton,
         end,
     }
+    // 아이템 메뉴 판넬들 그룹(배열로 관리함)
     enum EitemMenues
     {
         itemMenues = 0,
@@ -91,16 +93,12 @@ public class GameManager : MonoBehaviour
         goldenMenues,
         end,
     }
+
     // 아이템 메뉴 안에 아이템, 동료, 배경, 황금깃털의 버튼들
     [Header("ItemMenues")]
-    //[SerializeField] private Button itemMenuButton;                     // 아이템 메뉴 버튼
-    //[SerializeField] private GameObject itemMenues;                     // 아이템 메뉴 목록들
-    //[SerializeField] private Button colleagueMenuButton;                // 동료 메뉴 버튼
-    //[SerializeField] private GameObject colleagueMenues;                // 동료 메뉴 목록들
-    //[SerializeField] private Button backgroundMenuButton;               // 배경 메뉴 버튼
-    //[SerializeField] private Button goldenSomethingMenuButton;          // 황금머시기(황금깃털) 메뉴 버튼
-    [SerializeField] private Button[] itemMenuButtons;
-    [SerializeField] private GameObject[] itemMenues;
+    [SerializeField] private Button[] itemMenuButtons;              // itemPanel에서의 아이템 메뉴 버튼들
+    [SerializeField] private GameObject[] itemMenues;               // itemPanel에서의 메뉴 스크롤창 판넬
+    private bool[] isItemMenuButtonsOn = new bool[4];               // 버튼 색상 감지하기 위한 bool타입 배열
 
 
     // 아이템 메뉴 안에 아이템 목록
@@ -161,22 +159,21 @@ public class GameManager : MonoBehaviour
         catMaximumIncreaseButton.onClick.AddListener(IncreaseCatMaximum);
         itemBackButton.onClick.AddListener(CloseBottomItemMenuPanel);
 
-        //itemMenues.SetActive(true);
         itemMenues[(int)EitemMenues.itemMenues].SetActive(true);
         if (ColorUtility.TryParseHtmlString("#5f5f5f", out Color parsedColor))
         {
-            //itemMenuButton.GetComponent<Image>().color = parsedColor;
             itemMenuButtons[(int)EitemMenuButton.itemMenuButton].GetComponent<Image>().color = parsedColor;
         }
-        //itemMenuButton.onClick.AddListener(OpenItemMenuButton)
-        //colleagueMenuButton.onClick.AddListener(OpenColleagueMenuButton);
-        //backgroundMenuButton.onClick.AddListener(OpenBGMenuButton);
-        //goldenSomethingMenuButton.onClick.AddListener(OpenGoldenMenuButton);
-        //itemMenuButton.onClick.AddListener(() => OnButtonClicked(itemMenues));
-        itemMenuButtons[(int)EitemMenuButton.itemMenuButton].onClick.AddListener(() => OnButtonClicked(itemMenues[(int)EitemMenues.itemMenues]));
-        //colleagueMenuButton.onClick.AddListener(() => OnButtonClicked(colleagueMenues));
-        itemMenuButtons[(int)EitemMenuButton.colleagueMenuButton].onClick.AddListener(() => OnButtonClicked(itemMenues[(int)EitemMenues.colleagueMenues]));
 
+        itemMenuButtons[(int)EitemMenuButton.itemMenuButton].onClick.AddListener(() => OnButtonClicked(itemMenues[(int)EitemMenues.itemMenues]));
+        itemMenuButtons[(int)EitemMenuButton.colleagueMenuButton].onClick.AddListener(() => OnButtonClicked(itemMenues[(int)EitemMenues.colleagueMenues]));
+        itemMenuButtons[(int)EitemMenuButton.backgroundMenuButton].onClick.AddListener(() => OnButtonClicked(itemMenues[(int)EitemMenues.backgroundMenues]));
+        itemMenuButtons[(int)EitemMenuButton.goldenSomethingMenuButton].onClick.AddListener(() => OnButtonClicked(itemMenues[(int)EitemMenues.goldenMenues]));
+
+        for(int i = 1; i < 4; i++)
+        {
+            isItemMenuButtonsOn[i] = false;
+        }
         UpdateIncreaseMaximumFeeText();
         UpdateIncreaseMaximumLvText();
     }
@@ -604,29 +601,29 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // 아이템 메뉴의 아이템, 동료, 배경, 황금깃털 버튼 색상 변경(예정)
+    // 아이템 메뉴의 아이템, 동료, 배경, 황금깃털 버튼 색상 변경
     private void ChangeSelectedButtonColor(GameObject menues)
     {
         if (menues.gameObject.activeSelf)
         {
-            if (ColorUtility.TryParseHtmlString("#5f5f5f", out Color parsedColor))
+            if (ColorUtility.TryParseHtmlString("#5f5f5f", out Color parsedColorT))
             {
-                //itemMenuButton.GetComponent<Image>().color = parsedColor;
-                //colleagueMenuButton.GetComponent<Image>().color = parsedColor;
-                //backgroundMenuButton.GetComponent<Image>().color = parsedColor;
-                //goldenSomethingMenuButton.GetComponent<Image>().color = parsedColor;
-            }
-        }
-        else
-        {
-            Debug.Log($"{menues} 비활성화");
-            if (ColorUtility.TryParseHtmlString("#E2E2E2", out Color parsedColor))
-            {
-                //itemMenuButton.GetComponent<Image>().color = parsedColor;
-                //colleagueMenuButton.GetComponent<Image>().color = parsedColor;
-                //backgroundMenuButton.GetComponent<Image>().color = parsedColor;
-                //goldenSomethingMenuButton.GetComponent<Image>().color = parsedColor;
-
+                for (int i = 0; i < (int)EitemMenues.end; i++)
+                {
+                    if (isItemMenuButtonsOn[i])
+                    {
+                        // 색상변경
+                        itemMenuButtons[i].GetComponent<Image>().color = parsedColorT;
+                    }
+                    else
+                    {
+                        if (ColorUtility.TryParseHtmlString("#E2E2E2", out Color parsedColorF))
+                        {
+                             // 색상변경
+                             itemMenuButtons[i].GetComponent<Image>().color = parsedColorF;
+                        }
+                    }
+                }
             }
         }
     }
@@ -679,22 +676,23 @@ public class GameManager : MonoBehaviour
     void OnButtonClicked(GameObject activePanel)
     {
         // 모든 UI 패널 비활성화
-        //itemMenues.SetActive(false);
-        //colleagueMenues.SetActive(false);
-        //uiPanel3.SetActive(false);
-        //uiPanel4.SetActive(false);
-
         for(int i = 0; i < (int)EitemMenues.end; i++)
         {
             itemMenues[i].SetActive(false);
+            isItemMenuButtonsOn[i] = false;
         }
 
         // 클릭된 버튼의 UI만 활성화
         activePanel.SetActive(true);
+       
+        for(int i = 0; i < (int)EitemMenues.end; i++)
+        {
+            if(itemMenues[i].activeSelf)
+            {
+                isItemMenuButtonsOn[i] = true;
+            }
+        }
         ChangeSelectedButtonColor(activePanel);
-
-        // if itemMenues true , itemMenuButton.color 바뀜
-        // if colleagueMenues true, colleagueMenuButton.color 바뀜
     }
     // ============================================================================================
 }

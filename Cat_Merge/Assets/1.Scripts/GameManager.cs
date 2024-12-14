@@ -23,7 +23,7 @@ public class GameManager : MonoBehaviour
 
     // 기본 재화
     [SerializeField] private TextMeshProUGUI coinText;              // 기본재화 텍스트
-    private int coin = 5000;                                        // 기본재화
+    private int coin = 999999999;                                   // 기본재화
 
     // 캐쉬 재화
     [SerializeField] private TextMeshProUGUI cashText;              // 캐쉬재화 텍스트
@@ -39,7 +39,7 @@ public class GameManager : MonoBehaviour
     private bool isMergeEnabled = true;
 
     // AutoMove On/Off
-    [Header ("AutoMove On/Off")]
+    [Header("AutoMove On/Off")]
     [SerializeField] private Button openAutoMovePanelButton;        // 자동 이동 패널 열기 버튼
     [SerializeField] private GameObject autoMovePanel;              // 자동 이동 On/Off 패널
     [SerializeField] private Button closeAutoMovePanelButton;       // 자동 이동 패널 닫기 버튼
@@ -48,7 +48,7 @@ public class GameManager : MonoBehaviour
     private bool isAutoMoveEnabled = true;                          // 자동 이동 활성화 상태
 
     // AutoMerge
-    [Header ("AutoMerge")]
+    [Header("AutoMerge")]
     [SerializeField] private Button openAutoMergePanelButton;       // 자동 머지 패널 열기 버튼
     [SerializeField] private GameObject autoMergePanel;             // 자동 머지 패널
     [SerializeField] private Button closeAutoMergePanelButton;      // 자동 머지 패널 닫기 버튼
@@ -61,6 +61,57 @@ public class GameManager : MonoBehaviour
     [Header("Sort")]
     [SerializeField] private Button sortButton;                     // 정렬 버튼
     [SerializeField] private Transform gamePanel;                   // GamePanel
+
+
+    // 바텀 메인 버튼 작업 내용(현기)
+    // ============================================================================================
+    // ItemMenu Select Button
+    [Header("ItemMenu")]
+    [SerializeField] private Button bottomItemButton;                     // 아이템 버튼
+    [SerializeField] private Image bottomItemButtonImg;                   // 아이템 버튼 이미지
+
+
+    [SerializeField] private GameObject itemMenuPanel;              // 아이템 메뉴 판넬
+                     private bool isOnToggle;                       // 아이템 메뉴 판넬 토글
+    [SerializeField] private Button itemBackButton;                 // 아이템 뒤로가기 버튼
+
+    enum EitemMenuButton
+    {
+        itemMenuButton = 0,
+        colleagueMenuButton,
+        backgroundMenuButton,
+        goldenSomethingMenuButton,
+        end,
+    }
+    enum EitemMenues
+    {
+        itemMenues = 0,
+        colleagueMenues,
+        backgroundMenues,
+        goldenMenues,
+        end,
+    }
+    // 아이템 메뉴 안에 아이템, 동료, 배경, 황금깃털의 버튼들
+    [Header("ItemMenues")]
+    //[SerializeField] private Button itemMenuButton;                     // 아이템 메뉴 버튼
+    //[SerializeField] private GameObject itemMenues;                     // 아이템 메뉴 목록들
+    //[SerializeField] private Button colleagueMenuButton;                // 동료 메뉴 버튼
+    //[SerializeField] private GameObject colleagueMenues;                // 동료 메뉴 목록들
+    //[SerializeField] private Button backgroundMenuButton;               // 배경 메뉴 버튼
+    //[SerializeField] private Button goldenSomethingMenuButton;          // 황금머시기(황금깃털) 메뉴 버튼
+    [SerializeField] private Button[] itemMenuButtons;
+    [SerializeField] private GameObject[] itemMenues;
+
+
+    // 아이템 메뉴 안에 아이템 목록
+    [Header("ItemMenuList")]
+    [SerializeField] private Button catMaximumIncreaseButton;       // 고양이 최대치 증가 버튼
+    [SerializeField] private GameObject disabledBg;                 // 버튼 클릭 못할 때의 배경
+                     private int catMaximumIncreaseFee = 10;        // 고양이 최대치 증가 비용
+    [SerializeField] private TextMeshProUGUI catMaximumIncreaseText;// 고양이 최대치 증가 텍스트
+    [SerializeField] private TextMeshProUGUI catMaximumIncreaseLvText; // 고양이 최대치 증가 레벨 텍스트
+                     private int catMaximumIncreaseLv = 1;          // 고양이 최대치 증가 레벨
+    // ============================================================================================
 
     private void Awake()
     {
@@ -104,6 +155,30 @@ public class GameManager : MonoBehaviour
         closeAutoMergePanelButton.onClick.AddListener(CloseAutoMergePanel);
         autoMergeStateButton.onClick.AddListener(StartAutoMerge);
         UpdateAutoMergeTimerVisibility(false);
+
+        // 아이템 메뉴 관련
+        bottomItemButton.onClick.AddListener(OpenCloseBottomItemMenuPanel);
+        catMaximumIncreaseButton.onClick.AddListener(IncreaseCatMaximum);
+        itemBackButton.onClick.AddListener(CloseBottomItemMenuPanel);
+
+        //itemMenues.SetActive(true);
+        itemMenues[(int)EitemMenues.itemMenues].SetActive(true);
+        if (ColorUtility.TryParseHtmlString("#5f5f5f", out Color parsedColor))
+        {
+            //itemMenuButton.GetComponent<Image>().color = parsedColor;
+            itemMenuButtons[(int)EitemMenuButton.itemMenuButton].GetComponent<Image>().color = parsedColor;
+        }
+        //itemMenuButton.onClick.AddListener(OpenItemMenuButton)
+        //colleagueMenuButton.onClick.AddListener(OpenColleagueMenuButton);
+        //backgroundMenuButton.onClick.AddListener(OpenBGMenuButton);
+        //goldenSomethingMenuButton.onClick.AddListener(OpenGoldenMenuButton);
+        //itemMenuButton.onClick.AddListener(() => OnButtonClicked(itemMenues));
+        itemMenuButtons[(int)EitemMenuButton.itemMenuButton].onClick.AddListener(() => OnButtonClicked(itemMenues[(int)EitemMenues.itemMenues]));
+        //colleagueMenuButton.onClick.AddListener(() => OnButtonClicked(colleagueMenues));
+        itemMenuButtons[(int)EitemMenuButton.colleagueMenuButton].onClick.AddListener(() => OnButtonClicked(itemMenues[(int)EitemMenues.colleagueMenues]));
+
+        UpdateIncreaseMaximumFeeText();
+        UpdateIncreaseMaximumLvText();
     }
 
     // 고양이 정보 Load 함수
@@ -466,4 +541,160 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // ============================================================================================
+
+    // 아이템 메뉴 판넬 여는 함수
+    private void OpenCloseBottomItemMenuPanel()
+    {
+        if (itemMenuPanel != null)
+        {
+            isOnToggle = !isOnToggle;
+            if (isOnToggle)
+            {
+                itemMenuPanel.SetActive(true);
+                //if (ColorUtility.TryParseHtmlString("#5f5f5f", out Color parsedColor))
+                //{
+                //    bottomItemButtonImg.color = parsedColor;
+                //}
+                ChangeSelectedButtonColor(isOnToggle);
+            }
+            else
+            {
+                itemMenuPanel.SetActive(false);
+                //if (ColorUtility.TryParseHtmlString("#E2E2E2", out Color parsedColor))
+                //{
+                //    bottomItemButtonImg.color = parsedColor;
+                //}
+                ChangeSelectedButtonColor(isOnToggle);
+            }
+        }
+    }
+
+    // 아이템 메뉴 판넬 닫는 함수(뒤로가기 버튼)
+    private void CloseBottomItemMenuPanel()
+    {
+        if(itemMenuPanel != null)
+        {
+            isOnToggle = false;
+            itemMenuPanel.SetActive(false);
+            //if (ColorUtility.TryParseHtmlString("#E2E2E2", out Color parsedColor))
+            //{
+            //    bottomItemButtonImg.color = parsedColor;
+            //}
+            ChangeSelectedButtonColor(isOnToggle);
+        }
+    }
+
+    // 바텀 메뉴 버튼 색상 변경
+    private void ChangeSelectedButtonColor(bool isOnToggle)
+    {
+        if(isOnToggle)
+        {
+            if (ColorUtility.TryParseHtmlString("#5f5f5f", out Color parsedColor))
+            {
+                bottomItemButtonImg.color = parsedColor;
+            }
+        }
+        else
+        {
+            if (ColorUtility.TryParseHtmlString("#E2E2E2", out Color parsedColor))
+            {
+                bottomItemButtonImg.color = parsedColor;
+            }
+        }
+    }
+
+    // 아이템 메뉴의 아이템, 동료, 배경, 황금깃털 버튼 색상 변경(예정)
+    private void ChangeSelectedButtonColor(GameObject menues)
+    {
+        if (menues.gameObject.activeSelf)
+        {
+            if (ColorUtility.TryParseHtmlString("#5f5f5f", out Color parsedColor))
+            {
+                //itemMenuButton.GetComponent<Image>().color = parsedColor;
+                //colleagueMenuButton.GetComponent<Image>().color = parsedColor;
+                //backgroundMenuButton.GetComponent<Image>().color = parsedColor;
+                //goldenSomethingMenuButton.GetComponent<Image>().color = parsedColor;
+            }
+        }
+        else
+        {
+            Debug.Log($"{menues} 비활성화");
+            if (ColorUtility.TryParseHtmlString("#E2E2E2", out Color parsedColor))
+            {
+                //itemMenuButton.GetComponent<Image>().color = parsedColor;
+                //colleagueMenuButton.GetComponent<Image>().color = parsedColor;
+                //backgroundMenuButton.GetComponent<Image>().color = parsedColor;
+                //goldenSomethingMenuButton.GetComponent<Image>().color = parsedColor;
+
+            }
+        }
+    }
+
+    // 고양이 최대치 증가
+    private void IncreaseCatMaximum()
+    {
+        Debug.Log("고양이 최대치 증가 버튼 클릭");
+        if (catMaximumIncreaseButton != null)
+        {
+            maxCats++;
+            catMaximumIncreaseFee *= 2;
+            catMaximumIncreaseLv++;
+            UpdateCatCountText();
+            UpdateIncreaseMaximumFeeText();
+            UpdateIncreaseMaximumLvText();
+        }
+    }
+
+    // 고양이 수 텍스트 UI 업데이트하는 함수
+    private void UpdateIncreaseMaximumFeeText()
+    {
+        if (catMaximumIncreaseText != null)
+        {
+            if (coin < catMaximumIncreaseFee)
+            {
+                catMaximumIncreaseButton.interactable = false;
+                disabledBg.SetActive(true);
+            }
+            else
+            {
+                catMaximumIncreaseButton.interactable = true;
+                disabledBg.SetActive(false);
+            }
+            catMaximumIncreaseText.text = $"{catMaximumIncreaseFee}";
+            UpdateCoinText();
+            coin -= catMaximumIncreaseFee;
+
+        }
+    }
+
+    // 고양이 최대치 증가 레벨 UI 업데이트 하는 함수
+    private void UpdateIncreaseMaximumLvText()
+    {
+        catMaximumIncreaseLvText.text = $"Lv.{catMaximumIncreaseLv}";
+
+    }
+
+    // 버튼 클릭 이벤트
+    void OnButtonClicked(GameObject activePanel)
+    {
+        // 모든 UI 패널 비활성화
+        //itemMenues.SetActive(false);
+        //colleagueMenues.SetActive(false);
+        //uiPanel3.SetActive(false);
+        //uiPanel4.SetActive(false);
+
+        for(int i = 0; i < (int)EitemMenues.end; i++)
+        {
+            itemMenues[i].SetActive(false);
+        }
+
+        // 클릭된 버튼의 UI만 활성화
+        activePanel.SetActive(true);
+        ChangeSelectedButtonColor(activePanel);
+
+        // if itemMenues true , itemMenuButton.color 바뀜
+        // if colleagueMenues true, colleagueMenuButton.color 바뀜
+    }
+    // ============================================================================================
 }

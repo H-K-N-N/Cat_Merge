@@ -61,6 +61,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Button dictionaryBackButton;           // 도감 뒤로가기 버튼
     private bool isDictionaryOnToggle;                              // 도감 메뉴 판넬 토글
 
+    [SerializeField] private GameObject slotPrefab;                 // 슬롯 프리팹
+    [SerializeField] private Transform scrollRectContents;          // ScrollRect의 Content
+
     // 도감 메뉴 버튼 그룹 (배열로 관리함)
     enum EdictionaryMenuButton
     {
@@ -141,12 +144,12 @@ public class GameManager : MonoBehaviour
 
     // 아이템 메뉴 안에 아이템 목록
     [Header("ItemMenuList")]
-    [SerializeField] private Button catMaximumIncreaseButton;       // 고양이 최대치 증가 버튼
-    [SerializeField] private GameObject disabledBg;                 // 버튼 클릭 못할 때의 배경
-    private int catMaximumIncreaseFee = 10;        // 고양이 최대치 증가 비용
-    [SerializeField] private TextMeshProUGUI catMaximumIncreaseText;// 고양이 최대치 증가 텍스트
-    [SerializeField] private TextMeshProUGUI catMaximumIncreaseLvText; // 고양이 최대치 증가 레벨 텍스트
-    private int catMaximumIncreaseLv = 1;          // 고양이 최대치 증가 레벨
+    [SerializeField] private Button catMaximumIncreaseButton;           // 고양이 최대치 증가 버튼
+    [SerializeField] private GameObject disabledBg;                     // 버튼 클릭 못할 때의 배경
+    private int catMaximumIncreaseFee = 10;                             // 고양이 최대치 증가 비용
+    [SerializeField] private TextMeshProUGUI catMaximumIncreaseText;    // 고양이 최대치 증가 텍스트
+    [SerializeField] private TextMeshProUGUI catMaximumIncreaseLvText;  // 고양이 최대치 증가 레벨 텍스트
+    private int catMaximumIncreaseLv = 1;                               // 고양이 최대치 증가 레벨
 
     // ======================================================================================================================
 
@@ -199,6 +202,8 @@ public class GameManager : MonoBehaviour
         {
             dictionaryMenuButtons[(int)EdictionaryMenuButton.normalMenuButton].GetComponent<Image>().color = parsedColor1;
         }
+
+        PopulateDictionary();
 
         dictionaryMenuButtons[(int)EdictionaryMenuButton.normalMenuButton].onClick.AddListener(() => OnDictioanryButtonClicked(dictionaryMenues[(int)EdictionaryMenues.normalMenues]));
         dictionaryMenuButtons[(int)EdictionaryMenuButton.rareMenuButton].onClick.AddListener(() => OnDictioanryButtonClicked(dictionaryMenues[(int)EdictionaryMenues.rareMenues]));
@@ -445,16 +450,9 @@ public class GameManager : MonoBehaviour
         if (dictionaryMenuPanel != null)
         {
             isDictionaryOnToggle = !isDictionaryOnToggle;
-            if (isDictionaryOnToggle)
-            {
-                dictionaryMenuPanel.SetActive(true);
-                ChangeDictionarySelectedButtonColor(isDictionaryOnToggle);
-            }
-            else
-            {
-                dictionaryMenuPanel.SetActive(false);
-                ChangeDictionarySelectedButtonColor(isDictionaryOnToggle);
-            }
+
+            dictionaryMenuPanel.SetActive(isDictionaryOnToggle);
+            ChangeDictionarySelectedButtonColor(isDictionaryOnToggle);
         }
     }
 
@@ -517,7 +515,7 @@ public class GameManager : MonoBehaviour
     }
 
     // 도감 버튼 클릭 이벤트
-    void OnDictioanryButtonClicked(GameObject activePanel)
+    private void OnDictioanryButtonClicked(GameObject activePanel)
     {
         // 모든 UI 패널 비활성화
         for (int i = 0; i < (int)EitemMenues.end; i++)
@@ -537,6 +535,44 @@ public class GameManager : MonoBehaviour
             }
         }
         ChangeSelectedDictionaryButtonColor(activePanel);
+    }
+
+    // 도감 슬롯 생성 함수
+    private void PopulateDictionary()
+    {
+        // 기존 슬롯 초기화
+        foreach (Transform child in scrollRectContents)
+        {
+            Destroy(child.gameObject);
+        }
+
+        // allCatData를 기반으로 슬롯 생성
+        foreach (Cat cat in allCatData)
+        {
+            GameObject slot = Instantiate(slotPrefab, scrollRectContents);
+
+            // 슬롯 내 Icon 설정
+            Transform iconTransform = slot.transform.Find("Button/Icon");
+            if (iconTransform != null)
+            {
+                Image iconImage = iconTransform.GetComponent<Image>();
+                if (iconImage != null)
+                {
+                    iconImage.sprite = cat.CatImage;
+                }
+            }
+
+            // 슬롯 내 Text 설정
+            Transform textTransform = slot.transform.Find("Text Image/Text");
+            if (textTransform != null)
+            {
+                TextMeshProUGUI text = textTransform.GetComponent<TextMeshProUGUI>();
+                if (text != null)
+                {
+                    text.text = $"{cat.CatId}. {cat.CatName}";
+                }
+            }
+        }
     }
 
     // ======================================================================================================================

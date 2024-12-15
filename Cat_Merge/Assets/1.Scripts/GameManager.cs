@@ -15,7 +15,7 @@ public class GameManager : MonoBehaviour
     public Cat[] AllCatData => allCatData;
 
     // Main UI Text
-    [Header("Main UI Text")]
+    [Header("---[Main UI Text]")]
     // 고양이수/최대고양이수
     [SerializeField] private TextMeshProUGUI catCountText;          // 고양이 수 텍스트
     private int currentCatCount = 0;                                // 화면 내 고양이 수
@@ -30,7 +30,7 @@ public class GameManager : MonoBehaviour
     private int cash = 1000;                                        // 캐쉬재화
 
     // Merge On/Off
-    [Header("Merge On/Off")]
+    [Header("---[Merge On/Off]")]
     [SerializeField] private Button openMergePanelButton;           // 머지 패널 열기 버튼
     [SerializeField] private GameObject mergePanel;                 // 머지 On/Off 패널
     [SerializeField] private Button closeMergePanelButton;          // 머지 패널 닫기 버튼
@@ -39,7 +39,7 @@ public class GameManager : MonoBehaviour
     private bool isMergeEnabled = true;
 
     // AutoMove On/Off
-    [Header("AutoMove On/Off")]
+    [Header("----[AutoMove On/Off]")]
     [SerializeField] private Button openAutoMovePanelButton;        // 자동 이동 패널 열기 버튼
     [SerializeField] private GameObject autoMovePanel;              // 자동 이동 On/Off 패널
     [SerializeField] private Button closeAutoMovePanelButton;       // 자동 이동 패널 닫기 버튼
@@ -47,8 +47,16 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI autoMoveStateText;     // 자동 이동 현재 상태 텍스트
     private bool isAutoMoveEnabled = true;                          // 자동 이동 활성화 상태
 
+    // ============================================================================================
+    // 도감 기능
+    [Header("---[Dictionary]")]
+    public ScrollRect dictionaryScrollRect;
+
+
+    // ============================================================================================
+
     // AutoMerge
-    [Header("AutoMerge")]
+    [Header("---[AutoMerge]")]
     [SerializeField] private Button openAutoMergePanelButton;       // 자동 머지 패널 열기 버튼
     [SerializeField] private GameObject autoMergePanel;             // 자동 머지 패널
     [SerializeField] private Button closeAutoMergePanelButton;      // 자동 머지 패널 닫기 버튼
@@ -58,10 +66,9 @@ public class GameManager : MonoBehaviour
     private int autoMergeCost = 30;                                 // 자동 머지 비용
 
     // Sort System
-    [Header("Sort")]
+    [Header("---[Sort]")]
     [SerializeField] private Button sortButton;                     // 정렬 버튼
     [SerializeField] private Transform gamePanel;                   // GamePanel
-
 
     // 바텀 메인 버튼 작업 내용(현기)
     // ============================================================================================
@@ -145,6 +152,9 @@ public class GameManager : MonoBehaviour
         openMergePanelButton.onClick.AddListener(OpenMergePanel);
         closeMergePanelButton.onClick.AddListener(CloseMergePanel);
         mergeStateButton.onClick.AddListener(ToggleMergeState);
+
+        // 도감 관련
+        dictionaryScrollRect.verticalNormalizedPosition = 1f;
 
         // 정렬 관련
         sortButton.onClick.AddListener(SortCats);

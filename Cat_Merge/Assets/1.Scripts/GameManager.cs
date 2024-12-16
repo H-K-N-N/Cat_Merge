@@ -238,9 +238,10 @@ public class GameManager : MonoBehaviour
     public void SaveUnlockedCats(int catId)
     {
         GetComponent<CatDictionary>().UpdateDictionary(catId);
+        GetComponent<CatDictionary>().ShowNewCatPanel(catId);
 
         // 배열은 0번 부터지만 고양이의 CatId는 1번부터이기 때문
-        Debug.Log($"{catId + 1}번 고양이 정보 저장");
+        //Debug.Log($"{catId + 1}번 고양이 정보 저장");
     }
 
     // ======================================================================================================================

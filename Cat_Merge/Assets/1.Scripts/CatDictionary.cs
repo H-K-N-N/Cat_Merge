@@ -6,6 +6,7 @@ public class CatDictionary : MonoBehaviour
 {
     private GameManager gameManager;                                // GameManager
 
+    [Header("---[Cat Dictionary]")]
     [SerializeField] private ScrollRect[] dictionaryScrollRects;    // 도감의 스크롤뷰 배열
     [SerializeField] private GameObject[] dictionaryMenus;          // 도감 메뉴 Panel
 
@@ -19,6 +20,14 @@ public class CatDictionary : MonoBehaviour
     [SerializeField] private GameObject slotPrefab;                 // 도감 슬롯 프리팹
 
     [SerializeField] private Button[] dictionaryMenuButtons;        // 도감의 서브 메뉴 버튼 배열
+
+    [Header("---[New Cat Panel UI]")]
+    [SerializeField] private GameObject newCatPanel;                // New Cat Panel
+    [SerializeField] private Image newCatIcon;                      // New Cat Icon
+    [SerializeField] private TextMeshProUGUI newCatName;            // New Cat Name Text
+    [SerializeField] private TextMeshProUGUI newCatExplain;         // New Cat Explanation Text
+    [SerializeField] private TextMeshProUGUI newCatGetCoin;         // New Cat Get Coin Text
+    [SerializeField] private Button submitButton;                   // New Cat Panel Submit Button
 
     // Enum으로 메뉴 타입 정의 (서브 메뉴를 구분하기 위해 사용)
     private enum DictionaryMenuType
@@ -39,7 +48,8 @@ public class CatDictionary : MonoBehaviour
     private void Start()
     {
         gameManager = GameManager.Instance;
-        
+
+        newCatPanel.SetActive(false);
         dictionaryMenuPanel.SetActive(false);
         activeMenuType = DictionaryMenuType.Normal;
 
@@ -49,6 +59,8 @@ public class CatDictionary : MonoBehaviour
         ResetScrollPositions();
         InitializeMenuButtons();
         PopulateDictionary();
+
+        submitButton.onClick.AddListener(CloseNewCatPanel);
     }
 
     // 초기 스크롤 위치 초기화 함수
@@ -177,9 +189,9 @@ public class CatDictionary : MonoBehaviour
 
         slot.gameObject.SetActive(true);
 
-        TextMeshProUGUI text = slot.transform.Find("Text Image/Text")?.GetComponent<TextMeshProUGUI>();
         Button button = slot.transform.Find("Button")?.GetComponent<Button>();
         Image iconImage = slot.transform.Find("Button/Icon")?.GetComponent<Image>();
+        TextMeshProUGUI text = slot.transform.Find("Text Image/Text")?.GetComponent<TextMeshProUGUI>();
 
         button.interactable = true;
 
@@ -187,6 +199,33 @@ public class CatDictionary : MonoBehaviour
         iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
 
         text.text = $"{catId + 1}. {gameManager.AllCatData[catId].CatName}";
+
+        // 버튼 클릭 시 해당 고양이 ID를 ShowNewCatPanel에 전달
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(() => ShowNewCatPanel(catId));
+    }
+
+    // 새로운 고양이 해금 효과 & 도감에서 해당 고양이 버튼을 누르면 나오는 Panel 함수
+    public void ShowNewCatPanel(int catId)
+    {
+        Cat newCat = gameManager.AllCatData[catId];
+
+        newCatPanel.SetActive(true);
+
+        newCatIcon.sprite = newCat.CatImage;
+        newCatName.text = newCat.CatName;
+        newCatExplain.text = newCat.CatExplain;
+        newCatGetCoin.text = "Get Coin : " + newCat.CatGetCoin.ToString();
+
+        // 확인 버튼을 누르면 패널을 비활성화
+        submitButton.onClick.RemoveAllListeners();
+        submitButton.onClick.AddListener(CloseNewCatPanel);
+    }
+
+    // New Cat Panel을 닫는 함수
+    private void CloseNewCatPanel()
+    {
+        newCatPanel.SetActive(false);
     }
 
 

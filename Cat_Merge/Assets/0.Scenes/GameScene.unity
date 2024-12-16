@@ -6323,6 +6323,7 @@ GameObject:
   - component: {fileID: 331588644}
   - component: {fileID: 331588643}
   - component: {fileID: 331588642}
+  - component: {fileID: 331588645}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -6370,27 +6371,6 @@ MonoBehaviour:
   closeAutoMovePanelButton: {fileID: 1957409418}
   autoMoveStateButton: {fileID: 1580149191}
   autoMoveStateText: {fileID: 2081410092}
-  dictionaryScrollRect:
-  - {fileID: 18968911}
-  - {fileID: 1370648082}
-  - {fileID: 1585154869}
-  - {fileID: 2084705696}
-  dictionaryButton: {fileID: 482937125}
-  dictionaryButtonImg: {fileID: 482937126}
-  dictionaryMenuPanel: {fileID: 2108060639}
-  dictionaryBackButton: {fileID: 660876156}
-  slotPrefab: {fileID: 4711500874975617426, guid: 92c43c1fa91aa954b80aa863e14e066c, type: 3}
-  scrollRectContents: {fileID: 6771215}
-  dictionaryMenuButtons:
-  - {fileID: 1077991939}
-  - {fileID: 626702160}
-  - {fileID: 274529046}
-  - {fileID: 1258993322}
-  dictionaryMenues:
-  - {fileID: 18968908}
-  - {fileID: 1370648079}
-  - {fileID: 1585154866}
-  - {fileID: 2084705693}
   openAutoMergePanelButton: {fileID: 1736587142}
   autoMergePanel: {fileID: 355143274}
   closeAutoMergePanelButton: {fileID: 461313990}
@@ -6455,6 +6435,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f891c06dc0524a341a191de77b29a550, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &331588645
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 331588638}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f41dff7ffc60e9e4ca7d320d816c94fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dictionaryScrollRects:
+  - {fileID: 18968911}
+  - {fileID: 1370648082}
+  - {fileID: 1585154869}
+  - {fileID: 2084705696}
+  dictionaryMenus:
+  - {fileID: 18968908}
+  - {fileID: 1370648079}
+  - {fileID: 1585154866}
+  - {fileID: 2084705693}
+  dictionaryButton: {fileID: 482937125}
+  dictionaryButtonImage: {fileID: 482937126}
+  dictionaryMenuPanel: {fileID: 2108060639}
+  dictionaryBackButton: {fileID: 660876156}
+  slotPrefab: {fileID: 4711500874975617426, guid: 92c43c1fa91aa954b80aa863e14e066c, type: 3}
+  dictionaryMenuButtons:
+  - {fileID: 1077991939}
+  - {fileID: 626702160}
+  - {fileID: 274529046}
+  - {fileID: 1258993322}
+  scrollRectContents: {fileID: 6771215}
 --- !u!1 &335345886
 GameObject:
   m_ObjectHideFlags: 0
@@ -13456,7 +13469,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -460, y: 760}
+  m_AnchoredPosition: {x: -470, y: 760}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &660876156

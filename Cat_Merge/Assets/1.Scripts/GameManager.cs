@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
     public Cat[] AllCatData => allCatData;
 
     // ======================================================================================================================
+
     // Main UI Text
     [Header("---[Main UI Text]")]
     [SerializeField] private TextMeshProUGUI catCountText;          // 고양이 수 텍스트
@@ -30,6 +31,7 @@ public class GameManager : MonoBehaviour
     private int cash = 1000;                                        // 캐쉬재화
 
     // ======================================================================================================================
+
     // Merge On/Off
     [Header("---[Merge On/Off]")]
     [SerializeField] private Button openMergePanelButton;           // 머지 패널 열기 버튼
@@ -40,6 +42,7 @@ public class GameManager : MonoBehaviour
     private bool isMergeEnabled = true;
 
     // ======================================================================================================================
+
     // AutoMove On/Off
     [Header("----[AutoMove On/Off]")]
     [SerializeField] private Button openAutoMovePanelButton;        // 자동 이동 패널 열기 버튼
@@ -48,45 +51,6 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Button autoMoveStateButton;            // 자동 이동 상태 버튼
     [SerializeField] private TextMeshProUGUI autoMoveStateText;     // 자동 이동 현재 상태 텍스트
     private bool isAutoMoveEnabled = true;                          // 자동 이동 활성화 상태
-
-    // ======================================================================================================================
-    // 도감 기능
-    [Header("---[Dictionary]")]
-    [SerializeField] private ScrollRect[] dictionaryScrollRect;     // 도감 스크롤뷰 사이즈
-
-    [SerializeField] private Button dictionaryButton;               // 도감 버튼
-    [SerializeField] private Image dictionaryButtonImg;             // 도감 버튼 이미지
-
-    [SerializeField] private GameObject dictionaryMenuPanel;        // 도감 메뉴 판넬
-    [SerializeField] private Button dictionaryBackButton;           // 도감 뒤로가기 버튼
-    private bool isDictionaryOnToggle;                              // 도감 메뉴 판넬 토글
-
-    [SerializeField] private GameObject slotPrefab;                 // 슬롯 프리팹
-    [SerializeField] private Transform scrollRectContents;          // ScrollRect의 Content
-
-    // 도감 메뉴 버튼 그룹 (배열로 관리함)
-    enum EdictionaryMenuButton
-    {
-        normalMenuButton = 0,
-        rareMenuButton,
-        specialMenuButton,
-        backgroundMenuButton,
-        end,
-    }
-    // 도감 메뉴 판넬들 그룹 (배열로 관리함)
-    enum EdictionaryMenues
-    {
-        normalMenues = 0,
-        rareMenues,
-        specialMenues,
-        backgroundMenues,
-        end,
-    }
-
-    // 도감 메뉴 안에 일반, 고급, 특수, 배경의 버튼들
-    [SerializeField] private Button[] dictionaryMenuButtons;        // dictionaryPanel에서의 도감 메뉴 버튼들
-    [SerializeField] private GameObject[] dictionaryMenues;         // dictionaryPanel에서의 메뉴 스크롤창 판넬
-    private bool[] isDictionaryMenuButtonsOn = new bool[4];         // 버튼 색상 감지하기 위한 bool타입 배열
 
     // ======================================================================================================================
 
@@ -105,8 +69,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Button sortButton;                     // 정렬 버튼
     [SerializeField] private Transform gamePanel;                   // GamePanel
 
-    // 바텀 메인 버튼 작업 내용(현기)
     // ======================================================================================================================
+
     // ItemMenu Select Button
     [Header("ItemMenu")]
     [SerializeField] private Button bottomItemButton;               // 아이템 버튼
@@ -153,6 +117,7 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
+
     private void Awake()
     {
         if (Instance == null)
@@ -185,35 +150,6 @@ public class GameManager : MonoBehaviour
         openMergePanelButton.onClick.AddListener(OpenMergePanel);
         closeMergePanelButton.onClick.AddListener(CloseMergePanel);
         mergeStateButton.onClick.AddListener(ToggleMergeState);
-
-        // 도감 관련
-        for(int i=0;i<4;i++)
-        {
-            dictionaryScrollRect[i].verticalNormalizedPosition = 1f;
-        }
-
-        dictionaryMenuPanel.SetActive(false);
-
-        dictionaryButton.onClick.AddListener(OpenCloseDictionaryMenuPanel);
-        dictionaryBackButton.onClick.AddListener(CloseDictionaryMenuPanel);
-
-        dictionaryMenues[(int)EdictionaryMenues.normalMenues].SetActive(true);
-        if (ColorUtility.TryParseHtmlString("#5f5f5f", out Color parsedColor1))
-        {
-            dictionaryMenuButtons[(int)EdictionaryMenuButton.normalMenuButton].GetComponent<Image>().color = parsedColor1;
-        }
-
-        PopulateDictionary();
-
-        dictionaryMenuButtons[(int)EdictionaryMenuButton.normalMenuButton].onClick.AddListener(() => OnDictioanryButtonClicked(dictionaryMenues[(int)EdictionaryMenues.normalMenues]));
-        dictionaryMenuButtons[(int)EdictionaryMenuButton.rareMenuButton].onClick.AddListener(() => OnDictioanryButtonClicked(dictionaryMenues[(int)EdictionaryMenues.rareMenues]));
-        dictionaryMenuButtons[(int)EdictionaryMenuButton.specialMenuButton].onClick.AddListener(() => OnDictioanryButtonClicked(dictionaryMenues[(int)EdictionaryMenues.specialMenues]));
-        dictionaryMenuButtons[(int)EdictionaryMenuButton.backgroundMenuButton].onClick.AddListener(() => OnDictioanryButtonClicked(dictionaryMenues[(int)EdictionaryMenues.backgroundMenues]));
-
-        for (int i = 1; i < 4; i++)
-        {
-            isDictionaryMenuButtonsOn[i] = false;
-        }
 
         // 정렬 관련
         sortButton.onClick.AddListener(SortCats);
@@ -440,139 +376,6 @@ public class GameManager : MonoBehaviour
     public bool IsAutoMoveEnabled()
     {
         return isAutoMoveEnabled;
-    }
-
-    // ======================================================================================================================
-
-    // 도감 메뉴 판넬 여는 함수
-    private void OpenCloseDictionaryMenuPanel()
-    {
-        if (dictionaryMenuPanel != null)
-        {
-            isDictionaryOnToggle = !isDictionaryOnToggle;
-
-            dictionaryMenuPanel.SetActive(isDictionaryOnToggle);
-            ChangeDictionarySelectedButtonColor(isDictionaryOnToggle);
-        }
-    }
-
-    // 도감 메뉴 판넬 닫는 함수 (뒤로가기 버튼)
-    private void CloseDictionaryMenuPanel()
-    {
-        if (dictionaryMenuPanel != null)
-        {
-            isDictionaryOnToggle = false;
-            dictionaryMenuPanel.SetActive(false);
-
-            ChangeDictionarySelectedButtonColor(isDictionaryOnToggle);
-        }
-    }
-
-    // 도감 메뉴 버튼 색상 변경
-    private void ChangeDictionarySelectedButtonColor(bool isDictionaryOnToggle)
-    {
-        if (isDictionaryOnToggle)
-        {
-            if (ColorUtility.TryParseHtmlString("#5f5f5f", out Color parsedColor))
-            {
-                dictionaryButtonImg.color = parsedColor;
-            }
-        }
-        else
-        {
-            if (ColorUtility.TryParseHtmlString("#E2E2E2", out Color parsedColor))
-            {
-                dictionaryButtonImg.color = parsedColor;
-            }
-        }
-    }
-
-    // 도감 메뉴의 기본, 레어, 특수, 배경 버튼 색상 변경
-    private void ChangeSelectedDictionaryButtonColor(GameObject menues)
-    {
-        if (menues.gameObject.activeSelf)
-        {
-            if (ColorUtility.TryParseHtmlString("#5f5f5f", out Color parsedColorT))
-            {
-                for (int i = 0; i < (int)EdictionaryMenues.end; i++)
-                {
-                    if (isDictionaryMenuButtonsOn[i])
-                    {
-                        // 색상변경
-                        dictionaryMenuButtons[i].GetComponent<Image>().color = parsedColorT;
-                    }
-                    else
-                    {
-                        if (ColorUtility.TryParseHtmlString("#E2E2E2", out Color parsedColorF))
-                        {
-                            // 색상변경
-                            dictionaryMenuButtons[i].GetComponent<Image>().color = parsedColorF;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // 도감 버튼 클릭 이벤트
-    private void OnDictioanryButtonClicked(GameObject activePanel)
-    {
-        // 모든 UI 패널 비활성화
-        for (int i = 0; i < (int)EitemMenues.end; i++)
-        {
-            dictionaryMenues[i].SetActive(false);
-            isDictionaryMenuButtonsOn[i] = false;
-        }
-
-        // 클릭된 버튼의 UI만 활성화
-        activePanel.SetActive(true);
-
-        for (int i = 0; i < (int)EdictionaryMenues.end; i++)
-        {
-            if (dictionaryMenues[i].activeSelf)
-            {
-                isDictionaryMenuButtonsOn[i] = true;
-            }
-        }
-        ChangeSelectedDictionaryButtonColor(activePanel);
-    }
-
-    // 도감 슬롯 생성 함수
-    private void PopulateDictionary()
-    {
-        // 기존 슬롯 초기화
-        foreach (Transform child in scrollRectContents)
-        {
-            Destroy(child.gameObject);
-        }
-
-        // allCatData를 기반으로 슬롯 생성
-        foreach (Cat cat in allCatData)
-        {
-            GameObject slot = Instantiate(slotPrefab, scrollRectContents);
-
-            // 슬롯 내 Icon 설정
-            Transform iconTransform = slot.transform.Find("Button/Icon");
-            if (iconTransform != null)
-            {
-                Image iconImage = iconTransform.GetComponent<Image>();
-                if (iconImage != null)
-                {
-                    iconImage.sprite = cat.CatImage;
-                }
-            }
-
-            // 슬롯 내 Text 설정
-            Transform textTransform = slot.transform.Find("Text Image/Text");
-            if (textTransform != null)
-            {
-                TextMeshProUGUI text = textTransform.GetComponent<TextMeshProUGUI>();
-                if (text != null)
-                {
-                    text.text = $"{cat.CatId}. {cat.CatName}";
-                }
-            }
-        }
     }
 
     // ======================================================================================================================

@@ -32,19 +32,21 @@ public class CatDictionary : MonoBehaviour
     // Enum으로 메뉴 타입 정의 (서브 메뉴를 구분하기 위해 사용)
     private enum DictionaryMenuType
     {
-        Normal,         // 일반 고양이 메뉴
-        Rare,           // 희귀 고양이 메뉴
-        Special,        // 특수 고양이 메뉴
-        Background,     // 배경 메뉴
-        End             // Enum의 끝을 표시
+        Normal,                 // 일반 고양이 메뉴
+        Rare,                   // 희귀 고양이 메뉴
+        Special,                // 특수 고양이 메뉴
+        Background,             // 배경 메뉴
+        End                     // Enum의 끝
     }
     private DictionaryMenuType activeMenuType;                      // 현재 활성화된 메뉴 타입
 
-    // 임시 (도감에서 노멀 고양이의 정보를 초기화 하기 위해) (다른 서브 메뉴들을 추가한다면 어떻게 정리 할까 고민)
-    [SerializeField] private Transform scrollRectContents;          // 노말 고양이 scrollRectContents
+    // 임시 (다른 서브 메뉴들을 추가한다면 어떻게 정리 할까 고민)
+    [SerializeField] private Transform scrollRectContents;          // 노말 고양이 scrollRectContents (도감에서 노멀 고양이의 정보를 초기화 하기 위해)
+            // 희귀 고양이 scrollRectContents
+            // 특수 고양이 scrollRectContents
+            // 배경 scrollRectContents
 
-    
-    // Start()
+    // Start
     private void Start()
     {
         gameManager = GameManager.Instance;
@@ -92,7 +94,7 @@ public class CatDictionary : MonoBehaviour
         UpdateButtonColor(dictionaryButtonImage, isDictionaryMenuOpen);
     }
 
-    // 도감 Panel 닫는 함수
+    // 도감 Panel 닫는 함수 (dictionaryBackButton)
     private void CloseDictionaryMenuPanel()
     {
         isDictionaryMenuOpen = false;
@@ -184,7 +186,7 @@ public class CatDictionary : MonoBehaviour
     // 새로운 고양이를 해금할때마다 도감을 업데이트하는 함수
     public void UpdateDictionary(int catId)
     {
-        // scrollRectContents 내의 catId와 동일한 순번의 슬롯을 순회하여 해당 슬롯을 업데이트
+        // scrollRectContents 내의 catId와 동일한 순번의 슬롯을 찾아서 해당 슬롯을 업데이트
         Transform slot = scrollRectContents.GetChild(catId);
 
         slot.gameObject.SetActive(true);
@@ -205,7 +207,7 @@ public class CatDictionary : MonoBehaviour
         button.onClick.AddListener(() => ShowNewCatPanel(catId));
     }
 
-    // 새로운 고양이 해금 효과 & 도감에서 해당 고양이 버튼을 누르면 나오는 Panel 함수
+    // 새로운 고양이 해금 효과 & 도감에서 해당 고양이 버튼을 누르면 나오는 New Cat Panel 함수
     public void ShowNewCatPanel(int catId)
     {
         Cat newCat = gameManager.AllCatData[catId];

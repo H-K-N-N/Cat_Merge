@@ -13,7 +13,7 @@ public class GameManager : MonoBehaviour
     // Data
     private Cat[] allCatData;                                       // 모든 고양이 데이터 보유
     public Cat[] AllCatData => allCatData;
-    
+    private bool[] isCatUnlocked;                                   // 고양이 해금 여부 배열
 
     // ======================================================================================================================
 
@@ -185,8 +185,6 @@ public class GameManager : MonoBehaviour
         UpdateIncreaseMaximumFeeText();
         UpdateIncreaseMaximumLvText();
     }
-
-    private bool[] isCatUnlocked;                                   // 고양이 해금 여부 배열
 
     private void Start()
     {

@@ -59,7 +59,9 @@ public class CatSpawn : MonoBehaviour
     {
         // 예시: 랜덤으로 고양이 등급을 선택하거나 상점 업그레이드를 고려하여 선택
         // return gameManager.GetRandomCatForSpawn();  // 이 부분은 나중에 업그레이드 시스템에 맞게 수정
-        return gameManager.AllCatData[0];
+        int catId = 0;
+        gameManager.UnlockCat(catId);
+        return gameManager.AllCatData[catId];
     }
 
     // Panel내 랜덤 위치에 고양이 배치하는 함수

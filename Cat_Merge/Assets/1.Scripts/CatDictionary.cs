@@ -2,11 +2,9 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
-public class Dictionary : MonoBehaviour
+public class CatDictionary : MonoBehaviour
 {
-    // 도감 기능
-    [Header("---[Dictionary]")]
-    private GameManager gameManager;                                // GameManager SingleTon
+    private GameManager gameManager;                                // GameManager
 
     [SerializeField] private ScrollRect[] dictionaryScrollRects;    // 도감의 스크롤뷰 배열
     [SerializeField] private GameObject[] dictionaryMenus;          // 도감 메뉴 Panel
@@ -33,16 +31,15 @@ public class Dictionary : MonoBehaviour
     }
     private DictionaryMenuType activeMenuType;                      // 현재 활성화된 메뉴 타입
 
-    // 임시 (도감에서 노멀 고양이의 정보를 초기화 하기 위해)
+    // 임시 (도감에서 노멀 고양이의 정보를 초기화 하기 위해) (다른 서브 메뉴들을 추가한다면 어떻게 정리 할까 고민)
     [SerializeField] private Transform scrollRectContents;          // 노말 고양이 scrollRectContents
 
-
-
+    
     // Start()
     private void Start()
     {
         gameManager = GameManager.Instance;
-
+        
         dictionaryMenuPanel.SetActive(false);
         activeMenuType = DictionaryMenuType.Normal;
 
@@ -54,12 +51,7 @@ public class Dictionary : MonoBehaviour
         PopulateDictionary();
     }
 
-    private void OnEnable()
-    {
-        //ResetScrollPositions();
-    }
-
-    // 초기 스크롤위치 초기화 함수
+    // 초기 스크롤 위치 초기화 함수
     private void ResetScrollPositions()
     {
         foreach (var scrollRect in dictionaryScrollRects)
@@ -144,26 +136,57 @@ public class Dictionary : MonoBehaviour
 
         foreach (Cat cat in gameManager.AllCatData)
         {
-            CreateSlot(cat);
+            InitializeSlot(cat);
         }
     }
 
-    // 고양이 데이터를 바탕으로 슬롯을 생성하는 함수
-    private void CreateSlot(Cat cat)
+    // 고양이 데이터를 바탕으로 초기 슬롯을 생성하는 함수
+    private void InitializeSlot(Cat cat)
     {
         GameObject slot = Instantiate(slotPrefab, scrollRectContents);
 
+        Button button = slot.transform.Find("Button")?.GetComponent<Button>();
         Image iconImage = slot.transform.Find("Button/Icon")?.GetComponent<Image>();
-        if (iconImage != null)
-        {
-            iconImage.sprite = cat.CatImage;
-        }
-
         TextMeshProUGUI text = slot.transform.Find("Text Image/Text")?.GetComponent<TextMeshProUGUI>();
-        if (text != null)
+
+        if (gameManager.IsCatUnlocked(cat.CatId))
         {
+            button.interactable = true;
+
+            iconImage.sprite = cat.CatImage;
+            iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
+
             text.text = $"{cat.CatId}. {cat.CatName}";
         }
+        else
+        {
+            button.interactable = false;
+
+            iconImage.sprite = cat.CatImage;
+            iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 0f);
+
+            text.text = "???";
+        }
+    }
+
+    // 새로운 고양이를 해금할때마다 도감을 업데이트하는 함수
+    public void UpdateDictionary(int catId)
+    {
+        // scrollRectContents 내의 catId와 동일한 순번의 슬롯을 순회하여 해당 슬롯을 업데이트
+        Transform slot = scrollRectContents.GetChild(catId);
+
+        slot.gameObject.SetActive(true);
+
+        TextMeshProUGUI text = slot.transform.Find("Text Image/Text")?.GetComponent<TextMeshProUGUI>();
+        Button button = slot.transform.Find("Button")?.GetComponent<Button>();
+        Image iconImage = slot.transform.Find("Button/Icon")?.GetComponent<Image>();
+
+        button.interactable = true;
+
+        iconImage.sprite = gameManager.AllCatData[catId].CatImage;
+        iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
+
+        text.text = $"{catId + 1}. {gameManager.AllCatData[catId].CatName}";
     }
 
 

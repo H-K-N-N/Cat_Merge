@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
     // Data
     private Cat[] allCatData;                                       // 모든 고양이 데이터 보유
     public Cat[] AllCatData => allCatData;
+    
 
     // ======================================================================================================================
 
@@ -183,6 +184,63 @@ public class GameManager : MonoBehaviour
         }
         UpdateIncreaseMaximumFeeText();
         UpdateIncreaseMaximumLvText();
+    }
+
+    private bool[] isCatUnlocked;                                   // 고양이 해금 여부 배열
+
+    private void Start()
+    {
+        LoadUnlockedCats();
+    }
+
+    // 모든 해금 상태 불러오기
+    public void LoadUnlockedCats()
+    {
+        InitializeCatUnlockData();
+    }
+
+    // 고양이 해금 여부 초기화
+    public void InitializeCatUnlockData()
+    {
+        isCatUnlocked = new bool[AllCatData.Length];
+
+        // 모든 고양이를 잠금 상태로 초기화
+        for (int i = 0; i < isCatUnlocked.Length; i++)
+        {
+            isCatUnlocked[i] = false;
+        }
+    }
+
+    // 특정 고양이를 해금
+    public void UnlockCat(int catId)
+    {
+        if (catId < 0 || catId >= isCatUnlocked.Length || isCatUnlocked[catId])
+        {
+            return;
+        }
+
+        isCatUnlocked[catId] = true;
+        SaveUnlockedCats(catId);
+    }
+
+    // 특정 고양이의 해금 여부 확인
+    public bool IsCatUnlocked(int catId)
+    {
+        if (catId < 0 || catId >= isCatUnlocked.Length)
+        {
+            return false;
+        }
+
+        return isCatUnlocked[catId];
+    }
+
+    // 모든 해금 상태 저장
+    public void SaveUnlockedCats(int catId)
+    {
+        GetComponent<CatDictionary>().UpdateDictionary(catId);
+
+        // 배열은 0번 부터지만 고양이의 CatId는 1번부터이기 때문
+        Debug.Log($"{catId + 1}번 고양이 정보 저장");
     }
 
     // ======================================================================================================================

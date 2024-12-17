@@ -27,6 +27,9 @@ public class GameManager : MonoBehaviour
     private int getCoinCount;                                       // 획득코인 갯수
     public int GetCoinCount { get => getCoinCount; set => getCoinCount = value; }
 
+    private float playTimeCount;                                    // 플레이타임 카운트
+    public float PlayTimeCount { get => playTimeCount; set => playTimeCount = value; }
+
     // ======================================================================================================================
 
     // Main UI Text
@@ -262,6 +265,11 @@ public class GameManager : MonoBehaviour
 
     // 퀘스트 관련
 
+    private void Update()
+    {
+        AddPlayTimeCount();
+    }
+
     public void AddCash(int amount)
     {
         // 캐시를 추가하는 로직
@@ -296,6 +304,16 @@ public class GameManager : MonoBehaviour
     public void ResetGetCoinCount(int count)
     {
         GetCoinCount = count;
+    }
+
+    public void AddPlayTimeCount()
+    {
+        PlayTimeCount += Time.deltaTime;
+    }
+
+    public void ResetPlayTime(int count)
+    {
+        PlayTimeCount = count;
     }
 
     // ======================================================================================================================

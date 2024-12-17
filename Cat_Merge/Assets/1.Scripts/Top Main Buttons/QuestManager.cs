@@ -8,10 +8,8 @@ public class QuestManager : MonoBehaviour
 
     [Header("---[QuestManager]")]
     [SerializeField] private ScrollRect questScrollRect;            // 퀘스트의 스크롤뷰
-
     [SerializeField] private Button questButton;                    // 퀘스트 버튼
     [SerializeField] private Image questButtonImage;                // 퀘스트 버튼 이미지
-
     [SerializeField] private GameObject questMenuPanel;             // 퀘스트 메뉴 Panel
     [SerializeField] private Button questBackButton;                // 퀘스트 뒤로가기 버튼
     private bool isQuestMenuOpen;                                   // 퀘스트 메뉴 Panel의 활성화 상태
@@ -36,8 +34,6 @@ public class QuestManager : MonoBehaviour
     private int increaseCombineTargetCount = 2;                     // 목표 머지 횟수 증가치
     private int combineQuestRewardCash = 5;                         // 머지 퀘스트 보상 캐쉬 재화 개수
 
-    // PlayTime
-
     [Header("---[Cat GetCoin UI]")]
     [SerializeField] private Slider getCoinQuestSlider;             // 획득코인 Slider
     [SerializeField] private TextMeshProUGUI getCoinCountText;      // "?/?" 텍스트
@@ -47,6 +43,17 @@ public class QuestManager : MonoBehaviour
     private int getCoinTargetCount = 1;                             // 목표 획득코인 횟수
     private int increaseGetCoinTargetCount = 2;                     // 목표 획득코인 갯수 증가치
     private int getCoinQuestRewardCash = 5;                         // 획득코인 퀘스트 보상 캐쉬 재화 개수
+
+    [Header("---[PlayTime Quest UI]")]
+    [SerializeField] private Slider playTimeQuestSlider;             // 플레이타임 Slider
+    [SerializeField] private TextMeshProUGUI playTimeCountText;      // "?/?" 텍스트
+    [SerializeField] private Button playTimeRewardButton;            // 플레이타임 보상 버튼
+    [SerializeField] private TextMeshProUGUI playTimePlusCashText;   // 플레이타임 보상 재화 개수 Text
+    [SerializeField] private GameObject playTimeRewardDisabledBG;    // 플레이타임 보상 버튼 비활성화 BG
+    private int playTimeTargetCount = 10;                            // 목표 플레이타임 (초 단위)
+    private int increasePlayTimeTargetCount = 20;                    // 목표 플레이타임 증가치
+    private int playTimeQuestRewardCash = 5;                         // 플레이타임 퀘스트 보상 캐쉬 재화 개수
+
 
     // Purchase Cats
 
@@ -62,12 +69,14 @@ public class QuestManager : MonoBehaviour
         InitializeGiveFeedQuest();
         InitializeCombineQuest();
         InitializeGetCoinQuest();
+        InitializePlayTimeQuest();
 
         ResetScrollPositions();
 
         UpdateGiveFeedQuestUI();
         UpdateCombineQuestUI();
         UpdateGetCoinQuestUI();
+        UpdatePlayTimeQuestUI();
     }
 
     private void Update()
@@ -75,6 +84,7 @@ public class QuestManager : MonoBehaviour
         UpdateGiveFeedQuestUI();
         UpdateCombineQuestUI();
         UpdateGetCoinQuestUI();
+        UpdatePlayTimeQuestUI();
     }
 
     // ======================================================================================================================
@@ -313,6 +323,68 @@ public class QuestManager : MonoBehaviour
         }
     }
 
+    // ======================================================================================================================
 
+    // PlayTime 퀘스트 초기 설정
+    private void InitializePlayTimeQuest()
+    {
+        playTimeRewardButton.onClick.AddListener(ReceivePlayTimeReward);
+        playTimeRewardButton.interactable = false;
+        playTimePlusCashText.text = $"+{playTimeQuestRewardCash}";
+    }
+
+    // 플레이타임 퀘스트 UI를 업데이트하는 함수
+    private void UpdatePlayTimeQuestUI()
+    {
+        int currentTime = (int)gameManager.PlayTimeCount;
+
+        // 목표가 200 이상이면 퀘스트 종료 상태 처리
+        if (playTimeTargetCount >= 200)
+        {
+            playTimeQuestSlider.value = playTimeQuestSlider.maxValue;
+            playTimeCountText.text = "Complete";
+            playTimeRewardButton.interactable = false;
+            playTimeRewardDisabledBG.SetActive(true);
+            return;
+        }
+
+        // Slider 값 설정
+        playTimeQuestSlider.maxValue = playTimeTargetCount;
+        playTimeQuestSlider.value = currentTime;
+
+        // "?/?" 텍스트 업데이트
+        playTimeCountText.text = $"{currentTime}/{playTimeTargetCount}";
+
+        // 보상 버튼 활성화 조건 체크
+        bool isComplete = currentTime >= playTimeTargetCount;
+        playTimeRewardButton.interactable = isComplete;
+        playTimeRewardDisabledBG.SetActive(!isComplete);
+    }
+
+    // 플레이타임 퀘스트 보상 버튼 클릭 시 호출되는 함수
+    private void ReceivePlayTimeReward()
+    {
+        int currentTime = (int)gameManager.PlayTimeCount;
+
+        // 목표가 200 이상인 경우 더 이상 보상 지급 불가
+        if (playTimeTargetCount >= 200)
+        {
+            return;
+        }
+
+        if (currentTime >= playTimeTargetCount)
+        {
+            int excessTime = currentTime - playTimeTargetCount;
+
+            // 목표 플레이타임 증가
+            playTimeTargetCount += increasePlayTimeTargetCount;
+
+            // 퀘스트 완료 처리
+            gameManager.AddCash(playTimeQuestRewardCash);
+            gameManager.ResetPlayTime(excessTime);
+            gameManager.UpdateCashText();
+            UpdatePlayTimeQuestUI();
+        }
+    }
 
 }

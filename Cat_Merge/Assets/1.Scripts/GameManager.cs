@@ -21,6 +21,9 @@ public class GameManager : MonoBehaviour
     private int feedCount;                                          // 고양이 스폰 횟수(먹이 준 횟수)
     public int FeedCount { get => feedCount; set => feedCount = value; }
 
+    private int combineCount;                                       // 고양이 머지 횟수
+    public int CombineCount { get => combineCount; set => combineCount = value; }
+
     // ======================================================================================================================
 
     // Main UI Text
@@ -270,6 +273,16 @@ public class GameManager : MonoBehaviour
     {
         // 캐시를 추가하는 로직
         cash += amount;
+    }
+
+    public void AddCombineCount()
+    {
+        CombineCount++;
+    }
+
+    public void ResetCombineCount(int count)
+    {
+        CombineCount = count;
     }
 
     // ======================================================================================================================

@@ -38,35 +38,52 @@ public class QuestManager : MonoBehaviour
 
     // PlayTime
 
-    // Cat GetCoin
+    [Header("---[Cat GetCoin UI]")]
+    [SerializeField] private Slider getCoinQuestSlider;             // 획득코인 Slider
+    [SerializeField] private TextMeshProUGUI getCoinCountText;      // "?/?" 텍스트
+    [SerializeField] private Button getCoinRewardButton;            // 획득코인 보상 버튼
+    [SerializeField] private TextMeshProUGUI getCoinPlusCashText;   // 획득코인 보상 재화 개수 Text
+    [SerializeField] private GameObject getCoinRewardDisabledBG;    // 획득코인 보상 버튼 비활성화 BG
+    private int getCoinTargetCount = 1;                             // 목표 획득코인 횟수
+    private int increaseGetCoinTargetCount = 2;                     // 목표 획득코인 갯수 증가치
+    private int getCoinQuestRewardCash = 5;                         // 획득코인 퀘스트 보상 캐쉬 재화 개수
 
     // Purchase Cats
 
-    // Special Reward (예외)
-
     // ======================================================================================================================
 
-    // Start
     private void Start()
     {
         gameManager = GameManager.Instance;
-
         questMenuPanel.SetActive(false);
 
-        questButton.onClick.AddListener(ToggleQuestMenuPanel);
-        questBackButton.onClick.AddListener(CloseDictionaryMenuPanel);
+        InitializeQuestButton();
 
-        giveFeedRewardButton.onClick.AddListener(ReceiveReward);
-        giveFeedRewardButton.interactable = false;
-        giveFeedPlusCashText.text = $"+{giveFeedQuestRewardCash}";
-
-        combineRewardButton.onClick.AddListener(ReceiveCombineReward);
-        combineRewardButton.interactable = false;
-        combinePlusCashText.text = $"+{combineQuestRewardCash}";
+        InitializeGiveFeedQuest();
+        InitializeCombineQuest();
+        InitializeGetCoinQuest();
 
         ResetScrollPositions();
+
         UpdateGiveFeedQuestUI();
         UpdateCombineQuestUI();
+        UpdateGetCoinQuestUI();
+    }
+
+    private void Update()
+    {
+        UpdateGiveFeedQuestUI();
+        UpdateCombineQuestUI();
+        UpdateGetCoinQuestUI();
+    }
+
+    // ======================================================================================================================
+
+    // QuestButton 설정
+    private void InitializeQuestButton()
+    {
+        questButton.onClick.AddListener(ToggleQuestMenuPanel);
+        questBackButton.onClick.AddListener(CloseDictionaryMenuPanel);
     }
 
     // 초기 스크롤 위치 초기화 함수
@@ -103,14 +120,13 @@ public class QuestManager : MonoBehaviour
 
     // ======================================================================================================================
 
-    // UI 업데이트
-    private void Update()
+    // GiveFeed 퀘스트 초기 설정
+    private void InitializeGiveFeedQuest()
     {
-        UpdateGiveFeedQuestUI();
-        UpdateCombineQuestUI();
+        giveFeedRewardButton.onClick.AddListener(ReceiveReward);
+        giveFeedRewardButton.interactable = false;
+        giveFeedPlusCashText.text = $"+{giveFeedQuestRewardCash}";
     }
-
-    // ======================================================================================================================
 
     // 스폰 퀘스트 UI를 업데이트하는 함수
     private void UpdateGiveFeedQuestUI()
@@ -140,7 +156,7 @@ public class QuestManager : MonoBehaviour
         giveFeedRewardDisabledBG.SetActive(!isComplete);
     }
 
-    // 보상 버튼 클릭 시 호출되는 함수
+    // 스폰 퀘스트 보상 버튼 클릭 시 호출되는 함수
     private void ReceiveReward()
     {
         int currentCount = gameManager.FeedCount;
@@ -168,6 +184,14 @@ public class QuestManager : MonoBehaviour
     }
 
     // ======================================================================================================================
+
+    // Combine 퀘스트 초기 설정
+    private void InitializeCombineQuest()
+    {
+        combineRewardButton.onClick.AddListener(ReceiveCombineReward);
+        combineRewardButton.interactable = false;
+        combinePlusCashText.text = $"+{combineQuestRewardCash}";
+    }
 
     // 머지 퀘스트 UI를 업데이트하는 함수
     private void UpdateCombineQuestUI()
@@ -197,7 +221,7 @@ public class QuestManager : MonoBehaviour
         combineRewardDisabledBG.SetActive(!isComplete);
     }
 
-    // 머지 보상 버튼 클릭 시 호출되는 함수
+    // 머지 퀘스트 보상 버튼 클릭 시 호출되는 함수
     private void ReceiveCombineReward()
     {
         int currentCount = gameManager.CombineCount;
@@ -223,5 +247,72 @@ public class QuestManager : MonoBehaviour
             UpdateCombineQuestUI();
         }
     }
+
+    // ======================================================================================================================
+
+    // GetCoin 퀘스트 초기 설정
+    private void InitializeGetCoinQuest()
+    {
+        getCoinRewardButton.onClick.AddListener(ReceiveGetCoinReward);
+        getCoinRewardButton.interactable = false;
+        getCoinPlusCashText.text = $"+{getCoinQuestRewardCash}";
+    }
+
+    // 획득코인 퀘스트 UI를 업데이트하는 함수
+    private void UpdateGetCoinQuestUI()
+    {
+        int currentCount = gameManager.GetCoinCount;
+
+        // 목표가 10 이상이면 퀘스트 종료 상태 처리
+        if (getCoinTargetCount >= 10)
+        {
+            getCoinQuestSlider.value = getCoinQuestSlider.maxValue;
+            getCoinCountText.text = "Complete";
+            getCoinRewardButton.interactable = false;
+            getCoinRewardDisabledBG.SetActive(true);
+            return;
+        }
+
+        // Slider 값 설정
+        getCoinQuestSlider.maxValue = getCoinTargetCount;
+        getCoinQuestSlider.value = currentCount;
+
+        // "?/?" 텍스트 업데이트
+        getCoinCountText.text = $"{currentCount}/{getCoinTargetCount}";
+
+        // 보상 버튼 활성화 조건 체크
+        bool isComplete = currentCount >= getCoinTargetCount;
+        getCoinRewardButton.interactable = isComplete;
+        getCoinRewardDisabledBG.SetActive(!isComplete);
+    }
+
+    // 획득코인 퀘스트 보상 버튼 클릭 시 호출되는 함수
+    private void ReceiveGetCoinReward()
+    {
+        int currentCount = gameManager.GetCoinCount;
+
+        // 목표가 10 이상인 경우 더 이상 보상 지급 불가
+        if (getCoinTargetCount >= 10)
+        {
+            return;
+        }
+
+        if (currentCount >= getCoinTargetCount)
+        {
+            // 초과된 횟수 계산
+            int excessCount = currentCount - getCoinTargetCount;
+
+            // 목표 획득코인 횟수 증가 (퀘스트 난이도 상승)
+            getCoinTargetCount += increaseGetCoinTargetCount;
+
+            // 퀘스트 완료 처리
+            gameManager.AddCash(getCoinQuestRewardCash);
+            gameManager.ResetGetCoinCount(excessCount);
+            gameManager.UpdateCashText();
+            UpdateGetCoinQuestUI();
+        }
+    }
+
+
 
 }

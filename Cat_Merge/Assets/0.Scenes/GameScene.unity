@@ -6383,6 +6383,11 @@ MonoBehaviour:
   combineRewardButton: {fileID: 700823122}
   combinePlusCashText: {fileID: 426430620}
   combineRewardDisabledBG: {fileID: 34596091}
+  getCoinQuestSlider: {fileID: 1038923024}
+  getCoinCountText: {fileID: 708638333}
+  getCoinRewardButton: {fileID: 1953713947}
+  getCoinPlusCashText: {fileID: 844567719}
+  getCoinRewardDisabledBG: {fileID: 1638393562}
 --- !u!1 &335345886
 GameObject:
   m_ObjectHideFlags: 0
@@ -6491,7 +6496,7 @@ RectTransform:
   m_Father: {fileID: 516658442}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -12583,7 +12588,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &693673740
 RectTransform:
   m_ObjectHideFlags: 0
@@ -12602,10 +12607,10 @@ RectTransform:
   - {fileID: 1953713946}
   m_Father: {fileID: 1506342634}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 490, y: -615}
-  m_SizeDelta: {x: 1000, y: 150}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &693673741
 MonoBehaviour:

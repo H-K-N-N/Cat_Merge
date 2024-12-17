@@ -24,6 +24,9 @@ public class GameManager : MonoBehaviour
     private int combineCount;                                       // 고양이 머지 횟수
     public int CombineCount { get => combineCount; set => combineCount = value; }
 
+    private int getCoinCount;                                       // 획득코인 갯수
+    public int GetCoinCount { get => getCoinCount; set => getCoinCount = value; }
+
     // ======================================================================================================================
 
     // Main UI Text
@@ -259,6 +262,12 @@ public class GameManager : MonoBehaviour
 
     // 퀘스트 관련
 
+    public void AddCash(int amount)
+    {
+        // 캐시를 추가하는 로직
+        cash += amount;
+    }
+
     public void AddFeedCount()
     {
         FeedCount++;
@@ -269,12 +278,6 @@ public class GameManager : MonoBehaviour
         FeedCount = count;
     }
 
-    public void AddCash(int amount)
-    {
-        // 캐시를 추가하는 로직
-        cash += amount;
-    }
-
     public void AddCombineCount()
     {
         CombineCount++;
@@ -283,6 +286,16 @@ public class GameManager : MonoBehaviour
     public void ResetCombineCount(int count)
     {
         CombineCount = count;
+    }
+
+    public void AddGetCoinCount(int count)
+    {   // 고양이가 재화를 자동으로 얻을때마다 호출
+        GetCoinCount += count;
+    }
+
+    public void ResetGetCoinCount(int count)
+    {
+        GetCoinCount = count;
     }
 
     // ======================================================================================================================

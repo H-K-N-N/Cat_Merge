@@ -17,7 +17,7 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
-    // 퀘스트를 위한
+    // 퀘스트를 위한 변수들
     private int feedCount;                                          // 고양이 스폰 횟수(먹이 준 횟수)
     public int FeedCount { get => feedCount; set => feedCount = value; }
 
@@ -29,6 +29,9 @@ public class GameManager : MonoBehaviour
 
     private float playTimeCount;                                    // 플레이타임 카운트
     public float PlayTimeCount { get => playTimeCount; set => playTimeCount = value; }
+
+    private int purchaseCatsCount;                                  // 고양이 구매 횟수
+    public int PurchaseCatsCount { get => purchaseCatsCount; set => purchaseCatsCount = value; }
 
     // ======================================================================================================================
 
@@ -314,6 +317,16 @@ public class GameManager : MonoBehaviour
     public void ResetPlayTime(int count)
     {
         PlayTimeCount = count;
+    }
+
+    public void AddPurchaseCatsCount()
+    {   // 고양이를 구매할때 호출
+        PurchaseCatsCount++;
+    }
+
+    public void ResetPurchaseCatsCount(int count)
+    {
+        PurchaseCatsCount = count;
     }
 
     // ======================================================================================================================

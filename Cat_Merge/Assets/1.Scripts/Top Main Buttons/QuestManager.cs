@@ -4,58 +4,67 @@ using UnityEngine.UI;
 
 public class QuestManager : MonoBehaviour
 {
-    private GameManager gameManager;                                // GameManager
+    private GameManager gameManager;                                    // GameManager
 
     [Header("---[QuestManager]")]
-    [SerializeField] private ScrollRect questScrollRect;            // 퀘스트의 스크롤뷰
-    [SerializeField] private Button questButton;                    // 퀘스트 버튼
-    [SerializeField] private Image questButtonImage;                // 퀘스트 버튼 이미지
-    [SerializeField] private GameObject questMenuPanel;             // 퀘스트 메뉴 Panel
-    [SerializeField] private Button questBackButton;                // 퀘스트 뒤로가기 버튼
-    private bool isQuestMenuOpen;                                   // 퀘스트 메뉴 Panel의 활성화 상태
+    [SerializeField] private ScrollRect questScrollRect;                // 퀘스트의 스크롤뷰
+    [SerializeField] private Button questButton;                        // 퀘스트 버튼
+    [SerializeField] private Image questButtonImage;                    // 퀘스트 버튼 이미지
+    [SerializeField] private GameObject questMenuPanel;                 // 퀘스트 메뉴 Panel
+    [SerializeField] private Button questBackButton;                    // 퀘스트 뒤로가기 버튼
+    private bool isQuestMenuOpen;                                       // 퀘스트 메뉴 Panel의 활성화 상태
+
+    // ======================================================================================================================
 
     [Header("---[Give Feed Quest UI]")]
-    [SerializeField] private Slider giveFeedQuestSlider;            // 고양이 스폰 Slider
-    [SerializeField] private TextMeshProUGUI giveFeedCountText;     // "?/?" 텍스트
-    [SerializeField] private Button giveFeedRewardButton;           // 스폰 보상 버튼
-    [SerializeField] private TextMeshProUGUI giveFeedPlusCashText;  // 스폰 보상 재화 개수 Text
-    [SerializeField] private GameObject giveFeedRewardDisabledBG;   // 스폰 보상 버튼 비활성화 BG
-    private int giveFeedTargetCount = 1;                            // 목표 스폰 횟수
-    private int increaseGiveFeedTargetCount = 2;                    // 목표 스폰 횟수 증가치
-    private int giveFeedQuestRewardCash = 5;                        // 스폰 퀘스트 보상 캐쉬 재화 개수
+    [SerializeField] private Slider giveFeedQuestSlider;                // 고양이 스폰 Slider
+    [SerializeField] private TextMeshProUGUI giveFeedCountText;         // "?/?" 텍스트
+    [SerializeField] private Button giveFeedRewardButton;               // 스폰 보상 버튼
+    [SerializeField] private TextMeshProUGUI giveFeedPlusCashText;      // 스폰 보상 재화 개수 Text
+    [SerializeField] private GameObject giveFeedRewardDisabledBG;       // 스폰 보상 버튼 비활성화 BG
+    private int giveFeedTargetCount = 1;                                // 목표 스폰 횟수
+    private int increaseGiveFeedTargetCount = 2;                        // 목표 스폰 횟수 증가치
+    private int giveFeedQuestRewardCash = 5;                            // 스폰 퀘스트 보상 캐쉬 재화 개수
 
     [Header("---[Combine Quest UI]")]
-    [SerializeField] private Slider combineQuestSlider;             // 머지 Slider
-    [SerializeField] private TextMeshProUGUI combineCountText;      // "?/?" 텍스트
-    [SerializeField] private Button combineRewardButton;            // 머지 보상 버튼
-    [SerializeField] private TextMeshProUGUI combinePlusCashText;   // 머지 보상 재화 개수 Text
-    [SerializeField] private GameObject combineRewardDisabledBG;    // 머지 보상 버튼 비활성화 BG
-    private int combineTargetCount = 1;                             // 목표 머지 횟수
-    private int increaseCombineTargetCount = 2;                     // 목표 머지 횟수 증가치
-    private int combineQuestRewardCash = 5;                         // 머지 퀘스트 보상 캐쉬 재화 개수
+    [SerializeField] private Slider combineQuestSlider;                 // 머지 Slider
+    [SerializeField] private TextMeshProUGUI combineCountText;          // "?/?" 텍스트
+    [SerializeField] private Button combineRewardButton;                // 머지 보상 버튼
+    [SerializeField] private TextMeshProUGUI combinePlusCashText;       // 머지 보상 재화 개수 Text
+    [SerializeField] private GameObject combineRewardDisabledBG;        // 머지 보상 버튼 비활성화 BG
+    private int combineTargetCount = 1;                                 // 목표 머지 횟수
+    private int increaseCombineTargetCount = 2;                         // 목표 머지 횟수 증가치
+    private int combineQuestRewardCash = 5;                             // 머지 퀘스트 보상 캐쉬 재화 개수
 
     [Header("---[Cat GetCoin UI]")]
-    [SerializeField] private Slider getCoinQuestSlider;             // 획득코인 Slider
-    [SerializeField] private TextMeshProUGUI getCoinCountText;      // "?/?" 텍스트
-    [SerializeField] private Button getCoinRewardButton;            // 획득코인 보상 버튼
-    [SerializeField] private TextMeshProUGUI getCoinPlusCashText;   // 획득코인 보상 재화 개수 Text
-    [SerializeField] private GameObject getCoinRewardDisabledBG;    // 획득코인 보상 버튼 비활성화 BG
-    private int getCoinTargetCount = 1;                             // 목표 획득코인 횟수
-    private int increaseGetCoinTargetCount = 2;                     // 목표 획득코인 갯수 증가치
-    private int getCoinQuestRewardCash = 5;                         // 획득코인 퀘스트 보상 캐쉬 재화 개수
+    [SerializeField] private Slider getCoinQuestSlider;                 // 획득코인 Slider
+    [SerializeField] private TextMeshProUGUI getCoinCountText;          // "?/?" 텍스트
+    [SerializeField] private Button getCoinRewardButton;                // 획득코인 보상 버튼
+    [SerializeField] private TextMeshProUGUI getCoinPlusCashText;       // 획득코인 보상 재화 개수 Text
+    [SerializeField] private GameObject getCoinRewardDisabledBG;        // 획득코인 보상 버튼 비활성화 BG
+    private int getCoinTargetCount = 1;                                 // 목표 획득코인 횟수
+    private int increaseGetCoinTargetCount = 2;                         // 목표 획득코인 갯수 증가치
+    private int getCoinQuestRewardCash = 5;                             // 획득코인 퀘스트 보상 캐쉬 재화 개수
 
     [Header("---[PlayTime Quest UI]")]
-    [SerializeField] private Slider playTimeQuestSlider;             // 플레이타임 Slider
-    [SerializeField] private TextMeshProUGUI playTimeCountText;      // "?/?" 텍스트
-    [SerializeField] private Button playTimeRewardButton;            // 플레이타임 보상 버튼
-    [SerializeField] private TextMeshProUGUI playTimePlusCashText;   // 플레이타임 보상 재화 개수 Text
-    [SerializeField] private GameObject playTimeRewardDisabledBG;    // 플레이타임 보상 버튼 비활성화 BG
-    private int playTimeTargetCount = 10;                            // 목표 플레이타임 (초 단위)
-    private int increasePlayTimeTargetCount = 20;                    // 목표 플레이타임 증가치
-    private int playTimeQuestRewardCash = 5;                         // 플레이타임 퀘스트 보상 캐쉬 재화 개수
+    [SerializeField] private Slider playTimeQuestSlider;                // 플레이타임 Slider
+    [SerializeField] private TextMeshProUGUI playTimeCountText;         // "?/?" 텍스트
+    [SerializeField] private Button playTimeRewardButton;               // 플레이타임 보상 버튼
+    [SerializeField] private TextMeshProUGUI playTimePlusCashText;      // 플레이타임 보상 재화 개수 Text
+    [SerializeField] private GameObject playTimeRewardDisabledBG;       // 플레이타임 보상 버튼 비활성화 BG
+    private int playTimeTargetCount = 10;                               // 목표 플레이타임 (초 단위)
+    private int increasePlayTimeTargetCount = 20;                       // 목표 플레이타임 증가치
+    private int playTimeQuestRewardCash = 5;                            // 플레이타임 퀘스트 보상 캐쉬 재화 개수
 
-
-    // Purchase Cats
+    [Header("---[Purchase Cats Quest UI]")]
+    [SerializeField] private Slider purchaseCatsQuestSlider;            // 고양이 구매 Slider
+    [SerializeField] private TextMeshProUGUI purchaseCatsCountText;     // "?/?" 텍스트
+    [SerializeField] private Button purchaseCatsRewardButton;           // 고양이 구매 보상 버튼
+    [SerializeField] private TextMeshProUGUI purchaseCatsPlusCashText;  // 고양이 구매 보상 재화 개수 Text
+    [SerializeField] private GameObject purchaseCatsRewardDisabledBG;   // 고양이 구매 보상 버튼 비활성화 BG
+    private int purchaseCatsTargetCount = 1;                            // 목표 고양이 구매 횟수
+    private int increasePurchaseCatsTargetCount = 2;                    // 목표 고양이 구매 횟수 증가치
+    private int purchaseCatsQuestRewardCash = 5;                        // 고양이 구매 퀘스트 보상 캐쉬 재화 개수
 
     // ======================================================================================================================
 
@@ -70,6 +79,7 @@ public class QuestManager : MonoBehaviour
         InitializeCombineQuest();
         InitializeGetCoinQuest();
         InitializePlayTimeQuest();
+        InitializePurchaseCatsQuest();
 
         ResetScrollPositions();
 
@@ -77,6 +87,7 @@ public class QuestManager : MonoBehaviour
         UpdateCombineQuestUI();
         UpdateGetCoinQuestUI();
         UpdatePlayTimeQuestUI();
+        UpdatePurchaseCatsQuestUI();
     }
 
     private void Update()
@@ -85,6 +96,7 @@ public class QuestManager : MonoBehaviour
         UpdateCombineQuestUI();
         UpdateGetCoinQuestUI();
         UpdatePlayTimeQuestUI();
+        UpdatePurchaseCatsQuestUI();
     }
 
     // ======================================================================================================================
@@ -386,5 +398,70 @@ public class QuestManager : MonoBehaviour
             UpdatePlayTimeQuestUI();
         }
     }
+
+    // ======================================================================================================================
+
+    // Purchase Cats 퀘스트 초기 설정
+    private void InitializePurchaseCatsQuest()
+    {
+        purchaseCatsRewardButton.onClick.AddListener(ReceivePurchaseCatsReward);
+        purchaseCatsRewardButton.interactable = false;
+        purchaseCatsPlusCashText.text = $"+{purchaseCatsQuestRewardCash}";
+    }
+
+    // 고양이 구매 퀘스트 UI를 업데이트하는 함수
+    private void UpdatePurchaseCatsQuestUI()
+    {
+        int currentCount = gameManager.PurchaseCatsCount;
+
+        // 목표가 10 이상이면 퀘스트 종료 상태 처리
+        if (purchaseCatsTargetCount >= 10)
+        {
+            purchaseCatsQuestSlider.value = purchaseCatsQuestSlider.maxValue;
+            purchaseCatsCountText.text = "Complete";
+            purchaseCatsRewardButton.interactable = false;
+            purchaseCatsRewardDisabledBG.SetActive(true);
+            return;
+        }
+
+        // Slider 값 설정
+        purchaseCatsQuestSlider.maxValue = purchaseCatsTargetCount;
+        purchaseCatsQuestSlider.value = currentCount;
+
+        // "?/?" 텍스트 업데이트
+        purchaseCatsCountText.text = $"{currentCount}/{purchaseCatsTargetCount}";
+
+        // 보상 버튼 활성화 조건 체크
+        bool isComplete = currentCount >= purchaseCatsTargetCount;
+        purchaseCatsRewardButton.interactable = isComplete;
+        purchaseCatsRewardDisabledBG.SetActive(!isComplete);
+    }
+
+    // 고양이 구매 퀘스트 보상 버튼 클릭 시 호출되는 함수
+    private void ReceivePurchaseCatsReward()
+    {
+        int currentCount = gameManager.PurchaseCatsCount;
+
+        // 목표가 10 이상인 경우 더 이상 보상 지급 불가
+        if (purchaseCatsTargetCount >= 10)
+        {
+            return;
+        }
+
+        if (currentCount >= purchaseCatsTargetCount)
+        {
+            int excessCount = currentCount - purchaseCatsTargetCount;
+
+            // 목표 고양이 구매 횟수 증가
+            purchaseCatsTargetCount += increasePurchaseCatsTargetCount;
+
+            // 퀘스트 완료 처리
+            gameManager.AddCash(purchaseCatsQuestRewardCash);
+            gameManager.ResetPurchaseCatsCount(excessCount);
+            gameManager.UpdateCashText();
+            UpdatePurchaseCatsQuestUI();
+        }
+    }
+
 
 }

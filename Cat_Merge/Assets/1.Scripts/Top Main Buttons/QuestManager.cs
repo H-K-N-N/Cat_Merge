@@ -25,6 +25,7 @@ public class QuestManager : MonoBehaviour
     private int giveFeedTargetCount = 1;                                // 목표 스폰 횟수
     private int increaseGiveFeedTargetCount = 2;                        // 목표 스폰 횟수 증가치
     private int giveFeedQuestRewardCash = 5;                            // 스폰 퀘스트 보상 캐쉬 재화 개수
+    private bool isGiveFeedQuestComplete = false;                       // 스폰 퀘스트 완료 여부
 
     [Header("---[Combine Quest UI]")]
     [SerializeField] private Slider combineQuestSlider;                 // 머지 Slider
@@ -35,6 +36,7 @@ public class QuestManager : MonoBehaviour
     private int combineTargetCount = 1;                                 // 목표 머지 횟수
     private int increaseCombineTargetCount = 2;                         // 목표 머지 횟수 증가치
     private int combineQuestRewardCash = 5;                             // 머지 퀘스트 보상 캐쉬 재화 개수
+    private bool isCombineQuestComplete = false;                        // 머지 퀘스트 완료 여부
 
     [Header("---[Cat GetCoin UI]")]
     [SerializeField] private Slider getCoinQuestSlider;                 // 획득코인 Slider
@@ -45,6 +47,7 @@ public class QuestManager : MonoBehaviour
     private int getCoinTargetCount = 1;                                 // 목표 획득코인 횟수
     private int increaseGetCoinTargetCount = 2;                         // 목표 획득코인 갯수 증가치
     private int getCoinQuestRewardCash = 5;                             // 획득코인 퀘스트 보상 캐쉬 재화 개수
+    private bool isGetCoinQuestComplete = false;                        // 획득코인 퀘스트 완료 여부
 
     [Header("---[PlayTime Quest UI]")]
     [SerializeField] private Slider playTimeQuestSlider;                // 플레이타임 Slider
@@ -55,6 +58,7 @@ public class QuestManager : MonoBehaviour
     private int playTimeTargetCount = 10;                               // 목표 플레이타임 (초 단위)
     private int increasePlayTimeTargetCount = 20;                       // 목표 플레이타임 증가치
     private int playTimeQuestRewardCash = 5;                            // 플레이타임 퀘스트 보상 캐쉬 재화 개수
+    private bool isPlayTimeQuestComplete = false;                       // 플레이타임 퀘스트 완료 여부
 
     [Header("---[Purchase Cats Quest UI]")]
     [SerializeField] private Slider purchaseCatsQuestSlider;            // 고양이 구매 Slider
@@ -65,6 +69,15 @@ public class QuestManager : MonoBehaviour
     private int purchaseCatsTargetCount = 1;                            // 목표 고양이 구매 횟수
     private int increasePurchaseCatsTargetCount = 2;                    // 목표 고양이 구매 횟수 증가치
     private int purchaseCatsQuestRewardCash = 5;                        // 고양이 구매 퀘스트 보상 캐쉬 재화 개수
+    private bool isPurchaseCatsQuestComplete = false;                   // 고양이 구매 퀘스트 완료 여부
+
+    [Header("---[Special Reward UI]")]
+    [SerializeField] private Button specialRewardButton;                // Special Reward 버튼
+    [SerializeField] private TextMeshProUGUI specialRewardPlusCashText; // Special Reward 보상 재화 개수 Text
+    [SerializeField] private GameObject specialRewardRewardDisabledBG;  // Special Reward 보상 버튼 비활성화 BG
+    [SerializeField] private GameObject specialRewardDisabledBG;        // Special Reward 비활성화 BG
+    private int specialRewardQuestRewardCash = 50;                      // Special Reward 퀘스트 보상 캐쉬 재화 개수
+    private bool isSpecialRewardActive = false;                         // Special Reward 활성화 상태
 
     // ======================================================================================================================
 
@@ -80,14 +93,9 @@ public class QuestManager : MonoBehaviour
         InitializeGetCoinQuest();
         InitializePlayTimeQuest();
         InitializePurchaseCatsQuest();
+        InitializeSpecialReward();
 
         ResetScrollPositions();
-
-        UpdateGiveFeedQuestUI();
-        UpdateCombineQuestUI();
-        UpdateGetCoinQuestUI();
-        UpdatePlayTimeQuestUI();
-        UpdatePurchaseCatsQuestUI();
     }
 
     private void Update()
@@ -97,6 +105,8 @@ public class QuestManager : MonoBehaviour
         UpdateGetCoinQuestUI();
         UpdatePlayTimeQuestUI();
         UpdatePurchaseCatsQuestUI();
+
+        UpdateSpecialRewardUI();
     }
 
     // ======================================================================================================================
@@ -145,7 +155,7 @@ public class QuestManager : MonoBehaviour
     // GiveFeed 퀘스트 초기 설정
     private void InitializeGiveFeedQuest()
     {
-        giveFeedRewardButton.onClick.AddListener(ReceiveReward);
+        giveFeedRewardButton.onClick.AddListener(ReceiveGiveFeedReward);
         giveFeedRewardButton.interactable = false;
         giveFeedPlusCashText.text = $"+{giveFeedQuestRewardCash}";
     }
@@ -179,13 +189,14 @@ public class QuestManager : MonoBehaviour
     }
 
     // 스폰 퀘스트 보상 버튼 클릭 시 호출되는 함수
-    private void ReceiveReward()
+    private void ReceiveGiveFeedReward()
     {
         int currentCount = gameManager.FeedCount;
 
         // 목표가 10 이상인 경우 더 이상 보상 지급 불가
         if (giveFeedTargetCount >= 10)
         {
+            isGiveFeedQuestComplete = true;
             return;
         }
 
@@ -251,6 +262,7 @@ public class QuestManager : MonoBehaviour
         // 목표가 10 이상인 경우 더 이상 보상 지급 불가
         if (combineTargetCount >= 10)
         {
+            isCombineQuestComplete = true;
             return;
         }
 
@@ -316,6 +328,7 @@ public class QuestManager : MonoBehaviour
         // 목표가 10 이상인 경우 더 이상 보상 지급 불가
         if (getCoinTargetCount >= 10)
         {
+            isGetCoinQuestComplete = true;
             return;
         }
 
@@ -381,6 +394,7 @@ public class QuestManager : MonoBehaviour
         // 목표가 200 이상인 경우 더 이상 보상 지급 불가
         if (playTimeTargetCount >= 200)
         {
+            isPlayTimeQuestComplete = true;
             return;
         }
 
@@ -445,6 +459,7 @@ public class QuestManager : MonoBehaviour
         // 목표가 10 이상인 경우 더 이상 보상 지급 불가
         if (purchaseCatsTargetCount >= 10)
         {
+            isPurchaseCatsQuestComplete = true;
             return;
         }
 
@@ -462,6 +477,62 @@ public class QuestManager : MonoBehaviour
             UpdatePurchaseCatsQuestUI();
         }
     }
+
+    // ======================================================================================================================
+
+    // 퀘스트 초기 설정에서 Special Reward 버튼 초기화
+    private void InitializeSpecialReward()
+    {
+        specialRewardButton.onClick.AddListener(ReceiveSpecialReward);
+        specialRewardButton.interactable = false;
+        specialRewardDisabledBG.SetActive(true);
+        specialRewardPlusCashText.text = $"+{specialRewardQuestRewardCash}";
+    }
+
+    // 모든 퀘스트가 완료되었는지 확인하는 함수
+    private bool AllQuestsCompleted()
+    {
+        if (isGiveFeedQuestComplete && isCombineQuestComplete && isGetCoinQuestComplete && isPlayTimeQuestComplete && isPurchaseCatsQuestComplete)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    // Special Reward 활성화 상태를 업데이트하는 함수
+    private void UpdateSpecialRewardUI()
+    {
+        if (AllQuestsCompleted())
+        {
+            isSpecialRewardActive = true;
+            specialRewardDisabledBG.SetActive(false);
+            specialRewardButton.interactable = true;
+        }
+    }
+
+    // Special Reward 보상 지급 함수
+    private void ReceiveSpecialReward()
+    {
+        if (isSpecialRewardActive)
+        {
+            // 보상 처리 로직
+            gameManager.AddCash(specialRewardQuestRewardCash);
+
+            // 보상 지급 후 버튼만 비활성화 상태로 돌아감
+            specialRewardRewardDisabledBG.SetActive(true);
+            specialRewardButton.interactable = false;
+            isSpecialRewardActive = false;
+
+            // 퀘스트 UI 업데이트
+            UpdateSpecialRewardUI();
+            gameManager.UpdateCashText();
+        }
+    }
+
+    // ======================================================================================================================
 
 
 }

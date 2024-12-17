@@ -17,6 +17,12 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
+    // 퀘스트를 위한
+    private int feedCount;                                          // 고양이 스폰 횟수(먹이 준 횟수)
+    public int FeedCount { get => feedCount; set => feedCount = value; }
+
+    // ======================================================================================================================
+
     // Main UI Text
     [Header("---[Main UI Text]")]
     [SerializeField] private TextMeshProUGUI catCountText;          // 고양이 수 텍스트
@@ -186,6 +192,10 @@ public class GameManager : MonoBehaviour
         UpdateIncreaseMaximumLvText();
     }
 
+    // ======================================================================================================================
+
+    // 도감 해금 관련
+
     private void Start()
     {
         LoadUnlockedCats();
@@ -244,6 +254,26 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
+    // 퀘스트 관련
+
+    public void AddFeedCount()
+    {
+        FeedCount++;
+    }
+
+    public void ResetFeedCount(int count)
+    {
+        FeedCount = count;
+    }
+
+    public void AddCash(int amount)
+    {
+        // 캐시를 추가하는 로직
+        cash += amount;
+    }
+
+    // ======================================================================================================================
+
     // 고양이 정보 Load 함수
     private void LoadAllCats()
     {
@@ -288,7 +318,7 @@ public class GameManager : MonoBehaviour
     }
 
     // 기본재화 텍스트 UI 업데이트하는 함수
-    private void UpdateCoinText()
+    public void UpdateCoinText()
     {
         if (coinText != null)
         {
@@ -297,7 +327,7 @@ public class GameManager : MonoBehaviour
     }
 
     // 캐쉬재화 텍스트 UI 업데이트하는 함수
-    private void UpdateCashText()
+    public void UpdateCashText()
     {
         if (cashText != null)
         {

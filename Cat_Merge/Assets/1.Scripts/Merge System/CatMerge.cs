@@ -17,6 +17,7 @@ public class CatMerge : MonoBehaviour
         {
             //Debug.Log($"합성 성공 : {nextCat.CatName}");
             GameManager.Instance.UnlockCat(nextCat.CatId - 1);
+            GameManager.Instance.AddCombineCount();
             return nextCat;
         }
         else

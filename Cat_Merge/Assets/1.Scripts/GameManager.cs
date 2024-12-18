@@ -17,6 +17,24 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
+    // 퀘스트를 위한 변수들
+    private int feedCount;                                          // 고양이 스폰 횟수(먹이 준 횟수)
+    public int FeedCount { get => feedCount; set => feedCount = value; }
+
+    private int combineCount;                                       // 고양이 머지 횟수
+    public int CombineCount { get => combineCount; set => combineCount = value; }
+
+    private int getCoinCount;                                       // 획득코인 갯수
+    public int GetCoinCount { get => getCoinCount; set => getCoinCount = value; }
+
+    private float playTimeCount;                                    // 플레이타임 카운트
+    public float PlayTimeCount { get => playTimeCount; set => playTimeCount = value; }
+
+    private int purchaseCatsCount;                                  // 고양이 구매 횟수
+    public int PurchaseCatsCount { get => purchaseCatsCount; set => purchaseCatsCount = value; }
+
+    // ======================================================================================================================
+
     // Main UI Text
     [Header("---[Main UI Text]")]
     [SerializeField] private TextMeshProUGUI catCountText;          // 고양이 수 텍스트
@@ -186,6 +204,10 @@ public class GameManager : MonoBehaviour
         UpdateIncreaseMaximumLvText();
     }
 
+    // ======================================================================================================================
+
+    // 도감 해금 관련
+
     private void Start()
     {
         LoadUnlockedCats();
@@ -244,6 +266,71 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
+    // 퀘스트 관련
+
+    private void Update()
+    {
+        AddPlayTimeCount();
+    }
+
+    public void AddCash(int amount)
+    {
+        // 캐시를 추가하는 로직
+        cash += amount;
+    }
+
+    public void AddFeedCount()
+    {
+        FeedCount++;
+    }
+
+    public void ResetFeedCount(int count)
+    {
+        FeedCount = count;
+    }
+
+    public void AddCombineCount()
+    {
+        CombineCount++;
+    }
+
+    public void ResetCombineCount(int count)
+    {
+        CombineCount = count;
+    }
+
+    public void AddGetCoinCount(int count)
+    {   // 고양이가 재화를 자동으로 얻을때마다 호출
+        GetCoinCount += count;
+    }
+
+    public void ResetGetCoinCount(int count)
+    {
+        GetCoinCount = count;
+    }
+
+    public void AddPlayTimeCount()
+    {
+        PlayTimeCount += Time.deltaTime;
+    }
+
+    public void ResetPlayTime(int count)
+    {
+        PlayTimeCount = count;
+    }
+
+    public void AddPurchaseCatsCount()
+    {   // 고양이를 구매할때 호출
+        PurchaseCatsCount++;
+    }
+
+    public void ResetPurchaseCatsCount(int count)
+    {
+        PurchaseCatsCount = count;
+    }
+
+    // ======================================================================================================================
+
     // 고양이 정보 Load 함수
     private void LoadAllCats()
     {
@@ -288,7 +375,7 @@ public class GameManager : MonoBehaviour
     }
 
     // 기본재화 텍스트 UI 업데이트하는 함수
-    private void UpdateCoinText()
+    public void UpdateCoinText()
     {
         if (coinText != null)
         {
@@ -297,7 +384,7 @@ public class GameManager : MonoBehaviour
     }
 
     // 캐쉬재화 텍스트 UI 업데이트하는 함수
-    private void UpdateCashText()
+    public void UpdateCashText()
     {
         if (cashText != null)
         {

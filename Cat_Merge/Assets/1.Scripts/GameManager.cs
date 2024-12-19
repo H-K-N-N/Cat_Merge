@@ -96,7 +96,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Image bottomItemButtonImg;             // 아이템 버튼 이미지
 
     [SerializeField] private GameObject itemMenuPanel;              // 아이템 메뉴 판넬
-    private bool isOnToggle;                                        // 아이템 메뉴 판넬 토글
+    private bool isOnToggleItemMenu;                                // 아이템 메뉴 판넬 토글
     [SerializeField] private Button itemBackButton;                 // 아이템 뒤로가기 버튼
 
     // 아이템 메뉴 버튼 그룹(배열로 관리함)
@@ -133,6 +133,27 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI catMaximumIncreaseText;    // 고양이 최대치 증가 텍스트
     [SerializeField] private TextMeshProUGUI catMaximumIncreaseLvText;  // 고양이 최대치 증가 레벨 텍스트
     private int catMaximumIncreaseLv = 1;                               // 고양이 최대치 증가 레벨
+
+    // ======================================================================================================================
+    [Header("BuyCat")]
+    [SerializeField] private Button bottomBuyCatButton;               // 고양이 구매 버튼
+    [SerializeField] private Image bottomBuyCatButtonImg;             // 고양이 구매 버튼 이미지
+    [SerializeField] private GameObject buyCatCoinDisabledBg;         // 버튼 클릭 못할 때의 배경
+    [SerializeField] private GameObject buyCatCashDisabledBg;         // 버튼 클릭 못할 때의 배경
+    [SerializeField] private GameObject buyCatMenuPanel;              // 아이템 메뉴 판넬
+    private bool isOnToggleBuyCat;                                    // 아이템 메뉴 판넬 토글
+    [SerializeField] private Button buyCatBackButton;                 // 고양이 구매 메뉴 뒤로가기 버튼
+
+    [SerializeField] private Button buyCatCoinButton;                // 고양이 재화로 구매 버튼
+    [SerializeField] private Button buyCatCashButton;                // 크리스탈 재화로 구매 버튼
+
+    [SerializeField] private TextMeshProUGUI buyCatCountExplainText;  // 고양이 구매 횟수 설명창
+    [SerializeField] private TextMeshProUGUI buyCatCoinFeeText;       // 고양이 구매 비용 (골드)
+    [SerializeField] private TextMeshProUGUI buyCatCashFeeText;       // 고양이 구매 비용 (크리스탈)
+    private int buyCatCoinCount = 0;                                  // 고양이 구매 횟수(코인)
+    private int buyCatCashCount = 0;                                  // 고양이 구매 횟수(크리스탈)
+    private int buyCatCoinFee = 5;                                    // 고양이 구매 비용 (코인)
+    private int buyCatCashFee = 5;                                    // 고양이 구매 비용 (크리스탈)
 
     // ======================================================================================================================
 
@@ -202,6 +223,13 @@ public class GameManager : MonoBehaviour
         }
         UpdateIncreaseMaximumFeeText();
         UpdateIncreaseMaximumLvText();
+
+        // 고양이 구매 메뉴 관련
+        bottomBuyCatButton.onClick.AddListener(OpenCloseBottomBuyCatMenuPanel);
+        buyCatBackButton.onClick.AddListener(CloseBottomBuyCatMenuPanel);
+
+        buyCatCoinButton.onClick.AddListener(BuyCatCoin);
+        buyCatCashButton.onClick.AddListener(BuyCatCash);
     }
 
     // ======================================================================================================================
@@ -692,26 +720,29 @@ public class GameManager : MonoBehaviour
     // 아이템 메뉴 판넬 여는 함수
     private void OpenCloseBottomItemMenuPanel()
     {
+        Debug.Log("Item Toggle");
         if (itemMenuPanel != null)
         {
-            isOnToggle = !isOnToggle;
-            if (isOnToggle)
+            isOnToggleItemMenu = !isOnToggleItemMenu;
+            if (isOnToggleItemMenu)
             {
+                Debug.Log("Item Toggle On");
                 itemMenuPanel.SetActive(true);
                 //if (ColorUtility.TryParseHtmlString("#5f5f5f", out Color parsedColor))
                 //{
                 //    bottomItemButtonImg.color = parsedColor;
                 //}
-                ChangeSelectedButtonColor(isOnToggle);
+                ChangeSelectedButtonColor(isOnToggleItemMenu);
             }
             else
             {
+                Debug.Log("Item Toggle Off");
                 itemMenuPanel.SetActive(false);
                 //if (ColorUtility.TryParseHtmlString("#E2E2E2", out Color parsedColor))
                 //{
                 //    bottomItemButtonImg.color = parsedColor;
                 //}
-                ChangeSelectedButtonColor(isOnToggle);
+                ChangeSelectedButtonColor(isOnToggleItemMenu);
             }
         }
     }
@@ -721,13 +752,13 @@ public class GameManager : MonoBehaviour
     {
         if(itemMenuPanel != null)
         {
-            isOnToggle = false;
+            isOnToggleItemMenu = false;
             itemMenuPanel.SetActive(false);
             //if (ColorUtility.TryParseHtmlString("#E2E2E2", out Color parsedColor))
             //{
             //    bottomItemButtonImg.color = parsedColor;
             //}
-            ChangeSelectedButtonColor(isOnToggle);
+            ChangeSelectedButtonColor(isOnToggleItemMenu);
         }
     }
 
@@ -738,14 +769,30 @@ public class GameManager : MonoBehaviour
         {
             if (ColorUtility.TryParseHtmlString("#5f5f5f", out Color parsedColor))
             {
-                bottomItemButtonImg.color = parsedColor;
+                if(itemMenuPanel.activeSelf)
+                {
+                    bottomItemButtonImg.color = parsedColor;
+                }
+                if(buyCatMenuPanel.activeSelf)
+                {
+                    bottomBuyCatButtonImg.color = parsedColor;
+                }
+                
             }
         }
         else
         {
             if (ColorUtility.TryParseHtmlString("#E2E2E2", out Color parsedColor))
             {
-                bottomItemButtonImg.color = parsedColor;
+                if(!itemMenuPanel.activeSelf)
+                {
+                    bottomItemButtonImg.color = parsedColor;
+                }
+                if(!buyCatMenuPanel.activeSelf)
+                {
+                    bottomBuyCatButtonImg.color = parsedColor;
+                }
+
             }
         }
     }
@@ -845,5 +892,107 @@ public class GameManager : MonoBehaviour
     }
     // ======================================================================================================================
 
+    // 아이템 메뉴 판넬 여는 함수
+    private void OpenCloseBottomBuyCatMenuPanel()
+    {
+        Debug.Log("Buy Cat Toggle");
+        if (buyCatMenuPanel != null)
+        {
+            isOnToggleBuyCat = !isOnToggleBuyCat;
+            if (isOnToggleBuyCat)
+            {
+                Debug.Log("Buy Cat Toggle On");
+                buyCatMenuPanel.SetActive(true);
+                ChangeSelectedButtonColor(isOnToggleBuyCat);
+            }
+            else
+            {
+                Debug.Log("Buy Cat Toggle Off");
+                buyCatMenuPanel.SetActive(false);
+                ChangeSelectedButtonColor(isOnToggleBuyCat);
+            }
+        }
+    }
 
+    // 아이템 메뉴 판넬 닫는 함수(뒤로가기 버튼)
+    private void CloseBottomBuyCatMenuPanel()
+    {
+        if (buyCatMenuPanel != null)
+        {
+            isOnToggleBuyCat = false;
+            buyCatMenuPanel.SetActive(false);
+            ChangeSelectedButtonColor(isOnToggleBuyCat);
+        }
+    }
+
+    // 고양이 구매 버튼 함수(코인으로 구매)
+    private void BuyCatCoin()
+    {
+        if (CanSpawnCat())
+        {
+            Debug.Log("고양이 구매 버튼 클릭(코인으로)");
+            coin -= buyCatCoinFee;
+            buyCatCoinCount++;
+            buyCatCoinFee *= 2;
+
+            CatSpawn catSpawn = GetComponent<CatSpawn>();
+            catSpawn.OnClickedSpawn();
+
+            UpdateCoinText();
+            UpdateBuyCatUI();
+        }
+    }
+
+    // 고양이 구매 버튼 함수(코인으로 구매)
+    private void BuyCatCash()
+    {
+        // 현재 고양이 수가 고양이 최대 수 미만일 때
+        if (CanSpawnCat()) 
+        {
+            Debug.Log("고양이 구매 버튼 클릭(캐쉬로)");
+            cash -= buyCatCashFee;
+            buyCatCashCount++;
+
+
+            CatSpawn catSpawn = GetComponent<CatSpawn>();
+            catSpawn.OnClickedSpawn();
+
+            UpdateCashText();
+            UpdateBuyCatUI();
+        }
+    }
+
+    // 고양이 구매 관련 UI 업데이트 함수
+    private void UpdateBuyCatUI()
+    {
+        buyCatCountExplainText.text = $"BuyCount :{buyCatCoinCount}cnt + {buyCatCashCount}cnt";
+        buyCatCoinFeeText.text = $"{buyCatCoinFee}";
+        buyCatCashFeeText.text = $"{buyCatCashFee}";
+        if (CanSpawnCat())
+        {
+            if (coin < buyCatCoinFee)
+            {
+                buyCatCoinButton.interactable = false;
+                buyCatCoinDisabledBg.SetActive(true);
+            }
+            else
+            {
+                buyCatCoinButton.interactable = true;
+                buyCatCoinDisabledBg.SetActive(false);
+            }
+
+            if (cash < buyCatCashFee)
+            {
+                buyCatCashButton.interactable = false;
+                buyCatCashDisabledBg.SetActive(true);
+            }
+            else
+            {
+                buyCatCashButton.interactable = true;
+                buyCatCashDisabledBg.SetActive(false);
+            }      
+        }     
+    }
+
+    // ======================================================================================================================
 }

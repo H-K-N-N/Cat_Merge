@@ -82,8 +82,8 @@ public class AutoMerge : MonoBehaviour
             // mergingCats 상태 정리
             mergingCats.RemoveWhere(cat => cat == null || cat.isDragging);
 
-            var allCats = FindObjectsOfType<CatDragAndDrop>().OrderBy(cat => cat.catData.CatId).ToList();
-            var groupedCats = allCats.GroupBy(cat => cat.catData.CatId).Where(group => group.Count() > 1).ToList();
+            var allCats = FindObjectsOfType<CatDragAndDrop>().OrderBy(cat => cat.catData.CatGrade).ToList();
+            var groupedCats = allCats.GroupBy(cat => cat.catData.CatGrade).Where(group => group.Count() > 1).ToList();
 
             if (!groupedCats.Any())
             {
@@ -224,7 +224,7 @@ public class AutoMerge : MonoBehaviour
             return false;
         }
 
-        return gameManager.AllCatData.All(cat => cat.CatId != catData.CatId + 1);
+        return gameManager.AllCatData.All(cat => cat.CatGrade != catData.CatGrade + 1);
     }
 
     // 특정 고양이의 mergingCats 상태 제거 함수

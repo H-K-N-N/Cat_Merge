@@ -85,11 +85,11 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
                 return;
             }
 
-            // 동일한 ID 확인 후 합성 처리
-            if (nearbyCat.catData.CatId == this.catData.CatId)
+            // 동일한 등급 확인 후 합성 처리
+            if (nearbyCat.catData.CatGrade == this.catData.CatGrade)
             {
                 // 합성할 고양이의 다음 등급이 존재하는지 확인
-                Cat nextCat = FindObjectOfType<CatMerge>().GetCatById(this.catData.CatId + 1);
+                Cat nextCat = FindObjectOfType<CatMerge>().GetCatByGrade(this.catData.CatGrade + 1);
                 if (nextCat != null)
                 {
                     // nextCat이 존재할 경우에만 애니메이션 시작

@@ -27,6 +27,7 @@ using UnityEngine;
 
 //}
 
+// 고양이의 정보를 담는 Script
 [System.Serializable]
 public class Cat
 {

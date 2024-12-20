@@ -2,17 +2,16 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
-public class CatDictionary : MonoBehaviour
+// 고양이 도감 Script
+public class DictionaryManager : MonoBehaviour
 {
     private GameManager gameManager;                                // GameManager
 
-    [Header("---[Cat Dictionary]")]
+    [Header("---[Dictionary Manager]")]
     [SerializeField] private ScrollRect[] dictionaryScrollRects;    // 도감의 스크롤뷰 배열
     [SerializeField] private GameObject[] dictionaryMenus;          // 도감 메뉴 Panel
-
     [SerializeField] private Button dictionaryButton;               // 도감 버튼
     [SerializeField] private Image dictionaryButtonImage;           // 도감 버튼 이미지
-
     [SerializeField] private GameObject dictionaryMenuPanel;        // 도감 메뉴 Panel
     [SerializeField] private Button dictionaryBackButton;           // 도감 뒤로가기 버튼
     private bool isDictionaryMenuOpen;                              // 도감 메뉴 Panel의 활성화 상태
@@ -20,6 +19,8 @@ public class CatDictionary : MonoBehaviour
     [SerializeField] private GameObject slotPrefab;                 // 도감 슬롯 프리팹
 
     [SerializeField] private Button[] dictionaryMenuButtons;        // 도감의 서브 메뉴 버튼 배열
+
+    // ======================================================================================================================
 
     [Header("---[New Cat Panel UI]")]
     [SerializeField] private GameObject newCatPanel;                // New Cat Panel
@@ -42,9 +43,11 @@ public class CatDictionary : MonoBehaviour
 
     // 임시 (다른 서브 메뉴들을 추가한다면 어떻게 정리 할까 고민)
     [SerializeField] private Transform scrollRectContents;          // 노말 고양이 scrollRectContents (도감에서 노멀 고양이의 정보를 초기화 하기 위해)
-            // 희귀 고양이 scrollRectContents
-            // 특수 고양이 scrollRectContents
-            // 배경 scrollRectContents
+                                                                    // 희귀 고양이 scrollRectContents
+                                                                    // 특수 고양이 scrollRectContents
+                                                                    // 배경 scrollRectContents
+
+    // ======================================================================================================================
 
     // Start
     private void Start()
@@ -163,14 +166,14 @@ public class CatDictionary : MonoBehaviour
         Image iconImage = slot.transform.Find("Button/Icon")?.GetComponent<Image>();
         TextMeshProUGUI text = slot.transform.Find("Text Image/Text")?.GetComponent<TextMeshProUGUI>();
 
-        if (gameManager.IsCatUnlocked(cat.CatId))
+        if (gameManager.IsCatUnlocked(cat.CatGrade))
         {
             button.interactable = true;
 
             iconImage.sprite = cat.CatImage;
             iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
 
-            text.text = $"{cat.CatId}. {cat.CatName}";
+            text.text = $"{cat.CatGrade}. {cat.CatName}";
         }
         else
         {
@@ -184,10 +187,10 @@ public class CatDictionary : MonoBehaviour
     }
 
     // 새로운 고양이를 해금할때마다 도감을 업데이트하는 함수
-    public void UpdateDictionary(int catId)
+    public void UpdateDictionary(int catGrade)
     {
-        // scrollRectContents 내의 catId와 동일한 순번의 슬롯을 찾아서 해당 슬롯을 업데이트
-        Transform slot = scrollRectContents.GetChild(catId);
+        // scrollRectContents 내의 CatGrade와 동일한 순번의 슬롯을 찾아서 해당 슬롯을 업데이트
+        Transform slot = scrollRectContents.GetChild(catGrade);
 
         slot.gameObject.SetActive(true);
 
@@ -197,20 +200,20 @@ public class CatDictionary : MonoBehaviour
 
         button.interactable = true;
 
-        iconImage.sprite = gameManager.AllCatData[catId].CatImage;
+        iconImage.sprite = gameManager.AllCatData[catGrade].CatImage;
         iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
 
-        text.text = $"{catId + 1}. {gameManager.AllCatData[catId].CatName}";
+        text.text = $"{catGrade + 1}. {gameManager.AllCatData[catGrade].CatName}";
 
         // 버튼 클릭 시 해당 고양이 ID를 ShowNewCatPanel에 전달
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(() => ShowNewCatPanel(catId));
+        button.onClick.AddListener(() => ShowNewCatPanel(catGrade));
     }
 
     // 새로운 고양이 해금 효과 & 도감에서 해당 고양이 버튼을 누르면 나오는 New Cat Panel 함수
-    public void ShowNewCatPanel(int catId)
+    public void ShowNewCatPanel(int catGrade)
     {
-        Cat newCat = gameManager.AllCatData[catId];
+        Cat newCat = gameManager.AllCatData[catGrade];
 
         newCatPanel.SetActive(true);
 

@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-// 고양이 본인들의 정보를 담은 Script
+// 객체가 가지고있는 고양이의 정보를 담는 Script
 public class CatData : MonoBehaviour
 {
     public Cat catData;                         // 고양이 데이터

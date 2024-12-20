@@ -43,7 +43,7 @@ public class GameManager : MonoBehaviour
 
     // 기본 재화
     [SerializeField] private TextMeshProUGUI coinText;              // 기본재화 텍스트
-    private int coin = 999999999;                                   // 기본재화
+    private int coin = 1000;                                        // 기본재화
 
     // 캐쉬 재화
     [SerializeField] private TextMeshProUGUI cashText;              // 캐쉬재화 텍스트
@@ -157,7 +157,6 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
-
     private void Awake()
     {
         if (Instance == null)
@@ -260,36 +259,33 @@ public class GameManager : MonoBehaviour
     }
 
     // 특정 고양이를 해금
-    public void UnlockCat(int catId)
+    public void UnlockCat(int CatGrade)
     {
-        if (catId < 0 || catId >= isCatUnlocked.Length || isCatUnlocked[catId])
+        if (CatGrade < 0 || CatGrade >= isCatUnlocked.Length || isCatUnlocked[CatGrade])
         {
             return;
         }
 
-        isCatUnlocked[catId] = true;
-        SaveUnlockedCats(catId);
+        isCatUnlocked[CatGrade] = true;
+        SaveUnlockedCats(CatGrade);
     }
 
     // 특정 고양이의 해금 여부 확인
-    public bool IsCatUnlocked(int catId)
+    public bool IsCatUnlocked(int CatGrade)
     {
-        if (catId < 0 || catId >= isCatUnlocked.Length)
+        if (CatGrade < 0 || CatGrade >= isCatUnlocked.Length)
         {
             return false;
         }
 
-        return isCatUnlocked[catId];
+        return isCatUnlocked[CatGrade];
     }
 
     // 모든 해금 상태 저장
-    public void SaveUnlockedCats(int catId)
+    public void SaveUnlockedCats(int CatGrade)
     {
-        GetComponent<CatDictionary>().UpdateDictionary(catId);
-        GetComponent<CatDictionary>().ShowNewCatPanel(catId);
-
-        // 배열은 0번 부터지만 고양이의 CatId는 1번부터이기 때문
-        //Debug.Log($"{catId + 1}번 고양이 정보 저장");
+        GetComponent<DictionaryManager>().UpdateDictionary(CatGrade);
+        GetComponent<DictionaryManager>().ShowNewCatPanel(CatGrade);
     }
 
     // ======================================================================================================================
@@ -303,7 +299,6 @@ public class GameManager : MonoBehaviour
 
     public void AddCash(int amount)
     {
-        // 캐시를 추가하는 로직
         cash += amount;
     }
 
@@ -628,7 +623,7 @@ public class GameManager : MonoBehaviour
     // 고양이의 등급을 반환하는 함수
     private int GetCatGrade(GameObject catObject)
     {
-        int grade = catObject.GetComponent<CatData>().catData.CatId;
+        int grade = catObject.GetComponent<CatData>().catData.CatGrade;
         return grade;
     }
 

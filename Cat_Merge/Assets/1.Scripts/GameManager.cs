@@ -942,6 +942,8 @@ public class GameManager : MonoBehaviour
             buyCatCoinCount++;
             buyCatCoinFee *= 2;
 
+            AddPurchaseCatsCount();     // Äù½ºÆ® ÇÔ¼ö
+
             CatSpawn catSpawn = GetComponent<CatSpawn>();
             catSpawn.OnClickedSpawn();
 

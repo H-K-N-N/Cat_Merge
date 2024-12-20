@@ -343,7 +343,7 @@ public class GameManager : MonoBehaviour
     }
 
     public void AddPurchaseCatsCount()
-    {   // 고양이를 구매할때 호출
+    {
         PurchaseCatsCount++;
     }
 
@@ -960,6 +960,7 @@ public class GameManager : MonoBehaviour
             cash -= buyCatCashFee;
             buyCatCashCount++;
 
+            AddPurchaseCatsCount();     // 퀘스트 함수
 
             CatSpawn catSpawn = GetComponent<CatSpawn>();
             catSpawn.OnClickedSpawn();

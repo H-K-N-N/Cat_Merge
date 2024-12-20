@@ -362,7 +362,19 @@ public class GameManager : MonoBehaviour
     // 고양이 정보 Load 함수
     private void LoadAllCats()
     {
-        //allCatData = Resources.LoadAll<Cat>("Cats");
+        // CatDataLoader에서 catDictionary 가져오기
+        CatDataLoader catDataLoader = FindObjectOfType<CatDataLoader>();
+        if (catDataLoader == null || catDataLoader.catDictionary == null)
+        {
+            Debug.LogError("CatDataLoader가 없거나 고양이 데이터가 로드되지 않았습니다.");
+            return;
+        }
+
+        // Dictionary의 모든 값을 배열로 변환
+        allCatData = new Cat[catDataLoader.catDictionary.Count];
+        catDataLoader.catDictionary.Values.CopyTo(allCatData, 0);
+
+        Debug.Log($"고양이 데이터 {allCatData.Length}개가 로드되었습니다.");
     }
 
     // ======================================================================================================================

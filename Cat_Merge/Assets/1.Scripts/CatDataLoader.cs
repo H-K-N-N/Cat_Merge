@@ -4,6 +4,7 @@ using UnityEngine;
 
 // catDataDictionary.TryGetValue(1, out Cat cat) : 1번 인덱스의 Cat 정보를 가져오는 코드
 // CatDataLoader Script
+[DefaultExecutionOrder(-1)]     // 스크립트 실행 순서 조정
 public class CatDataLoader : MonoBehaviour
 {
     // 고양이 데이터를 관리할 Dictionary
@@ -34,6 +35,7 @@ public class CatDataLoader : MonoBehaviour
 
             lineNumber++;
             if (lineNumber <= 2) continue;
+            if (lineNumber >= 6) continue;
 
             string[] values = line.Split(',');
 

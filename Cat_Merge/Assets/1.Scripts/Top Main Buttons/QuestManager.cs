@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
+// Äù½ºÆ® Script
 public class QuestManager : MonoBehaviour
 {
     private GameManager gameManager;                                    // GameManager

@@ -6,17 +6,17 @@ public class CatMerge : MonoBehaviour
     // 고양이 Merge 함수
     public Cat MergeCats(Cat cat1, Cat cat2)
     {
-        if (cat1.CatId != cat2.CatId)
+        if (cat1.CatGrade != cat2.CatGrade)
         {
             //Debug.LogWarning("등급이 다름");
             return null;
         }
 
-        Cat nextCat = GetCatById(cat1.CatId + 1);
+        Cat nextCat = GetCatByGrade(cat1.CatGrade + 1);
         if (nextCat != null)
         {
             //Debug.Log($"합성 성공 : {nextCat.CatName}");
-            GameManager.Instance.UnlockCat(nextCat.CatId - 1);
+            GameManager.Instance.UnlockCat(nextCat.CatGrade - 1);
             GameManager.Instance.AddCombineCount();
             return nextCat;
         }
@@ -28,13 +28,13 @@ public class CatMerge : MonoBehaviour
     }
 
     // 고양이 ID 반환 함수
-    public Cat GetCatById(int id)
+    public Cat GetCatByGrade(int grade)
     {
         GameManager gameManager = GameManager.Instance;
 
         foreach (Cat cat in gameManager.AllCatData)
         {
-            if (cat.CatId == id)
+            if (cat.CatId == grade)
                 return cat;
         }
         return null;

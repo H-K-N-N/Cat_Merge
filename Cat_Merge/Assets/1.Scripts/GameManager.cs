@@ -362,7 +362,7 @@ public class GameManager : MonoBehaviour
     // 고양이 정보 Load 함수
     private void LoadAllCats()
     {
-        allCatData = Resources.LoadAll<Cat>("Cats");
+        //allCatData = Resources.LoadAll<Cat>("Cats");
     }
 
     // ======================================================================================================================

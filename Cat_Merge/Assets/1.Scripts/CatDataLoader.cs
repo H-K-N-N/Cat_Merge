@@ -46,7 +46,7 @@ public class CatDataLoader : MonoBehaviour
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    Debug.Log($"라인 {lineNumber}: 빈 칸 발견 - 해당 칸 이후 데이터를 무시합니다.");
+                    //Debug.Log($"라인 {lineNumber}: 빈 칸 발견 - 해당 칸 이후 데이터를 무시합니다.");
                     break;
                 }
                 validValues.Add(value);
@@ -81,7 +81,7 @@ public class CatDataLoader : MonoBehaviour
             }
         }
 
-        Debug.Log("고양이 데이터 로드 완료: " + catDictionary.Count + "개");
+        //Debug.Log("고양이 데이터 로드 완료: " + catDictionary.Count + "개");
     }
 
     // Resources 폴더에서 스프라이트 로드

@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     private Cat[] allCatData;                                       // 모든 고양이 데이터 보유
     public Cat[] AllCatData => allCatData;
     private bool[] isCatUnlocked;                                   // 고양이 해금 여부 배열
+    private bool[] isGetFirstUnlockedReward;                        // 고양이 첫 해금 보상 획득 여부 배열
 
     // ======================================================================================================================
 
@@ -249,12 +250,16 @@ public class GameManager : MonoBehaviour
     // 고양이 해금 여부 초기화
     public void InitializeCatUnlockData()
     {
-        isCatUnlocked = new bool[AllCatData.Length];
+        int allCatDataLength = AllCatData.Length;
 
-        // 모든 고양이를 잠금 상태로 초기화
+        isCatUnlocked = new bool[allCatDataLength];
+        isGetFirstUnlockedReward = new bool[allCatDataLength];
+
+        // 모든 고양이를 잠금 상태로 초기화 & 첫 보상 획득 false로 초기화
         for (int i = 0; i < isCatUnlocked.Length; i++)
         {
             isCatUnlocked[i] = false;
+            isGetFirstUnlockedReward[i] = false;
         }
     }
 
@@ -271,14 +276,28 @@ public class GameManager : MonoBehaviour
     }
 
     // 특정 고양이의 해금 여부 확인
-    public bool IsCatUnlocked(int CatGrade)
+    public bool IsCatUnlocked(int catGrade)
     {
-        if (CatGrade < 0 || CatGrade >= isCatUnlocked.Length)
+        return isCatUnlocked[catGrade];
+    }
+
+    // 특정 고양이의 첫 해금 보상 획득
+    public void GetFirstUnlockedReward(int catGrade)
+    {
+        if (catGrade < 0 || catGrade >= isGetFirstUnlockedReward.Length || isGetFirstUnlockedReward[catGrade])
         {
-            return false;
+            return;
         }
 
-        return isCatUnlocked[CatGrade];
+        isGetFirstUnlockedReward[catGrade] = true;
+        AddCash(AllCatData[catGrade].CatGetCoin);
+        UpdateCashText();
+    }
+
+    // 특정 고양이의 첫 해금 보상 획득 여부 확인
+    public bool IsGetFirstUnlockedReward(int catGrade)
+    {
+        return isGetFirstUnlockedReward[catGrade];
     }
 
     // 모든 해금 상태 저장

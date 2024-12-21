@@ -165,28 +165,32 @@ public class DictionaryManager : MonoBehaviour
         Button button = slot.transform.Find("Button")?.GetComponent<Button>();
         Image iconImage = slot.transform.Find("Button/Icon")?.GetComponent<Image>();
         TextMeshProUGUI text = slot.transform.Find("Text Image/Text")?.GetComponent<TextMeshProUGUI>();
+        Image firstOpenBG = slot.transform.Find("Button/FirstOpenBG")?.GetComponent<Image>();
+        TextMeshProUGUI firstOpenCashtext = slot.transform.Find("Button/FirstOpenBG/Cash Text")?.GetComponent<TextMeshProUGUI>();
 
-        if (gameManager.IsCatUnlocked(cat.CatGrade))
+        // 나중에 데이터 불러오기 기능이 있다면 무조건 있어야하기 때문에 작성 (현재는 무조건 else문으로 넘어감)
+        if (gameManager.IsCatUnlocked(cat.CatGrade - 1))
         {
             button.interactable = true;
-
             iconImage.sprite = cat.CatImage;
             iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
-
             text.text = $"{cat.CatGrade}. {cat.CatName}";
+
+            // 첫 해금 보상을 받았다면 해당 슬롯의 firstOpenBG 비활성화 / 받지 않았다면 firstOpenBG 활성화
+            firstOpenBG.gameObject.SetActive(false);
         }
         else
         {
             button.interactable = false;
-
             iconImage.sprite = cat.CatImage;
             iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 0f);
-
             text.text = "???";
+
+            firstOpenBG.gameObject.SetActive(false);
         }
     }
 
-    // 새로운 고양이를 해금할때마다 도감을 업데이트하는 함수
+    // 새로운 고양이를 해금하면 도감을 업데이트하는 함수
     public void UpdateDictionary(int catGrade)
     {
         // scrollRectContents 내의 CatGrade와 동일한 순번의 슬롯을 찾아서 해당 슬롯을 업데이트
@@ -197,6 +201,8 @@ public class DictionaryManager : MonoBehaviour
         Button button = slot.transform.Find("Button")?.GetComponent<Button>();
         Image iconImage = slot.transform.Find("Button/Icon")?.GetComponent<Image>();
         TextMeshProUGUI text = slot.transform.Find("Text Image/Text")?.GetComponent<TextMeshProUGUI>();
+        Image firstOpenBG = slot.transform.Find("Button/FirstOpenBG")?.GetComponent<Image>();
+        TextMeshProUGUI firstOpenCashtext = slot.transform.Find("Button/FirstOpenBG/Cash Text")?.GetComponent<TextMeshProUGUI>();
 
         button.interactable = true;
 
@@ -204,10 +210,30 @@ public class DictionaryManager : MonoBehaviour
         iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
 
         text.text = $"{catGrade + 1}. {gameManager.AllCatData[catGrade].CatName}";
+        
+        if (!gameManager.IsGetFirstUnlockedReward(catGrade))
+        {
+            firstOpenBG.gameObject.SetActive(true);
+            firstOpenCashtext.text = $"+ {gameManager.AllCatData[catGrade].CatGetCoin}";
+        }
+        else
+        {
+            firstOpenBG.gameObject.SetActive(false);
+        }
 
-        // 버튼 클릭 시 해당 고양이 ID를 ShowNewCatPanel에 전달
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(() => ShowNewCatPanel(catGrade));
+        button.onClick.AddListener(() =>
+        {
+            if (!gameManager.IsGetFirstUnlockedReward(catGrade))
+            {
+                gameManager.GetFirstUnlockedReward(catGrade);
+                firstOpenBG.gameObject.SetActive(false);
+            }
+            else
+            {
+                ShowNewCatPanel(catGrade);
+            }
+        });
     }
 
     // 새로운 고양이 해금 효과 & 도감에서 해당 고양이 버튼을 누르면 나오는 New Cat Panel 함수

@@ -52,17 +52,6 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
-    // Merge On/Off System
-    [Header("---[Merge On/Off System]")]
-    [SerializeField] private Button openMergePanelButton;           // 머지 패널 열기 버튼
-    [SerializeField] private GameObject mergePanel;                 // 머지 On/Off 패널
-    [SerializeField] private Button closeMergePanelButton;          // 머지 패널 닫기 버튼
-    [SerializeField] private Button mergeStateButton;               // 머지 상태 버튼
-    [SerializeField] private TextMeshProUGUI mergeStateText;        // 머지 현재 상태 텍스트
-    private bool isMergeEnabled = true;
-
-    // ======================================================================================================================
-
     // AutoMove On/Off System
     [Header("---[AutoMove On/Off System]")]
     [SerializeField] private Button openAutoMovePanelButton;        // 자동 이동 패널 열기 버튼
@@ -166,13 +155,6 @@ public class GameManager : MonoBehaviour
         openAutoMovePanelButton.onClick.AddListener(OpenAutoMovePanel);
         closeAutoMovePanelButton.onClick.AddListener(CloseAutoMovePanel);
         autoMoveStateButton.onClick.AddListener(ToggleAutoMove);
-
-        // 머지 On/Off 관련
-        UpdateMergeStateText();
-        UpdateMergeButtonColor();
-        openMergePanelButton.onClick.AddListener(OpenMergePanel);
-        closeMergePanelButton.onClick.AddListener(CloseMergePanel);
-        mergeStateButton.onClick.AddListener(ToggleMergeState);
 
         // 아이템 메뉴 관련
         bottomItemButton.onClick.AddListener(OpenCloseBottomItemMenuPanel);
@@ -279,65 +261,6 @@ public class GameManager : MonoBehaviour
             // 숫자를 3자리마다 콤마를 추가하여 표시
             cashText.text = cash.ToString("N0");
         }
-    }
-
-    // ======================================================================================================================
-
-    // 머지 On/Off 패널 여는 함수
-    private void OpenMergePanel()
-    {
-        if (mergePanel != null)
-        {
-            mergePanel.SetActive(true);
-        }
-    }
-
-    // 머지 상태 전환 함수
-    private void ToggleMergeState()
-    {
-        isMergeEnabled = !isMergeEnabled;
-        UpdateMergeStateText();
-        UpdateMergeButtonColor();
-        CloseMergePanel();
-    }
-
-    // 머지 상태 Text 업데이트 함수
-    private void UpdateMergeStateText()
-    {
-        if (mergeStateText != null)
-        {
-            mergeStateText.text = isMergeEnabled ? "OFF" : "ON";
-        }
-    }
-
-    // 머지 버튼 색상 업데이트 함수
-    private void UpdateMergeButtonColor()
-    {
-        if (openMergePanelButton != null)
-        {
-            Color normalColor = isMergeEnabled ? new Color(1f, 1f, 1f, 1f) : new Color(0.5f, 0.5f, 0.5f, 1f);
-            ColorBlock colors = openMergePanelButton.colors;
-            colors.normalColor = normalColor;
-            colors.highlightedColor = normalColor;
-            colors.pressedColor = normalColor;
-            colors.selectedColor = normalColor;
-            openMergePanelButton.colors = colors;
-        }
-    }
-
-    // 머지 패널 닫는 함수
-    public void CloseMergePanel()
-    {
-        if (mergePanel != null)
-        {
-            mergePanel.SetActive(false);
-        }
-    }
-
-    // 머지 상태 반환 함수
-    public bool IsMergeEnabled()
-    {
-        return isMergeEnabled;
     }
 
     // ======================================================================================================================

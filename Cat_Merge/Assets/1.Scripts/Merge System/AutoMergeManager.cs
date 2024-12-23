@@ -234,7 +234,7 @@ public class AutoMergeManager : MonoBehaviour
 
                     if (cat1 != null && cat2 != null && mergingCats.Contains(cat1) && mergingCats.Contains(cat2))
                     {
-                        Cat mergedCat = FindObjectOfType<CatMerge>().MergeCats(cat1.catData, cat2.catData);
+                        Cat mergedCat = FindObjectOfType<MergeManager>().MergeCats(cat1.catData, cat2.catData);
                         if (mergedCat != null)
                         {
                             cat1.catData = mergedCat;

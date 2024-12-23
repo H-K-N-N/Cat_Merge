@@ -6623,6 +6623,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 331588639}
+  - component: {fileID: 331588644}
   - component: {fileID: 331588640}
   - component: {fileID: 331588647}
   - component: {fileID: 331588645}
@@ -6630,7 +6631,6 @@ GameObject:
   - component: {fileID: 331588648}
   - component: {fileID: 331588643}
   - component: {fileID: 331588642}
-  - component: {fileID: 331588644}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -6752,6 +6752,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f891c06dc0524a341a191de77b29a550, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  openMergePanelButton: {fileID: 77040144}
+  mergePanel: {fileID: 1524788007}
+  closeMergePanelButton: {fileID: 1617718342}
+  mergeStateButton: {fileID: 824748588}
+  mergeStateText: {fileID: 1656514465}
 --- !u!114 &331588645
 MonoBehaviour:
   m_ObjectHideFlags: 0

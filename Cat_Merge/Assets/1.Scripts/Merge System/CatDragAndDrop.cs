@@ -72,7 +72,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         isDragging = false;
 
         // 머지 상태가 OFF일 경우 머지 X
-        if (!GameManager.Instance.IsMergeEnabled())
+        if (!MergeManager.Instance.IsMergeEnabled())
         {
             return;
         }
@@ -93,7 +93,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
             if (nearbyCat.catData.CatGrade == this.catData.CatGrade)
             {
                 // 합성할 고양이의 다음 등급이 존재하는지 확인
-                Cat nextCat = FindObjectOfType<CatMerge>().GetCatByGrade(this.catData.CatGrade + 1);
+                Cat nextCat = FindObjectOfType<MergeManager>().GetCatByGrade(this.catData.CatGrade + 1);
                 if (nextCat != null)
                 {
                     // nextCat이 존재할 경우에만 애니메이션 시작
@@ -188,7 +188,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         }
 
         // 끌려온 후 합성 처리
-        Cat mergedCat = FindObjectOfType<CatMerge>().MergeCats(this.catData, nearbyCat.catData);
+        Cat mergedCat = FindObjectOfType<MergeManager>().MergeCats(this.catData, nearbyCat.catData);
         if (mergedCat != null)
         {
             //Debug.Log($"합성 성공: {mergedCat.CatName}");

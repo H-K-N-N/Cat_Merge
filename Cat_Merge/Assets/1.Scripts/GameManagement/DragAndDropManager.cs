@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 // 고양이 드래그 앤 드랍 Script
-public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
+public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
     public Cat catData;                             // 드래그하는 고양이의 데이터
     public RectTransform rectTransform;             // RectTransform 참조
@@ -11,11 +11,15 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
 
     public bool isDragging { get; private set; }    // 드래그 상태 확인 플래그
 
+    // ======================================================================================================================
+
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
         parentCanvas = GetComponentInParent<Canvas>();
     }
+
+    // ======================================================================================================================
 
     // 드래그 시작 함수
     public void OnBeginDrag(PointerEventData eventData)
@@ -23,7 +27,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         isDragging = true;
 
         // 드래그된 고양이를 mergingCats에서 제거
-        AutoMerge autoMerge = FindObjectOfType<AutoMerge>();
+        AutoMergeManager autoMerge = FindObjectOfType<AutoMergeManager>();
         if (autoMerge != null && autoMerge.IsMerging(this))
         {
             autoMerge.StopMerging(this);
@@ -68,14 +72,14 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         isDragging = false;
 
         // 머지 상태가 OFF일 경우 머지 X
-        if (!GameManager.Instance.IsMergeEnabled())
+        if (!MergeManager.Instance.IsMergeEnabled())
         {
             return;
         }
 
         CheckEdgeDrop();
 
-        CatDragAndDrop nearbyCat = FindNearbyCat();
+        DragAndDropManager nearbyCat = FindNearbyCat();
         if (nearbyCat != null && nearbyCat != this)
         {
             // 자동 머지 중인지 확인
@@ -89,7 +93,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
             if (nearbyCat.catData.CatGrade == this.catData.CatGrade)
             {
                 // 합성할 고양이의 다음 등급이 존재하는지 확인
-                Cat nextCat = FindObjectOfType<CatMerge>().GetCatByGrade(this.catData.CatGrade + 1);
+                Cat nextCat = FindObjectOfType<MergeManager>().GetCatByGrade(this.catData.CatGrade + 1);
                 if (nextCat != null)
                 {
                     // nextCat이 존재할 경우에만 애니메이션 시작
@@ -161,14 +165,14 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
     }
 
     // 자동 머지 중인지 확인하는 함수
-    private bool IsAutoMerging(CatDragAndDrop nearbyCat)
+    private bool IsAutoMerging(DragAndDropManager nearbyCat)
     {
-        AutoMerge autoMerge = FindObjectOfType<AutoMerge>();
+        AutoMergeManager autoMerge = FindObjectOfType<AutoMergeManager>();
         return autoMerge != null && autoMerge.IsMerging(nearbyCat);
     }
 
     // 합성시 고양이가 끌려오는 애니메이션 코루틴
-    private IEnumerator PullNearbyCat(CatDragAndDrop nearbyCat)
+    private IEnumerator PullNearbyCat(DragAndDropManager nearbyCat)
     {
         Vector3 startPosition = nearbyCat.rectTransform.localPosition;
         Vector3 targetPosition = rectTransform.localPosition;
@@ -184,7 +188,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         }
 
         // 끌려온 후 합성 처리
-        Cat mergedCat = FindObjectOfType<CatMerge>().MergeCats(this.catData, nearbyCat.catData);
+        Cat mergedCat = FindObjectOfType<MergeManager>().MergeCats(this.catData, nearbyCat.catData);
         if (mergedCat != null)
         {
             //Debug.Log($"합성 성공: {mergedCat.CatName}");
@@ -199,7 +203,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
     }
 
     // 범위 내에서 가장 가까운 CatPrefab을 찾는 함수
-    private CatDragAndDrop FindNearbyCat()
+    private DragAndDropManager FindNearbyCat()
     {
         RectTransform parentRect = rectTransform.parent.GetComponent<RectTransform>();
         Rect thisRect = GetWorldRect(rectTransform);
@@ -211,7 +215,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         {
             if (child == this.transform) continue;
 
-            CatDragAndDrop otherCat = child.GetComponent<CatDragAndDrop>();
+            DragAndDropManager otherCat = child.GetComponent<DragAndDropManager>();
             if (otherCat != null)
             {
                 Rect otherRect = GetWorldRect(otherCat.rectTransform);

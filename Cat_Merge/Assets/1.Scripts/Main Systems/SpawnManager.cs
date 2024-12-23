@@ -1,7 +1,7 @@
 using UnityEngine;
 
 // 고양이 스폰 Script
-public class CatSpawn : MonoBehaviour
+public class SpawnManager : MonoBehaviour
 {
     [SerializeField] private GameObject catPrefab;      // 고양이 UI 프리팹
     [SerializeField] private Transform catUIParent;     // 고양이를 배치할 부모 Transform (UI Panel 등)
@@ -27,7 +27,7 @@ public class CatSpawn : MonoBehaviour
             // 업그레이드 시스템 확장성을 위해 변경한 고양이 생성 코드
             Cat catData = GetCatDataForSpawn();
             LoadAndDisplayCats(catData);
-            gameManager.AddFeedCount();
+            QuestManager.Instance.AddFeedCount();
             gameManager.AddCatCount();
         }
         else
@@ -45,7 +45,7 @@ public class CatSpawn : MonoBehaviour
         Cat catData = GetCatDataForSpawn();
         GameObject newCat = LoadAndDisplayCats(catData);
 
-        CatDragAndDrop catDragAndDrop = newCat.GetComponent<CatDragAndDrop>();
+        DragAndDropManager catDragAndDrop = newCat.GetComponent<DragAndDropManager>();
         if (catDragAndDrop != null)
         {
             catDragAndDrop.catData = gameManager.AllCatData[0];
@@ -61,7 +61,7 @@ public class CatSpawn : MonoBehaviour
         // 예시: 랜덤으로 고양이 등급을 선택하거나 상점 업그레이드를 고려하여 선택
         // return gameManager.GetRandomCatForSpawn();  // 이 부분은 나중에 업그레이드 시스템에 맞게 수정
         int catGrade = 0;
-        gameManager.UnlockCat(catGrade);
+        DictionaryManager.Instance.UnlockCat(catGrade);
         return gameManager.AllCatData[catGrade];
     }
 
@@ -76,10 +76,10 @@ public class CatSpawn : MonoBehaviour
         {
             catUIData.SetCatData(catData);
 
-            // 자동 이동 상태를 GameManager와 동기화
+            // 자동 이동 상태를 동기화
             if (gameManager != null)
             {
-                catUIData.SetAutoMoveState(gameManager.IsAutoMoveEnabled());
+                catUIData.SetAutoMoveState(AutoMoveManager.Instance.IsAutoMoveEnabled());
             }
         }
 

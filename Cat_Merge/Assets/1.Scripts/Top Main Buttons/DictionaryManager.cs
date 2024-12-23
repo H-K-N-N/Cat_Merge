@@ -350,7 +350,5 @@ public class DictionaryManager : MonoBehaviour
         newCatPanel.SetActive(false);
     }
 
-    // ======================================================================================================================
-
 
 }

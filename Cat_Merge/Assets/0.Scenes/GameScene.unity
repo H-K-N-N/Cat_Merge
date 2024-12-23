@@ -6623,7 +6623,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 331588639}
-  - component: {fileID: 331588640}
   - component: {fileID: 331588647}
   - component: {fileID: 331588644}
   - component: {fileID: 331588649}
@@ -6632,6 +6631,8 @@ GameObject:
   - component: {fileID: 331588648}
   - component: {fileID: 331588643}
   - component: {fileID: 331588642}
+  - component: {fileID: 331588640}
+  - component: {fileID: 331588650}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -6669,24 +6670,6 @@ MonoBehaviour:
   catCountText: {fileID: 1154106647}
   coinText: {fileID: 2118068271}
   cashText: {fileID: 1170366662}
-  bottomItemButton: {fileID: 929568856}
-  bottomItemButtonImg: {fileID: 929568857}
-  itemMenuPanel: {fileID: 1819275872}
-  itemBackButton: {fileID: 1642773475}
-  itemMenuButtons:
-  - {fileID: 321115491}
-  - {fileID: 1440139851}
-  - {fileID: 1349482381}
-  - {fileID: 1081351519}
-  itemMenues:
-  - {fileID: 1949045627}
-  - {fileID: 2104030818}
-  - {fileID: 589774802}
-  - {fileID: 827961183}
-  catMaximumIncreaseButton: {fileID: 2074647992}
-  disabledBg: {fileID: 369635015}
-  catMaximumIncreaseText: {fileID: 1097910091}
-  catMaximumIncreaseLvText: {fileID: 1551978644}
   bottomBuyCatButton: {fileID: 539204325}
   bottomBuyCatButtonImg: {fileID: 539204326}
   buyCatCoinDisabledBg: {fileID: 379888343}
@@ -6874,6 +6857,47 @@ MonoBehaviour:
   closeAutoMovePanelButton: {fileID: 1957409418}
   autoMoveStateButton: {fileID: 1580149191}
   isAutoMoveEnabled: 1
+--- !u!114 &331588650
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 331588638}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b15dec1add852c439c585b868813100, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bottomItemButton: {fileID: 929568856}
+  bottomItemButtonImg: {fileID: 929568857}
+  itemMenuPanel: {fileID: 1819275872}
+  itemBackButton: {fileID: 1642773475}
+  itemMenuButtons:
+  - {fileID: 321115491}
+  - {fileID: 1440139851}
+  - {fileID: 1349482381}
+  - {fileID: 1081351519}
+  itemMenues:
+  - {fileID: 1949045627}
+  - {fileID: 2104030818}
+  - {fileID: 589774802}
+  - {fileID: 827961183}
+  catMaximumIncreaseButton: {fileID: 2074647992}
+  disabledBg: {fileID: 369635015}
+  catMaximumIncreaseText: {fileID: 1097910091}
+  catMaximumIncreaseLvText: {fileID: 1551978644}
+  bottomBuyCatButton: {fileID: 539204325}
+  bottomBuyCatButtonImg: {fileID: 539204326}
+  buyCatCoinDisabledBg: {fileID: 379888343}
+  buyCatCashDisabledBg: {fileID: 2106389744}
+  buyCatMenuPanel: {fileID: 1043402365}
+  buyCatBackButton: {fileID: 1589574999}
+  buyCatCoinButton: {fileID: 2059655911}
+  buyCatCashButton: {fileID: 1672625869}
+  buyCatCountExplainText: {fileID: 150337298}
+  buyCatCoinFeeText: {fileID: 980235594}
+  buyCatCashFeeText: {fileID: 156841704}
 --- !u!1 &335345886
 GameObject:
   m_ObjectHideFlags: 0

@@ -27,7 +27,7 @@ public class AutoMergeManager : MonoBehaviour
     private float moveDuration = 0.2f;                  // 고양이가 이동하는 데 걸리는 시간 (이동 속도)
     private bool isAutoMergeActive = false;             // 자동 머지 활성화 상태
 
-    private HashSet<CatDragAndDrop> mergingCats;        // 머지 중인 고양이 추적
+    private HashSet<DragAndDropManager> mergingCats;        // 머지 중인 고양이 추적
 
     // ======================================================================================================================
 
@@ -46,7 +46,7 @@ public class AutoMergeManager : MonoBehaviour
 
     private void Start()
     {
-        mergingCats = new HashSet<CatDragAndDrop>();
+        mergingCats = new HashSet<DragAndDropManager>();
     }
 
     private void Update()
@@ -159,7 +159,7 @@ public class AutoMergeManager : MonoBehaviour
     }
 
     // 자동 머지 중인지 확인하는 함수
-    public bool IsMerging(CatDragAndDrop cat)
+    public bool IsMerging(DragAndDropManager cat)
     {
         return mergingCats.Contains(cat);
     }
@@ -175,7 +175,7 @@ public class AutoMergeManager : MonoBehaviour
             // mergingCats 상태 정리
             mergingCats.RemoveWhere(cat => cat == null || cat.isDragging);
 
-            var allCats = FindObjectsOfType<CatDragAndDrop>().OrderBy(cat => cat.catData.CatGrade).ToList();
+            var allCats = FindObjectsOfType<DragAndDropManager>().OrderBy(cat => cat.catData.CatGrade).ToList();
             var groupedCats = allCats.GroupBy(cat => cat.catData.CatGrade).Where(group => group.Count() > 1).ToList();
 
             if (!groupedCats.Any())
@@ -267,7 +267,7 @@ public class AutoMergeManager : MonoBehaviour
     // 자동머지중 고양이 최대치로 소환하는 함수
     private IEnumerator SpawnCatsWhileAutoMerge()
     {
-        CatSpawn catSpawn = FindObjectOfType<CatSpawn>();
+        SpawnManager catSpawn = FindObjectOfType<SpawnManager>();
         while (isAutoMergeActive)
         {
             while (GameManager.Instance.CanSpawnCat())
@@ -291,7 +291,7 @@ public class AutoMergeManager : MonoBehaviour
     }
 
     // 고양이가 부드럽게 이동하는 코루틴
-    private IEnumerator MoveCatSmoothly(CatDragAndDrop cat, Vector2 targetPosition)
+    private IEnumerator MoveCatSmoothly(DragAndDropManager cat, Vector2 targetPosition)
     {
         if (cat == null) yield break;
 
@@ -321,7 +321,7 @@ public class AutoMergeManager : MonoBehaviour
     }
 
     // 특정 고양이의 mergingCats 상태 제거 함수
-    public void StopMerging(CatDragAndDrop cat)
+    public void StopMerging(DragAndDropManager cat)
     {
         mergingCats.Remove(cat);
     }

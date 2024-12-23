@@ -1,7 +1,7 @@
 using UnityEngine;
 
 // 고양이 스폰 Script
-public class CatSpawn : MonoBehaviour
+public class SpawnManager : MonoBehaviour
 {
     [SerializeField] private GameObject catPrefab;      // 고양이 UI 프리팹
     [SerializeField] private Transform catUIParent;     // 고양이를 배치할 부모 Transform (UI Panel 등)
@@ -45,7 +45,7 @@ public class CatSpawn : MonoBehaviour
         Cat catData = GetCatDataForSpawn();
         GameObject newCat = LoadAndDisplayCats(catData);
 
-        CatDragAndDrop catDragAndDrop = newCat.GetComponent<CatDragAndDrop>();
+        DragAndDropManager catDragAndDrop = newCat.GetComponent<DragAndDropManager>();
         if (catDragAndDrop != null)
         {
             catDragAndDrop.catData = gameManager.AllCatData[0];

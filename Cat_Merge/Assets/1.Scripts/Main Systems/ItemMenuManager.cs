@@ -312,7 +312,7 @@ public class ItemMenuManager : MonoBehaviour
 
             QuestManager.Instance.AddPurchaseCatsCount();
 
-            CatSpawn catSpawn = GetComponent<CatSpawn>();
+            SpawnManager catSpawn = GetComponent<SpawnManager>();
             catSpawn.OnClickedSpawn();
 
             UpdateBuyCatUI();
@@ -331,7 +331,7 @@ public class ItemMenuManager : MonoBehaviour
 
             QuestManager.Instance.AddPurchaseCatsCount();
 
-            CatSpawn catSpawn = GetComponent<CatSpawn>();
+            SpawnManager catSpawn = GetComponent<SpawnManager>();
             catSpawn.OnClickedSpawn();
 
             UpdateBuyCatUI();

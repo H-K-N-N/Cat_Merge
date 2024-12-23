@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 // 고양이 드래그 앤 드랍 Script
-public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
+public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
     public Cat catData;                             // 드래그하는 고양이의 데이터
     public RectTransform rectTransform;             // RectTransform 참조
@@ -79,7 +79,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
 
         CheckEdgeDrop();
 
-        CatDragAndDrop nearbyCat = FindNearbyCat();
+        DragAndDropManager nearbyCat = FindNearbyCat();
         if (nearbyCat != null && nearbyCat != this)
         {
             // 자동 머지 중인지 확인
@@ -165,14 +165,14 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
     }
 
     // 자동 머지 중인지 확인하는 함수
-    private bool IsAutoMerging(CatDragAndDrop nearbyCat)
+    private bool IsAutoMerging(DragAndDropManager nearbyCat)
     {
         AutoMergeManager autoMerge = FindObjectOfType<AutoMergeManager>();
         return autoMerge != null && autoMerge.IsMerging(nearbyCat);
     }
 
     // 합성시 고양이가 끌려오는 애니메이션 코루틴
-    private IEnumerator PullNearbyCat(CatDragAndDrop nearbyCat)
+    private IEnumerator PullNearbyCat(DragAndDropManager nearbyCat)
     {
         Vector3 startPosition = nearbyCat.rectTransform.localPosition;
         Vector3 targetPosition = rectTransform.localPosition;
@@ -203,7 +203,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
     }
 
     // 범위 내에서 가장 가까운 CatPrefab을 찾는 함수
-    private CatDragAndDrop FindNearbyCat()
+    private DragAndDropManager FindNearbyCat()
     {
         RectTransform parentRect = rectTransform.parent.GetComponent<RectTransform>();
         Rect thisRect = GetWorldRect(rectTransform);
@@ -215,7 +215,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         {
             if (child == this.transform) continue;
 
-            CatDragAndDrop otherCat = child.GetComponent<CatDragAndDrop>();
+            DragAndDropManager otherCat = child.GetComponent<DragAndDropManager>();
             if (otherCat != null)
             {
                 Rect otherRect = GetWorldRect(otherCat.rectTransform);

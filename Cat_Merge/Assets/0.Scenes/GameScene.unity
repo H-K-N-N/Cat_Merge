@@ -6623,6 +6623,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 331588639}
+  - component: {fileID: 331588640}
   - component: {fileID: 331588647}
   - component: {fileID: 331588644}
   - component: {fileID: 331588649}
@@ -6630,9 +6631,8 @@ GameObject:
   - component: {fileID: 331588646}
   - component: {fileID: 331588648}
   - component: {fileID: 331588643}
-  - component: {fileID: 331588642}
-  - component: {fileID: 331588640}
   - component: {fileID: 331588650}
+  - component: {fileID: 331588642}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -6670,17 +6670,6 @@ MonoBehaviour:
   catCountText: {fileID: 1154106647}
   coinText: {fileID: 2118068271}
   cashText: {fileID: 1170366662}
-  bottomBuyCatButton: {fileID: 539204325}
-  bottomBuyCatButtonImg: {fileID: 539204326}
-  buyCatCoinDisabledBg: {fileID: 379888343}
-  buyCatCashDisabledBg: {fileID: 2106389744}
-  buyCatMenuPanel: {fileID: 1043402365}
-  buyCatBackButton: {fileID: 1589574999}
-  buyCatCoinButton: {fileID: 2059655911}
-  buyCatCashButton: {fileID: 1672625869}
-  buyCatCountExplainText: {fileID: 150337298}
-  buyCatCoinFeeText: {fileID: 980235594}
-  buyCatCashFeeText: {fileID: 156841704}
 --- !u!114 &331588642
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -34151,7 +34140,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1046184631, guid: 25bdaca4692ff0745b5f493318b5cb38, type: 3}
+  m_Sprite: {fileID: 0}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

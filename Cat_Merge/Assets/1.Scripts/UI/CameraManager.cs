@@ -1,7 +1,7 @@
 using UnityEngine;
 
 // 카메라 화면 제한 Script (9:16)
-public class CameraResolution : MonoBehaviour
+public class CameraManager : MonoBehaviour
 {
     private void Awake()
     {

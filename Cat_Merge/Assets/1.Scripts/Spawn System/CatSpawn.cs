@@ -76,10 +76,10 @@ public class CatSpawn : MonoBehaviour
         {
             catUIData.SetCatData(catData);
 
-            // 자동 이동 상태를 GameManager와 동기화
+            // 자동 이동 상태를 동기화
             if (gameManager != null)
             {
-                catUIData.SetAutoMoveState(gameManager.IsAutoMoveEnabled());
+                catUIData.SetAutoMoveState(AutoMoveManager.Instance.IsAutoMoveEnabled());
             }
         }
 

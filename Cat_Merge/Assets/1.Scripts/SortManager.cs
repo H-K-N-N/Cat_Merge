@@ -74,7 +74,7 @@ public class SortManager : MonoBehaviour
             CatData catData = child.GetComponent<CatData>();
             if (catData != null)
             {
-                catData.SetAutoMoveState(GameManager.Instance.isAutoMoveEnabled);
+                catData.SetAutoMoveState(AutoMoveManager.Instance.isAutoMoveEnabled);
             }
         }
     }

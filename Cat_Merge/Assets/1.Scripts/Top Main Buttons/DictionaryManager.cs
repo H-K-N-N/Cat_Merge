@@ -66,23 +66,18 @@ public class DictionaryManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-    }
-
-    private void Start()
-    {
-        LoadUnlockedCats();
 
         newCatPanel.SetActive(false);
         dictionaryMenuPanel.SetActive(false);
         activeMenuType = DictionaryMenuType.Normal;
 
-        dictionaryButton.onClick.AddListener(ToggleDictionaryMenuPanel);
-        dictionaryBackButton.onClick.AddListener(CloseDictionaryMenuPanel);
-
+        LoadUnlockedCats();
         ResetScrollPositions();
         InitializeMenuButtons();
         PopulateDictionary();
 
+        dictionaryButton.onClick.AddListener(ToggleDictionaryMenuPanel);
+        dictionaryBackButton.onClick.AddListener(CloseDictionaryMenuPanel);
         submitButton.onClick.AddListener(CloseNewCatPanel);
     }
 
@@ -217,7 +212,7 @@ public class DictionaryManager : MonoBehaviour
     // 버튼 색상을 활성 상태에 따라 업데이트하는 함수
     private void UpdateButtonColor(Image buttonImage, bool isActive)
     {
-        string colorCode = isActive ? "#5f5f5f" : "#E2E2E2";
+        string colorCode = isActive ? "#5f5f5f" : "#FFFFFF";
         if (ColorUtility.TryParseHtmlString(colorCode, out Color color))
         {
             buttonImage.color = color;
@@ -264,7 +259,16 @@ public class DictionaryManager : MonoBehaviour
             text.text = $"{cat.CatGrade}. {cat.CatName}";
 
             // 첫 해금 보상을 받았다면 해당 슬롯의 firstOpenBG 비활성화 / 받지 않았다면 firstOpenBG 활성화
-            firstOpenBG.gameObject.SetActive(false);
+            if (IsGetFirstUnlockedReward(cat.CatGrade))
+            {
+                firstOpenBG.gameObject.SetActive(false);
+            }
+            else
+            {
+                // 활성화
+                firstOpenBG.gameObject.SetActive(true);
+                firstOpenCashtext.text = $"+ {GameManager.Instance.AllCatData[cat.CatGrade].CatGetCoin}";
+            }
         }
         else
         {

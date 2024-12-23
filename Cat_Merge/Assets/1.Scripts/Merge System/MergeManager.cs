@@ -1,4 +1,3 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,13 +7,11 @@ public class MergeManager : MonoBehaviour
     // Singleton Instance
     public static MergeManager Instance { get; private set; }
 
-    // Merge On/Off System
     [Header("---[Merge On/Off System]")]
     [SerializeField] private Button openMergePanelButton;           // 머지 패널 열기 버튼
     [SerializeField] private GameObject mergePanel;                 // 머지 On/Off 패널
     [SerializeField] private Button closeMergePanelButton;          // 머지 패널 닫기 버튼
     [SerializeField] private Button mergeStateButton;               // 머지 상태 버튼
-    [SerializeField] private TextMeshProUGUI mergeStateText;        // 머지 현재 상태 텍스트
     private bool isMergeEnabled = true;
 
     // ======================================================================================================================
@@ -30,8 +27,8 @@ public class MergeManager : MonoBehaviour
             Destroy(gameObject);
         }
 
-        UpdateMergeStateText();
         UpdateMergeButtonColor();
+
         openMergePanelButton.onClick.AddListener(OpenMergePanel);
         closeMergePanelButton.onClick.AddListener(CloseMergePanel);
         mergeStateButton.onClick.AddListener(ToggleMergeState);
@@ -52,18 +49,8 @@ public class MergeManager : MonoBehaviour
     private void ToggleMergeState()
     {
         isMergeEnabled = !isMergeEnabled;
-        UpdateMergeStateText();
         UpdateMergeButtonColor();
         CloseMergePanel();
-    }
-
-    // 머지 상태 Text 업데이트 함수
-    private void UpdateMergeStateText()
-    {
-        if (mergeStateText != null)
-        {
-            mergeStateText.text = isMergeEnabled ? "OFF" : "ON";
-        }
     }
 
     // 머지 버튼 색상 업데이트 함수
@@ -71,13 +58,11 @@ public class MergeManager : MonoBehaviour
     {
         if (openMergePanelButton != null)
         {
-            Color normalColor = isMergeEnabled ? new Color(1f, 1f, 1f, 1f) : new Color(0.5f, 0.5f, 0.5f, 1f);
-            ColorBlock colors = openMergePanelButton.colors;
-            colors.normalColor = normalColor;
-            colors.highlightedColor = normalColor;
-            colors.pressedColor = normalColor;
-            colors.selectedColor = normalColor;
-            openMergePanelButton.colors = colors;
+            string colorCode = !isMergeEnabled ? "#5f5f5f" : "#FFFFFF";
+            if (ColorUtility.TryParseHtmlString(colorCode, out Color color))
+            {
+                openMergePanelButton.GetComponent<Image>().color = color;
+            }
         }
     }
 

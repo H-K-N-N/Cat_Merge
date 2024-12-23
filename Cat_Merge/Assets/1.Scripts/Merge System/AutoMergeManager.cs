@@ -37,10 +37,11 @@ public class AutoMergeManager : MonoBehaviour
         currentAutoMergeDuration = autoMergeDuration;
 
         UpdateAutoMergeCostText();
+        UpdateAutoMergeTimerVisibility(false);
+
         openAutoMergePanelButton.onClick.AddListener(OpenAutoMergePanel);
         closeAutoMergePanelButton.onClick.AddListener(CloseAutoMergePanel);
         autoMergeStateButton.onClick.AddListener(StartAutoMerge);
-        UpdateAutoMergeTimerVisibility(false);
     }
 
     private void Start()

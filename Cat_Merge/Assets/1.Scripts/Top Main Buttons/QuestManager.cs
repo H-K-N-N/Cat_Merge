@@ -110,10 +110,7 @@ public class QuestManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-    }
 
-    private void Start()
-    {
         questMenuPanel.SetActive(false);
 
         InitializeQuestButton();
@@ -234,7 +231,7 @@ public class QuestManager : MonoBehaviour
     // 버튼 색상을 활성 상태에 따라 업데이트하는 함수
     private void UpdateButtonColor(Image buttonImage, bool isActive)
     {
-        string colorCode = isActive ? "#5f5f5f" : "#E2E2E2";
+        string colorCode = isActive ? "#5f5f5f" : "#FFFFFF";
         if (ColorUtility.TryParseHtmlString(colorCode, out Color color))
         {
             buttonImage.color = color;

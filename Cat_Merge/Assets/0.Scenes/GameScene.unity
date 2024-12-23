@@ -6623,9 +6623,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 331588639}
-  - component: {fileID: 331588644}
   - component: {fileID: 331588640}
   - component: {fileID: 331588647}
+  - component: {fileID: 331588644}
+  - component: {fileID: 331588649}
   - component: {fileID: 331588645}
   - component: {fileID: 331588646}
   - component: {fileID: 331588648}
@@ -6668,17 +6669,6 @@ MonoBehaviour:
   catCountText: {fileID: 1154106647}
   coinText: {fileID: 2118068271}
   cashText: {fileID: 1170366662}
-  openMergePanelButton: {fileID: 77040144}
-  mergePanel: {fileID: 1524788007}
-  closeMergePanelButton: {fileID: 1617718342}
-  mergeStateButton: {fileID: 824748588}
-  mergeStateText: {fileID: 1656514465}
-  openAutoMovePanelButton: {fileID: 164083476}
-  autoMovePanel: {fileID: 1167491137}
-  closeAutoMovePanelButton: {fileID: 1957409418}
-  autoMoveStateButton: {fileID: 1580149191}
-  autoMoveStateText: {fileID: 2081410092}
-  isAutoMoveEnabled: 1
   bottomItemButton: {fileID: 929568856}
   bottomItemButtonImg: {fileID: 929568857}
   itemMenuPanel: {fileID: 1819275872}
@@ -6756,7 +6746,6 @@ MonoBehaviour:
   mergePanel: {fileID: 1524788007}
   closeMergePanelButton: {fileID: 1617718342}
   mergeStateButton: {fileID: 824748588}
-  mergeStateText: {fileID: 1656514465}
 --- !u!114 &331588645
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6868,6 +6857,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sortButton: {fileID: 496146655}
   gamePanel: {fileID: 1808509785}
+--- !u!114 &331588649
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 331588638}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae323f359eaba6940be700e18a8a5627, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  openAutoMovePanelButton: {fileID: 164083476}
+  autoMovePanel: {fileID: 1167491137}
+  closeAutoMovePanelButton: {fileID: 1957409418}
+  autoMoveStateButton: {fileID: 1580149191}
+  isAutoMoveEnabled: 1
 --- !u!1 &335345886
 GameObject:
   m_ObjectHideFlags: 0
@@ -10980,7 +10986,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1046184631, guid: 25bdaca4692ff0745b5f493318b5cb38, type: 3}
+  m_Sprite: {fileID: 0}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -11318,7 +11324,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1046184631, guid: 25bdaca4692ff0745b5f493318b5cb38, type: 3}
+  m_Sprite: {fileID: 0}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -14997,7 +15003,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1046184631, guid: 25bdaca4692ff0745b5f493318b5cb38, type: 3}
+  m_Sprite: {fileID: 0}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -18269,7 +18275,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1046184631, guid: 25bdaca4692ff0745b5f493318b5cb38, type: 3}
+  m_Sprite: {fileID: 0}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -28884,7 +28890,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1046184631, guid: 25bdaca4692ff0745b5f493318b5cb38, type: 3}
+  m_Sprite: {fileID: 0}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1

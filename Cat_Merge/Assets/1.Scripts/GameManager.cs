@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 // GameManager Script
+[DefaultExecutionOrder(-1)]     // 스크립트 실행 순서 조정
 public class GameManager : MonoBehaviour
 {
     // Singleton instance
@@ -49,17 +50,6 @@ public class GameManager : MonoBehaviour
             UpdateCashText();
         }
     }
-
-    // ======================================================================================================================
-
-    // AutoMove On/Off System
-    [Header("---[AutoMove On/Off System]")]
-    [SerializeField] private Button openAutoMovePanelButton;        // 자동 이동 패널 열기 버튼
-    [SerializeField] private GameObject autoMovePanel;              // 자동 이동 On/Off 패널
-    [SerializeField] private Button closeAutoMovePanelButton;       // 자동 이동 패널 닫기 버튼
-    [SerializeField] private Button autoMoveStateButton;            // 자동 이동 상태 버튼
-    [SerializeField] private TextMeshProUGUI autoMoveStateText;     // 자동 이동 현재 상태 텍스트
-    public bool isAutoMoveEnabled = true;                           // 자동 이동 활성화 상태
 
     // ======================================================================================================================
 
@@ -108,6 +98,7 @@ public class GameManager : MonoBehaviour
     private int catMaximumIncreaseLv = 1;                               // 고양이 최대치 증가 레벨
 
     // ======================================================================================================================
+
     [Header("BuyCat")]
     [SerializeField] private Button bottomBuyCatButton;                 // 고양이 구매 버튼
     [SerializeField] private Image bottomBuyCatButtonImg;               // 고양이 구매 버튼 이미지
@@ -149,12 +140,7 @@ public class GameManager : MonoBehaviour
         UpdateCoinText();
         UpdateCashText();
 
-        // 자동이동 On/Off 관련
-        UpdateAutoMoveStateText();
-        UpdateOpenButtonColor();
-        openAutoMovePanelButton.onClick.AddListener(OpenAutoMovePanel);
-        closeAutoMovePanelButton.onClick.AddListener(CloseAutoMovePanel);
-        autoMoveStateButton.onClick.AddListener(ToggleAutoMove);
+
 
         // 아이템 메뉴 관련
         bottomItemButton.onClick.AddListener(OpenCloseBottomItemMenuPanel);
@@ -265,76 +251,6 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
-    // 자동이동 패널 여는 함수
-    private void OpenAutoMovePanel()
-    {
-        if (autoMovePanel != null)
-        {
-            autoMovePanel.SetActive(true);
-        }
-    }
-
-    // 자동이동 상태 전환 함수
-    public void ToggleAutoMove()
-    {
-        isAutoMoveEnabled = !isAutoMoveEnabled;
-
-        // 모든 고양이에 상태 적용
-        CatData[] allCatDataObjects = FindObjectsOfType<CatData>();
-        foreach (var catData in allCatDataObjects)
-        {
-            catData.SetAutoMoveState(isAutoMoveEnabled);
-        }
-
-        // 상태 업데이트 및 버튼 색상 변경
-        UpdateAutoMoveStateText();
-        UpdateOpenButtonColor();
-
-        // 패널 닫기
-        CloseAutoMovePanel();
-    }
-
-    // 자동이동 상태 Text 업데이트 함수
-    private void UpdateAutoMoveStateText()
-    {
-        if (autoMoveStateText != null)
-        {
-            autoMoveStateText.text = isAutoMoveEnabled ? "OFF" : "ON";
-        }
-    }
-
-    // 자동이동 버튼 색상 업데이트 함수
-    private void UpdateOpenButtonColor()
-    {
-        if (openAutoMovePanelButton != null)
-        {
-            Color normalColor = isAutoMoveEnabled ? new Color(1f, 1f, 1f, 1f) : new Color(0.5f, 0.5f, 0.5f, 1f);
-            ColorBlock colors = openAutoMovePanelButton.colors;
-            colors.normalColor = normalColor;
-            colors.highlightedColor = normalColor;
-            colors.pressedColor = normalColor;
-            colors.selectedColor = normalColor;
-            openAutoMovePanelButton.colors = colors;
-        }
-    }
-
-    // 자동이동 패널 닫는 함수
-    public void CloseAutoMovePanel()
-    {
-        if (autoMovePanel != null)
-        {
-            autoMovePanel.SetActive(false);
-        }
-    }
-
-    // 자동이동 현재 상태 반환하는 함수
-    public bool IsAutoMoveEnabled()
-    {
-        return isAutoMoveEnabled;
-    }
-
-    // ======================================================================================================================
-
     // 아이템 메뉴 판넬 여는 함수
     private void OpenCloseBottomItemMenuPanel()
     {
@@ -356,7 +272,7 @@ public class GameManager : MonoBehaviour
             {
                 Debug.Log("Item Toggle Off");
                 itemMenuPanel.SetActive(false);
-                //if (ColorUtility.TryParseHtmlString("#E2E2E2", out Color parsedColor))
+                //if (ColorUtility.TryParseHtmlString("#FFFFFF", out Color parsedColor))
                 //{
                 //    bottomItemButtonImg.color = parsedColor;
                 //}
@@ -372,7 +288,7 @@ public class GameManager : MonoBehaviour
         {
             isOnToggleItemMenu = false;
             itemMenuPanel.SetActive(false);
-            //if (ColorUtility.TryParseHtmlString("#E2E2E2", out Color parsedColor))
+            //if (ColorUtility.TryParseHtmlString("#FFFFFF", out Color parsedColor))
             //{
             //    bottomItemButtonImg.color = parsedColor;
             //}
@@ -400,7 +316,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            if (ColorUtility.TryParseHtmlString("#E2E2E2", out Color parsedColor))
+            if (ColorUtility.TryParseHtmlString("#FFFFFF", out Color parsedColor))
             {
                 if(!itemMenuPanel.activeSelf)
                 {
@@ -431,7 +347,7 @@ public class GameManager : MonoBehaviour
                     }
                     else
                     {
-                        if (ColorUtility.TryParseHtmlString("#E2E2E2", out Color parsedColorF))
+                        if (ColorUtility.TryParseHtmlString("#FFFFFF", out Color parsedColorF))
                         {
                              // 색상변경
                              itemMenuButtons[i].GetComponent<Image>().color = parsedColorF;

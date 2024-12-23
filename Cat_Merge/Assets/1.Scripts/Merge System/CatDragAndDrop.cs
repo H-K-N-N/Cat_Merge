@@ -23,7 +23,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
         isDragging = true;
 
         // 드래그된 고양이를 mergingCats에서 제거
-        AutoMerge autoMerge = FindObjectOfType<AutoMerge>();
+        AutoMergeManager autoMerge = FindObjectOfType<AutoMergeManager>();
         if (autoMerge != null && autoMerge.IsMerging(this))
         {
             autoMerge.StopMerging(this);
@@ -163,7 +163,7 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
     // 자동 머지 중인지 확인하는 함수
     private bool IsAutoMerging(CatDragAndDrop nearbyCat)
     {
-        AutoMerge autoMerge = FindObjectOfType<AutoMerge>();
+        AutoMergeManager autoMerge = FindObjectOfType<AutoMergeManager>();
         return autoMerge != null && autoMerge.IsMerging(nearbyCat);
     }
 

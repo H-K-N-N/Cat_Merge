@@ -48,7 +48,7 @@ public class GameManager : MonoBehaviour
     // ======================================================================================================================
 
     // AutoMove On/Off System
-    [Header("----[AutoMove On/Off System]")]
+    [Header("---[AutoMove On/Off System]")]
     [SerializeField] private Button openAutoMovePanelButton;        // 자동 이동 패널 열기 버튼
     [SerializeField] private GameObject autoMovePanel;              // 자동 이동 On/Off 패널
     [SerializeField] private Button closeAutoMovePanelButton;       // 자동 이동 패널 닫기 버튼
@@ -57,16 +57,6 @@ public class GameManager : MonoBehaviour
     private bool isAutoMoveEnabled = true;                          // 자동 이동 활성화 상태
 
     // ======================================================================================================================
-
-    // AutoMerge System
-    [Header("---[AutoMerge System]")]
-    [SerializeField] private Button openAutoMergePanelButton;       // 자동 머지 패널 열기 버튼
-    [SerializeField] private GameObject autoMergePanel;             // 자동 머지 패널
-    [SerializeField] private Button closeAutoMergePanelButton;      // 자동 머지 패널 닫기 버튼
-    [SerializeField] private Button autoMergeStateButton;           // 자동 머지 상태 버튼
-    [SerializeField] private TextMeshProUGUI autoMergeCostText;     // 자동 머지 상태 버튼
-    [SerializeField] private TextMeshProUGUI autoMergeTimerText;    // 자동 머지 타이머 텍스트
-    private int autoMergeCost = 30;                                 // 자동 머지 비용
 
     // Sort System
     [Header("---[Sort System]")]
@@ -177,13 +167,6 @@ public class GameManager : MonoBehaviour
 
         // 정렬 관련
         sortButton.onClick.AddListener(SortCats);
-
-        // 자동머지 관련
-        UpdateAutoMergeCostText();
-        openAutoMergePanelButton.onClick.AddListener(OpenAutoMergePanel);
-        closeAutoMergePanelButton.onClick.AddListener(CloseAutoMergePanel);
-        autoMergeStateButton.onClick.AddListener(StartAutoMerge);
-        UpdateAutoMergeTimerVisibility(false);
 
         // 아이템 메뉴 관련
         bottomItemButton.onClick.AddListener(OpenCloseBottomItemMenuPanel);
@@ -521,70 +504,7 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
-    // 자동머지 비용 Text 업데이트 함수
-    private void UpdateAutoMergeCostText()
-    {
-        if (autoMergeCostText != null)
-        {
-            autoMergeCostText.text = $"{autoMergeCost}";
-        }
-    }
-
-    // 자동머지 패널 여는 함수
-    private void OpenAutoMergePanel()
-    {
-        if (autoMergePanel != null)
-        {
-            autoMergePanel.SetActive(true);
-        }
-    }
-
-    // 자동머지 패널 닫는 함수
-    private void CloseAutoMergePanel()
-    {
-        if (autoMergePanel != null)
-        {
-            autoMergePanel.SetActive(false);
-        }
-    }
-
-    // 자동머지 시작 함수
-    private void StartAutoMerge()
-    {
-        if (cash >= autoMergeCost)
-        {
-            cash -= autoMergeCost;
-            UpdateCashText();
-
-            AutoMerge autoMergeScript = FindObjectOfType<AutoMerge>();
-            if (autoMergeScript != null)
-            {
-                autoMergeScript.OnClickedAutoMerge();
-            }
-        }
-        else
-        {
-            Debug.Log("Not enough coins to start AutoMerge!");
-        }
-    }
-
-    // 자동머지 상태에 따라 타이머 텍스트 가시성 업데이트 함수
-    public void UpdateAutoMergeTimerVisibility(bool isVisible)
-    {
-        if (autoMergeTimerText != null)
-        {
-            autoMergeTimerText.gameObject.SetActive(isVisible);
-        }
-    }
-
-    // 자동머지 타이머 업데이트 함수
-    public void UpdateAutoMergeTimerText(int remainingTime)
-    {
-        if (autoMergeTimerText != null)
-        {
-            autoMergeTimerText.text = $"{remainingTime}";
-        }
-    }
+    
 
     // ======================================================================================================================
 

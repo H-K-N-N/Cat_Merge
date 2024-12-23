@@ -2,10 +2,28 @@ using UnityEngine;
 using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
+using UnityEngine.UI;
+using TMPro;
 
 // 자동 머지 Script
-public class AutoMerge : MonoBehaviour
+public class AutoMergeManager : MonoBehaviour
 {
+    // Singleton Instance
+    public static AutoMergeManager Instance { get; private set; }
+
+    // ======================================================================================================================
+
+    [Header("---[AutoMerge System]")]
+    [SerializeField] private Button openAutoMergePanelButton;       // 자동 머지 패널 열기 버튼
+    [SerializeField] private GameObject autoMergePanel;             // 자동 머지 패널
+    [SerializeField] private Button closeAutoMergePanelButton;      // 자동 머지 패널 닫기 버튼
+    [SerializeField] private Button autoMergeStateButton;           // 자동 머지 상태 버튼
+    [SerializeField] private TextMeshProUGUI autoMergeCostText;     // 자동 머지 상태 버튼
+    [SerializeField] private TextMeshProUGUI autoMergeTimerText;    // 자동 머지 타이머 텍스트
+    private int autoMergeCost = 30;
+
+    // ======================================================================================================================
+
     private float startTime;                            // 자동 머지 시작 시간
     private float autoMergeDuration = 10.0f;            // 자동 머지 기본 지속 시간
     private float currentAutoMergeDuration;             // 현재 자동 머지 지속 시간
@@ -15,15 +33,33 @@ public class AutoMerge : MonoBehaviour
     private bool isAutoMergeActive = false;             // 자동 머지 활성화 상태
 
     private HashSet<CatDragAndDrop> mergingCats;        // 머지 중인 고양이 추적
-    private GameManager gameManager;                    // gameManager
+
+    // ======================================================================================================================
 
     private void Awake()
     {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+
         plusAutoMergeDuration = autoMergeDuration;
         currentAutoMergeDuration = autoMergeDuration;
 
+        UpdateAutoMergeCostText();
+        openAutoMergePanelButton.onClick.AddListener(OpenAutoMergePanel);
+        closeAutoMergePanelButton.onClick.AddListener(CloseAutoMergePanel);
+        autoMergeStateButton.onClick.AddListener(StartAutoMerge);
+        UpdateAutoMergeTimerVisibility(false);
+    }
+
+    private void Start()
+    {
         mergingCats = new HashSet<CatDragAndDrop>();
-        gameManager = GameManager.Instance;
     }
 
     private void Update()
@@ -35,16 +71,87 @@ public class AutoMerge : MonoBehaviour
             remainingTime = Mathf.Max(remainingTime, 0);
 
             // 타이머 업데이트
-            gameManager.UpdateAutoMergeTimerText((int)remainingTime);
+            UpdateAutoMergeTimerText((int)remainingTime);
 
             // 자동 머지 종료 처리
             if (remainingTime <= 0)
             {
                 isAutoMergeActive = false;
-                gameManager.UpdateAutoMergeTimerVisibility(false);
+                UpdateAutoMergeTimerVisibility(false);
             }
         }
     }
+
+    // ======================================================================================================================
+    // ---[자동머지 UI]
+
+    // 자동머지 비용 Text 업데이트 함수
+    private void UpdateAutoMergeCostText()
+    {
+        if (autoMergeCostText != null)
+        {
+            autoMergeCostText.text = $"{autoMergeCost}";
+        }
+    }
+
+    // 자동머지 패널 여는 함수
+    private void OpenAutoMergePanel()
+    {
+        if (autoMergePanel != null)
+        {
+            autoMergePanel.SetActive(true);
+        }
+    }
+
+    // 자동머지 패널 닫는 함수
+    private void CloseAutoMergePanel()
+    {
+        if (autoMergePanel != null)
+        {
+            autoMergePanel.SetActive(false);
+        }
+    }
+
+    // 자동머지 시작 함수
+    private void StartAutoMerge()
+    {
+        if (GameManager.Instance.Cash >= autoMergeCost)
+        {
+            GameManager.Instance.Cash -= autoMergeCost;
+            GameManager.Instance.UpdateCashText();
+
+            AutoMergeManager autoMergeScript = FindObjectOfType<AutoMergeManager>();
+            if (autoMergeScript != null)
+            {
+                autoMergeScript.OnClickedAutoMerge();
+            }
+        }
+        else
+        {
+            Debug.Log("Not enough coins to start AutoMerge!");
+        }
+    }
+
+    // 자동머지 상태에 따라 타이머 텍스트 가시성 업데이트 함수
+    public void UpdateAutoMergeTimerVisibility(bool isVisible)
+    {
+        if (autoMergeTimerText != null)
+        {
+            autoMergeTimerText.gameObject.SetActive(isVisible);
+        }
+    }
+
+    // 자동머지 타이머 업데이트 함수
+    public void UpdateAutoMergeTimerText(int remainingTime)
+    {
+        if (autoMergeTimerText != null)
+        {
+            autoMergeTimerText.text = $"{remainingTime}";
+        }
+    }
+
+    // ======================================================================================================================
+    // ---[자동머지 기능]
 
     // 자동 머지 시작 함수
     public void OnClickedAutoMerge()
@@ -55,7 +162,7 @@ public class AutoMerge : MonoBehaviour
             startTime = Time.time;
             isAutoMergeActive = true;
             currentAutoMergeDuration = autoMergeDuration;
-            gameManager.UpdateAutoMergeTimerVisibility(true);
+            UpdateAutoMergeTimerVisibility(true);
             StartCoroutine(AutoMergeCoroutine());
         }
         else
@@ -167,7 +274,7 @@ public class AutoMerge : MonoBehaviour
         }
 
         isAutoMergeActive = false;
-        gameManager.UpdateAutoMergeTimerVisibility(false);
+        UpdateAutoMergeTimerVisibility(false);
         Debug.Log("자동 머지 종료");
     }
 
@@ -177,7 +284,7 @@ public class AutoMerge : MonoBehaviour
         CatSpawn catSpawn = FindObjectOfType<CatSpawn>();
         while (isAutoMergeActive)
         {
-            while (gameManager.CanSpawnCat())
+            while (GameManager.Instance.CanSpawnCat())
             {
                 catSpawn.SpawnCat();
                 yield return new WaitForSeconds(0.1f); // 고양이 자동 생성 간격
@@ -219,12 +326,12 @@ public class AutoMerge : MonoBehaviour
     // 최대 레벨 고양이 확인 함수
     private bool IsMaxLevelCat(Cat catData)
     {
-        if (gameManager == null || gameManager.AllCatData == null)
+        if (GameManager.Instance == null || GameManager.Instance.AllCatData == null)
         {
             return false;
         }
 
-        return gameManager.AllCatData.All(cat => cat.CatGrade != catData.CatGrade + 1);
+        return GameManager.Instance.AllCatData.All(cat => cat.CatGrade != catData.CatGrade + 1);
     }
 
     // 특정 고양이의 mergingCats 상태 제거 함수

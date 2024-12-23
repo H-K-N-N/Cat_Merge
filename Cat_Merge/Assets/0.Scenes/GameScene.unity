@@ -6624,12 +6624,12 @@ GameObject:
   m_Component:
   - component: {fileID: 331588639}
   - component: {fileID: 331588640}
+  - component: {fileID: 331588647}
   - component: {fileID: 331588644}
-  - component: {fileID: 331588643}
-  - component: {fileID: 331588642}
   - component: {fileID: 331588645}
   - component: {fileID: 331588646}
-  - component: {fileID: 331588647}
+  - component: {fileID: 331588643}
+  - component: {fileID: 331588642}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -6677,12 +6677,6 @@ MonoBehaviour:
   closeAutoMovePanelButton: {fileID: 1957409418}
   autoMoveStateButton: {fileID: 1580149191}
   autoMoveStateText: {fileID: 2081410092}
-  openAutoMergePanelButton: {fileID: 1736587142}
-  autoMergePanel: {fileID: 355143274}
-  closeAutoMergePanelButton: {fileID: 461313990}
-  autoMergeStateButton: {fileID: 909696355}
-  autoMergeCostText: {fileID: 521732957}
-  autoMergeTimerText: {fileID: 1767247614}
   sortButton: {fileID: 496146655}
   gamePanel: {fileID: 1808509785}
   bottomItemButton: {fileID: 929568856}
@@ -6740,6 +6734,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e86346600c1117488acdbfb68f79d2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  openAutoMergePanelButton: {fileID: 1736587142}
+  autoMergePanel: {fileID: 355143274}
+  closeAutoMergePanelButton: {fileID: 461313990}
+  autoMergeStateButton: {fileID: 909696355}
+  autoMergeCostText: {fileID: 521732957}
+  autoMergeTimerText: {fileID: 1767247614}
 --- !u!114 &331588644
 MonoBehaviour:
   m_ObjectHideFlags: 0

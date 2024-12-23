@@ -5,7 +5,8 @@ using UnityEngine.UI;
 // 퀘스트 Script
 public class QuestManager : MonoBehaviour
 {
-    private GameManager gameManager;                                    // GameManager
+    // Singleton Instance
+    public static QuestManager Instance { get; private set; }
 
     [Header("---[QuestManager]")]
     [SerializeField] private ScrollRect questScrollRect;                // 퀘스트의 스크롤뷰
@@ -14,6 +15,24 @@ public class QuestManager : MonoBehaviour
     [SerializeField] private GameObject questMenuPanel;                 // 퀘스트 메뉴 Panel
     [SerializeField] private Button questBackButton;                    // 퀘스트 뒤로가기 버튼
     private bool isQuestMenuOpen;                                       // 퀘스트 메뉴 Panel의 활성화 상태
+
+    // ======================================================================================================================
+
+    // 퀘스트를 위한 변수들
+    private int feedCount;                                              // 고양이 스폰 횟수(먹이 준 횟수)
+    public int FeedCount { get => feedCount; set => feedCount = value; }
+
+    private int combineCount;                                           // 고양이 머지 횟수
+    public int CombineCount { get => combineCount; set => combineCount = value; }
+
+    private int getCoinCount;                                           // 획득코인 갯수
+    public int GetCoinCount { get => getCoinCount; set => getCoinCount = value; }
+
+    private float playTimeCount;                                        // 플레이타임 카운트
+    public float PlayTimeCount { get => playTimeCount; set => playTimeCount = value; }
+
+    private int purchaseCatsCount;                                      // 고양이 구매 횟수
+    public int PurchaseCatsCount { get => purchaseCatsCount; set => purchaseCatsCount = value; }
 
     // ======================================================================================================================
 
@@ -82,9 +101,20 @@ public class QuestManager : MonoBehaviour
 
     // ======================================================================================================================
 
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else 
+        {
+            Destroy(gameObject);
+        }
+    }
+
     private void Start()
     {
-        gameManager = GameManager.Instance;
         questMenuPanel.SetActive(false);
 
         InitializeQuestButton();
@@ -101,6 +131,8 @@ public class QuestManager : MonoBehaviour
 
     private void Update()
     {
+        AddPlayTimeCount();
+
         UpdateGiveFeedQuestUI();
         UpdateCombineQuestUI();
         UpdateGetCoinQuestUI();
@@ -108,6 +140,65 @@ public class QuestManager : MonoBehaviour
         UpdatePurchaseCatsQuestUI();
 
         UpdateSpecialRewardUI();
+    }
+
+    // ======================================================================================================================
+
+    // 퀘스트 관련 변수들
+
+    public void AddCash(int amount)
+    {
+        GameManager.Instance.Cash += amount;
+    }
+
+    public void AddFeedCount()
+    {
+        FeedCount++;
+    }
+
+    public void ResetFeedCount(int count)
+    {
+        FeedCount = count;
+    }
+
+    public void AddCombineCount()
+    {
+        CombineCount++;
+    }
+
+    public void ResetCombineCount(int count)
+    {
+        CombineCount = count;
+    }
+
+    public void AddGetCoinCount(int count)
+    {   // 고양이가 재화를 자동으로 얻을때마다 호출
+        GetCoinCount += count;
+    }
+
+    public void ResetGetCoinCount(int count)
+    {
+        GetCoinCount = count;
+    }
+
+    public void AddPlayTimeCount()
+    {
+        PlayTimeCount += Time.deltaTime;
+    }
+
+    public void ResetPlayTime(int count)
+    {
+        PlayTimeCount = count;
+    }
+
+    public void AddPurchaseCatsCount()
+    {
+        PurchaseCatsCount++;
+    }
+
+    public void ResetPurchaseCatsCount(int count)
+    {
+        PurchaseCatsCount = count;
     }
 
     // ======================================================================================================================
@@ -164,7 +255,7 @@ public class QuestManager : MonoBehaviour
     // 스폰 퀘스트 UI를 업데이트하는 함수
     private void UpdateGiveFeedQuestUI()
     {
-        int currentCount = gameManager.FeedCount;
+        int currentCount = FeedCount;
 
         // 목표가 10 이상이면 퀘스트 종료 상태 처리
         if (giveFeedTargetCount >= 10)
@@ -192,7 +283,7 @@ public class QuestManager : MonoBehaviour
     // 스폰 퀘스트 보상 버튼 클릭 시 호출되는 함수
     private void ReceiveGiveFeedReward()
     {
-        int currentCount = gameManager.FeedCount;
+        int currentCount = FeedCount;
 
         // 목표가 10 이상인 경우 더 이상 보상 지급 불가
         if (giveFeedTargetCount >= 10)
@@ -210,9 +301,9 @@ public class QuestManager : MonoBehaviour
             giveFeedTargetCount += increaseGiveFeedTargetCount;
 
             // 퀘스트 완료 처리
-            gameManager.AddCash(giveFeedQuestRewardCash);
-            gameManager.ResetFeedCount(excessCount);
-            gameManager.UpdateCashText();
+            AddCash(giveFeedQuestRewardCash);
+            ResetFeedCount(excessCount);
+            GameManager.Instance.UpdateCashText();
             UpdateGiveFeedQuestUI();
         }
     }
@@ -230,7 +321,7 @@ public class QuestManager : MonoBehaviour
     // 머지 퀘스트 UI를 업데이트하는 함수
     private void UpdateCombineQuestUI()
     {
-        int currentCount = gameManager.CombineCount;
+        int currentCount = CombineCount;
 
         // 목표가 10 이상이면 퀘스트 종료 상태 처리
         if (combineTargetCount >= 10)
@@ -258,7 +349,7 @@ public class QuestManager : MonoBehaviour
     // 머지 퀘스트 보상 버튼 클릭 시 호출되는 함수
     private void ReceiveCombineReward()
     {
-        int currentCount = gameManager.CombineCount;
+        int currentCount = CombineCount;
 
         // 목표가 10 이상인 경우 더 이상 보상 지급 불가
         if (combineTargetCount >= 10)
@@ -276,9 +367,9 @@ public class QuestManager : MonoBehaviour
             combineTargetCount += increaseCombineTargetCount;
 
             // 퀘스트 완료 처리
-            gameManager.AddCash(combineQuestRewardCash);
-            gameManager.ResetCombineCount(excessCount);
-            gameManager.UpdateCashText();
+            AddCash(combineQuestRewardCash);
+            ResetCombineCount(excessCount);
+            GameManager.Instance.UpdateCashText();
             UpdateCombineQuestUI();
         }
     }
@@ -296,7 +387,7 @@ public class QuestManager : MonoBehaviour
     // 획득코인 퀘스트 UI를 업데이트하는 함수
     private void UpdateGetCoinQuestUI()
     {
-        int currentCount = gameManager.GetCoinCount;
+        int currentCount = GetCoinCount;
 
         // 목표가 10 이상이면 퀘스트 종료 상태 처리
         if (getCoinTargetCount >= 10)
@@ -324,7 +415,7 @@ public class QuestManager : MonoBehaviour
     // 획득코인 퀘스트 보상 버튼 클릭 시 호출되는 함수
     private void ReceiveGetCoinReward()
     {
-        int currentCount = gameManager.GetCoinCount;
+        int currentCount = GetCoinCount;
 
         // 목표가 10 이상인 경우 더 이상 보상 지급 불가
         if (getCoinTargetCount >= 10)
@@ -342,9 +433,9 @@ public class QuestManager : MonoBehaviour
             getCoinTargetCount += increaseGetCoinTargetCount;
 
             // 퀘스트 완료 처리
-            gameManager.AddCash(getCoinQuestRewardCash);
-            gameManager.ResetGetCoinCount(excessCount);
-            gameManager.UpdateCashText();
+            AddCash(getCoinQuestRewardCash);
+            ResetGetCoinCount(excessCount);
+            GameManager.Instance.UpdateCashText();
             UpdateGetCoinQuestUI();
         }
     }
@@ -362,7 +453,7 @@ public class QuestManager : MonoBehaviour
     // 플레이타임 퀘스트 UI를 업데이트하는 함수
     private void UpdatePlayTimeQuestUI()
     {
-        int currentTime = (int)gameManager.PlayTimeCount;
+        int currentTime = (int)PlayTimeCount;
 
         // 목표가 200 이상이면 퀘스트 종료 상태 처리
         if (playTimeTargetCount >= 200)
@@ -390,7 +481,7 @@ public class QuestManager : MonoBehaviour
     // 플레이타임 퀘스트 보상 버튼 클릭 시 호출되는 함수
     private void ReceivePlayTimeReward()
     {
-        int currentTime = (int)gameManager.PlayTimeCount;
+        int currentTime = (int)PlayTimeCount;
 
         // 목표가 200 이상인 경우 더 이상 보상 지급 불가
         if (playTimeTargetCount >= 200)
@@ -407,9 +498,9 @@ public class QuestManager : MonoBehaviour
             playTimeTargetCount += increasePlayTimeTargetCount;
 
             // 퀘스트 완료 처리
-            gameManager.AddCash(playTimeQuestRewardCash);
-            gameManager.ResetPlayTime(excessTime);
-            gameManager.UpdateCashText();
+            AddCash(playTimeQuestRewardCash);
+            ResetPlayTime(excessTime);
+            GameManager.Instance.UpdateCashText();
             UpdatePlayTimeQuestUI();
         }
     }
@@ -427,7 +518,7 @@ public class QuestManager : MonoBehaviour
     // 고양이 구매 퀘스트 UI를 업데이트하는 함수
     private void UpdatePurchaseCatsQuestUI()
     {
-        int currentCount = gameManager.PurchaseCatsCount;
+        int currentCount = PurchaseCatsCount;
 
         // 목표가 10 이상이면 퀘스트 종료 상태 처리
         if (purchaseCatsTargetCount >= 10)
@@ -455,7 +546,7 @@ public class QuestManager : MonoBehaviour
     // 고양이 구매 퀘스트 보상 버튼 클릭 시 호출되는 함수
     private void ReceivePurchaseCatsReward()
     {
-        int currentCount = gameManager.PurchaseCatsCount;
+        int currentCount = PurchaseCatsCount;
 
         // 목표가 10 이상인 경우 더 이상 보상 지급 불가
         if (purchaseCatsTargetCount >= 10)
@@ -472,9 +563,9 @@ public class QuestManager : MonoBehaviour
             purchaseCatsTargetCount += increasePurchaseCatsTargetCount;
 
             // 퀘스트 완료 처리
-            gameManager.AddCash(purchaseCatsQuestRewardCash);
-            gameManager.ResetPurchaseCatsCount(excessCount);
-            gameManager.UpdateCashText();
+            AddCash(purchaseCatsQuestRewardCash);
+            ResetPurchaseCatsCount(excessCount);
+            GameManager.Instance.UpdateCashText();
             UpdatePurchaseCatsQuestUI();
         }
     }
@@ -520,7 +611,7 @@ public class QuestManager : MonoBehaviour
         if (isSpecialRewardActive)
         {
             // 보상 처리 로직
-            gameManager.AddCash(specialRewardQuestRewardCash);
+            AddCash(specialRewardQuestRewardCash);
 
             // 보상 지급 후 버튼만 비활성화 상태로 돌아감
             specialRewardRewardDisabledBG.SetActive(true);
@@ -529,7 +620,7 @@ public class QuestManager : MonoBehaviour
 
             // 퀘스트 UI 업데이트
             UpdateSpecialRewardUI();
-            gameManager.UpdateCashText();
+            GameManager.Instance.UpdateCashText();
         }
     }
 

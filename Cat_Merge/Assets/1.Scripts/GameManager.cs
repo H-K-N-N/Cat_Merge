@@ -13,26 +13,12 @@ public class GameManager : MonoBehaviour
     // Data
     private Cat[] allCatData;                                       // 모든 고양이 데이터 보유
     public Cat[] AllCatData => allCatData;
-    private bool[] isCatUnlocked;                                   // 고양이 해금 여부 배열
-    private bool[] isGetFirstUnlockedReward;                        // 고양이 첫 해금 보상 획득 여부 배열
 
     // ======================================================================================================================
 
-    // 퀘스트를 위한 변수들
-    private int feedCount;                                          // 고양이 스폰 횟수(먹이 준 횟수)
-    public int FeedCount { get => feedCount; set => feedCount = value; }
-
-    private int combineCount;                                       // 고양이 머지 횟수
-    public int CombineCount { get => combineCount; set => combineCount = value; }
-
-    private int getCoinCount;                                       // 획득코인 갯수
-    public int GetCoinCount { get => getCoinCount; set => getCoinCount = value; }
-
-    private float playTimeCount;                                    // 플레이타임 카운트
-    public float PlayTimeCount { get => playTimeCount; set => playTimeCount = value; }
-
-    private int purchaseCatsCount;                                  // 고양이 구매 횟수
-    public int PurchaseCatsCount { get => purchaseCatsCount; set => purchaseCatsCount = value; }
+    // 도감 관련
+    private bool[] isCatUnlocked;                                   // 고양이 해금 여부 배열
+    private bool[] isGetFirstUnlockedReward;                        // 고양이 첫 해금 보상 획득 여부 배열
 
     // ======================================================================================================================
 
@@ -45,10 +31,12 @@ public class GameManager : MonoBehaviour
     // 기본 재화
     [SerializeField] private TextMeshProUGUI coinText;              // 기본재화 텍스트
     private int coin = 1000;                                        // 기본재화
+    public int Coin { get => coin; set => coin = value; }
 
     // 캐쉬 재화
     [SerializeField] private TextMeshProUGUI cashText;              // 캐쉬재화 텍스트
     private int cash = 1000;                                        // 캐쉬재화
+    public int Cash { get => cash; set => cash = value; }
 
     // ======================================================================================================================
 
@@ -290,7 +278,7 @@ public class GameManager : MonoBehaviour
         }
 
         isGetFirstUnlockedReward[catGrade] = true;
-        AddCash(AllCatData[catGrade].CatGetCoin);
+        QuestManager.Instance.AddCash(AllCatData[catGrade].CatGetCoin);
         UpdateCashText();
     }
 
@@ -309,67 +297,7 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
-    // 퀘스트 관련
-
-    private void Update()
-    {
-        AddPlayTimeCount();
-    }
-
-    public void AddCash(int amount)
-    {
-        cash += amount;
-    }
-
-    public void AddFeedCount()
-    {
-        FeedCount++;
-    }
-
-    public void ResetFeedCount(int count)
-    {
-        FeedCount = count;
-    }
-
-    public void AddCombineCount()
-    {
-        CombineCount++;
-    }
-
-    public void ResetCombineCount(int count)
-    {
-        CombineCount = count;
-    }
-
-    public void AddGetCoinCount(int count)
-    {   // 고양이가 재화를 자동으로 얻을때마다 호출
-        GetCoinCount += count;
-    }
-
-    public void ResetGetCoinCount(int count)
-    {
-        GetCoinCount = count;
-    }
-
-    public void AddPlayTimeCount()
-    {
-        PlayTimeCount += Time.deltaTime;
-    }
-
-    public void ResetPlayTime(int count)
-    {
-        PlayTimeCount = count;
-    }
-
-    public void AddPurchaseCatsCount()
-    {
-        PurchaseCatsCount++;
-    }
-
-    public void ResetPurchaseCatsCount(int count)
-    {
-        PurchaseCatsCount = count;
-    }
+    
 
     // ======================================================================================================================
 
@@ -961,7 +889,7 @@ public class GameManager : MonoBehaviour
             buyCatCoinCount++;
             buyCatCoinFee *= 2;
 
-            AddPurchaseCatsCount();     // 퀘스트 함수
+            QuestManager.Instance.AddPurchaseCatsCount();
 
             CatSpawn catSpawn = GetComponent<CatSpawn>();
             catSpawn.OnClickedSpawn();
@@ -981,7 +909,7 @@ public class GameManager : MonoBehaviour
             cash -= buyCatCashFee;
             buyCatCashCount++;
 
-            AddPurchaseCatsCount();     // 퀘스트 함수
+            QuestManager.Instance.AddPurchaseCatsCount();
 
             CatSpawn catSpawn = GetComponent<CatSpawn>();
             catSpawn.OnClickedSpawn();

@@ -16,7 +16,7 @@ public class CatMerge : MonoBehaviour
         if (nextCat != null)
         {
             //Debug.Log($"합성 성공 : {nextCat.CatName}");
-            GameManager.Instance.UnlockCat(nextCat.CatGrade - 1);
+            DictionaryManager.Instance.UnlockCat(nextCat.CatGrade - 1);
             QuestManager.Instance.AddCombineCount();
             return nextCat;
         }

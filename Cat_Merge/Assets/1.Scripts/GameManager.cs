@@ -10,15 +10,11 @@ public class GameManager : MonoBehaviour
     // Singleton instance
     public static GameManager Instance { get; private set; }        // SingleTon
 
+    // ======================================================================================================================
+
     // Data
     private Cat[] allCatData;                                       // 모든 고양이 데이터 보유
     public Cat[] AllCatData => allCatData;
-
-    // ======================================================================================================================
-
-    // 도감 관련
-    private bool[] isCatUnlocked;                                   // 고양이 해금 여부 배열
-    private bool[] isGetFirstUnlockedReward;                        // 고양이 첫 해금 보상 획득 여부 배열
 
     // ======================================================================================================================
 
@@ -40,8 +36,8 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
-    // Merge On/Off
-    [Header("---[Merge On/Off]")]
+    // Merge On/Off System
+    [Header("---[Merge On/Off System]")]
     [SerializeField] private Button openMergePanelButton;           // 머지 패널 열기 버튼
     [SerializeField] private GameObject mergePanel;                 // 머지 On/Off 패널
     [SerializeField] private Button closeMergePanelButton;          // 머지 패널 닫기 버튼
@@ -51,8 +47,8 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
-    // AutoMove On/Off
-    [Header("----[AutoMove On/Off]")]
+    // AutoMove On/Off System
+    [Header("----[AutoMove On/Off System]")]
     [SerializeField] private Button openAutoMovePanelButton;        // 자동 이동 패널 열기 버튼
     [SerializeField] private GameObject autoMovePanel;              // 자동 이동 On/Off 패널
     [SerializeField] private Button closeAutoMovePanelButton;       // 자동 이동 패널 닫기 버튼
@@ -62,8 +58,8 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
-    // AutoMerge
-    [Header("---[AutoMerge]")]
+    // AutoMerge System
+    [Header("---[AutoMerge System]")]
     [SerializeField] private Button openAutoMergePanelButton;       // 자동 머지 패널 열기 버튼
     [SerializeField] private GameObject autoMergePanel;             // 자동 머지 패널
     [SerializeField] private Button closeAutoMergePanelButton;      // 자동 머지 패널 닫기 버튼
@@ -73,7 +69,7 @@ public class GameManager : MonoBehaviour
     private int autoMergeCost = 30;                                 // 자동 머지 비용
 
     // Sort System
-    [Header("---[Sort]")]
+    [Header("---[Sort System]")]
     [SerializeField] private Button sortButton;                     // 정렬 버튼
     [SerializeField] private Transform gamePanel;                   // GamePanel
 
@@ -219,85 +215,6 @@ public class GameManager : MonoBehaviour
         buyCatCoinButton.onClick.AddListener(BuyCatCoin);
         buyCatCashButton.onClick.AddListener(BuyCatCash);
     }
-
-    // ======================================================================================================================
-
-    // 도감 해금 관련
-
-    private void Start()
-    {
-        LoadUnlockedCats();
-    }
-
-    // 모든 해금 상태 불러오기
-    public void LoadUnlockedCats()
-    {
-        InitializeCatUnlockData();
-    }
-
-    // 고양이 해금 여부 초기화
-    public void InitializeCatUnlockData()
-    {
-        int allCatDataLength = AllCatData.Length;
-
-        isCatUnlocked = new bool[allCatDataLength];
-        isGetFirstUnlockedReward = new bool[allCatDataLength];
-
-        // 모든 고양이를 잠금 상태로 초기화 & 첫 보상 획득 false로 초기화
-        for (int i = 0; i < isCatUnlocked.Length; i++)
-        {
-            isCatUnlocked[i] = false;
-            isGetFirstUnlockedReward[i] = false;
-        }
-    }
-
-    // 특정 고양이를 해금
-    public void UnlockCat(int CatGrade)
-    {
-        if (CatGrade < 0 || CatGrade >= isCatUnlocked.Length || isCatUnlocked[CatGrade])
-        {
-            return;
-        }
-
-        isCatUnlocked[CatGrade] = true;
-        SaveUnlockedCats(CatGrade);
-    }
-
-    // 특정 고양이의 해금 여부 확인
-    public bool IsCatUnlocked(int catGrade)
-    {
-        return isCatUnlocked[catGrade];
-    }
-
-    // 특정 고양이의 첫 해금 보상 획득
-    public void GetFirstUnlockedReward(int catGrade)
-    {
-        if (catGrade < 0 || catGrade >= isGetFirstUnlockedReward.Length || isGetFirstUnlockedReward[catGrade])
-        {
-            return;
-        }
-
-        isGetFirstUnlockedReward[catGrade] = true;
-        QuestManager.Instance.AddCash(AllCatData[catGrade].CatGetCoin);
-        UpdateCashText();
-    }
-
-    // 특정 고양이의 첫 해금 보상 획득 여부 확인
-    public bool IsGetFirstUnlockedReward(int catGrade)
-    {
-        return isGetFirstUnlockedReward[catGrade];
-    }
-
-    // 모든 해금 상태 저장
-    public void SaveUnlockedCats(int CatGrade)
-    {
-        GetComponent<DictionaryManager>().UpdateDictionary(CatGrade);
-        GetComponent<DictionaryManager>().ShowNewCatPanel(CatGrade);
-    }
-
-    // ======================================================================================================================
-
-    
 
     // ======================================================================================================================
 

@@ -5,7 +5,8 @@ using UnityEngine.UI;
 // 고양이 도감 Script
 public class DictionaryManager : MonoBehaviour
 {
-    private GameManager gameManager;                                // GameManager
+    // Singleton Instance
+    public static DictionaryManager Instance { get; private set; }
 
     [Header("---[Dictionary Manager]")]
     [SerializeField] private ScrollRect[] dictionaryScrollRects;    // 도감의 스크롤뷰 배열
@@ -19,6 +20,12 @@ public class DictionaryManager : MonoBehaviour
     [SerializeField] private GameObject slotPrefab;                 // 도감 슬롯 프리팹
 
     [SerializeField] private Button[] dictionaryMenuButtons;        // 도감의 서브 메뉴 버튼 배열
+
+    // ======================================================================================================================
+
+    // 도감 해금 관련 변수
+    private bool[] isCatUnlocked;                                   // 고양이 해금 여부 배열
+    private bool[] isGetFirstUnlockedReward;                        // 고양이 첫 해금 보상 획득 여부 배열
 
     // ======================================================================================================================
 
@@ -49,10 +56,21 @@ public class DictionaryManager : MonoBehaviour
 
     // ======================================================================================================================
 
-    // Start
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
     private void Start()
     {
-        gameManager = GameManager.Instance;
+        LoadUnlockedCats();
 
         newCatPanel.SetActive(false);
         dictionaryMenuPanel.SetActive(false);
@@ -67,6 +85,74 @@ public class DictionaryManager : MonoBehaviour
 
         submitButton.onClick.AddListener(CloseNewCatPanel);
     }
+
+    // 모든 해금 상태 불러오기
+    public void LoadUnlockedCats()
+    {
+        InitializeCatUnlockData();
+    }
+
+    // 고양이 해금 여부 초기화
+    public void InitializeCatUnlockData()
+    {
+        int allCatDataLength = GameManager.Instance.AllCatData.Length;
+
+        isCatUnlocked = new bool[allCatDataLength];
+        isGetFirstUnlockedReward = new bool[allCatDataLength];
+
+        // 모든 고양이를 잠금 상태로 초기화 & 첫 보상 획득 false로 초기화
+        for (int i = 0; i < isCatUnlocked.Length; i++)
+        {
+            isCatUnlocked[i] = false;
+            isGetFirstUnlockedReward[i] = false;
+        }
+    }
+
+    // 특정 고양이를 해금
+    public void UnlockCat(int CatGrade)
+    {
+        if (CatGrade < 0 || CatGrade >= isCatUnlocked.Length || isCatUnlocked[CatGrade])
+        {
+            return;
+        }
+
+        isCatUnlocked[CatGrade] = true;
+        SaveUnlockedCats(CatGrade);
+    }
+
+    // 특정 고양이의 해금 여부 확인
+    public bool IsCatUnlocked(int catGrade)
+    {
+        return isCatUnlocked[catGrade];
+    }
+
+    // 특정 고양이의 첫 해금 보상 획득
+    public void GetFirstUnlockedReward(int catGrade)
+    {
+        if (catGrade < 0 || catGrade >= isGetFirstUnlockedReward.Length || isGetFirstUnlockedReward[catGrade])
+        {
+            return;
+        }
+
+        isGetFirstUnlockedReward[catGrade] = true;
+        QuestManager.Instance.AddCash(GameManager.Instance.AllCatData[catGrade].CatGetCoin);
+        GameManager.Instance.UpdateCashText();
+    }
+
+    // 특정 고양이의 첫 해금 보상 획득 여부 확인
+    public bool IsGetFirstUnlockedReward(int catGrade)
+    {
+        return isGetFirstUnlockedReward[catGrade];
+    }
+
+    // 모든 해금 상태 저장
+    public void SaveUnlockedCats(int CatGrade)
+    {
+        GetComponent<DictionaryManager>().UpdateDictionary(CatGrade);
+        GetComponent<DictionaryManager>().ShowNewCatPanel(CatGrade);
+    }
+
+    // ======================================================================================================================
 
     // 초기 스크롤 위치 초기화 함수
     private void ResetScrollPositions()
@@ -140,7 +226,7 @@ public class DictionaryManager : MonoBehaviour
     // 도감 데이터를 채우는 함수
     private void PopulateDictionary()
     {
-        if (gameManager.AllCatData == null || gameManager.AllCatData.Length == 0)
+        if (GameManager.Instance.AllCatData == null || GameManager.Instance.AllCatData.Length == 0)
         {
             Debug.LogError("No cat data found in GameManager.");
             return;
@@ -151,7 +237,7 @@ public class DictionaryManager : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        foreach (Cat cat in gameManager.AllCatData)
+        foreach (Cat cat in GameManager.Instance.AllCatData)
         {
             InitializeSlot(cat);
         }
@@ -169,7 +255,7 @@ public class DictionaryManager : MonoBehaviour
         TextMeshProUGUI firstOpenCashtext = slot.transform.Find("Button/FirstOpenBG/Cash Text")?.GetComponent<TextMeshProUGUI>();
 
         // 나중에 데이터 불러오기 기능이 있다면 무조건 있어야하기 때문에 작성 (현재는 무조건 else문으로 넘어감)
-        if (gameManager.IsCatUnlocked(cat.CatGrade - 1))
+        if (IsCatUnlocked(cat.CatGrade - 1))
         {
             button.interactable = true;
             iconImage.sprite = cat.CatImage;
@@ -206,15 +292,15 @@ public class DictionaryManager : MonoBehaviour
 
         button.interactable = true;
 
-        iconImage.sprite = gameManager.AllCatData[catGrade].CatImage;
+        iconImage.sprite = GameManager.Instance.AllCatData[catGrade].CatImage;
         iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
 
-        text.text = $"{catGrade + 1}. {gameManager.AllCatData[catGrade].CatName}";
+        text.text = $"{catGrade + 1}. {GameManager.Instance.AllCatData[catGrade].CatName}";
         
-        if (!gameManager.IsGetFirstUnlockedReward(catGrade))
+        if (!IsGetFirstUnlockedReward(catGrade))
         {
             firstOpenBG.gameObject.SetActive(true);
-            firstOpenCashtext.text = $"+ {gameManager.AllCatData[catGrade].CatGetCoin}";
+            firstOpenCashtext.text = $"+ {GameManager.Instance.AllCatData[catGrade].CatGetCoin}";
         }
         else
         {
@@ -224,9 +310,9 @@ public class DictionaryManager : MonoBehaviour
         button.onClick.RemoveAllListeners();
         button.onClick.AddListener(() =>
         {
-            if (!gameManager.IsGetFirstUnlockedReward(catGrade))
+            if (!IsGetFirstUnlockedReward(catGrade))
             {
-                gameManager.GetFirstUnlockedReward(catGrade);
+                GetFirstUnlockedReward(catGrade);
                 firstOpenBG.gameObject.SetActive(false);
             }
             else
@@ -239,7 +325,7 @@ public class DictionaryManager : MonoBehaviour
     // 새로운 고양이 해금 효과 & 도감에서 해당 고양이 버튼을 누르면 나오는 New Cat Panel 함수
     public void ShowNewCatPanel(int catGrade)
     {
-        Cat newCat = gameManager.AllCatData[catGrade];
+        Cat newCat = GameManager.Instance.AllCatData[catGrade];
 
         newCatPanel.SetActive(true);
 
@@ -258,6 +344,8 @@ public class DictionaryManager : MonoBehaviour
     {
         newCatPanel.SetActive(false);
     }
+
+    // ======================================================================================================================
 
 
 }

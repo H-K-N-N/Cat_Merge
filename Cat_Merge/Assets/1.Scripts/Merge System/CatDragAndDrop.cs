@@ -11,11 +11,15 @@ public class CatDragAndDrop : MonoBehaviour, IDragHandler, IBeginDragHandler, IE
 
     public bool isDragging { get; private set; }    // 드래그 상태 확인 플래그
 
+    // ======================================================================================================================
+
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
         parentCanvas = GetComponentInParent<Canvas>();
     }
+
+    // ======================================================================================================================
 
     // 드래그 시작 함수
     public void OnBeginDrag(PointerEventData eventData)

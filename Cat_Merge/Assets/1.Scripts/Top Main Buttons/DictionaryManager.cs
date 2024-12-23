@@ -86,6 +86,8 @@ public class DictionaryManager : MonoBehaviour
         submitButton.onClick.AddListener(CloseNewCatPanel);
     }
 
+    // ======================================================================================================================
+
     // 모든 해금 상태 불러오기
     public void LoadUnlockedCats()
     {
@@ -136,7 +138,6 @@ public class DictionaryManager : MonoBehaviour
 
         isGetFirstUnlockedReward[catGrade] = true;
         QuestManager.Instance.AddCash(GameManager.Instance.AllCatData[catGrade].CatGetCoin);
-        GameManager.Instance.UpdateCashText();
     }
 
     // 특정 고양이의 첫 해금 보상 획득 여부 확인

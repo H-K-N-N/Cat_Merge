@@ -18,7 +18,6 @@ public class QuestManager : MonoBehaviour
 
     // ======================================================================================================================
 
-    // Äù½ºÆ®¸¦ À§ÇÑ º¯¼öµé
     private int feedCount;                                              // °í¾çÀÌ ½ºÆù È½¼ö(¸ÔÀÌ ÁØ È½¼ö)
     public int FeedCount { get => feedCount; set => feedCount = value; }
 

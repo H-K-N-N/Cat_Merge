@@ -15,6 +15,8 @@ public class CatData : MonoBehaviour
     private bool isAnimating = false;           // 애니메이션 중인지 확인 플래그
     private bool isAutoMoveEnabled = true;      // 자동 이동 활성화 상태
 
+    // ======================================================================================================================
+
     private void Awake()
     {
         catImage = GetComponent<Image>();
@@ -27,6 +29,8 @@ public class CatData : MonoBehaviour
     {
         UpdateCatUI();
     }
+
+    // ======================================================================================================================
 
     // CatUI 최신화하는 함수
     public void UpdateCatUI()

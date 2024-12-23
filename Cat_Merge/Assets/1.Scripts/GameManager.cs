@@ -27,12 +27,28 @@ public class GameManager : MonoBehaviour
     // 기본 재화
     [SerializeField] private TextMeshProUGUI coinText;              // 기본재화 텍스트
     private int coin = 1000;                                        // 기본재화
-    public int Coin { get => coin; set => coin = value; }
+    public int Coin
+    {
+        get => coin;
+        set
+        {
+            coin = value;
+            UpdateCoinText();
+        }
+    }
 
     // 캐쉬 재화
     [SerializeField] private TextMeshProUGUI cashText;              // 캐쉬재화 텍스트
     private int cash = 1000;                                        // 캐쉬재화
-    public int Cash { get => cash; set => cash = value; }
+    public int Cash 
+    { 
+        get => cash;
+        set
+        {
+            cash = value;
+            UpdateCashText();
+        }
+    }
 
     // ======================================================================================================================
 
@@ -54,14 +70,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Button closeAutoMovePanelButton;       // 자동 이동 패널 닫기 버튼
     [SerializeField] private Button autoMoveStateButton;            // 자동 이동 상태 버튼
     [SerializeField] private TextMeshProUGUI autoMoveStateText;     // 자동 이동 현재 상태 텍스트
-    private bool isAutoMoveEnabled = true;                          // 자동 이동 활성화 상태
-
-    // ======================================================================================================================
-
-    // Sort System
-    [Header("---[Sort System]")]
-    [SerializeField] private Button sortButton;                     // 정렬 버튼
-    [SerializeField] private Transform gamePanel;                   // GamePanel
+    public bool isAutoMoveEnabled = true;                           // 자동 이동 활성화 상태
 
     // ======================================================================================================================
 
@@ -95,9 +104,9 @@ public class GameManager : MonoBehaviour
 
     // 아이템 메뉴 안에 아이템, 동료, 배경, 황금깃털의 버튼들
     [Header("ItemMenues")]
-    [SerializeField] private Button[] itemMenuButtons;              // itemPanel에서의 아이템 메뉴 버튼들
-    [SerializeField] private GameObject[] itemMenues;               // itemPanel에서의 메뉴 스크롤창 판넬
-    private bool[] isItemMenuButtonsOn = new bool[4];               // 버튼 색상 감지하기 위한 bool타입 배열
+    [SerializeField] private Button[] itemMenuButtons;                  // itemPanel에서의 아이템 메뉴 버튼들
+    [SerializeField] private GameObject[] itemMenues;                   // itemPanel에서의 메뉴 스크롤창 판넬
+    private bool[] isItemMenuButtonsOn = new bool[4];                   // 버튼 색상 감지하기 위한 bool타입 배열
 
 
     // 아이템 메뉴 안에 아이템 목록
@@ -111,24 +120,24 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
     [Header("BuyCat")]
-    [SerializeField] private Button bottomBuyCatButton;               // 고양이 구매 버튼
-    [SerializeField] private Image bottomBuyCatButtonImg;             // 고양이 구매 버튼 이미지
-    [SerializeField] private GameObject buyCatCoinDisabledBg;         // 버튼 클릭 못할 때의 배경
-    [SerializeField] private GameObject buyCatCashDisabledBg;         // 버튼 클릭 못할 때의 배경
-    [SerializeField] private GameObject buyCatMenuPanel;              // 아이템 메뉴 판넬
-    private bool isOnToggleBuyCat;                                    // 아이템 메뉴 판넬 토글
-    [SerializeField] private Button buyCatBackButton;                 // 고양이 구매 메뉴 뒤로가기 버튼
+    [SerializeField] private Button bottomBuyCatButton;                 // 고양이 구매 버튼
+    [SerializeField] private Image bottomBuyCatButtonImg;               // 고양이 구매 버튼 이미지
+    [SerializeField] private GameObject buyCatCoinDisabledBg;           // 버튼 클릭 못할 때의 배경
+    [SerializeField] private GameObject buyCatCashDisabledBg;           // 버튼 클릭 못할 때의 배경
+    [SerializeField] private GameObject buyCatMenuPanel;                // 아이템 메뉴 판넬
+    private bool isOnToggleBuyCat;                                      // 아이템 메뉴 판넬 토글
+    [SerializeField] private Button buyCatBackButton;                   // 고양이 구매 메뉴 뒤로가기 버튼
 
-    [SerializeField] private Button buyCatCoinButton;                // 고양이 재화로 구매 버튼
-    [SerializeField] private Button buyCatCashButton;                // 크리스탈 재화로 구매 버튼
+    [SerializeField] private Button buyCatCoinButton;                   // 고양이 재화로 구매 버튼
+    [SerializeField] private Button buyCatCashButton;                   // 크리스탈 재화로 구매 버튼
 
-    [SerializeField] private TextMeshProUGUI buyCatCountExplainText;  // 고양이 구매 횟수 설명창
-    [SerializeField] private TextMeshProUGUI buyCatCoinFeeText;       // 고양이 구매 비용 (골드)
-    [SerializeField] private TextMeshProUGUI buyCatCashFeeText;       // 고양이 구매 비용 (크리스탈)
-    private int buyCatCoinCount = 0;                                  // 고양이 구매 횟수(코인)
-    private int buyCatCashCount = 0;                                  // 고양이 구매 횟수(크리스탈)
-    private int buyCatCoinFee = 5;                                    // 고양이 구매 비용 (코인)
-    private int buyCatCashFee = 5;                                    // 고양이 구매 비용 (크리스탈)
+    [SerializeField] private TextMeshProUGUI buyCatCountExplainText;    // 고양이 구매 횟수 설명창
+    [SerializeField] private TextMeshProUGUI buyCatCoinFeeText;         // 고양이 구매 비용 (골드)
+    [SerializeField] private TextMeshProUGUI buyCatCashFeeText;         // 고양이 구매 비용 (크리스탈)
+    private int buyCatCoinCount = 0;                                    // 고양이 구매 횟수(코인)
+    private int buyCatCashCount = 0;                                    // 고양이 구매 횟수(크리스탈)
+    private int buyCatCoinFee = 5;                                      // 고양이 구매 비용 (코인)
+    private int buyCatCashFee = 5;                                      // 고양이 구매 비용 (크리스탈)
 
     // ======================================================================================================================
 
@@ -164,9 +173,6 @@ public class GameManager : MonoBehaviour
         openMergePanelButton.onClick.AddListener(OpenMergePanel);
         closeMergePanelButton.onClick.AddListener(CloseMergePanel);
         mergeStateButton.onClick.AddListener(ToggleMergeState);
-
-        // 정렬 관련
-        sortButton.onClick.AddListener(SortCats);
 
         // 아이템 메뉴 관련
         bottomItemButton.onClick.AddListener(OpenCloseBottomItemMenuPanel);
@@ -406,108 +412,6 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
-    // 고양이 정렬 함수
-    private void SortCats()
-    {
-        StartCoroutine(SortCatsCoroutine());
-    }
-
-    // 고양이들을 정렬된 위치에 배치하는 코루틴
-    private IEnumerator SortCatsCoroutine()
-    {
-        // 정렬 전 자동 이동 잠시 중지 (현재 자동이동이 진행중인 고양이도 중지 = CatData의 AutoMove가 실행중이어도 중지)
-        foreach (Transform child in gamePanel)
-        {
-            CatData catData = child.GetComponent<CatData>();
-            if (catData != null)
-            {
-                catData.SetAutoMoveState(false); // 자동 이동 비활성화
-            }
-        }
-
-        // 고양이 객체들을 등급을 기준으로 정렬 (높은 등급이 먼저 오도록)
-        List<GameObject> sortedCats = new List<GameObject>();
-        foreach (Transform child in gamePanel)
-        {
-            sortedCats.Add(child.gameObject);
-        }
-
-        sortedCats.Sort((cat1, cat2) =>
-        {
-            int grade1 = GetCatGrade(cat1);
-            int grade2 = GetCatGrade(cat2);
-
-            if (grade1 == grade2) return 0;
-            return grade1 > grade2 ? -1 : 1;
-        });
-
-        // 고양이 이동 코루틴 실행
-        List<Coroutine> moveCoroutines = new List<Coroutine>();
-        for (int i = 0; i < sortedCats.Count; i++)
-        {
-            GameObject cat = sortedCats[i];
-            Coroutine moveCoroutine = StartCoroutine(MoveCatToPosition(cat, i));
-            moveCoroutines.Add(moveCoroutine);
-        }
-
-        // 모든 고양이가 이동을 마칠 때까지 기다리기
-        foreach (Coroutine coroutine in moveCoroutines)
-        {
-            yield return coroutine;
-        }
-
-        // 정렬 후 자동 이동 상태 복구 (정렬이 완료되고 고양이들이 다시 주기마다 자동이동이 가능하게 원래상태로 복구)
-        foreach (Transform child in gamePanel)
-        {
-            CatData catData = child.GetComponent<CatData>();
-            if (catData != null)
-            {
-                catData.SetAutoMoveState(isAutoMoveEnabled);
-            }
-        }
-    }
-
-    // 고양이의 등급을 반환하는 함수
-    private int GetCatGrade(GameObject catObject)
-    {
-        int grade = catObject.GetComponent<CatData>().catData.CatGrade;
-        return grade;
-    }
-
-    // 고양이들을 부드럽게 정렬된 위치로 이동시키는 함수
-    private IEnumerator MoveCatToPosition(GameObject catObject, int index)
-    {
-        RectTransform rectTransform = catObject.GetComponent<RectTransform>();
-
-        // 목표 위치 계산 (index는 정렬된 순서)
-        float targetX = (index % 7 - 3) * (rectTransform.rect.width + 10);
-        float targetY = (index / 7) * (rectTransform.rect.height + 10);
-        Vector2 targetPosition = new Vector2(targetX, -targetY);
-
-        // 현재 위치와 목표 위치의 차이를 계산하여 부드럽게 이동
-        float elapsedTime = 0f;
-        float duration = 0.1f;          // 이동 시간 (초)
-
-        Vector2 initialPosition = rectTransform.anchoredPosition;
-
-        // 목표 위치로 부드럽게 이동
-        while (elapsedTime < duration)
-        {
-            rectTransform.anchoredPosition = Vector2.Lerp(initialPosition, targetPosition, elapsedTime / duration);
-            elapsedTime += Time.deltaTime;
-            yield return null;
-        }
-
-        // 이동이 끝났을 때 정확한 목표 위치에 도달
-        rectTransform.anchoredPosition = targetPosition;
-    }
-
-    // ======================================================================================================================
-
-    
-
-    // ======================================================================================================================
-
     // 아이템 메뉴 판넬 여는 함수
     private void OpenCloseBottomItemMenuPanel()
     {
@@ -681,6 +585,7 @@ public class GameManager : MonoBehaviour
         }
         ChangeSelectedButtonColor(activePanel);
     }
+
     // ======================================================================================================================
 
     // 아이템 메뉴 판넬 여는 함수

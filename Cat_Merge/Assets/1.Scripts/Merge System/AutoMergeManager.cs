@@ -8,11 +8,6 @@ using TMPro;
 // 자동 머지 Script
 public class AutoMergeManager : MonoBehaviour
 {
-    // Singleton Instance
-    public static AutoMergeManager Instance { get; private set; }
-
-    // ======================================================================================================================
-
     [Header("---[AutoMerge System]")]
     [SerializeField] private Button openAutoMergePanelButton;       // 자동 머지 패널 열기 버튼
     [SerializeField] private GameObject autoMergePanel;             // 자동 머지 패널
@@ -38,15 +33,6 @@ public class AutoMergeManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-
         plusAutoMergeDuration = autoMergeDuration;
         currentAutoMergeDuration = autoMergeDuration;
 
@@ -118,7 +104,6 @@ public class AutoMergeManager : MonoBehaviour
         if (GameManager.Instance.Cash >= autoMergeCost)
         {
             GameManager.Instance.Cash -= autoMergeCost;
-            GameManager.Instance.UpdateCashText();
 
             AutoMergeManager autoMergeScript = FindObjectOfType<AutoMergeManager>();
             if (autoMergeScript != null)

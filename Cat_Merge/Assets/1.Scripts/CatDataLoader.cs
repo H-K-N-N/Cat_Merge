@@ -9,12 +9,16 @@ public class CatDataLoader : MonoBehaviour
     // 고양이 데이터를 관리할 Dictionary
     public Dictionary<int, Cat> catDictionary = new Dictionary<int, Cat>();
 
+    // ======================================================================================================================
+
     private void Awake()
     {
         LoadCatDataFromCSV();
 
         // catDataDictionary.TryGetValue(1, out Cat cat) : 1번 인덱스의 Cat 정보를 가져오는 코드
     }
+
+    // ======================================================================================================================
 
     // CSV 파일을 읽어 Cat 객체로 변환 후 Dictionary에 저장
     public void LoadCatDataFromCSV()

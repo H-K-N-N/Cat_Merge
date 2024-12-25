@@ -54,8 +54,8 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI cashText;              // 캐쉬재화 텍스트
     private int cash = 1000;                                        // 캐쉬재화
-    public int Cash 
-    { 
+    public int Cash
+    {
         get => cash;
         set
         {

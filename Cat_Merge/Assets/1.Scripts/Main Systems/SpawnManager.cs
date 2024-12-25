@@ -55,6 +55,25 @@ public class SpawnManager : MonoBehaviour
         gameManager.AddCatCount();
     }
 
+    // 상점에서 이용될 등급에 따른 구매 후 스폰 (12/26 새로 작성)
+    public void SpawnGradeCat(int grade)
+    {
+        if (!gameManager.CanSpawnCat()) return;
+        Cat catData = gameManager.AllCatData[grade];
+
+        GameObject newCat = LoadAndDisplayCats(catData);
+
+        DragAndDropManager catDragAndDrop = newCat.GetComponent<DragAndDropManager>();
+        if (catDragAndDrop != null)
+        {
+            catDragAndDrop.catData = gameManager.AllCatData[grade];
+            catDragAndDrop.UpdateCatUI();
+        }
+
+        gameManager.AddCatCount();
+
+    }
+
     // 고양이 스폰 데이터를 선택하는 함수 (업그레이드 시스템 대비)
     private Cat GetCatDataForSpawn()
     {

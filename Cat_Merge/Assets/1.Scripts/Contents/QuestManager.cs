@@ -16,6 +16,9 @@ public class QuestManager : MonoBehaviour
     [SerializeField] private Button questBackButton;                    // 퀘스트 뒤로가기 버튼
     private bool isQuestMenuOpen;                                       // 퀘스트 메뉴 Panel의 활성화 상태
 
+    [Header("---[New Image UI]")]
+    [SerializeField] private GameObject newImage;                       // 퀘스트 Button의 New Image 
+
     // ======================================================================================================================
 
     private int feedCount;                                              // 고양이 스폰 횟수(먹이 준 횟수)
@@ -122,6 +125,8 @@ public class QuestManager : MonoBehaviour
         InitializePurchaseCatsQuest();
         InitializeSpecialReward();
 
+        newImage.SetActive(false);
+
         ResetScrollPositions();
     }
 
@@ -129,13 +134,36 @@ public class QuestManager : MonoBehaviour
     {
         AddPlayTimeCount();
 
+        UpdateQuestUI();
+    }
+
+    // 모든 퀘스트 UI를 업데이트하는 함수
+    private void UpdateQuestUI()
+    {
         UpdateGiveFeedQuestUI();
         UpdateCombineQuestUI();
         UpdateGetCoinQuestUI();
         UpdatePlayTimeQuestUI();
         UpdatePurchaseCatsQuestUI();
-
         UpdateSpecialRewardUI();
+
+        UpdateNewImageStatus();
+    }
+
+    // ======================================================================================================================
+
+    // New Image 상태를 업데이트하는 함수
+    private void UpdateNewImageStatus()
+    {
+        bool hasActiveReward =
+            giveFeedRewardButton.interactable ||
+            combineRewardButton.interactable ||
+            getCoinRewardButton.interactable ||
+            playTimeRewardButton.interactable ||
+            purchaseCatsRewardButton.interactable ||
+            specialRewardButton.interactable;
+
+        newImage.SetActive(hasActiveReward);
     }
 
     // ======================================================================================================================

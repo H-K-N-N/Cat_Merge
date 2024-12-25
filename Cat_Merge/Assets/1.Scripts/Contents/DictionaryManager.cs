@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System;
 
 // 고양이 도감 Script
 public class DictionaryManager : MonoBehaviour
@@ -20,6 +21,10 @@ public class DictionaryManager : MonoBehaviour
     [SerializeField] private GameObject slotPrefab;                 // 도감 슬롯 프리팹
 
     [SerializeField] private Button[] dictionaryMenuButtons;        // 도감의 서브 메뉴 버튼 배열
+
+    [SerializeField] private GameObject normalCatButtonNewImage;    // Normal Cat Button의 New Image
+    [SerializeField] private GameObject dictionaryButtonNewImage;   // 도감 Button의 New Image
+    private event Action OnCatDataChanged;                          // 이벤트 정의
 
     // ======================================================================================================================
 
@@ -79,6 +84,12 @@ public class DictionaryManager : MonoBehaviour
         dictionaryButton.onClick.AddListener(ToggleDictionaryMenuPanel);
         dictionaryBackButton.onClick.AddListener(CloseDictionaryMenuPanel);
         submitButton.onClick.AddListener(CloseNewCatPanel);
+
+        // 이벤트 등록 (상태가 변경될 때 UpdateNewImageIndicators 호출)
+        OnCatDataChanged += UpdateNewImageIndicators;
+
+        // 초기화 시 New Image UI 갱신
+        UpdateNewImageIndicators();
     }
 
     // ======================================================================================================================
@@ -115,6 +126,9 @@ public class DictionaryManager : MonoBehaviour
 
         isCatUnlocked[CatGrade] = true;
         SaveUnlockedCats(CatGrade);
+
+        // 이벤트 발생
+        OnCatDataChanged?.Invoke();
     }
 
     // 특정 고양이의 해금 여부 확인
@@ -133,6 +147,9 @@ public class DictionaryManager : MonoBehaviour
 
         isGetFirstUnlockedReward[catGrade] = true;
         QuestManager.Instance.AddCash(GameManager.Instance.AllCatData[catGrade].CatGetCoin);
+
+        // 이벤트 발생
+        OnCatDataChanged?.Invoke();
     }
 
     // 특정 고양이의 첫 해금 보상 획득 여부 확인
@@ -350,5 +367,43 @@ public class DictionaryManager : MonoBehaviour
         newCatPanel.SetActive(false);
     }
 
+    // ======================================================================================================================
+
+    // 보상을 받을 수 있는 상태를 확인하는 함수
+    public bool HasUnclaimedRewards()
+    {
+        for (int i = 0; i < isCatUnlocked.Length; i++)
+        {
+            if (isCatUnlocked[i] && !isGetFirstUnlockedReward[i])
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // New Image UI를 갱신하는 함수
+    private void UpdateNewImageIndicators()
+    {
+        bool hasUnclaimedRewards = HasUnclaimedRewards();
+
+        // Normal Cat Button의 New Image 활성화/비활성화
+        if (normalCatButtonNewImage != null)
+        {
+            normalCatButtonNewImage.SetActive(hasUnclaimedRewards);
+        }
+
+        // 도감 Button의 New Image 활성화/비활성화
+        if (dictionaryButtonNewImage != null)
+        {
+            dictionaryButtonNewImage.SetActive(hasUnclaimedRewards);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        // 이벤트 핸들러 해제
+        OnCatDataChanged -= UpdateNewImageIndicators;
+    }
 
 }

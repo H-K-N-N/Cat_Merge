@@ -1,19 +1,29 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 // 객체가 가지고있는 고양이의 정보를 담는 Script
 public class CatData : MonoBehaviour
 {
     public Cat catData;                         // 고양이 데이터
     private Image catImage;                     // 고양이 이미지
-
+    
     private RectTransform rectTransform;        // RectTransform 참조
     private RectTransform parentPanel;          // 부모 패널 RectTransform
     private DragAndDropManager catDragAndDrop;  // DragAndDropManager 참조
-
+    
     private bool isAnimating = false;           // 애니메이션 중인지 확인 플래그
     private bool isAutoMoveEnabled = true;      // 자동 이동 활성화 상태
+    private Coroutine autoMoveCoroutine;        // 자동 이동 코루틴
+
+    private TextMeshProUGUI collectCoinText;    // 자동 재화 획득 텍스트
+    private Image collectCoinImage;             // 자동 재화 획득 이미지
+    //private Animator catAnimator;               // 자동 재화 획득 Animator 컴포넌트 참조
+
+    private float collectingTime = 2f;          // 자동 재화 수집 시간
+    public float CollectingTime { get => collectingTime; set => collectingTime = value; }
+    private bool isCollectingCoins = true;      // 자동 재화 수집 활성화 상태
 
     // ======================================================================================================================
 
@@ -23,11 +33,19 @@ public class CatData : MonoBehaviour
         rectTransform = GetComponent<RectTransform>();
         parentPanel = rectTransform.parent.GetComponent<RectTransform>();
         catDragAndDrop = GetComponentInParent<DragAndDropManager>();
+
+        collectCoinText = transform.Find("CollectCoinText").GetComponent<TextMeshProUGUI>();
+        collectCoinImage = transform.Find("CollectCoinImage").GetComponent<Image>();
+        //catAnimator = GetComponent<Animator>();
+
+        collectCoinText.gameObject.SetActive(false);
+        collectCoinImage.gameObject.SetActive(false);
     }
 
     private void Start()
     {
         UpdateCatUI();
+        StartCoroutine(AutoCollectCoins());
     }
 
     // ======================================================================================================================
@@ -49,6 +67,8 @@ public class CatData : MonoBehaviour
         UpdateCatUI();
     }
 
+    // ======================================================================================================================
+
     // 자동 이동을 활성화/비활성화하는 함수
     public void SetAutoMoveState(bool isEnabled)
     {
@@ -57,14 +77,19 @@ public class CatData : MonoBehaviour
         // 자동 이동을 활성화하려면 코루틴 시작
         if (isAutoMoveEnabled)
         {
-            if (!isAnimating)
+            if (!isAnimating && autoMoveCoroutine == null)
             {
-                StartCoroutine(AutoMove());
+                autoMoveCoroutine = StartCoroutine(AutoMove());
             }
         }
         else
         {
-            StopAllCoroutines();
+            // 모든 코루틴 중단 -> 자동 이동만 중단
+            if (autoMoveCoroutine != null)
+            {
+                StopCoroutine(autoMoveCoroutine);
+                autoMoveCoroutine = null;
+            }
             isAnimating = false;
         }
     }
@@ -81,8 +106,7 @@ public class CatData : MonoBehaviour
                 Vector3 randomDirection = GetRandomDirection();
                 Vector3 targetPosition = (Vector3)rectTransform.anchoredPosition + randomDirection;
 
-                StartCoroutine(SmoothMoveToPosition(targetPosition));
-                yield return new WaitForSeconds(0.5f);
+                yield return StartCoroutine(SmoothMoveToPosition(targetPosition));
 
                 // 위치가 범위를 초과했으면 안쪽으로 조정
                 if (IsOutOfBounds(targetPosition))
@@ -165,11 +189,52 @@ public class CatData : MonoBehaviour
     // 고양이가 파괴될때 고양이 수 감소시키는 함수
     private void OnDestroy()
     {
-        GameManager gameManager = GameManager.Instance;
-        if (gameManager != null)
+        if (GameManager.Instance != null)
         {
-            gameManager.DeleteCatCount();
+            GameManager.Instance.DeleteCatCount();
         }
+    }
+
+    // ======================================================================================================================
+
+    // 자동 재화 수집 코루틴
+    private IEnumerator AutoCollectCoins()
+    {
+        while (isCollectingCoins)
+        {
+            yield return new WaitForSeconds(collectingTime);
+
+            if (catData != null && GameManager.Instance != null)
+            {
+                int collectedCoins = catData.CatGetCoin;
+                GameManager.Instance.Coin += collectedCoins;
+                QuestManager.Instance.AddGetCoinCount(collectedCoins);
+
+                // 모션 실행 및 재화 획득 텍스트 활성화
+                StartCoroutine(PlayCollectingAnimation(collectedCoins));
+            }
+        }
+    }
+
+    // 모션과 재화 획득 텍스트 처리 코루틴
+    private IEnumerator PlayCollectingAnimation(int collectedCoins)
+    {
+        //// 애니메이션 시작 (아직 제작 안함)
+        //if (catAnimator != null)
+        //{
+        //    catAnimator.SetTrigger("CollectCoin");      // CollectCoin 트리거 실행
+        //}
+
+        collectCoinText.text = $"+{collectedCoins}";
+        collectCoinText.gameObject.SetActive(true);
+        collectCoinImage.gameObject.SetActive(true);
+
+        // 애니메이션 대기 (애니메이션 길이 설정에 맞추기)
+        float animationDuration = 0.5f;     // 애니메이션 길이 (Animator 설정에 따라 조정)
+        yield return new WaitForSeconds(animationDuration);
+
+        collectCoinText.gameObject.SetActive(false);
+        collectCoinImage.gameObject.SetActive(false);
     }
 
 }

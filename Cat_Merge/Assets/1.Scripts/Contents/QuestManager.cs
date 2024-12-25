@@ -168,7 +168,7 @@ public class QuestManager : MonoBehaviour
     }
 
     public void AddGetCoinCount(int count)
-    {   // 고양이가 재화를 자동으로 얻을때마다 호출
+    {
         GetCoinCount += count;
     }
 

@@ -208,6 +208,7 @@ public class CatData : MonoBehaviour
             {
                 int collectedCoins = catData.CatGetCoin;
                 GameManager.Instance.Coin += collectedCoins;
+                QuestManager.Instance.AddGetCoinCount(collectedCoins);
 
                 // 모션 실행 및 재화 획득 텍스트 활성화
                 StartCoroutine(PlayCollectingAnimation(collectedCoins));

@@ -342,6 +342,7 @@ public class ItemMenuManager : MonoBehaviour
                 buyCatCoinFee[0] *= 2;
 
                 QuestManager.Instance.AddPurchaseCatsCount();
+                DictionaryManager.Instance.UnlockCat(0);
 
                 SpawnManager catSpawn = GetComponent<SpawnManager>();
                 catSpawn.SpawnGradeCat(0);
@@ -358,6 +359,7 @@ public class ItemMenuManager : MonoBehaviour
                 buyCatCoinFee[1] *= 2;
 
                 QuestManager.Instance.AddPurchaseCatsCount();
+                DictionaryManager.Instance.UnlockCat(1);
 
                 SpawnManager catSpawn = GetComponent<SpawnManager>();
                 catSpawn.SpawnGradeCat(1);
@@ -374,6 +376,7 @@ public class ItemMenuManager : MonoBehaviour
                 buyCatCoinFee[2] *= 2;
 
                 QuestManager.Instance.AddPurchaseCatsCount();
+                DictionaryManager.Instance.UnlockCat(2);
 
                 SpawnManager catSpawn = GetComponent<SpawnManager>();
                 catSpawn.SpawnGradeCat(2);
@@ -398,6 +401,7 @@ public class ItemMenuManager : MonoBehaviour
                 buyCatCashCounts[0]++;
 
                 QuestManager.Instance.AddPurchaseCatsCount();
+                DictionaryManager.Instance.UnlockCat(0);
 
                 SpawnManager catSpawn = GetComponent<SpawnManager>();
                 catSpawn.SpawnGradeCat(0);
@@ -413,6 +417,7 @@ public class ItemMenuManager : MonoBehaviour
                 buyCatCashCounts[1]++;
 
                 QuestManager.Instance.AddPurchaseCatsCount();
+                DictionaryManager.Instance.UnlockCat(1);
 
                 SpawnManager catSpawn = GetComponent<SpawnManager>();
                 catSpawn.SpawnGradeCat(1);
@@ -428,6 +433,7 @@ public class ItemMenuManager : MonoBehaviour
                 buyCatCashCounts[2]++;
 
                 QuestManager.Instance.AddPurchaseCatsCount();
+                DictionaryManager.Instance.UnlockCat(2);
 
                 SpawnManager catSpawn = GetComponent<SpawnManager>();
                 catSpawn.SpawnGradeCat(2);

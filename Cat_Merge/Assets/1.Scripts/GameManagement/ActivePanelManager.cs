@@ -21,7 +21,7 @@ public class ActivePanelManager : MonoBehaviour
 
     // ======================================================================================================================
 
-    private void Start()
+    private void Awake()
     {
         panels = new Dictionary<string, PanelInfo>();
         activePanelName = null;

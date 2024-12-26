@@ -103,7 +103,7 @@ public class GameManager : MonoBehaviour
         allCatData = new Cat[catDataLoader.catDictionary.Count];
         catDataLoader.catDictionary.Values.CopyTo(allCatData, 0);
 
-        Debug.Log($"고양이 데이터 {allCatData.Length}개가 로드되었습니다.");
+        //Debug.Log($"고양이 데이터 {allCatData.Length}개가 로드되었습니다.");
     }
 
     // ======================================================================================================================

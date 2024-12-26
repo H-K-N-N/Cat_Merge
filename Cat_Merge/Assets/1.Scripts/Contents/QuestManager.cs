@@ -14,7 +14,7 @@ public class QuestManager : MonoBehaviour
     [SerializeField] private Image questButtonImage;                    // 퀘스트 버튼 이미지
     [SerializeField] private GameObject questMenuPanel;                 // 퀘스트 메뉴 Panel
     [SerializeField] private Button questBackButton;                    // 퀘스트 뒤로가기 버튼
-    private bool isQuestMenuOpen;                                       // 퀘스트 메뉴 Panel의 활성화 상태
+    private ActivePanelManager activePanelManager;                      // ActivePanelManager
 
     [Header("---[New Image UI]")]
     [SerializeField] private GameObject newImage;                       // 퀘스트 Button의 New Image 
@@ -113,10 +113,31 @@ public class QuestManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
         questMenuPanel.SetActive(false);
+        newImage.SetActive(false);
 
+        InitializeQuestManager();
+    }
+
+    private void Start()
+    {
+        activePanelManager = FindObjectOfType<ActivePanelManager>();
+        activePanelManager.RegisterPanel("QuestMenu", questMenuPanel, questButtonImage);
+    }
+
+    private void Update()
+    {
+        AddPlayTimeCount();
+        UpdateQuestUI();
+    }
+
+    // ======================================================================================================================
+
+    // 모든 QuestManager 시작 함수들 모음
+    private void InitializeQuestManager()
+    {
         InitializeQuestButton();
+        ResetScrollPositions();
 
         InitializeGiveFeedQuest();
         InitializeCombineQuest();
@@ -124,18 +145,9 @@ public class QuestManager : MonoBehaviour
         InitializePlayTimeQuest();
         InitializePurchaseCatsQuest();
         InitializeSpecialReward();
-
-        newImage.SetActive(false);
-
-        ResetScrollPositions();
     }
 
-    private void Update()
-    {
-        AddPlayTimeCount();
-
-        UpdateQuestUI();
-    }
+    // ======================================================================================================================
 
     // 모든 퀘스트 UI를 업데이트하는 함수
     private void UpdateQuestUI()
@@ -150,8 +162,6 @@ public class QuestManager : MonoBehaviour
         UpdateNewImageStatus();
     }
 
-    // ======================================================================================================================
-
     // New Image 상태를 업데이트하는 함수
     private void UpdateNewImageStatus()
     {
@@ -164,6 +174,19 @@ public class QuestManager : MonoBehaviour
             specialRewardButton.interactable;
 
         newImage.SetActive(hasActiveReward);
+    }
+
+    // QuestButton 설정
+    private void InitializeQuestButton()
+    {
+        questButton.onClick.AddListener(() => activePanelManager.TogglePanel("QuestMenu"));
+        questBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("QuestMenu"));
+    }
+
+    // 초기 스크롤 위치 초기화 함수
+    private void ResetScrollPositions()
+    {
+        questScrollRect.verticalNormalizedPosition = 1f;
     }
 
     // ======================================================================================================================
@@ -223,47 +246,6 @@ public class QuestManager : MonoBehaviour
     public void ResetPurchaseCatsCount(int count)
     {
         PurchaseCatsCount = count;
-    }
-
-    // ======================================================================================================================
-
-    // QuestButton 설정
-    private void InitializeQuestButton()
-    {
-        questButton.onClick.AddListener(ToggleQuestMenuPanel);
-        questBackButton.onClick.AddListener(CloseDictionaryMenuPanel);
-    }
-
-    // 초기 스크롤 위치 초기화 함수
-    private void ResetScrollPositions()
-    {
-        questScrollRect.verticalNormalizedPosition = 1f;
-    }
-
-    // 퀘스트 Panel 열고 닫는 함수
-    private void ToggleQuestMenuPanel()
-    {
-        isQuestMenuOpen = !isQuestMenuOpen;
-        questMenuPanel.SetActive(isQuestMenuOpen);
-        UpdateButtonColor(questButtonImage, isQuestMenuOpen);
-    }
-
-    // 퀘스트 Panel 닫는 함수 (questBackButton)
-    private void CloseDictionaryMenuPanel()
-    {
-        isQuestMenuOpen = false;
-        questMenuPanel.SetActive(false);
-        UpdateButtonColor(questButtonImage, false);
-    }
-
-    // 버튼 색상을 활성 상태에 따라 업데이트하는 함수
-    private void UpdateButtonColor(Image buttonImage, bool isActive)
-    {
-        string colorCode = isActive ? "#5f5f5f" : "#FFFFFF";
-        if (ColorUtility.TryParseHtmlString(colorCode, out Color color))
-        {
-            buttonImage.color = color;
-        }
     }
 
     // ======================================================================================================================

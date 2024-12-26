@@ -16,10 +16,9 @@ public class DictionaryManager : MonoBehaviour
     [SerializeField] private Image dictionaryButtonImage;           // 도감 버튼 이미지
     [SerializeField] private GameObject dictionaryMenuPanel;        // 도감 메뉴 Panel
     [SerializeField] private Button dictionaryBackButton;           // 도감 뒤로가기 버튼
-    private bool isDictionaryMenuOpen;                              // 도감 메뉴 Panel의 활성화 상태
+    private ActivePanelManager activePanelManager;                  // ActivePanelManager
 
     [SerializeField] private GameObject slotPrefab;                 // 도감 슬롯 프리팹
-
     [SerializeField] private Button[] dictionaryMenuButtons;        // 도감의 서브 메뉴 버튼 배열
 
     [SerializeField] private GameObject normalCatButtonNewImage;    // Normal Cat Button의 New Image
@@ -71,19 +70,29 @@ public class DictionaryManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
         newCatPanel.SetActive(false);
         dictionaryMenuPanel.SetActive(false);
         activeMenuType = DictionaryMenuType.Normal;
 
+        InitializeDictionaryManager();
+    }
+
+    private void Start()
+    {
+        activePanelManager = FindObjectOfType<ActivePanelManager>();
+        activePanelManager.RegisterPanel("DictionaryMenu", dictionaryMenuPanel, dictionaryButtonImage);
+    }
+
+    // ======================================================================================================================
+
+    // 모든 DictionaryManager 시작 함수들 모음
+    private void InitializeDictionaryManager()
+    {
         LoadUnlockedCats();
         ResetScrollPositions();
-        InitializeMenuButtons();
+        InitializeDictionaryButton();
+        InitializeSubMenuButtons();
         PopulateDictionary();
-
-        dictionaryButton.onClick.AddListener(ToggleDictionaryMenuPanel);
-        dictionaryBackButton.onClick.AddListener(CloseDictionaryMenuPanel);
-        submitButton.onClick.AddListener(CloseNewCatPanel);
 
         // 이벤트 등록 (상태가 변경될 때 UpdateNewImageIndicators 호출)
         OnCatDataChanged += UpdateNewImageIndicators;
@@ -176,8 +185,17 @@ public class DictionaryManager : MonoBehaviour
         }
     }
 
+    // DictionaryButton 설정
+    private void InitializeDictionaryButton()
+    {
+        dictionaryButton.onClick.AddListener(() => activePanelManager.TogglePanel("DictionaryMenu"));
+        dictionaryBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("DictionaryMenu"));
+
+        submitButton.onClick.AddListener(CloseNewCatPanel);
+    }
+
     // 서브 메뉴 버튼 초기화 및 클릭 이벤트 추가 함수
-    private void InitializeMenuButtons()
+    private void InitializeSubMenuButtons()
     {
         for (int i = 0; i < (int)DictionaryMenuType.End; i++)
         {
@@ -186,22 +204,6 @@ public class DictionaryManager : MonoBehaviour
         }
 
         ActivateMenu(DictionaryMenuType.Normal);
-    }
-
-    // 도감 Panel 열고 닫는 함수
-    private void ToggleDictionaryMenuPanel()
-    {
-        isDictionaryMenuOpen = !isDictionaryMenuOpen;
-        dictionaryMenuPanel.SetActive(isDictionaryMenuOpen);
-        UpdateButtonColor(dictionaryButtonImage, isDictionaryMenuOpen);
-    }
-
-    // 도감 Panel 닫는 함수 (dictionaryBackButton)
-    private void CloseDictionaryMenuPanel()
-    {
-        isDictionaryMenuOpen = false;
-        dictionaryMenuPanel.SetActive(false);
-        UpdateButtonColor(dictionaryButtonImage, false);
     }
 
     // 선택한 서브 메뉴를 활성화하는 함수
@@ -214,20 +216,20 @@ public class DictionaryManager : MonoBehaviour
             dictionaryMenus[i].SetActive(i == (int)menuType);
         }
 
-        UpdateMenuButtonColors();
+        UpdateSubMenuButtonColors();
     }
 
     // 서브 메뉴 버튼 색상을 업데이트하는 함수
-    private void UpdateMenuButtonColors()
+    private void UpdateSubMenuButtonColors()
     {
         for (int i = 0; i < dictionaryMenuButtons.Length; i++)
         {
-            UpdateButtonColor(dictionaryMenuButtons[i].GetComponent<Image>(), i == (int)activeMenuType);
+            UpdateSubButtonColor(dictionaryMenuButtons[i].GetComponent<Image>(), i == (int)activeMenuType);
         }
     }
 
-    // 버튼 색상을 활성 상태에 따라 업데이트하는 함수
-    private void UpdateButtonColor(Image buttonImage, bool isActive)
+    // 서브 메뉴 버튼 색상을 활성 상태에 따라 업데이트하는 함수
+    private void UpdateSubButtonColor(Image buttonImage, bool isActive)
     {
         string colorCode = isActive ? "#5f5f5f" : "#FFFFFF";
         if (ColorUtility.TryParseHtmlString(colorCode, out Color color))

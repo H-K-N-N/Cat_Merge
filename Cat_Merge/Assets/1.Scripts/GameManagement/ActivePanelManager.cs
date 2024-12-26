@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class ActivePanelManager : MonoBehaviour
 {
-    private class PanelInfo
+    private class PanelInfo                                 // PanelInfo Class
     {
         public GameObject Panel { get; }
         public Image ButtonImage { get; }
@@ -16,8 +16,16 @@ public class ActivePanelManager : MonoBehaviour
         }
     }
 
-    private Dictionary<string, PanelInfo> panels = new Dictionary<string, PanelInfo>();     // Panel과 버튼 정보를 저장할 Dictionary
-    private string activePanelName = null;
+    private Dictionary<string, PanelInfo> panels;           // Panel과 버튼 정보를 저장할 Dictionary
+    private string activePanelName;                         // 활성화된 Panel 이름
+
+    // ======================================================================================================================
+
+    private void Start()
+    {
+        panels = new Dictionary<string, PanelInfo>();
+        activePanelName = null;
+    }
 
     // Panel과 버튼 등록
     public void RegisterPanel(string panelName, GameObject panel, Image buttonImage)
@@ -68,7 +76,7 @@ public class ActivePanelManager : MonoBehaviour
         }
     }
 
-    // 버튼 색상 업데이트
+    // 버튼 색상 업데이트하는 함수
     private void UpdateButtonColor(Image buttonImage, bool isActive)
     {
         string colorCode = isActive ? "#5f5f5f" : "#FFFFFF";

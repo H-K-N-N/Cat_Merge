@@ -6292,6 +6292,7 @@ GameObject:
   - component: {fileID: 331588643}
   - component: {fileID: 331588650}
   - component: {fileID: 331588642}
+  - component: {fileID: 331588651}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -6403,6 +6404,7 @@ MonoBehaviour:
   dictionaryButtonImage: {fileID: 482937126}
   dictionaryMenuPanel: {fileID: 2108060639}
   dictionaryBackButton: {fileID: 660876156}
+  activePanelManager: {fileID: 0}
   slotPrefab: {fileID: 4711500874975617426, guid: 92c43c1fa91aa954b80aa863e14e066c, type: 3}
   dictionaryMenuButtons:
   - {fileID: 1077991939}
@@ -6435,6 +6437,7 @@ MonoBehaviour:
   questButtonImage: {fileID: 99826528}
   questMenuPanel: {fileID: 1255234484}
   questBackButton: {fileID: 1933287548}
+  activePanelManager: {fileID: 0}
   newImage: {fileID: 719886877}
   giveFeedQuestSlider: {fileID: 268966191}
   giveFeedCountText: {fileID: 1513484542}
@@ -6570,6 +6573,18 @@ MonoBehaviour:
   - {fileID: 156841704}
   - {fileID: 534468614}
   - {fileID: 597969171}
+--- !u!114 &331588651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 331588638}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffe8b461e17275246ab225d4ae6fadd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &335345886
 GameObject:
   m_ObjectHideFlags: 0

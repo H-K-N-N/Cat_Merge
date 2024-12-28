@@ -27,6 +27,17 @@ public class ActivePanelManager : MonoBehaviour
         activePanelName = null;
     }
 
+    private void Start()
+    {
+        if (panels != null)
+        {
+            foreach (var panel in panels.Values)
+            {
+                panel.Panel.SetActive(false);
+            }
+        }
+    }
+
     // Panel과 버튼 등록
     public void RegisterPanel(string panelName, GameObject panel, Image buttonImage)
     {

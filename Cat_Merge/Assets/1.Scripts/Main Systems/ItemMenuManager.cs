@@ -94,6 +94,10 @@ public class ItemMenuManager : MonoBehaviour
         // 판넬 토글
         activePanelManager = FindObjectOfType<ActivePanelManager>();
         activePanelManager.RegisterPanel("BottomItemMenu", itemMenuPanel, bottomItemButtonImg);
+
+        catMaximumIncreaseLvText.text = $"Lv.{ ItemFunctionManager.Instance.maxCatsList[0].step}";
+        catHowManyIncreaseText.text = $"{ ItemFunctionManager.Instance.maxCatsList[0].value}->{ ItemFunctionManager.Instance.maxCatsList[1].value}"; // 1->2 2->3 3->4
+        catMaximumIncreaseFeeText.text = $"{ ItemFunctionManager.Instance.maxCatsList[0].fee}";
     }
 
     // 아이템 메뉴 판넬 여는 함수
@@ -206,8 +210,5 @@ public class ItemMenuManager : MonoBehaviour
     private void InitializeItemMenuManager()
     {
         OpenCloseBottomItemMenuPanel();
-        catMaximumIncreaseLvText.text = $"Lv.{ ItemFunctionManager.Instance.maxCatsList[0].step}";
-        catHowManyIncreaseText.text = $"{ ItemFunctionManager.Instance.maxCatsList[0].value}->{ ItemFunctionManager.Instance.maxCatsList[1].value}"; // 1->2 2->3 3->4
-        catMaximumIncreaseFeeText.text = $"{ ItemFunctionManager.Instance.maxCatsList[0].fee}";
     }
 }

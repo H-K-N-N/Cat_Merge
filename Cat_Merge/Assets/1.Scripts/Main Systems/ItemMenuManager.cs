@@ -46,10 +46,14 @@ public class ItemMenuManager : MonoBehaviour
     [SerializeField] private Button catMaximumIncreaseButton;           // 고양이 최대치 증가 버튼
     [SerializeField] private GameObject disabledBg;                     // 버튼 클릭 못할 때의 배경
     private int catMaximumIncreaseFee = 10;                             // 고양이 최대치 증가 비용
-    [SerializeField] private TextMeshProUGUI catMaximumIncreaseText;    // 고양이 최대치 증가 텍스트
+    [SerializeField] private TextMeshProUGUI catMaximumIncreaseFeeText; // 고양이 최대치 증가 비용 텍스트
     [SerializeField] private TextMeshProUGUI catMaximumIncreaseLvText;  // 고양이 최대치 증가 레벨 텍스트
     private int catMaximumIncreaseLv = 1;                               // 고양이 최대치 증가 레벨
+    [SerializeField] private TextMeshProUGUI catHowManyIncreaseText; // 고양이 증가 얼마나 했는지 텍스트
+    private int catHowManyIncrease = 1;
 
+
+    private int step = 0;
     // ======================================================================================================================
 
     private void Awake()
@@ -87,15 +91,16 @@ public class ItemMenuManager : MonoBehaviour
 
     private void Start()
     {
+        // 판넬 토글
         activePanelManager = FindObjectOfType<ActivePanelManager>();
-        activePanelManager.RegisterPanel("ItemMenu", itemMenuPanel, bottomItemButtonImg);
+        activePanelManager.RegisterPanel("BottomItemMenu", itemMenuPanel, bottomItemButtonImg);
     }
 
     // 아이템 메뉴 판넬 여는 함수
     private void OpenCloseBottomItemMenuPanel()
     {
-        bottomItemButton.onClick.AddListener(() => activePanelManager.TogglePanel("ItemMenu"));
-        itemBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("ItemMenu"));
+        bottomItemButton.onClick.AddListener(() => activePanelManager.TogglePanel("BottomItemMenu"));
+        itemBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("BottomItemMenu"));
     }   
 
     // 아이템 메뉴의 아이템, 동료, 배경, 황금깃털 버튼 색상 변경
@@ -129,20 +134,30 @@ public class ItemMenuManager : MonoBehaviour
         //Debug.Log("고양이 최대치 증가 버튼 클릭");
         if (catMaximumIncreaseButton != null)
         {
-            GameManager.Instance.Coin -= catMaximumIncreaseFee;
-            GameManager.Instance.MaxCats++;
-            catMaximumIncreaseFee *= 2;
-            catMaximumIncreaseLv++;
-            UpdateIncreaseMaximumFeeText();
-            UpdateIncreaseMaximumLvText();
+            //GameManager.Instance.Coin -= catMaximumIncreaseFee;
+            //GameManager.Instance.MaxCats++;
+            //catMaximumIncreaseFee *= 2;
 
+            //catHowManyIncreaseText.text = $"{++catHowManyIncrease}->{catHowManyIncrease + 1}"; // 1->2 2->3 3->4
+
+            //UpdateIncreaseMaximumFeeText();
+            //UpdateIncreaseMaximumLvText();
+            if (step < 0 || step > ItemFunctionManager.Instance.maxCatsList.Count)
+            {
+                Debug.LogError($"Index {step} is out of bounds! List Count: {ItemFunctionManager.Instance.maxCatsList.Count}");
+                return;
+            }
+            step++;
+            catMaximumIncreaseLvText.text = $"Lv.{ ItemFunctionManager.Instance.maxCatsList[step].step}";
+            catHowManyIncreaseText.text = $"{ ItemFunctionManager.Instance.maxCatsList[step].value}->{ ItemFunctionManager.Instance.maxCatsList[step + 1].value}"; // 1->2 2->3 3->4
+            catMaximumIncreaseFeeText.text = $"{ ItemFunctionManager.Instance.maxCatsList[step].fee}";
         }
     }
 
     // 고양이 수 텍스트 UI 업데이트하는 함수
     private void UpdateIncreaseMaximumFeeText()
     {
-        if (catMaximumIncreaseText != null)
+        if (catMaximumIncreaseFeeText != null)
         {
             if (GameManager.Instance.Coin < catMaximumIncreaseFee)
             {
@@ -155,7 +170,7 @@ public class ItemMenuManager : MonoBehaviour
                 catMaximumIncreaseButton.interactable = true;
                 disabledBg.SetActive(false);
             }
-            catMaximumIncreaseText.text = $"{catMaximumIncreaseFee}";
+            catMaximumIncreaseFeeText.text = $"{catMaximumIncreaseFee}";
         }
     }
 
@@ -191,5 +206,8 @@ public class ItemMenuManager : MonoBehaviour
     private void InitializeItemMenuManager()
     {
         OpenCloseBottomItemMenuPanel();
+        catMaximumIncreaseLvText.text = $"Lv.{ ItemFunctionManager.Instance.maxCatsList[0].step}";
+        catHowManyIncreaseText.text = $"{ ItemFunctionManager.Instance.maxCatsList[0].value}->{ ItemFunctionManager.Instance.maxCatsList[1].value}"; // 1->2 2->3 3->4
+        catMaximumIncreaseFeeText.text = $"{ ItemFunctionManager.Instance.maxCatsList[0].fee}";
     }
 }

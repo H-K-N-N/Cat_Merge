@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 // GameManager Script
-[DefaultExecutionOrder(-1)]     // 스크립트 실행 순서 조정(2번째)
+[DefaultExecutionOrder(-1)]     // 스크립트 실행 순서 조정(3번째)
 public class GameManager : MonoBehaviour
 {
     // Singleton instance

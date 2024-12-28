@@ -3,7 +3,7 @@ using System.IO;
 using UnityEngine;
 
 // CatDataLoader Script
-[DefaultExecutionOrder(-2)]     // 스크립트 실행 순서 조정 (1번째)
+[DefaultExecutionOrder(-3)]     // 스크립트 실행 순서 조정 (1번째)
 public class CatDataLoader : MonoBehaviour
 {
     // 고양이 데이터를 관리할 Dictionary

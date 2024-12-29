@@ -202,7 +202,9 @@ public class CatData : MonoBehaviour
     {
         while (isCollectingCoins)
         {
-            yield return new WaitForSeconds(collectingTime);
+            //yield return new WaitForSeconds(collectingTime);
+
+            yield return new WaitForSeconds(ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value); // 재화 획득 시간(아이템 상점 레벨)
 
             if (catData != null && GameManager.Instance != null)
             {

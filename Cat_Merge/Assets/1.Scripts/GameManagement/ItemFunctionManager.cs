@@ -27,6 +27,8 @@ public class ItemFunctionManager : MonoBehaviour
     //public int AutoFeedingTime { get => autoFeedingTime; set => autoFeedingTime = value; }
 
     public List<(int step, float value, float fee)> maxCatsList = new List<(int step, float value, float fee)>();
+    public List<(int step, float value, float fee)> reduceCollectingTimeList = new List<(int step, float value, float fee)>();
+    public List<(int step, float value, float fee)> maxFoodsList = new List<(int step, float value, float fee)>();
 
     private void Awake()
     {
@@ -44,12 +46,37 @@ public class ItemFunctionManager : MonoBehaviour
 
     private void InitListContents()
     {
-        var data = ItemItemUpgradeDataLoader.Instance.GetDataByNumber(1);
-        if (data != null)
+        // 고양이 최대치 증가
+        var itemData1 = ItemItemUpgradeDataLoader.Instance.GetDataByNumber(1);
+        if (itemData1 != null)
         {
-            foreach (var item in data)
+            foreach (var item in itemData1)
             {
                 maxCatsList.Add((item.step, item.value, item.fee));
+            }
+        }
+
+        // 재화 획득 시간 감소
+        var itemData2 = ItemItemUpgradeDataLoader.Instance.GetDataByNumber(2);
+        {
+            if (itemData2 != null)
+            {
+                foreach (var item in itemData2)
+                {
+                    reduceCollectingTimeList.Add((item.step, item.value, item.fee));
+                }
+            }
+        }
+
+        // 먹이 최대치 증가
+        var itemData3 = ItemItemUpgradeDataLoader.Instance.GetDataByNumber(3);
+        {
+            if (itemData3 != null)
+            {
+                foreach (var item in itemData3)
+                {
+                    maxFoodsList.Add((item.step, item.value, item.fee));
+                }
             }
         }
     }

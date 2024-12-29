@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour
     }
 
     [SerializeField] private TextMeshProUGUI coinText;              // 기본재화 텍스트
-    private int coin = 1000;                                        // 기본재화
+    private int coin = 1000000;                                        // 기본재화
     public int Coin
     {
         get => coin;

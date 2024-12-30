@@ -46,6 +46,7 @@ public class ItemMenuManager : MonoBehaviour
     [SerializeField] private Button increaseCatMaximumButton;           // 고양이 최대치 증가 버튼
     [SerializeField] private Button reduceCollectingTimeButton;         // 재화 획득 시간 감소 버튼
     [SerializeField] private Button increaseFoodMaximumButton;          // 먹이 최대치 증가 버튼
+    [SerializeField] private Button reduceProducingFoodTimeButton;      // 먹이 생성 시간 감소 버튼
 
     [SerializeField] private GameObject[] disabledBg;                     // 버튼 클릭 못할 때의 배경
 
@@ -57,14 +58,21 @@ public class ItemMenuManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI[] itemMenuesValueText;
     [SerializeField] private TextMeshProUGUI[] itemMenuesFeeText;
 
+    // 고양이 최대치
     private int maxCatsLv = 0;
     public int MaxCatsLv { get => maxCatsLv; set => maxCatsLv = value; }
 
+    // 재화 획득 시간
     private int reduceCollectingTimeLv = 0;
     public int ReduceCollectingTimeLv { get => reduceCollectingTimeLv; set => reduceCollectingTimeLv = value; }
 
+    // 먹이 최대치
     private int maxFoodsLv = 0;
     public int MaxFoodsLv { get => maxFoodsLv; set => maxFoodsLv = value; }
+
+    // 먹이 생성 시간
+    private int reduceProducingFoodTimeLv = 0;
+    public int ReduceProducingFoodTimeLv { get => reduceProducingFoodTimeLv; set => reduceProducingFoodTimeLv = value; }
 
     // ======================================================================================================================
 
@@ -98,6 +106,7 @@ public class ItemMenuManager : MonoBehaviour
         increaseCatMaximumButton.onClick.AddListener(IncreaseCatMaximum);
         reduceCollectingTimeButton.onClick.AddListener(ReduceCollectingTime);
         increaseFoodMaximumButton.onClick.AddListener(IncreaseFoodMaximum);
+        reduceProducingFoodTimeButton.onClick.AddListener(ReduceProducingFoodTime);
         OpenCloseBottomItemMenuPanel();
     }
 
@@ -124,7 +133,7 @@ public class ItemMenuManager : MonoBehaviour
 
     private void InitItemMenuText()
     {
-        for(int i = 0; i <= 2; i++)
+        for(int i = 0; i <= 3; i++)
         {
             switch(i)
             {
@@ -142,6 +151,11 @@ public class ItemMenuManager : MonoBehaviour
                     itemMenuesLvText[i].text = $"Lv.{ ItemFunctionManager.Instance.maxFoodsList[0].step}";
                     itemMenuesValueText[i].text = $"{ ItemFunctionManager.Instance.maxFoodsList[0].value}->{ ItemFunctionManager.Instance.maxFoodsList[1].value}"; // 1->2 2->3 3->4
                     itemMenuesFeeText[i].text = $"{ ItemFunctionManager.Instance.maxFoodsList[0].fee}";
+                    break;
+                case 3:
+                    itemMenuesLvText[i].text = $"Lv.{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[0].step}";
+                    itemMenuesValueText[i].text = $"{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[0].value}->{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[1].value}"; // 1->2 2->3 3->4
+                    itemMenuesFeeText[i].text = $"{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[0].fee}";
                     break;
                 default:
                     break;
@@ -258,6 +272,22 @@ public class ItemMenuManager : MonoBehaviour
             }
             itemMenuesFeeText[2].text = $"{(int)ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv].fee}";
         }
+
+        // 먹이 생성 시간 감소
+        if (itemMenuesFeeText[3] != null)
+        {
+            if (GameManager.Instance.Coin < (int)ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].fee)
+            {
+                reduceProducingFoodTimeButton.interactable = false;
+                disabledBg[3].SetActive(true);
+            }
+            else
+            {
+                reduceProducingFoodTimeButton.interactable = true;
+                disabledBg[3].SetActive(false);
+            }
+            itemMenuesFeeText[3].text = $"{(int)ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].fee}";
+        }
     }
 
     // 고양이 최대치 증가
@@ -303,7 +333,7 @@ public class ItemMenuManager : MonoBehaviour
     // 먹이 최대치 증가
     private void IncreaseFoodMaximum()
     {
-        Debug.Log("먹이 최대치 증가 버튼 클릭");
+        //Debug.Log("먹이 최대치 증가 버튼 클릭");
         if (increaseFoodMaximumButton != null)
         {
             if (maxFoodsLv < 0 || maxFoodsLv > ItemFunctionManager.Instance.maxFoodsList.Count)
@@ -316,6 +346,25 @@ public class ItemMenuManager : MonoBehaviour
             itemMenuesLvText[2].text = $"Lv.{ ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv].step}";
             itemMenuesValueText[2].text = $"{ ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv].value}->{ ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv + 1].value}"; // 3.0->2.9
             itemMenuesFeeText[2].text = $"{ ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv].fee}";
+        }
+    }
+
+    // 먹이 생성 시간 감소
+    private void ReduceProducingFoodTime()
+    {
+        //Debug.Log("먹이 생성 시간 감소 버튼 클릭");
+        if (reduceProducingFoodTimeButton != null)
+        {
+            if (reduceProducingFoodTimeLv < 0 || reduceProducingFoodTimeLv > ItemFunctionManager.Instance.reduceProducingFoodTimeList.Count)
+            {
+                Debug.LogError($"Index {reduceProducingFoodTimeLv} is out of bounds! List Count: {ItemFunctionManager.Instance.reduceProducingFoodTimeList.Count}");
+                return;
+            }
+            GameManager.Instance.Coin -= (int)ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].fee;
+            reduceProducingFoodTimeLv++;
+            itemMenuesLvText[3].text = $"Lv.{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].step}";
+            itemMenuesValueText[3].text = $"{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].value}->{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv + 1].value}"; // 7->6.8
+            itemMenuesFeeText[3].text = $"{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].fee}";
         }
     }
 }

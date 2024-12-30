@@ -16,6 +16,8 @@ public class SpawnManager : MonoBehaviour
     private int nowFood = 0;                                        // 현재 먹이 갯수
     private bool isStoppedCoroutine = false;                        // 코루틴 종료 판별
 
+    [SerializeField] private Image foodFillAmountImg;
+
     private void Awake()
     {
         if (Instance == null)
@@ -175,17 +177,25 @@ public class SpawnManager : MonoBehaviour
 
     // ======================================================================================================================
 
+    //private float duration = 3f; // fillAmount를 변경하는 데 걸리는 시간(이거 변수 나중에 지우고 먹이 생성 시간 감소에서 불러올것)(완료)
+    //private float duration = ItemFunctionManager.Instance.reduceProducingFoodTimeList[ItemMenuManager.Instance.ReduceProducingFoodTimeLv].value;
     // 먹이 생성 시간
     public IEnumerator CreateFoodTime()
     {
+        float elapsed = 0f; // 경과 시간
         // 현재 먹이가 최대치 이하일 때 코루틴 시작
         while (nowFood < ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
         {
-            
-            // 3초는 나중에 업뎃할 먹이 생성 시간 감소에 적용할것
-            yield return new WaitForSeconds(3f);
-
+            foodFillAmountImg.fillAmount = 0f; // 정확히 1로 설정
+            while (elapsed < ItemFunctionManager.Instance.reduceProducingFoodTimeList[ItemMenuManager.Instance.ReduceProducingFoodTimeLv].value)
+            {                
+                elapsed += Time.deltaTime; // 매 프레임마다 경과 시간 증가
+                foodFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / ItemFunctionManager.Instance.reduceProducingFoodTimeList[ItemMenuManager.Instance.ReduceProducingFoodTimeLv].value); // 0 ~ 1 사이로 비율 계산
+                yield return null; // 다음 프레임까지 대기
+            }
             nowFood++;
+            foodFillAmountImg.fillAmount = 1f; // 정확히 1로 설정
+            elapsed = 0f;
         }
 
         // 현재 먹이갯수가 최대치이면 코루틴을 종료시킨다.

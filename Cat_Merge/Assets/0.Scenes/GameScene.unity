@@ -4925,6 +4925,10 @@ MonoBehaviour:
   bossPrefab: {fileID: 7027263960823894882, guid: 5f9e56c0bd9032e469961e0b9155d9b6, type: 3}
   bossUIParent: {fileID: 1808509785}
   respawnSlider: {fileID: 699126342}
+  battleHPUI: {fileID: 1402368391}
+  bossNameText: {fileID: 563596345}
+  bossHPSlider: {fileID: 1943725633}
+  bossHPText: {fileID: 1996685929}
 --- !u!1 &335345886
 GameObject:
   m_ObjectHideFlags: 0
@@ -8836,7 +8840,7 @@ GameObject:
   - component: {fileID: 563596346}
   - component: {fileID: 563596345}
   m_Layer: 5
-  m_Name: Mouse Grade Text
+  m_Name: Mouse Name Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26556,7 +26560,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.14901961, g: 0.14901961, b: 0.14901961, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -33835,7 +33839,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 0}
   m_FillRect: {fileID: 146241786}
   m_HandleRect: {fileID: 0}
-  m_Direction: 1
+  m_Direction: 0
   m_MinValue: 0
   m_MaxValue: 1
   m_WholeNumbers: 0

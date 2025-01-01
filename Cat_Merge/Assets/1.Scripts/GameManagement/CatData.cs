@@ -68,6 +68,37 @@ public class CatData : MonoBehaviour
     }
 
     // ======================================================================================================================
+    // [전투 관련]
+
+    // 자동이동 현재 상태 반환하는 함수
+    public bool IsAutoMoveEnabled()
+    {
+        return isAutoMoveEnabled;
+    }
+
+    // 보스를 향해 이동
+    public void MoveTowardsBoss(Vector3 bossPosition)
+    {
+        StartCoroutine(MoveToPosition(bossPosition));
+    }
+
+    private IEnumerator MoveToPosition(Vector3 targetPosition)
+    {
+        while (Vector3.Distance(transform.position, targetPosition) > 0.1f)
+        {
+            transform.position = Vector3.Lerp(transform.position, targetPosition, 0.01f);
+            yield return null;
+        }
+    }
+
+    // 고양이 피해 받기
+    public void TakeDamage(int damage)
+    {
+        // 체력 감소 로직
+        //Debug.Log("체력 감소");
+    }
+
+    // ======================================================================================================================
 
     // 자동 이동을 활성화/비활성화하는 함수
     public void SetAutoMoveState(bool isEnabled)

@@ -15,14 +15,15 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Slider respawnSlider;              // 보스 소환까지 남은 시간을 표시할 Slider UI
     //private RectTransform panelRectTransform;                   // Panel의 크기 정보 (배치할 범위)
 
-    private float spawnInterval = 5f;                           // 보스 등장 주기
+    private float spawnInterval = 10f;                          // 보스 등장 주기
     private float timer = 0f;                                   // 보스 소환 타이머
-    private float bossDuration = 60f;                           // 보스 유지 시간
+    private float bossDuration = 10f;                           // 보스 유지 시간
     //private float bossAttackDelay = 2f;                         // 보스 공격 딜레이
     private int bossStage = 1;                                  // 보스 스테이지
 
     private GameObject currentBoss = null;                      // 현재 보스
     private bool isBattleActive = false;                        // 전투 활성화 여부
+    //private BossHitbox bossHitbox;                              // 보스 히트박스
 
     [Header("---[Boss UI]")]
     [SerializeField] private GameObject battleHPUI;             // Battle HP UI (활성화/비활성화 제어)
@@ -33,9 +34,6 @@ public class BattleManager : MonoBehaviour
     private Mouse currentBossData = null;                       // 현재 보스 데이터
     private float currentBossHP;                                // 보스의 현재 HP
     private float maxBossHP;                                    // 보스의 최대 HP
-
-    private Coroutine bossDurationCoroutine;                    // 
-    private Coroutine bossSliderCoroutine;                      // 
 
     // ======================================================================================================================
 
@@ -56,6 +54,7 @@ public class BattleManager : MonoBehaviour
     private void Start()
     {
         //panelRectTransform = bossUIParent.GetComponent<RectTransform>();
+        //bossHitbox = currentBoss.GetComponent<BossHitbox>();
         StartCoroutine(BossSpawnRoutine());
     }
 
@@ -116,13 +115,16 @@ public class BattleManager : MonoBehaviour
         RectTransform bossRectTransform = currentBoss.GetComponent<RectTransform>();
         bossRectTransform.anchoredPosition = new Vector2(0f, 250f);
 
+        // 보스의 히트박스 위치를 보스 위치와 동일하게 설정
+        BossHitbox bossHitbox = currentBoss.GetComponent<BossHitbox>();
+        bossHitbox.transform.position = bossRectTransform.position;
+
         // 보스를 항상 최하위 자식으로 설정 (UI상 고양이들 뒤에 생기게)
         currentBoss.transform.SetAsFirstSibling();
 
         UpdateBossUI();
 
-        StartCoroutine(DecreaseSliderDuringBossDuration(bossDuration));
-        StartCoroutine(BossBattleRoutine(bossDuration));
+        PushCatsAwayFromBoss();
     }
 
     // 해당 스테이지와 동일한 등급을 갖는 보스 데이터 불러오는 함수 (MouseGrade)
@@ -153,6 +155,88 @@ public class BattleManager : MonoBehaviour
         bossHPSlider.maxValue = maxBossHP;
         bossHPSlider.value = currentBossHP;
         bossHPText.text = $"{maxBossHP}%";
+    }
+
+    // 보스 스폰시 해당 범위의 고양이를 밀어내는 함수
+    private void PushCatsAwayFromBoss()
+    {
+        if (currentBoss == null)
+        {
+            Debug.LogError("No boss to push cats away from.");
+            return;
+        }
+
+        CatData[] allCats = FindObjectsOfType<CatData>();
+        BossHitbox bossHitbox = currentBoss.GetComponent<BossHitbox>();
+
+        if (bossHitbox == null)
+        {
+            Debug.LogError("BossHitbox component is missing on the boss.");
+            return;
+        }
+
+        // 각 고양이를 확인하여 보스의 히트박스 내에 있으면 밀어내기
+        foreach (var cat in allCats)
+        {
+            RectTransform catRectTransform = cat.GetComponent<RectTransform>();
+            Vector3 catPosition = catRectTransform.anchoredPosition;
+
+            //Debug.Log(catPosition.x + ", " + catPosition.y);
+
+            // 고양이가 보스의 히트박스 범위 내에 있는지 확인
+            if (bossHitbox.IsInHitbox(catPosition))
+            {
+                // 해당 고양이를 히트박스 범위 외곽으로 밀기 (현재는 로그만)
+                Debug.Log("히트박스 범위 내 존재");
+            }
+        }
+    }
+
+    // 보스가 받는 데미지 함수
+    public void TakeBossDamage(float damage)
+    {
+        if (!isBattleActive || currentBoss == null) return;
+
+        currentBossHP -= damage;
+        if (currentBossHP < 0)
+        {
+            currentBossHP = 0;
+        }
+
+        UpdateBossHPUI();
+    }
+
+    // HP Slider 및 텍스트 업데이트 함수
+    private void UpdateBossHPUI()
+    {
+        bossHPSlider.value = currentBossHP;
+
+        float hpPercentage = (currentBossHP / maxBossHP) * 100f;
+        bossHPText.text = $"{hpPercentage:F2}%";
+    }
+
+    // 전투 시작 함수
+    private void StartBattle()
+    {
+        isBattleActive = true;
+        StartCoroutine(DecreaseSliderDuringBossDuration(bossDuration));
+        StartCoroutine(BossBattleRoutine(bossDuration));
+
+        // 고양이들의 모든 행동 정지
+        CatData[] allCats = FindObjectsOfType<CatData>();
+        foreach (var cat in allCats)
+        {
+            cat.SetAutoMoveState(false);
+        }
+
+        //// 고양이들이 보스를 향해 이동
+        //foreach (var cat in allCats)
+        //{
+        //    cat.MoveTowardsBoss(currentBoss.transform.position);
+        //}
+
+        //// 보스 공격 코루틴 시작
+        //StartCoroutine(BossAttackRoutine());
     }
 
     // 보스 유지시간동안 슬라이더가 감소하는 코루틴 
@@ -197,70 +281,8 @@ public class BattleManager : MonoBehaviour
         EndBattle(false);
     }
 
-    // 보스가 받는 데미지 함수
-    public void TakeBossDamage(float damage)
-    {
-        if (!isBattleActive || currentBoss == null) return;
-
-        currentBossHP -= damage;
-        if (currentBossHP < 0)
-        {
-            currentBossHP = 0;
-        }
-
-        UpdateBossHPUI();
-    }
-
-    // HP Slider 및 텍스트 업데이트 함수
-    private void UpdateBossHPUI()
-    {
-        bossHPSlider.value = currentBossHP;
-
-        float hpPercentage = (currentBossHP / maxBossHP) * 100f;
-        bossHPText.text = $"{hpPercentage:F2}%";
-    }
-
-    // 전투 시작 함수
-    private void StartBattle()
-    {
-        isBattleActive = true;
-
-        // 고양이들의 모든 행동 정지
-        CatData[] allCats = FindObjectsOfType<CatData>();
-        foreach (var cat in allCats)
-        {
-            cat.SetAutoMoveState(false);
-        }
-
-        //PushCatsAwayFromBoss();
-
-        // 고양이들이 보스를 향해 이동
-        foreach (var cat in allCats)
-        {
-            cat.MoveTowardsBoss(currentBoss.transform.position);
-        }
-
-        //StartCoroutine(BossAttackRoutine());
-    }
 
     /*
-    // 보스 스폰시 해당 범위의 고양이를 밀어내는 함수
-    private void PushCatsAwayFromBoss()
-    {
-        CatData[] allCats = FindObjectsOfType<CatData>();
-        foreach (var cat in allCats)
-        {
-            Vector3 direction = cat.transform.position - currentBoss.transform.position;
-            float distance = direction.magnitude;
-
-            if (distance < 5f)
-            {
-                Vector3 pushDirection = direction.normalized * 2f;
-                cat.transform.position += pushDirection;
-            }
-        }
-    }
-
     // 보스 공격 코루틴
     private IEnumerator BossAttackRoutine()
     {

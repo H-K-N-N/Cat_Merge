@@ -13,7 +13,7 @@ public class SpawnManager : MonoBehaviour
     private GameManager gameManager;                    // GameManager
 
     [SerializeField] private TextMeshProUGUI nowAndMaxFoodText;     // 스폰버튼 밑에 현재 먹이 갯수와 최대 먹이 갯수
-    private int nowFood = 0;                                        // 현재 먹이 갯수
+    private int nowFood = 5;                                        // 현재 먹이 갯수
     private bool isStoppedCoroutine = false;                        // 코루틴 종료 판별
 
     [SerializeField] private Image foodFillAmountImg;

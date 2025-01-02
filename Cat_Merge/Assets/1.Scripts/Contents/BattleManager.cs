@@ -13,12 +13,13 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private GameObject bossPrefab;             // 보스 프리팹
     [SerializeField] private Transform bossUIParent;            // 보스를 배치할 부모 Transform (UI Panel 등)
     [SerializeField] private Slider respawnSlider;              // 보스 소환까지 남은 시간을 표시할 Slider UI
-    //private RectTransform panelRectTransform;                   // Panel의 크기 정보 (배치할 범위)
+    //private RectTransform panelRectTransform;                   // Panel의 크기 정보
 
     private float spawnInterval = 10f;                          // 보스 등장 주기
     private float timer = 0f;                                   // 보스 소환 타이머
-    private float bossDuration = 10f;                           // 보스 유지 시간
-    //private float bossAttackDelay = 2f;                         // 보스 공격 딜레이
+    private float bossDuration = 30f;                           // 보스 유지 시간
+    private float bossAttackDelay = 2f;                         // 보스 공격 딜레이
+    private float catAttackDelay = 1f;                          // 고양이 공격 딜레이
     private int bossStage = 1;                                  // 보스 스테이지
 
     private GameObject currentBoss = null;                      // 현재 보스
@@ -53,7 +54,6 @@ public class BattleManager : MonoBehaviour
 
     private void Start()
     {
-        //panelRectTransform = bossUIParent.GetComponent<RectTransform>();
         StartCoroutine(BossSpawnRoutine());
     }
 
@@ -115,10 +115,6 @@ public class BattleManager : MonoBehaviour
         RectTransform bossRectTransform = currentBoss.GetComponent<RectTransform>();
         bossRectTransform.anchoredPosition = new Vector2(0f, 250f);
 
-        // 보스의 히트박스 위치를 보스 위치와 동일하게 설정
-        //BossHitbox bossHitbox = currentBoss.GetComponent<BossHitbox>();
-        //bossHitbox.transform.position = bossRectTransform.position;
-
         // 보스를 항상 최하위 자식으로 설정 (UI상 고양이들 뒤에 생기게)
         currentBoss.transform.SetAsFirstSibling();
 
@@ -145,8 +141,6 @@ public class BattleManager : MonoBehaviour
     {
         battleHPUI.SetActive(true);
         bossNameText.text = currentBossData.MouseName;
-
-        //Debug.Log(currentBossData.MouseGrade + ", " + currentBossData.MouseHp);
 
         maxBossHP = currentBossData.MouseHp;
         currentBossHP = maxBossHP;
@@ -198,11 +192,14 @@ public class BattleManager : MonoBehaviour
         // 보스 히트박스 범위 밖에 있는 고양이들을 보스를 향해 이동 시키기
         MoveCatsTowardBossBoundary();
 
-        //// 보스 공격 코루틴 시작
-        //StartCoroutine(BossAttackRoutine());
+        // 보스 공격 코루틴 시작
+        StartCoroutine(BossAttackRoutine());
+        
+        // 고양이 공격 코루틴 시작
+        StartCoroutine(CatsAttackRoutine());
     }
 
-    // 보스 유지시간동안 슬라이더가 감소하는 코루틴 
+    // 보스 유지시간동안 슬라이더가 감소하는 코루틴
     private IEnumerator DecreaseSliderDuringBossDuration(float duration)
     {
         float elapsedTime = 0f;
@@ -227,13 +224,10 @@ public class BattleManager : MonoBehaviour
         {
             elapsedTime += Time.deltaTime;
 
-            //// 임의로 테스트
-            //TakeBossDamage(Time.deltaTime * 5);
-
             // 보스 체력이 0 이하가 되면 즉시 전투 종료
             if (currentBossHP <= 0)
             {
-                EndBattle(true); // 승리로 전투 종료
+                EndBattle(true);
                 yield break;
             }
 
@@ -244,7 +238,7 @@ public class BattleManager : MonoBehaviour
         EndBattle(false);
     }
 
-    // 보스 스폰시 해당 범위의 고양이를 밀어내는 함수
+    // 보스 스폰시 히트박스 범위 내에 있는 고양이를 밀어내는 함수
     private void PushCatsAwayFromBoss()
     {
         if (currentBoss == null)
@@ -253,37 +247,23 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        CatData[] allCats = FindObjectsOfType<CatData>();
-        //BossHitbox bossHitbox = currentBoss.GetComponent<BossHitbox>();
-
-        if (bossHitbox == null)
-        {
-            Debug.LogError("BossHitbox component is missing on the boss.");
-            return;
-        }
-
         // 각 고양이를 확인하여 보스의 히트박스 내에 있으면 밀어내기
+        CatData[] allCats = FindObjectsOfType<CatData>();
         foreach (var cat in allCats)
         {
             RectTransform catRectTransform = cat.GetComponent<RectTransform>();
             Vector3 catPosition = catRectTransform.anchoredPosition;
 
-            //Debug.Log(catPosition);
-            //Debug.Log("Boss Position: " + bossHitbox.Position);
-            //Debug.Log("Boss Size: " + bossHitbox.Size);
-
-            // 고양이가 보스의 히트박스 범위 내에 있는지 확인
+            // 고양이가 히트박스 경계 내에 있는지 확인
             if (bossHitbox.IsInHitbox(catPosition))
             {
                 // 고양이를 보스의 히트박스 외곽으로 밀어내기
                 cat.MoveOppositeBoss(bossHitbox.Position, bossHitbox.Size);
-
-                //Debug.Log("히트박스 범위 내 존재, 밀어내기");
             }
         }
     }
 
-    // 보스 히트박스 범위 밖에 있는 고양이들을 히트박스 경계로 이동시키는 함수
+    // 보스 스폰시 히트박스 범위 밖에 있는 고양이를 히트박스 경계로 이동시키는 함수
     private void MoveCatsTowardBossBoundary()
     {
         if (currentBoss == null || bossHitbox == null)
@@ -293,7 +273,6 @@ public class BattleManager : MonoBehaviour
         }
 
         CatData[] allCats = FindObjectsOfType<CatData>();
-
         foreach (var cat in allCats)
         {
             RectTransform catRectTransform = cat.GetComponent<RectTransform>();
@@ -302,40 +281,97 @@ public class BattleManager : MonoBehaviour
             // 고양이가 히트박스 경계 밖에 있는지 확인
             if (!bossHitbox.IsInHitbox(catPosition))
             {
+                // 고양이를 보스 히트박스 외곽으로 모으기
                 cat.MoveTowardBossBoundary(bossHitbox.Position, bossHitbox.Size);
             }
         }
     }
 
-
-    /*
     // 보스 공격 코루틴
     private IEnumerator BossAttackRoutine()
     {
         while (isBattleActive)
         {
             yield return new WaitForSeconds(bossAttackDelay);
+            BossAttackCats();
+        }
+    }
 
-            // 보스가 무작위 고양이 3마리를 공격
-            Mouse bossData = GetBossData();
-            CatData[] allCats = FindObjectsOfType<CatData>();
-            List<CatData> randomCats = new List<CatData>();
+    // 고양이 공격 코루틴
+    private IEnumerator CatsAttackRoutine()
+    {
+        while (isBattleActive)
+        {
+            // 고양이 공격
+            yield return new WaitForSeconds(catAttackDelay);
+            CatsAttackBoss();
+        }
+    }
 
-            for (int i = 0; i < bossData.NumOfAttack; i++)
+    // 보스가 히트박스 내 고양이 N마리를 공격하는 함수
+    private void BossAttackCats()
+    {
+        if (currentBoss == null || bossHitbox == null) return;
+
+        // 히트박스 경계에 있는 고양이를 찾음
+        List<CatData> catsAtBoundary = new List<CatData>();
+        CatData[] allCats = FindObjectsOfType<CatData>();
+
+        foreach (var cat in allCats)
+        {
+            RectTransform catRectTransform = cat.GetComponent<RectTransform>();
+            Vector3 catPosition = catRectTransform.anchoredPosition;
+
+            if (bossHitbox.IsAtBoundary(catPosition))
             {
-                int randomIndex = Random.Range(0, allCats.Length);
-                CatData selectedCat = allCats[randomIndex];
-                randomCats.Add(selectedCat);
+                catsAtBoundary.Add(cat);
             }
+        }
 
-            // 고양이들에게 피해 주기 (임시로 데미지 구현)
-            foreach (var cat in randomCats)
+        if (catsAtBoundary.Count == 0) return;
+
+        // 보스 공격 대상 선정
+        int attackCount = Mathf.Min(catsAtBoundary.Count, currentBossData.NumOfAttack);
+        List<CatData> selectedCats = new List<CatData>();
+
+        while (selectedCats.Count < attackCount)
+        {
+            int randomIndex = Random.Range(0, catsAtBoundary.Count);
+            CatData selectedCat = catsAtBoundary[randomIndex];
+
+            if (!selectedCats.Contains(selectedCat))
             {
-                cat.TakeDamage(10); // TakeDamage 메서드를 고양이 스크립트에서 구현해야 함
+                selectedCats.Add(selectedCat);
+            }
+        }
+
+        // 선택된 고양이들에게 데미지 적용
+        foreach (var cat in selectedCats)
+        {
+            int damage = currentBossData.MouseDamage;
+            cat.TakeDamage(damage);
+        }
+    }
+
+    // 히트박스 내 고양이들이 보스를 공격하는 함수
+    private void CatsAttackBoss()
+    {
+        if (currentBoss == null || bossHitbox == null) return;
+
+        CatData[] allCats = FindObjectsOfType<CatData>();
+
+        foreach (var cat in allCats)
+        {
+            RectTransform catRectTransform = cat.GetComponent<RectTransform>();
+            Vector3 catPosition = catRectTransform.anchoredPosition;
+
+            if (bossHitbox.IsAtBoundary(catPosition))
+            {
+                int damage = cat.catData.CatDamage;
+                TakeBossDamage(damage);
             }
         }
     }
-    */
 
     // 전투 종료 함수
     public void EndBattle(bool isVictory)
@@ -365,6 +401,14 @@ public class BattleManager : MonoBehaviour
         {
             cat.SetAutoMoveState(AutoMoveManager.Instance.IsAutoMoveEnabled());
         }
+
+        // 전투가 종료되면 모든 고양이의 체력을 최대로 회복하는 기능도 넣어야할듯
+
+
     }
+
+    // ======================================================================================================================
+
+
 
 }

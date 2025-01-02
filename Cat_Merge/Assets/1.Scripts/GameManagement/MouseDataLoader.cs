@@ -60,7 +60,7 @@ public class MouseDataLoader : MonoBehaviour
                 int mouseId = int.Parse(validValues[0]);
                 string mouseName = validValues[1];
                 int mouseGrade = int.Parse(validValues[2]);
-                float mouseDamage = float.Parse(validValues[3]);
+                int mouseDamage = int.Parse(validValues[3]);
                 float mouseHp = float.Parse(validValues[4]);
                 Sprite mouseImage = LoadSprite(validValues[5]);
                 int numOfAttack = int.Parse(validValues[6]);

@@ -25,6 +25,8 @@ public class CatData : MonoBehaviour
     public float CollectingTime { get => collectingTime; set => collectingTime = value; }
     private bool isCollectingCoins = true;      // 자동 재화 수집 활성화 상태
 
+    public int catHp;                           // 고양이 체력
+
     // ======================================================================================================================
 
     private void Awake()
@@ -64,6 +66,7 @@ public class CatData : MonoBehaviour
     public void SetCatData(Cat cat)
     {
         catData = cat;
+        catHp = catData.CatHp;
         UpdateCatUI();
     }
 
@@ -143,10 +146,14 @@ public class CatData : MonoBehaviour
     // 보스한테 공격당했을때 실행되는 함수
     public void TakeDamage(int damage)
     {
-        // 체력 감소 로직
-        Debug.Log("고양이 체력 감소");
-        //catData.CatHp -= damage;
-        //Debug.Log($"남은 체력 : {catData.CatHp}");
+        catHp -= damage;
+        Debug.Log($"남은 체력 : {catHp}");
+
+        // 임시로 파괴 (기획대로면 기절 후 회복)
+        if (catHp <= 0)
+        {
+            Destroy(gameObject);
+        }
     }
 
     // ======================================================================================================================

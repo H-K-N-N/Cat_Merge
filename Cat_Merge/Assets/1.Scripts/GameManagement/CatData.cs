@@ -152,7 +152,7 @@ public class CatData : MonoBehaviour
         // 임시로 파괴 (기획대로면 기절 후 회복)
         if (catHp <= 0)
         {
-            Destroy(gameObject);
+            //Destroy(gameObject);
         }
     }
 

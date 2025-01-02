@@ -17,7 +17,7 @@ public class BattleManager : MonoBehaviour
 
     private float spawnInterval = 10f;                          // 보스 등장 주기
     private float timer = 0f;                                   // 보스 소환 타이머
-    private float bossDuration = 30f;                           // 보스 유지 시간
+    private float bossDuration = 10f;                           // 보스 유지 시간
     private float bossAttackDelay = 2f;                         // 보스 공격 딜레이
     private float catAttackDelay = 1f;                          // 고양이 공격 딜레이
     private int bossStage = 1;                                  // 보스 스테이지
@@ -175,16 +175,12 @@ public class BattleManager : MonoBehaviour
     // 전투 시작 함수
     private void StartBattle()
     {
-        isBattleActive = true;
+        // 전투 시작시 여러 기능들 비활성화
+        SetStartFunctions();
+
         StartCoroutine(DecreaseSliderDuringBossDuration(bossDuration));
         StartCoroutine(BossBattleRoutine(bossDuration));
-
-        // 고양이들의 모든 행동 정지
-        CatData[] allCats = FindObjectsOfType<CatData>();
-        foreach (var cat in allCats)
-        {
-            cat.SetAutoMoveState(false);
-        }
+        isBattleActive = true;
 
         // 보스 히트박스 내에 존재하는 고양이들 밀어내기
         PushCatsAwayFromBoss();
@@ -197,6 +193,26 @@ public class BattleManager : MonoBehaviour
         
         // 고양이 공격 코루틴 시작
         StartCoroutine(CatsAttackRoutine());
+    }
+
+    // [MergeManager, AutoMoveManager, SortManager, AutoMergeManager]
+    // [SpawnManager]
+    // [ItemMenuManager, BuyCatManager, DictionaryManager, QuestManager]
+    private void SetStartFunctions()
+    {
+        GetComponent<MergeManager>().StartBattleMergeState();
+        GetComponent<AutoMoveManager>().StartBattleAutoMoveState();
+        GetComponent<SortManager>().StartBattleSortState();
+        //GetComponent<AutoMergeManager>().StartBattleAutoMergeState();
+        //GetComponent<SpawnManager>().StartBattleSpawnState();
+    }
+    private void SetEndFunctions()
+    {
+        GetComponent<MergeManager>().EndBattleMergeState();
+        GetComponent<AutoMoveManager>().EndBattleAutoMoveState();
+        GetComponent<SortManager>().EndBattleSortState();
+        //GetComponent<AutoMergeManager>().EndBattleAutoMergeState();
+        //GetComponent<SpawnManager>().EndBattleSpawnState();
     }
 
     // 보스 유지시간동안 슬라이더가 감소하는 코루틴
@@ -395,12 +411,8 @@ public class BattleManager : MonoBehaviour
             respawnSlider.value = 0f;
         }
 
-        // 고양이들의 상태 복구
-        CatData[] allCats = FindObjectsOfType<CatData>();
-        foreach (var cat in allCats)
-        {
-            cat.SetAutoMoveState(AutoMoveManager.Instance.IsAutoMoveEnabled());
-        }
+        // 전투 종료시 비활성화했던 기능들 다시 기존 상태로 복구
+        SetEndFunctions();
 
         // 전투가 종료되면 모든 고양이의 체력을 최대로 회복하는 기능도 넣어야할듯
 

@@ -12,7 +12,8 @@ public class MergeManager : MonoBehaviour
     [SerializeField] private GameObject mergePanel;                 // 머지 On/Off 패널
     [SerializeField] private Button closeMergePanelButton;          // 머지 패널 닫기 버튼
     [SerializeField] private Button mergeStateButton;               // 머지 상태 버튼
-    private bool isMergeEnabled = true;
+    private bool isMergeEnabled = true;                             // 머지 활성화 상태
+    private bool previousMergeState = true;                         // 이전 상태 저장
 
     // ======================================================================================================================
 
@@ -51,6 +52,21 @@ public class MergeManager : MonoBehaviour
         isMergeEnabled = !isMergeEnabled;
         UpdateMergeButtonColor();
         CloseMergePanel();
+    }
+
+    // 전투 시작시 버튼 및 기능 비활성화시키는 함수
+    public void StartBattleMergeState()
+    {
+        previousMergeState = isMergeEnabled;
+        isMergeEnabled = false;
+        openMergePanelButton.interactable = false;
+    }
+
+    // 전투 종료시 버튼 및 기능 기존 상태로 되돌려놓는 함수
+    public void EndBattleMergeState()
+    {
+        isMergeEnabled = previousMergeState;
+        openMergePanelButton.interactable = true;
     }
 
     // 머지 버튼 색상 업데이트 함수

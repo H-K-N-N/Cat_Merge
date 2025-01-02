@@ -24,6 +24,18 @@ public class SortManager : MonoBehaviour
         StartCoroutine(SortCatsCoroutine());
     }
 
+    // 전투 시작시 버튼 및 기능 비활성화시키는 함수
+    public void StartBattleSortState()
+    {
+        sortButton.interactable = false;
+    }
+
+    // 전투 종료시 버튼 및 기능 기존 상태로 되돌려놓는 함수
+    public void EndBattleSortState()
+    {
+        sortButton.interactable = true;
+    }
+
     // 고양이들을 정렬된 위치에 배치하는 코루틴
     private IEnumerator SortCatsCoroutine()
     {

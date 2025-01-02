@@ -12,6 +12,7 @@ public class AutoMoveManager : MonoBehaviour
     [SerializeField] private Button closeAutoMovePanelButton;       // 자동 이동 패널 닫기 버튼
     [SerializeField] private Button autoMoveStateButton;            // 자동 이동 상태 버튼
     public bool isAutoMoveEnabled = true;                           // 자동 이동 활성화 상태
+    private bool previousAutoMoveState = true;                      // 이전 상태 저장
 
     // ======================================================================================================================
 
@@ -58,6 +59,37 @@ public class AutoMoveManager : MonoBehaviour
 
         UpdateAutoMoveButtonColor();
         CloseAutoMovePanel();
+    }
+
+    // 전투 시작시 버튼 및 기능 비활성화시키는 함수
+    public void StartBattleAutoMoveState()
+    {
+        previousAutoMoveState = isAutoMoveEnabled;
+        isAutoMoveEnabled = false;
+
+        // 모든 고양이에 상태 적용
+        CatData[] allCatDataObjects = FindObjectsOfType<CatData>();
+        foreach (var catData in allCatDataObjects)
+        {
+            catData.SetAutoMoveState(isAutoMoveEnabled);
+        }
+
+        openAutoMovePanelButton.interactable = false;
+    }
+
+    // 전투 종료시 버튼 및 기능 기존 상태로 되돌려놓는 함수
+    public void EndBattleAutoMoveState()
+    {
+        isAutoMoveEnabled = previousAutoMoveState;
+
+        // 모든 고양이에 상태 적용
+        CatData[] allCatDataObjects = FindObjectsOfType<CatData>();
+        foreach (var catData in allCatDataObjects)
+        {
+            catData.SetAutoMoveState(isAutoMoveEnabled);
+        }
+
+        openAutoMovePanelButton.interactable = true;
     }
 
     // 자동이동 버튼 색상 업데이트 함수

@@ -15,6 +15,10 @@ public class GameManager : MonoBehaviour
     private Cat[] allCatData;                                       // 모든 고양이 데이터
     public Cat[] AllCatData => allCatData;
 
+    // Main Mouse Data
+    private Mouse[] allMouseData;                                   // 모든 쥐 데이터
+    public Mouse[] AllMouseData => allMouseData;    
+
     // Main UI Text
     [Header("---[Main UI Text]")]
     [SerializeField] private TextMeshProUGUI catCountText;          // 고양이 수 텍스트
@@ -81,6 +85,7 @@ public class GameManager : MonoBehaviour
 
         // 기본 세팅
         LoadAllCats();
+        LoadAllMouses();
         UpdateCatCountText();
         UpdateCoinText();
         UpdateCashText();
@@ -104,6 +109,22 @@ public class GameManager : MonoBehaviour
         catDataLoader.catDictionary.Values.CopyTo(allCatData, 0);
 
         //Debug.Log($"고양이 데이터 {allCatData.Length}개가 로드되었습니다.");
+    }
+
+    // 쥐 정보 Load 함수
+    private void LoadAllMouses()
+    {
+        // MouseDataLoader mouseDictionary 가져오기
+        MouseDataLoader mouseDataLoader = FindObjectOfType<MouseDataLoader>();
+        if (mouseDataLoader == null || mouseDataLoader.mouseDictionary == null)
+        {
+            Debug.LogError("MouseDataLoader가 없거나 쥐 데이터가 로드되지 않았습니다.");
+            return;
+        }
+
+        // Dictionary의 모든 값을 배열로 변환
+        allMouseData = new Mouse[mouseDataLoader.mouseDictionary.Count];
+        mouseDataLoader.mouseDictionary.Values.CopyTo(allMouseData, 0);
     }
 
     // ======================================================================================================================

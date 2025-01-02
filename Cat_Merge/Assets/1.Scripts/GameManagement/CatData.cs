@@ -76,26 +76,77 @@ public class CatData : MonoBehaviour
         return isAutoMoveEnabled;
     }
 
-    // 보스를 향해 이동
-    public void MoveTowardsBoss(Vector3 bossPosition)
+    // 보스 히트박스 경계 내에 존재하는 고양이를 히트박스 경계로 이동 (보스 스폰시 히트박스 내부에 있던 고양이들이 히트박스 경계로 밀려나는 현상)
+    public void MoveOppositeBoss(Vector3 bossPosition, Vector2 bossSize)
     {
-        StartCoroutine(MoveToPosition(bossPosition));
-    }
+        Vector3 catPosition = rectTransform.anchoredPosition;
+        Vector3 offset = catPosition - bossPosition;
 
-    private IEnumerator MoveToPosition(Vector3 targetPosition)
-    {
-        while (Vector3.Distance(transform.position, targetPosition) > 0.1f)
+        float halfWidth = bossSize.x / 2f;
+        float halfHeight = bossSize.y / 2f;
+
+        // 히트박스의 외곽 라인 상에서 가장 가까운 x, y 좌표를 계산
+        float closestX = Mathf.Clamp(catPosition.x, bossPosition.x - halfWidth, bossPosition.x + halfWidth);
+        float closestY = Mathf.Clamp(catPosition.y, bossPosition.y - halfHeight, bossPosition.y + halfHeight);
+
+        // x 방향과 y 방향 중 어떤 면이 더 가까운지 판단하여 이동 위치 설정
+        float distanceToVerticalEdge = Mathf.Min(Mathf.Abs(catPosition.x - (bossPosition.x - halfWidth)), Mathf.Abs(catPosition.x - (bossPosition.x + halfWidth)));
+        float distanceToHorizontalEdge = Mathf.Min(Mathf.Abs(catPosition.y - (bossPosition.y - halfHeight)), Mathf.Abs(catPosition.y - (bossPosition.y + halfHeight)));
+
+        if (distanceToVerticalEdge < distanceToHorizontalEdge)
         {
-            transform.position = Vector3.Lerp(transform.position, targetPosition, 0.01f);
-            yield return null;
+            // x 방향 가장 가까운 외곽으로 이동
+            closestX = offset.x < 0 ? bossPosition.x - halfWidth : bossPosition.x + halfWidth;
         }
+        else
+        {
+            // y 방향 가장 가까운 외곽으로 이동
+            closestY = offset.y < 0 ? bossPosition.y - halfHeight : bossPosition.y + halfHeight;
+        }
+
+        Vector3 targetPosition = new Vector3(closestX, closestY, catPosition.z);
+        StartCoroutine(SmoothMoveToPosition(targetPosition));
     }
 
-    // 고양이 피해 받기
+    // 보스 히트박스 경계 외에 존재하는 고양이를 히트박스 경계로 이동 (보스 스폰 완료 후 전투 시작시 히트박스 경계에서 전투할 수 있도록 이동)
+    public void MoveTowardBossBoundary(Vector3 bossPosition, Vector2 bossSize)
+    {
+        Vector3 catPosition = rectTransform.anchoredPosition;
+        Vector3 offset = bossPosition - catPosition;
+
+        float halfWidth = bossSize.x / 2f;
+        float halfHeight = bossSize.y / 2f;
+
+        // 히트박스 외곽 라인 상에서 가장 가까운 x, y 좌표 계산
+        float closestX = Mathf.Clamp(catPosition.x, bossPosition.x - halfWidth, bossPosition.x + halfWidth);
+        float closestY = Mathf.Clamp(catPosition.y, bossPosition.y - halfHeight, bossPosition.y + halfHeight);
+
+        // x 방향과 y 방향 중 어떤 면이 더 가까운지 판단하여 이동 위치 설정
+        float distanceToVerticalEdge = Mathf.Min(Mathf.Abs(catPosition.x - (bossPosition.x - halfWidth)), Mathf.Abs(catPosition.x - (bossPosition.x + halfWidth)));
+        float distanceToHorizontalEdge = Mathf.Min(Mathf.Abs(catPosition.y - (bossPosition.y - halfHeight)), Mathf.Abs(catPosition.y - (bossPosition.y + halfHeight)));
+
+        if (distanceToVerticalEdge < distanceToHorizontalEdge)
+        {
+            // x 방향 가장 가까운 외곽으로 이동
+            closestX = offset.x > 0 ? bossPosition.x - halfWidth : bossPosition.x + halfWidth;
+        }
+        else
+        {
+            // y 방향 가장 가까운 외곽으로 이동
+            closestY = offset.y > 0 ? bossPosition.y - halfHeight : bossPosition.y + halfHeight;
+        }
+
+        Vector3 targetPosition = new Vector3(closestX, closestY, catPosition.z);
+        StartCoroutine(SmoothMoveToPosition(targetPosition));
+    }
+
+    // 보스한테 공격당했을때 실행되는 함수
     public void TakeDamage(int damage)
     {
         // 체력 감소 로직
-        //Debug.Log("체력 감소");
+        Debug.Log("고양이 체력 감소");
+        //catData.CatHp -= damage;
+        //Debug.Log($"남은 체력 : {catData.CatHp}");
     }
 
     // ======================================================================================================================
@@ -235,7 +286,8 @@ public class CatData : MonoBehaviour
         {
             //yield return new WaitForSeconds(collectingTime);
 
-            yield return new WaitForSeconds(ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value); // 재화 획득 시간(아이템 상점 레벨)
+            // 재화 획득 시간(아이템 상점 레벨)
+            yield return new WaitForSeconds(ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value); 
 
             if (catData != null && GameManager.Instance != null)
             {

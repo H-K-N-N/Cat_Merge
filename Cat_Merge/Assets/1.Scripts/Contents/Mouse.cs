@@ -13,10 +13,10 @@ public class Mouse : MonoBehaviour
     private int mouseGrade;             // 쥐 등급 (스테이지)
     public int MouseGrade { get => mouseGrade; set => mouseGrade = value; }
 
-    private float mouseDamage;            // 쥐 전투력
+    private float mouseDamage;          // 쥐 전투력
     public float MouseDamage { get => mouseDamage; set => mouseDamage = value; }
 
-    private float mouseHp;                // 쥐 체력
+    private float mouseHp;              // 쥐 체력
     public float MouseHp { get => mouseHp; set => mouseHp = value; }
 
     private Sprite mouseImage;          // 쥐 이미지

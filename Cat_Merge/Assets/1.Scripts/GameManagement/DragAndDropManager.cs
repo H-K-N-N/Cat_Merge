@@ -71,47 +71,55 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
     {
         isDragging = false;
 
-        // 머지 상태가 OFF일 경우 머지 X
-        if (!MergeManager.Instance.IsMergeEnabled())
+        if (BattleManager.Instance.IsBattleActive)
         {
-            return;
+            BattleDrop(eventData);
         }
-
-        CheckEdgeDrop();
-
-        DragAndDropManager nearbyCat = FindNearbyCat();
-        if (nearbyCat != null && nearbyCat != this)
+        else
         {
-            // 자동 머지 중인지 확인
-            if (IsAutoMerging(nearbyCat))
+            // 머지 상태가 OFF일 경우 머지 X
+            if (!MergeManager.Instance.IsMergeEnabled())
             {
-                Debug.Log("자동 머지 중인 고양이와 합성할 수 없습니다.");
                 return;
             }
 
-            // 동일한 등급 확인 후 합성 처리
-            if (nearbyCat.catData.CatGrade == this.catData.CatGrade)
+            CheckEdgeDrop();
+
+            DragAndDropManager nearbyCat = FindNearbyCat();
+            if (nearbyCat != null && nearbyCat != this)
             {
-                // 합성할 고양이의 다음 등급이 존재하는지 확인
-                Cat nextCat = FindObjectOfType<MergeManager>().GetCatByGrade(this.catData.CatGrade + 1);
-                if (nextCat != null)
+                // 자동 머지 중인지 확인
+                if (IsAutoMerging(nearbyCat))
                 {
-                    // nextCat이 존재할 경우에만 애니메이션 시작
-                    StartCoroutine(PullNearbyCat(nearbyCat));
+                    Debug.Log("자동 머지 중인 고양이와 합성할 수 없습니다.");
+                    return;
+                }
+
+                // 동일한 등급 확인 후 합성 처리
+                if (nearbyCat.catData.CatGrade == this.catData.CatGrade)
+                {
+                    // 합성할 고양이의 다음 등급이 존재하는지 확인
+                    //Cat nextCat = FindObjectOfType<MergeManager>().GetCatByGrade(this.catData.CatGrade + 1);
+                    Cat nextCat = MergeManager.Instance.GetCatByGrade(this.catData.CatGrade + 1);
+                    if (nextCat != null)
+                    {
+                        // nextCat이 존재할 경우에만 애니메이션 시작
+                        StartCoroutine(PullNearbyCat(nearbyCat));
+                    }
+                    else
+                    {
+                        //Debug.LogWarning("다음 등급의 고양이가 없음");
+                    }
                 }
                 else
                 {
-                    //Debug.LogWarning("다음 등급의 고양이가 없음");
+                    //Debug.LogWarning("등급이 다름");
                 }
             }
             else
             {
-                //Debug.LogWarning("등급이 다름");
+                //Debug.Log("드랍한 위치에 배치");
             }
-        }
-        else
-        {
-            //Debug.Log("드랍한 위치에 배치");
         }
     }
 
@@ -164,6 +172,35 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
         rectTransform.localPosition = targetPosition;
     }
 
+    // ======================================================================================================================
+
+    // 전투중일때 드래그 앤 드랍 (어디에 위치하든 가까운 보스 히트박스 외곽으로 이동되게 해야함)
+    private void BattleDrop(PointerEventData eventData)
+    {
+        if (!BattleManager.Instance.IsBattleActive) return;
+
+        BossHitbox currentBossHitBox = BattleManager.Instance.bossHitbox;
+        GameObject droppedObject = eventData.pointerDrag;
+        CatData catData = droppedObject.GetComponent<CatData>();
+
+        // 히트박스 내부라면
+        if (currentBossHitBox.IsInHitbox(this.rectTransform.anchoredPosition))
+        {
+            //Debug.Log("히트박스 내부 감지");
+
+            catData.MoveOppositeBoss(currentBossHitBox.Position, currentBossHitBox.Size);
+        }
+        // 히트박스 외부라면
+        else if (!currentBossHitBox.IsInHitbox(this.rectTransform.anchoredPosition))
+        {
+            //Debug.Log("히트박스 외부 감지");
+
+            catData.MoveTowardBossBoundary(currentBossHitBox.Position, currentBossHitBox.Size);
+        }
+    }
+
+    // ======================================================================================================================
+
     // 자동 머지 중인지 확인하는 함수
     private bool IsAutoMerging(DragAndDropManager nearbyCat)
     {
@@ -188,7 +225,8 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
         }
 
         // 끌려온 후 합성 처리
-        Cat mergedCat = FindObjectOfType<MergeManager>().MergeCats(this.catData, nearbyCat.catData);
+        //Cat mergedCat = FindObjectOfType<MergeManager>().MergeCats(this.catData, nearbyCat.catData);
+        Cat mergedCat = MergeManager.Instance.MergeCats(this.catData, nearbyCat.catData);
         if (mergedCat != null)
         {
             //Debug.Log($"합성 성공: {mergedCat.CatName}");

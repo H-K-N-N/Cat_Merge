@@ -60,6 +60,11 @@ public class MergeManager : MonoBehaviour
         previousMergeState = isMergeEnabled;
         isMergeEnabled = false;
         openMergePanelButton.interactable = false;
+
+        if (mergePanel.activeSelf == true)
+        {
+            mergePanel.SetActive(false);
+        }
     }
 
     // 전투 종료시 버튼 및 기능 기존 상태로 되돌려놓는 함수

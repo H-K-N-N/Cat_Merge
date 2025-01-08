@@ -226,13 +226,13 @@ public class BattleManager : MonoBehaviour
     }
 
     // 슬라이더 감소 관리 코루틴
-    private IEnumerator ExecuteBattleSliders(float warningDuration, float bossDuration)
+    private IEnumerator ExecuteBattleSliders(float warningDuration, float sliderDuration)
     {
         // 1. warningSlider 감소
         yield return StartCoroutine(DecreaseWarningSliderDuringBossDuration(warningDuration));
 
         // 2. respawnSlider 감소
-        yield return StartCoroutine(DecreaseSliderDuringBossDuration(bossDuration));
+        yield return StartCoroutine(DecreaseSliderDuringBossDuration(sliderDuration));
     }
 
     // 보스 유지시간동안 warningSlider가 감소하는 코루틴
@@ -484,18 +484,12 @@ public class BattleManager : MonoBehaviour
         }
 
         // respawnSlider 초기화
-        if (respawnSlider != null)
-        {
-            respawnSlider.maxValue = spawnInterval;
-            respawnSlider.value = 0f;
-        }
+        respawnSlider.maxValue = spawnInterval;
+        respawnSlider.value = 0f;
 
         // warningSlider 초기화
-        if (warningSlider != null)
-        {
-            warningSlider.maxValue = warningDuration;
-            warningSlider.value = 0f;
-        }
+        warningSlider.maxValue = warningDuration;
+        warningSlider.value = 0f;
 
         // 전투 종료시 비활성화했던 기능들 다시 기존 상태로 복구
         SetEndFunctions();

@@ -2476,7 +2476,7 @@ RectTransform:
   m_Father: {fileID: 218029432}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -5062,11 +5062,12 @@ MonoBehaviour:
   bossPrefab: {fileID: 7027263960823894882, guid: 5f9e56c0bd9032e469961e0b9155d9b6, type: 3}
   bossUIParent: {fileID: 1808509785}
   respawnSlider: {fileID: 699126342}
-  giveupButton: {fileID: 1918917955}
+  bossHitbox: {fileID: 0}
   battleHPUI: {fileID: 1402368391}
   bossNameText: {fileID: 563596345}
   bossHPSlider: {fileID: 1943725633}
   bossHPText: {fileID: 1996685929}
+  giveupButton: {fileID: 1918917955}
   warningPanel: {fileID: 1241622844}
   warningSlider: {fileID: 186678278}
 --- !u!1 &335345886
@@ -25270,7 +25271,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1402368392
 RectTransform:
   m_ObjectHideFlags: 0

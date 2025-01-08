@@ -149,10 +149,10 @@ public class CatData : MonoBehaviour
         catHp -= damage;
         Debug.Log($"남은 체력 : {catHp}");
 
-        // 임시로 파괴 (기획대로면 기절 후 회복)
         if (catHp <= 0)
         {
-            //Destroy(gameObject);
+            // 체력 회복 시간동안 기절해있는 애니메이션이 재생되면서 해당 객체의 모든 기능 정지
+            // 체력 회복이 되면 다시 원상복구
         }
     }
 

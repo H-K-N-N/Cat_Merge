@@ -40,7 +40,7 @@ public class MouseData : MonoBehaviour
     }
 
     // ======================================================================================================================
-    // [전투관련]
+    // [전투관련] - 현재 BattleManager에 다 있음
     // Mouse Prefab에 MouseData, BossHitbox 스크립트 포함되어있음
 
 

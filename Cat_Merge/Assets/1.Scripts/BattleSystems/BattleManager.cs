@@ -389,6 +389,9 @@ public class BattleManager : MonoBehaviour
 
         foreach (var cat in allCats)
         {
+            // 기절 상태의 고양이는 제외
+            if (cat.isStuned) continue;
+
             RectTransform catRectTransform = cat.GetComponent<RectTransform>();
             Vector3 catPosition = catRectTransform.anchoredPosition;
 
@@ -446,6 +449,9 @@ public class BattleManager : MonoBehaviour
 
         foreach (var cat in allCats)
         {
+            // 기절 상태인 고양이는 공격하지 않도록 처리
+            if (cat.isStuned) continue;
+
             RectTransform catRectTransform = cat.GetComponent<RectTransform>();
             Vector3 catPosition = catRectTransform.anchoredPosition;
 
@@ -493,6 +499,15 @@ public class BattleManager : MonoBehaviour
 
         // 전투 종료시 비활성화했던 기능들 다시 기존 상태로 복구
         SetEndFunctions();
+
+        // 모든 고양이의 체력을 회복시켜줘야함
+        CatData[] allCats = FindObjectsOfType<CatData>();
+        foreach (var cat in allCats)
+        {
+            if (cat.isStuned) continue;
+
+            cat.HealCatHP();
+        }
     }
 
     // [MergeManager, AutoMoveManager, SortManager, AutoMergeManager]

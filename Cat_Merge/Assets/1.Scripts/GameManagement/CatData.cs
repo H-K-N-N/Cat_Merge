@@ -24,8 +24,10 @@ public class CatData : MonoBehaviour
     private float collectingTime = 2f;          // 자동 재화 수집 시간
     public float CollectingTime { get => collectingTime; set => collectingTime = value; }
     private bool isCollectingCoins = true;      // 자동 재화 수집 활성화 상태
+    private Coroutine autoCollectCoroutine;     // 자동 재화 수집 코루틴
 
     public int catHp;                           // 고양이 체력
+    public bool isStuned = false;               // 고양이 기절상태
 
     // ======================================================================================================================
 
@@ -47,7 +49,7 @@ public class CatData : MonoBehaviour
     private void Start()
     {
         UpdateCatUI();
-        StartCoroutine(AutoCollectCoins());
+        autoCollectCoroutine = StartCoroutine(AutoCollectCoins());
     }
 
     // ======================================================================================================================
@@ -152,8 +154,44 @@ public class CatData : MonoBehaviour
         if (catHp <= 0)
         {
             // 체력 회복 시간동안 기절해있는 애니메이션이 재생되면서 해당 객체의 모든 기능 정지
-            // 체력 회복이 되면 다시 원상복구
+            // 지금은 임시로 10초뒤에 체력이 회복된다고 가정(N초)
+            StartCoroutine(StunAndRecover(15f));     // 10초 후에 체력 회복 (예시)
         }
+    }
+
+    // 기절 상태 및 체력 회복 처리 코루틴
+    private IEnumerator StunAndRecover(float recoveryTime)
+    {
+        // 고양이 기절 상태 처리 (기능 정지, 애니메이션 등)
+        isCollectingCoins = false;
+        SetAutoMoveState(false);
+        SetRaycastTarget(false);
+        isStuned = true;
+        catImage.color = new Color(1f, 0.5f, 0.5f, 0.7f);   // 임시 투명도 (Stun 애니메이션 실행)
+
+        // 기절 상태 유지 시간
+        yield return new WaitForSeconds(recoveryTime);
+
+        // 체력 회복 및 상태 복구
+        HealCatHP();
+        isCollectingCoins = true;
+        SetRaycastTarget(true);
+        SetAutoMoveState(true);
+        isStuned = false;
+        catImage.color = Color.white;                       // 원래 색상 복구 (Idle 애니메이션 복구)
+
+        Debug.Log("고양이 체력 회복 완료!");
+    }
+
+    private void SetRaycastTarget(bool isActive)
+    {
+        catImage.raycastTarget = isActive;
+        SetCollectingCoinsState(isActive);
+    }
+
+    public void HealCatHP()
+    {
+        catHp = catData.CatHp;
     }
 
     // ======================================================================================================================
@@ -164,7 +202,7 @@ public class CatData : MonoBehaviour
         isAutoMoveEnabled = isEnabled;
 
         // 자동 이동을 활성화하려면 코루틴 시작
-        if (isAutoMoveEnabled)
+        if (isAutoMoveEnabled && !isStuned)
         {
             if (!isAnimating && autoMoveCoroutine == null)
             {
@@ -285,6 +323,31 @@ public class CatData : MonoBehaviour
     }
 
     // ======================================================================================================================
+
+    // 자동 재화 수집 활성화/비활성화 함수
+    public void SetCollectingCoinsState(bool isEnabled)
+    {
+        // 자동 재화 수집 상태 변경
+        isCollectingCoins = isEnabled;
+
+        // 수집을 활성화하려면 코루틴 시작
+        if (isCollectingCoins)
+        {
+            if (autoCollectCoroutine == null)
+            {
+                autoCollectCoroutine = StartCoroutine(AutoCollectCoins());
+            }
+        }
+        else
+        {
+            // 수집을 비활성화하려면 코루틴 중단
+            if (autoCollectCoroutine != null)
+            {
+                StopCoroutine(autoCollectCoroutine);
+                autoCollectCoroutine = null;
+            }
+        }
+    }
 
     // 자동 재화 수집 코루틴
     private IEnumerator AutoCollectCoins()

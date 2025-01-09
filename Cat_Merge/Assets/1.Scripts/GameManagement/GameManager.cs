@@ -12,17 +12,20 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     // Main Cat Data
-    private Cat[] allCatData;                                       // 모든 고양이 데이터
+    private Cat[] allCatData;                                               // 모든 고양이 데이터
     public Cat[] AllCatData => allCatData;
 
     // Main Mouse Data
-    private Mouse[] allMouseData;                                   // 모든 쥐 데이터
-    public Mouse[] AllMouseData => allMouseData;    
+    private Mouse[] allMouseData;                                           // 모든 쥐 데이터
+    public Mouse[] AllMouseData => allMouseData;
+
+    [SerializeField] private Transform gamePanel;                           // 고양이 정보를 가져올 부모 Panel
+    private List<RectTransform> catUIObjects = new List<RectTransform>();   // 고양이 UI 객체 리스트
 
     // Main UI Text
     [Header("---[Main UI Text]")]
-    [SerializeField] private TextMeshProUGUI catCountText;          // 고양이 수 텍스트
-    private int currentCatCount = 0;                                // 화면 내 고양이 수
+    [SerializeField] private TextMeshProUGUI catCountText;                  // 고양이 수 텍스트
+    private int currentCatCount = 0;                                        // 화면 내 고양이 수
     public int CurrentCatCount
     {
         get => currentCatCount;
@@ -33,7 +36,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private int maxCats = 8;                                        // 최대 고양이 수
+    private int maxCats = 8;                                                // 최대 고양이 수
     public int MaxCats
     {
         get => maxCats;
@@ -44,8 +47,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    [SerializeField] private TextMeshProUGUI coinText;              // 기본재화 텍스트
-    private int coin = 1000000;                                        // 기본재화
+    [SerializeField] private TextMeshProUGUI coinText;                      // 기본재화 텍스트
+    private int coin = 1000000;                                             // 기본재화
     public int Coin
     {
         get => coin;
@@ -56,8 +59,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    [SerializeField] private TextMeshProUGUI cashText;              // 캐쉬재화 텍스트
-    private int cash = 1000;                                        // 캐쉬재화
+    [SerializeField] private TextMeshProUGUI cashText;                      // 캐쉬재화 텍스트
+    private int cash = 1000;                                                // 캐쉬재화
     public int Cash
     {
         get => cash;
@@ -89,6 +92,11 @@ public class GameManager : MonoBehaviour
         UpdateCatCountText();
         UpdateCoinText();
         UpdateCashText();
+    }
+
+    private void Update()
+    {
+        SortCatUIObjectsByYPosition();
     }
 
     // ======================================================================================================================
@@ -178,6 +186,38 @@ public class GameManager : MonoBehaviour
         {
             // 숫자를 3자리마다 콤마를 추가하여 표시
             cashText.text = cash.ToString("N0");
+        }
+    }
+
+    // ======================================================================================================================
+
+    // GamePanel에서 모든 RectTransform 자식 객체 가져오는 함수
+    private void UpdateCatUIObjects()
+    {
+        catUIObjects.Clear();
+
+        foreach (Transform child in gamePanel)
+        {
+            RectTransform rectTransform = child.GetComponent<RectTransform>();
+            if (rectTransform != null)
+            {
+                catUIObjects.Add(rectTransform);
+            }
+        }
+    }
+
+    // Y축 위치를 기준으로 고양이 UI 정렬
+    private void SortCatUIObjectsByYPosition()
+    {
+        UpdateCatUIObjects();
+
+        // Y축을 기준으로 정렬 (높은 Y값이 뒤로 가게 설정)
+        catUIObjects.Sort((a, b) => b.anchoredPosition.y.CompareTo(a.anchoredPosition.y));
+
+        // 정렬된 순서대로 UI 계층 구조 업데이트
+        for (int i = 0; i < catUIObjects.Count; i++)
+        {
+            catUIObjects[i].SetSiblingIndex(i);
         }
     }
 

@@ -7,34 +7,44 @@ using TMPro;
 // BattleManager Script
 public class BattleManager : MonoBehaviour
 {
-    public static BattleManager Instance { get; private set; }
+    public static BattleManager Instance { get; private set; }  // 
 
     [Header("---[Battle System]")]
     [SerializeField] private GameObject bossPrefab;             // 보스 프리팹
     [SerializeField] private Transform bossUIParent;            // 보스를 배치할 부모 Transform (UI Panel 등)
     [SerializeField] private Slider respawnSlider;              // 보스 소환까지 남은 시간을 표시할 Slider UI
-    //private RectTransform panelRectTransform;                   // Panel의 크기 정보
 
     private float spawnInterval = 10f;                          // 보스 등장 주기
     private float timer = 0f;                                   // 보스 소환 타이머
-    private float bossDuration = 10f;                           // 보스 유지 시간
-    private float bossAttackDelay = 2f;                         // 보스 공격 딜레이
-    private float catAttackDelay = 1f;                          // 고양이 공격 딜레이
+    private float sliderDuration = 8f;                          // slider 유지 시간
+    private float bossDuration;                                 // 보스 유지 시간 (sliderDuration + warningDuration)
     private int bossStage = 1;                                  // 보스 스테이지
 
+    private float bossAttackDelay = 2f;                         // 보스 공격 딜레이
+    private float catAttackDelay = 1f;                          // 고양이 공격 딜레이
+
     private GameObject currentBoss = null;                      // 현재 보스
-    private BossHitbox bossHitbox;                              // 보스 히트박스
+    [HideInInspector] public BossHitbox bossHitbox;             // 보스 히트박스
     private bool isBattleActive = false;                        // 전투 활성화 여부
+    public bool IsBattleActive { get => isBattleActive; }       // 
+
 
     [Header("---[Boss UI]")]
     [SerializeField] private GameObject battleHPUI;             // Battle HP UI (활성화/비활성화 제어)
     [SerializeField] private TextMeshProUGUI bossNameText;      // Boss Name Text
     [SerializeField] private Slider bossHPSlider;               // HP Slider
     [SerializeField] private TextMeshProUGUI bossHPText;        // HP % Text
+    [SerializeField] private Button giveupButton;               // 항복 버튼
 
     private Mouse currentBossData = null;                       // 현재 보스 데이터
     private float currentBossHP;                                // 보스의 현재 HP
     private float maxBossHP;                                    // 보스의 최대 HP
+
+
+    [Header("---[Warning Panel]")]
+    [SerializeField] private GameObject warningPanel;           // 전투시스템 시작시 나오는 경고 Panel (warningDuration동안 지속)
+    [SerializeField] private Slider warningSlider;              // 리스폰시간이 됐을때 차오르는 Slider (warningDuration만큼 차오름)
+    private float warningDuration = 2.0f;                       // warningPanel 활성화 시간
 
     // ======================================================================================================================
 
@@ -50,6 +60,7 @@ public class BattleManager : MonoBehaviour
         }
 
         InitializeBattleManager();
+        giveupButton.onClick.AddListener(GiveUpState);
     }
 
     private void Start()
@@ -57,14 +68,28 @@ public class BattleManager : MonoBehaviour
         StartCoroutine(BossSpawnRoutine());
     }
 
+    // 초기 설정
     private void InitializeBattleManager()
     {
-        // 슬라이더 UI 설정
+        // WarningPanel 설정
+        warningPanel.SetActive(false);
+
+        // respawnSlider 설정
         if (respawnSlider != null)
         {
             respawnSlider.maxValue = spawnInterval;
             respawnSlider.value = 0f;
         }
+
+        // warning Slider 설정
+        if (warningSlider != null)
+        {
+            warningSlider.maxValue = warningDuration;
+            warningSlider.value = 0f;
+        }
+
+        // 보스 유지 시간 설정
+        bossDuration = sliderDuration + warningDuration;
 
         // Battle HP UI 초기화
         if (battleHPUI != null)
@@ -90,6 +115,9 @@ public class BattleManager : MonoBehaviour
                 if (timer >= spawnInterval)
                 {
                     timer = 0f;
+
+                    yield return StartCoroutine(LoadWarningPanel());
+
                     LoadAndDisplayBoss();
                     StartBattle();
                 }
@@ -98,6 +126,29 @@ public class BattleManager : MonoBehaviour
             yield return null;
         }
     }
+
+    // warningPanel 활성화시 코루틴
+    private IEnumerator LoadWarningPanel()
+    {
+        warningPanel.SetActive(true);
+        float elapsedTime = 0f;
+
+        //// WarningSlider 초기화
+        //warningSlider.value = 0f;
+        //warningSlider.maxValue = warningTimer;
+
+        // warningDuration 동안 WarningSlider 차오르게 하기
+        while (elapsedTime < warningDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            warningSlider.value = elapsedTime;
+            yield return null;
+        }
+
+        warningPanel.SetActive(false);
+    }
+
+
 
     // 보스 스폰 함수
     private void LoadAndDisplayBoss()
@@ -136,7 +187,7 @@ public class BattleManager : MonoBehaviour
         return null;
     }
 
-    // 배틀 시작할때마다 Boss UI Panel 설정 함수
+    // 전투 시작할때마다 Boss UI Panel 설정 함수
     private void UpdateBossUI()
     {
         battleHPUI.SetActive(true);
@@ -149,28 +200,7 @@ public class BattleManager : MonoBehaviour
         bossHPText.text = $"{maxBossHP}%";
     }
 
-    // 보스가 받는 데미지 함수
-    public void TakeBossDamage(float damage)
-    {
-        if (!isBattleActive || currentBoss == null) return;
-
-        currentBossHP -= damage;
-        if (currentBossHP < 0)
-        {
-            currentBossHP = 0;
-        }
-
-        UpdateBossHPUI();
-    }
-
-    // HP Slider 및 텍스트 업데이트 함수
-    private void UpdateBossHPUI()
-    {
-        bossHPSlider.value = currentBossHP;
-
-        float hpPercentage = (currentBossHP / maxBossHP) * 100f;
-        bossHPText.text = $"{hpPercentage:F2}%";
-    }
+    
 
     // 전투 시작 함수
     private void StartBattle()
@@ -178,7 +208,7 @@ public class BattleManager : MonoBehaviour
         // 전투 시작시 여러 기능들 비활성화
         SetStartFunctions();
 
-        StartCoroutine(DecreaseSliderDuringBossDuration(bossDuration));
+        StartCoroutine(ExecuteBattleSliders(warningDuration, sliderDuration));
         StartCoroutine(BossBattleRoutine(bossDuration));
         isBattleActive = true;
 
@@ -195,27 +225,33 @@ public class BattleManager : MonoBehaviour
         StartCoroutine(CatsAttackRoutine());
     }
 
-    // [MergeManager, AutoMoveManager, SortManager, AutoMergeManager]
-    // [SpawnManager]
-    // [ItemMenuManager, BuyCatManager, DictionaryManager, QuestManager]
-    private void SetStartFunctions()
+    // 슬라이더 감소 관리 코루틴
+    private IEnumerator ExecuteBattleSliders(float warningDuration, float sliderDuration)
     {
-        GetComponent<MergeManager>().StartBattleMergeState();
-        GetComponent<AutoMoveManager>().StartBattleAutoMoveState();
-        GetComponent<SortManager>().StartBattleSortState();
-        //GetComponent<AutoMergeManager>().StartBattleAutoMergeState();
-        //GetComponent<SpawnManager>().StartBattleSpawnState();
-    }
-    private void SetEndFunctions()
-    {
-        GetComponent<MergeManager>().EndBattleMergeState();
-        GetComponent<AutoMoveManager>().EndBattleAutoMoveState();
-        GetComponent<SortManager>().EndBattleSortState();
-        //GetComponent<AutoMergeManager>().EndBattleAutoMergeState();
-        //GetComponent<SpawnManager>().EndBattleSpawnState();
+        // 1. warningSlider 감소
+        yield return StartCoroutine(DecreaseWarningSliderDuringBossDuration(warningDuration));
+
+        // 2. respawnSlider 감소
+        yield return StartCoroutine(DecreaseSliderDuringBossDuration(sliderDuration));
     }
 
-    // 보스 유지시간동안 슬라이더가 감소하는 코루틴
+    // 보스 유지시간동안 warningSlider가 감소하는 코루틴
+    private IEnumerator DecreaseWarningSliderDuringBossDuration(float duration)
+    {
+        float elapsedTime = 0f;
+        warningSlider.maxValue = duration;
+        warningSlider.value = duration;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            warningSlider.value = duration - elapsedTime;
+
+            yield return null;
+        }
+    }
+
+    // 보스 유지시간동안 respawnSlider가 감소하는 코루틴
     private IEnumerator DecreaseSliderDuringBossDuration(float duration)
     {
         float elapsedTime = 0f;
@@ -230,6 +266,8 @@ public class BattleManager : MonoBehaviour
             yield return null;
         }
     }
+
+
 
     // 보스 배틀 코루틴
     private IEnumerator BossBattleRoutine(float duration)
@@ -263,7 +301,6 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        // 각 고양이를 확인하여 보스의 히트박스 내에 있으면 밀어내기
         CatData[] allCats = FindObjectsOfType<CatData>();
         foreach (var cat in allCats)
         {
@@ -303,6 +340,34 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+
+
+    // 보스가 받는 데미지 함수
+    public void TakeBossDamage(float damage)
+    {
+        if (!isBattleActive || currentBoss == null) return;
+
+        currentBossHP -= damage;
+        if (currentBossHP < 0)
+        {
+            currentBossHP = 0;
+        }
+
+        UpdateBossHPUI();
+    }
+
+    // 보스 HP Slider 및 텍스트 업데이트 함수
+    private void UpdateBossHPUI()
+    {
+        bossHPSlider.value = currentBossHP;
+
+        float hpPercentage = (currentBossHP / maxBossHP) * 100f;
+        bossHPText.text = $"{hpPercentage:F2}%";
+    }
+
+    // ======================================================================================================================
+    // [보스 공격 관련]
+
     // 보스 공격 코루틴
     private IEnumerator BossAttackRoutine()
     {
@@ -310,17 +375,6 @@ public class BattleManager : MonoBehaviour
         {
             yield return new WaitForSeconds(bossAttackDelay);
             BossAttackCats();
-        }
-    }
-
-    // 고양이 공격 코루틴
-    private IEnumerator CatsAttackRoutine()
-    {
-        while (isBattleActive)
-        {
-            // 고양이 공격
-            yield return new WaitForSeconds(catAttackDelay);
-            CatsAttackBoss();
         }
     }
 
@@ -335,6 +389,9 @@ public class BattleManager : MonoBehaviour
 
         foreach (var cat in allCats)
         {
+            // 기절 상태의 고양이는 제외
+            if (cat.isStuned) continue;
+
             RectTransform catRectTransform = cat.GetComponent<RectTransform>();
             Vector3 catPosition = catRectTransform.anchoredPosition;
 
@@ -369,6 +426,20 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    // ======================================================================================================================
+    // [고양이 공격 관련]
+
+    // 고양이 공격 코루틴
+    private IEnumerator CatsAttackRoutine()
+    {
+        while (isBattleActive)
+        {
+            // 고양이 공격
+            yield return new WaitForSeconds(catAttackDelay);
+            CatsAttackBoss();
+        }
+    }
+
     // 히트박스 내 고양이들이 보스를 공격하는 함수
     private void CatsAttackBoss()
     {
@@ -378,6 +449,9 @@ public class BattleManager : MonoBehaviour
 
         foreach (var cat in allCats)
         {
+            // 기절 상태인 고양이는 공격하지 않도록 처리
+            if (cat.isStuned) continue;
+
             RectTransform catRectTransform = cat.GetComponent<RectTransform>();
             Vector3 catPosition = catRectTransform.anchoredPosition;
 
@@ -389,14 +463,25 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    // ======================================================================================================================
+
+    // 항복 버튼 함수
+    private void GiveUpState()
+    {
+        // giveup Panel 추가할거면 여기에 하면 됌
+        EndBattle(false);
+    }
+
     // 전투 종료 함수
     public void EndBattle(bool isVictory)
     {
         isBattleActive = false;
+
         Destroy(currentBoss);
         currentBossData = null;
         currentBoss = null;
         bossHitbox = null;
+
         battleHPUI.SetActive(false);
 
         if (isVictory)
@@ -405,21 +490,46 @@ public class BattleManager : MonoBehaviour
         }
 
         // respawnSlider 초기화
-        if (respawnSlider != null)
-        {
-            respawnSlider.maxValue = spawnInterval;
-            respawnSlider.value = 0f;
-        }
+        respawnSlider.maxValue = spawnInterval;
+        respawnSlider.value = 0f;
+
+        // warningSlider 초기화
+        warningSlider.maxValue = warningDuration;
+        warningSlider.value = 0f;
 
         // 전투 종료시 비활성화했던 기능들 다시 기존 상태로 복구
         SetEndFunctions();
 
-        // 전투가 종료되면 모든 고양이의 체력을 최대로 회복하는 기능도 넣어야할듯
+        // 모든 고양이의 체력을 회복시켜줘야함
+        CatData[] allCats = FindObjectsOfType<CatData>();
+        foreach (var cat in allCats)
+        {
+            if (cat.isStuned) continue;
 
-
+            cat.HealCatHP();
+        }
     }
 
-    // ======================================================================================================================
+    // [MergeManager, AutoMoveManager, SortManager, AutoMergeManager]
+    // [SpawnManager]
+    // [ItemMenuManager, BuyCatManager, DictionaryManager, QuestManager]
+    private void SetStartFunctions()
+    {
+        GetComponent<MergeManager>().StartBattleMergeState();
+        GetComponent<AutoMoveManager>().StartBattleAutoMoveState();
+        GetComponent<SortManager>().StartBattleSortState();
+        //GetComponent<AutoMergeManager>().StartBattleAutoMergeState();
+        //GetComponent<SpawnManager>().StartBattleSpawnState();
+    }
+    private void SetEndFunctions()
+    {
+        GetComponent<MergeManager>().EndBattleMergeState();
+        GetComponent<AutoMoveManager>().EndBattleAutoMoveState();
+        GetComponent<SortManager>().EndBattleSortState();
+        //GetComponent<AutoMergeManager>().EndBattleAutoMergeState();
+        //GetComponent<SpawnManager>().EndBattleSpawnState();
+    }
+
 
 
 

@@ -32,9 +32,6 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
         {
             autoMerge.StopMerging(this);
         }
-
-        // 드래그하는 객체를 부모의 자식 객체 중 최상단으로 이동 (드래그중인 객체가 UI상 제일 위로 보여질 수 있게)
-        rectTransform.SetAsLastSibling();
     }
 
     // 드래그 진행중 함수
@@ -64,6 +61,33 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
 
         // 드래그 위치 업데이트 (UI의 localPosition 사용)
         rectTransform.localPosition = localPointerPosition;
+
+        // 부모의 자식 객체들 정렬
+        UpdateSiblingIndexBasedOnY();
+    }
+
+    // Y축 값을 기준으로 드래그 객체의 정렬을 업데이트하는 함수
+    private void UpdateSiblingIndexBasedOnY()
+    {
+        Transform parent = rectTransform.parent;
+        int newIndex = 0;
+
+        for (int i = 0; i < parent.childCount; i++)
+        {
+            RectTransform sibling = parent.GetChild(i).GetComponent<RectTransform>();
+
+            if (sibling != null && sibling != rectTransform)
+            {
+                // 드래그 객체의 Y값이 현재 sibling의 Y값보다 작으면 새로운 인덱스를 증가
+                if (rectTransform.localPosition.y < sibling.localPosition.y)
+                {
+                    newIndex = i + 1;
+                }
+            }
+        }
+
+        // 새로운 인덱스 설정
+        rectTransform.SetSiblingIndex(newIndex);
     }
 
     // 드래그 종료 함수

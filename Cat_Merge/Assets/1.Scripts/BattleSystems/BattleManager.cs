@@ -469,7 +469,7 @@ public class BattleManager : MonoBehaviour
     private void GiveUpState()
     {
         // giveup Panel 추가할거면 여기에 하면 됌
-        EndBattle(false);
+        //EndBattle(false);
     }
 
     // 전투 종료 함수

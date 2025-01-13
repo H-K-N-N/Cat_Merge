@@ -5071,6 +5071,9 @@ MonoBehaviour:
   giveupButton: {fileID: 1918917955}
   warningPanel: {fileID: 1241622844}
   warningSlider: {fileID: 186678278}
+  topWarningText: {fileID: 879588235}
+  bossDangerText: {fileID: 861149136}
+  bottomWarningText: {fileID: 1051592827}
 --- !u!1 &335345886
 GameObject:
   m_ObjectHideFlags: 0
@@ -11819,7 +11822,7 @@ GameObject:
   - component: {fileID: 751942772}
   - component: {fileID: 751942771}
   m_Layer: 5
-  m_Name: Boss Danger
+  m_Name: Boss Danger Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13948,10 +13951,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 751942770}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 540, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &861149136
 MonoBehaviour:
@@ -14773,7 +14776,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1080, y: 50}
+  m_SizeDelta: {x: 430, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &879588235
 MonoBehaviour:
@@ -18725,7 +18728,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1080, y: 50}
+  m_SizeDelta: {x: 430, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1051592827
 MonoBehaviour:
@@ -31530,7 +31533,7 @@ GameObject:
   - component: {fileID: 1711338666}
   - component: {fileID: 1711338665}
   m_Layer: 5
-  m_Name: Bottom Warning
+  m_Name: Bottom Warning Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -34826,7 +34829,7 @@ GameObject:
   - component: {fileID: 1928660662}
   - component: {fileID: 1928660661}
   m_Layer: 5
-  m_Name: Top Warning
+  m_Name: Top Warning Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -47,6 +47,10 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Slider warningSlider;              // 리스폰시간이 됐을때 차오르는 Slider (warningDuration만큼 차오름)
     private float warningDuration = 2f;                         // warningPanel 활성화 시간
     private Coroutine warningSliderCoroutine;                   // warningSlider 코루틴
+
+    [SerializeField] private TextMeshProUGUI topWarningText;    // 상단 경고 텍스트
+    [SerializeField] private TextMeshProUGUI bossDangerText;    // 보스 위험 텍스트
+    [SerializeField] private TextMeshProUGUI bottomWarningText; // 하단 경고 텍스트
     
 
     // ======================================================================================================================
@@ -139,16 +143,32 @@ public class BattleManager : MonoBehaviour
         warningPanel.SetActive(true);
         float elapsedTime = 0f;
 
-        // warningDuration 동안 WarningSlider 차오르게 하기
+        // Text 초기 위치 설정
+        topWarningText.rectTransform.anchoredPosition = new Vector2(-755, 0);
+        bossDangerText.rectTransform.anchoredPosition = new Vector2(810, 0);
+        bottomWarningText.rectTransform.anchoredPosition = new Vector2(-755, 0);
+
+        // warningDuration 시간 동안 (경고 Text 애니메이션 + warningSlider 차오르게 하기)
         while (elapsedTime < warningDuration)
         {
             elapsedTime += Time.deltaTime;
+            float normalizedTime = elapsedTime / warningDuration;
+
+            // 텍스트 이동
+            topWarningText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(-755, 0), new Vector2(755, 0), normalizedTime);
+            bottomWarningText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(-755, 0), new Vector2(755, 0), normalizedTime);
+            bossDangerText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(810, 0), new Vector2(-810, 0), normalizedTime);
+
+            // slider 업데이트
             warningSlider.value = elapsedTime;
+
             yield return null;
         }
 
         warningPanel.SetActive(false);
     }
+
+    
 
 
 

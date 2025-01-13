@@ -488,6 +488,7 @@ public class BattleManager : MonoBehaviour
     }
 
     // ======================================================================================================================
+    // [게임 종료 관련]
 
     // 항복 버튼 함수
     private void GiveUpState()
@@ -544,17 +545,21 @@ public class BattleManager : MonoBehaviour
     }
 
     // ======================================================================================================================
+    // [전투시 비활성화 되는 기능들]
 
-    // [MergeManager, AutoMoveManager, SortManager, AutoMergeManager]
-    // [SpawnManager]
-    // [ItemMenuManager, BuyCatManager, DictionaryManager, QuestManager]
     private void SetStartFunctions()
     {
         GetComponent<MergeManager>().StartBattleMergeState();
         GetComponent<AutoMoveManager>().StartBattleAutoMoveState();
         GetComponent<SortManager>().StartBattleSortState();
         //GetComponent<AutoMergeManager>().StartBattleAutoMergeState();
-        //GetComponent<SpawnManager>().StartBattleSpawnState();
+
+        GetComponent<SpawnManager>().StartBattleSpawnState();
+
+        //GetComponent<ItemMenuManager>().StartBattleItemMenuState();
+        //GetComponent<BuyCatManager>().StartBattleButCatState();
+        //GetComponent<DictionaryManager>().StartBattleDictionaryState();
+        //GetComponent<QuestManager>().StartBattleQuestState();
     }
     private void SetEndFunctions()
     {
@@ -562,7 +567,13 @@ public class BattleManager : MonoBehaviour
         GetComponent<AutoMoveManager>().EndBattleAutoMoveState();
         GetComponent<SortManager>().EndBattleSortState();
         //GetComponent<AutoMergeManager>().EndBattleAutoMergeState();
-        //GetComponent<SpawnManager>().EndBattleSpawnState();
+
+        GetComponent<SpawnManager>().EndBattleSpawnState();
+
+        //GetComponent<ItemMenuManager>().EndBattleItemMenuState();
+        //GetComponent<BuyCatManager>().EndBattleButCatState();
+        //GetComponent<DictionaryManager>().EndBattleDictionaryState();
+        //GetComponent<QuestManager>().EndBattleQuestState();
     }
 
     // ======================================================================================================================

@@ -168,6 +168,23 @@ public class ItemMenuManager : MonoBehaviour
         UpdateItemMenuUI();
     }
 
+    // 전투 시작시 버튼 및 기능 비활성화시키는 함수
+    public void StartBattleItemMenuState()
+    {
+        bottomItemButton.interactable = false;
+
+        if (itemMenuPanel.activeSelf == true)
+        {
+            activePanelManager.TogglePanel("BottomItemMenu");
+        }
+    }
+
+    // 전투 종료시 버튼 및 기능 기존 상태로 되돌려놓는 함수
+    public void EndBattleItemMenuState()
+    {
+        bottomItemButton.interactable = true;
+    }
+
     // 아이템 메뉴 판넬 여는 함수
     private void OpenCloseBottomItemMenuPanel()
     {

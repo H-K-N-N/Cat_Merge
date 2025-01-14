@@ -556,7 +556,7 @@ public class BattleManager : MonoBehaviour
 
         GetComponent<SpawnManager>().StartBattleSpawnState();
 
-        //GetComponent<ItemMenuManager>().StartBattleItemMenuState();
+        GetComponent<ItemMenuManager>().StartBattleItemMenuState();
         GetComponent<BuyCatManager>().StartBattleBuyCatState();
         //GetComponent<DictionaryManager>().StartBattleDictionaryState();
         //GetComponent<QuestManager>().StartBattleQuestState();
@@ -570,7 +570,7 @@ public class BattleManager : MonoBehaviour
 
         GetComponent<SpawnManager>().EndBattleSpawnState();
 
-        //GetComponent<ItemMenuManager>().EndBattleItemMenuState();
+        GetComponent<ItemMenuManager>().EndBattleItemMenuState();
         GetComponent<BuyCatManager>().EndBattleBuyCatState();
         //GetComponent<DictionaryManager>().EndBattleDictionaryState();
         //GetComponent<QuestManager>().EndBattleQuestState();

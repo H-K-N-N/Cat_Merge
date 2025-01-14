@@ -7,16 +7,17 @@ using TMPro;
 // BattleManager Script
 public class BattleManager : MonoBehaviour
 {
-    public static BattleManager Instance { get; private set; }  // 
+    public static BattleManager Instance { get; private set; }
 
     [Header("---[Battle System]")]
     [SerializeField] private GameObject bossPrefab;             // 보스 프리팹
     [SerializeField] private Transform bossUIParent;            // 보스를 배치할 부모 Transform (UI Panel 등)
     [SerializeField] private Slider respawnSlider;              // 보스 소환까지 남은 시간을 표시할 Slider UI
 
-    private float spawnInterval = 100f;                          // 보스 등장 주기
-    private float timer = 0f;                                   // 보스 소환 타이머
-    private float sliderDuration = 8f;                          // slider 유지 시간
+    private float spawnInterval = 10f;                          // 보스 등장 주기 (나중에 유저가 변경할 수 있게 수정할 계획도 있음)
+    private Coroutine respawnSliderCoroutine;                   // Slider 코루틴
+    private float bossSpawnTimer = 0f;                          // 보스 스폰 타이머
+    private float sliderDuration = 8f;                          // Slider 유지 시간
     private float bossDuration;                                 // 보스 유지 시간 (sliderDuration + warningDuration)
     private int bossStage = 1;                                  // 보스 스테이지
 
@@ -26,7 +27,7 @@ public class BattleManager : MonoBehaviour
     private GameObject currentBoss = null;                      // 현재 보스
     [HideInInspector] public BossHitbox bossHitbox;             // 보스 히트박스
     private bool isBattleActive = false;                        // 전투 활성화 여부
-    public bool IsBattleActive { get => isBattleActive; }       // 
+    public bool IsBattleActive { get => isBattleActive; }
 
 
     [Header("---[Boss UI]")]
@@ -44,7 +45,13 @@ public class BattleManager : MonoBehaviour
     [Header("---[Warning Panel]")]
     [SerializeField] private GameObject warningPanel;           // 전투시스템 시작시 나오는 경고 Panel (warningDuration동안 지속)
     [SerializeField] private Slider warningSlider;              // 리스폰시간이 됐을때 차오르는 Slider (warningDuration만큼 차오름)
-    private float warningDuration = 2.0f;                       // warningPanel 활성화 시간
+    private float warningDuration = 2f;                         // warningPanel 활성화 시간
+    private Coroutine warningSliderCoroutine;                   // warningSlider 코루틴
+
+    [SerializeField] private TextMeshProUGUI topWarningText;    // 상단 경고 텍스트
+    [SerializeField] private TextMeshProUGUI bossDangerText;    // 보스 위험 텍스트
+    [SerializeField] private TextMeshProUGUI bottomWarningText; // 하단 경고 텍스트
+    
 
     // ======================================================================================================================
 
@@ -71,12 +78,17 @@ public class BattleManager : MonoBehaviour
     // 초기 설정
     private void InitializeBattleManager()
     {
-        // WarningPanel 설정
+        // warningPanel 설정
         warningPanel.SetActive(false);
+
+        // Slider 시간 설정 (보스 리스폰, 보스 전투 시간)
+        spawnInterval = spawnInterval - warningDuration;
+        bossDuration = sliderDuration + warningDuration;
 
         // respawnSlider 설정
         if (respawnSlider != null)
         {
+            respawnSliderCoroutine = null;
             respawnSlider.maxValue = spawnInterval;
             respawnSlider.value = 0f;
         }
@@ -84,12 +96,10 @@ public class BattleManager : MonoBehaviour
         // warning Slider 설정
         if (warningSlider != null)
         {
+            warningSliderCoroutine = null;
             warningSlider.maxValue = warningDuration;
             warningSlider.value = 0f;
         }
-
-        // 보스 유지 시간 설정
-        bossDuration = sliderDuration + warningDuration;
 
         // Battle HP UI 초기화
         if (battleHPUI != null)
@@ -108,13 +118,13 @@ public class BattleManager : MonoBehaviour
             // 보스가 없을 때만 게이지를 충전
             if (currentBoss == null)
             {
-                timer += Time.deltaTime;
-                respawnSlider.value = timer;
+                bossSpawnTimer += Time.deltaTime;
+                respawnSlider.value = bossSpawnTimer;
 
                 // 게이지가 꽉 차면 보스 소환
-                if (timer >= spawnInterval)
+                if (bossSpawnTimer >= spawnInterval)
                 {
-                    timer = 0f;
+                    bossSpawnTimer = 0f;
 
                     yield return StartCoroutine(LoadWarningPanel());
 
@@ -133,20 +143,32 @@ public class BattleManager : MonoBehaviour
         warningPanel.SetActive(true);
         float elapsedTime = 0f;
 
-        //// WarningSlider 초기화
-        //warningSlider.value = 0f;
-        //warningSlider.maxValue = warningTimer;
+        // Text 초기 위치 설정
+        topWarningText.rectTransform.anchoredPosition = new Vector2(-755, 0);
+        bossDangerText.rectTransform.anchoredPosition = new Vector2(810, 0);
+        bottomWarningText.rectTransform.anchoredPosition = new Vector2(-755, 0);
 
-        // warningDuration 동안 WarningSlider 차오르게 하기
+        // warningDuration 시간 동안 (경고 Text 애니메이션 + warningSlider 차오르게 하기)
         while (elapsedTime < warningDuration)
         {
             elapsedTime += Time.deltaTime;
+            float normalizedTime = elapsedTime / warningDuration;
+
+            // 텍스트 이동
+            topWarningText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(-755, 0), new Vector2(755, 0), normalizedTime);
+            bottomWarningText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(-755, 0), new Vector2(755, 0), normalizedTime);
+            bossDangerText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(810, 0), new Vector2(-810, 0), normalizedTime);
+
+            // slider 업데이트
             warningSlider.value = elapsedTime;
+
             yield return null;
         }
 
         warningPanel.SetActive(false);
     }
+
+    
 
 
 
@@ -165,9 +187,6 @@ public class BattleManager : MonoBehaviour
         // 보스 위치 설정
         RectTransform bossRectTransform = currentBoss.GetComponent<RectTransform>();
         bossRectTransform.anchoredPosition = new Vector2(0f, 250f);
-
-        // 보스를 항상 최하위 자식으로 설정 (UI상 고양이들 뒤에 생기게)
-        currentBoss.transform.SetAsFirstSibling();
 
         UpdateBossUI();
     }
@@ -208,6 +227,7 @@ public class BattleManager : MonoBehaviour
         // 전투 시작시 여러 기능들 비활성화
         SetStartFunctions();
 
+        // Slider관련 코루틴 시작
         StartCoroutine(ExecuteBattleSliders(warningDuration, sliderDuration));
         StartCoroutine(BossBattleRoutine(bossDuration));
         isBattleActive = true;
@@ -225,14 +245,16 @@ public class BattleManager : MonoBehaviour
         StartCoroutine(CatsAttackRoutine());
     }
 
-    // 슬라이더 감소 관리 코루틴
+    // Slider 감소 관리 코루틴
     private IEnumerator ExecuteBattleSliders(float warningDuration, float sliderDuration)
     {
         // 1. warningSlider 감소
-        yield return StartCoroutine(DecreaseWarningSliderDuringBossDuration(warningDuration));
+        warningSliderCoroutine = StartCoroutine(DecreaseWarningSliderDuringBossDuration(warningDuration));
+        yield return warningSliderCoroutine;
 
         // 2. respawnSlider 감소
-        yield return StartCoroutine(DecreaseSliderDuringBossDuration(sliderDuration));
+        respawnSliderCoroutine = StartCoroutine(DecreaseSliderDuringBossDuration(sliderDuration));
+        yield return respawnSliderCoroutine;
     }
 
     // 보스 유지시간동안 warningSlider가 감소하는 코루틴
@@ -249,6 +271,8 @@ public class BattleManager : MonoBehaviour
 
             yield return null;
         }
+
+        warningSliderCoroutine = null;
     }
 
     // 보스 유지시간동안 respawnSlider가 감소하는 코루틴
@@ -265,6 +289,8 @@ public class BattleManager : MonoBehaviour
 
             yield return null;
         }
+
+        respawnSliderCoroutine = null;
     }
 
 
@@ -345,13 +371,11 @@ public class BattleManager : MonoBehaviour
     // 보스가 받는 데미지 함수
     public void TakeBossDamage(float damage)
     {
-        if (!isBattleActive || currentBoss == null) return;
-
-        currentBossHP -= damage;
-        if (currentBossHP < 0)
+        if (!isBattleActive || currentBoss == null)
         {
-            currentBossHP = 0;
+            return;
         }
+        currentBossHP -= damage;
 
         UpdateBossHPUI();
     }
@@ -464,12 +488,13 @@ public class BattleManager : MonoBehaviour
     }
 
     // ======================================================================================================================
+    // [게임 종료 관련]
 
     // 항복 버튼 함수
     private void GiveUpState()
     {
-        // giveup Panel 추가할거면 여기에 하면 됌
-        //EndBattle(false);
+        // giveup Panel 추가할거면 여기에 관련 함수 추가
+        EndBattle(false);
     }
 
     // 전투 종료 함수
@@ -477,25 +502,34 @@ public class BattleManager : MonoBehaviour
     {
         isBattleActive = false;
 
+        // 현재 실행 중인 슬라이더 코루틴 종료
+        if (warningSliderCoroutine != null)
+        {
+            StopCoroutine(warningSliderCoroutine);
+            warningSliderCoroutine = null;
+
+            warningSlider.maxValue = warningDuration;
+            warningSlider.value = 0f;
+        }
+        if (respawnSliderCoroutine != null)
+        {
+            StopCoroutine(respawnSliderCoroutine);
+            respawnSliderCoroutine = null;
+
+            respawnSlider.maxValue = spawnInterval;
+            respawnSlider.value = 0f;
+        }
+
         Destroy(currentBoss);
         currentBossData = null;
         currentBoss = null;
         bossHitbox = null;
-
         battleHPUI.SetActive(false);
 
         if (isVictory)
         {
             bossStage++;
         }
-
-        // respawnSlider 초기화
-        respawnSlider.maxValue = spawnInterval;
-        respawnSlider.value = 0f;
-
-        // warningSlider 초기화
-        warningSlider.maxValue = warningDuration;
-        warningSlider.value = 0f;
 
         // 전투 종료시 비활성화했던 기능들 다시 기존 상태로 복구
         SetEndFunctions();
@@ -510,16 +544,22 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    // [MergeManager, AutoMoveManager, SortManager, AutoMergeManager]
-    // [SpawnManager]
-    // [ItemMenuManager, BuyCatManager, DictionaryManager, QuestManager]
+    // ======================================================================================================================
+    // [전투시 비활성화 되는 기능들]
+
     private void SetStartFunctions()
     {
         GetComponent<MergeManager>().StartBattleMergeState();
         GetComponent<AutoMoveManager>().StartBattleAutoMoveState();
         GetComponent<SortManager>().StartBattleSortState();
         //GetComponent<AutoMergeManager>().StartBattleAutoMergeState();
-        //GetComponent<SpawnManager>().StartBattleSpawnState();
+
+        GetComponent<SpawnManager>().StartBattleSpawnState();
+
+        GetComponent<ItemMenuManager>().StartBattleItemMenuState();
+        GetComponent<BuyCatManager>().StartBattleBuyCatState();
+        //GetComponent<DictionaryManager>().StartBattleDictionaryState();
+        //GetComponent<QuestManager>().StartBattleQuestState();
     }
     private void SetEndFunctions()
     {
@@ -527,9 +567,16 @@ public class BattleManager : MonoBehaviour
         GetComponent<AutoMoveManager>().EndBattleAutoMoveState();
         GetComponent<SortManager>().EndBattleSortState();
         //GetComponent<AutoMergeManager>().EndBattleAutoMergeState();
-        //GetComponent<SpawnManager>().EndBattleSpawnState();
+
+        GetComponent<SpawnManager>().EndBattleSpawnState();
+
+        GetComponent<ItemMenuManager>().EndBattleItemMenuState();
+        GetComponent<BuyCatManager>().EndBattleBuyCatState();
+        //GetComponent<DictionaryManager>().EndBattleDictionaryState();
+        //GetComponent<QuestManager>().EndBattleQuestState();
     }
 
+    // ======================================================================================================================
 
 
 

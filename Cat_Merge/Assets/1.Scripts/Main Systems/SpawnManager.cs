@@ -2,10 +2,13 @@ using UnityEngine;
 using TMPro;
 using System.Collections;
 using UnityEngine.UI;
+
 // 고양이 스폰 Script
 public class SpawnManager : MonoBehaviour
 {
     public static SpawnManager Instance { get; private set; }
+
+    [SerializeField] private Button spawnButton;                    // 스폰 버튼
 
     [SerializeField] private GameObject catPrefab;      // 고양이 UI 프리팹
     [SerializeField] private Transform catUIParent;     // 고양이를 배치할 부모 Transform (UI Panel 등)
@@ -17,6 +20,9 @@ public class SpawnManager : MonoBehaviour
     private bool isStoppedCoroutine = false;                        // 코루틴 종료 판별
 
     [SerializeField] private Image foodFillAmountImg;
+
+
+    // ======================================================================================================================
 
     private void Awake()
     {
@@ -48,6 +54,22 @@ public class SpawnManager : MonoBehaviour
         // 현재 먹이 갯수와 최대치 갯수 표시(나중에 함수로 빼둘 것)
         nowAndMaxFoodText.text = $"({nowFood} / {ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value})";
     }
+
+    // ======================================================================================================================
+
+    // 전투 시작시 버튼 및 기능 비활성화시키는 함수
+    public void StartBattleSpawnState()
+    {
+        spawnButton.interactable = false;
+    }
+
+    // 전투 종료시 버튼 및 기능 기존 상태로 되돌려놓는 함수
+    public void EndBattleSpawnState()
+    {
+        spawnButton.interactable = true;
+    }
+
+    // ======================================================================================================================
 
     // 고양이 스폰 버튼 클릭
     public void OnClickedSpawn()

@@ -82,6 +82,23 @@ public class BuyCatManager : MonoBehaviour
         activePanelManager.RegisterPanel("BuyCatMenu", buyCatMenuPanel, bottomBuyCatButtonImg);
     }
 
+    // 전투 시작시 버튼 및 기능 비활성화시키는 함수
+    public void StartBattleBuyCatState()
+    {
+        bottomBuyCatButton.interactable = false;
+
+        if (buyCatMenuPanel.activeSelf == true)
+        {
+            activePanelManager.TogglePanel("BuyCatMenu");
+        }
+    }
+
+    // 전투 종료시 버튼 및 기능 기존 상태로 되돌려놓는 함수
+    public void EndBattleBuyCatState()
+    {
+        bottomBuyCatButton.interactable = true;
+    }
+
     // 고양이 구매 메뉴 판넬 여는 함수
     private void OpenCloseBottomBuyCatMenuPanel()
     {

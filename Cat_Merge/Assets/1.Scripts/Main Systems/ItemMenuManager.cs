@@ -47,6 +47,7 @@ public class ItemMenuManager : MonoBehaviour
     [SerializeField] private Button reduceCollectingTimeButton;         // 재화 획득 시간 감소 버튼
     [SerializeField] private Button increaseFoodMaximumButton;          // 먹이 최대치 증가 버튼
     [SerializeField] private Button reduceProducingFoodTimeButton;      // 먹이 생성 시간 감소 버튼
+    [SerializeField] private Button autoCollectingButton;               // 자동 먹이주기 버튼
 
     [SerializeField] private GameObject[] disabledBg;                     // 버튼 클릭 못할 때의 배경
 
@@ -73,6 +74,10 @@ public class ItemMenuManager : MonoBehaviour
     // 먹이 생성 시간
     private int reduceProducingFoodTimeLv = 0;
     public int ReduceProducingFoodTimeLv { get => reduceProducingFoodTimeLv; set => reduceProducingFoodTimeLv = value; }
+
+    // 자동 먹이주기 시간
+    private int autoCollectingLv = 0;
+    public int AutoCollectingLv { get => autoCollectingLv; set => autoCollectingLv = value; }
 
     // ======================================================================================================================
 
@@ -107,6 +112,7 @@ public class ItemMenuManager : MonoBehaviour
         reduceCollectingTimeButton.onClick.AddListener(ReduceCollectingTime);
         increaseFoodMaximumButton.onClick.AddListener(IncreaseFoodMaximum);
         reduceProducingFoodTimeButton.onClick.AddListener(ReduceProducingFoodTime);
+        autoCollectingButton.onClick.AddListener(AutoCollecting);
         OpenCloseBottomItemMenuPanel();
     }
 
@@ -156,6 +162,11 @@ public class ItemMenuManager : MonoBehaviour
                     itemMenuesLvText[i].text = $"Lv.{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[0].step}";
                     itemMenuesValueText[i].text = $"{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[0].value}->{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[1].value}"; // 1->2 2->3 3->4
                     itemMenuesFeeText[i].text = $"{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[0].fee}";
+                    break;
+                case 4:
+                    itemMenuesLvText[i].text = $"Lv.{ ItemFunctionManager.Instance.autoCollectingList[0].step}";
+                    itemMenuesValueText[i].text = $"{ ItemFunctionManager.Instance.autoCollectingList[0].value}sec"; // 1->2 2->3 3->4
+                    itemMenuesFeeText[i].text = $"{ ItemFunctionManager.Instance.autoCollectingList[0].fee}";
                     break;
                 default:
                     break;
@@ -209,7 +220,7 @@ public class ItemMenuManager : MonoBehaviour
         {
             if (itemMenues[i].activeSelf)
             {
-                isItemMenuButtonsOn[i] = true;
+                isItemMenuButtonsOn[i] = true;              
             }
         }
         ChangeSelectedButtonColor(activePanel);
@@ -382,6 +393,24 @@ public class ItemMenuManager : MonoBehaviour
             itemMenuesLvText[3].text = $"Lv.{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].step}";
             itemMenuesValueText[3].text = $"{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].value}->{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv + 1].value}"; // 7->6.8
             itemMenuesFeeText[3].text = $"{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].fee}";
+        }
+    }
+
+    private void AutoCollecting()
+    {
+        //Debug.Log("자동 먹이주기 시간 감소 버튼 클릭");
+        if(autoCollectingButton != null)
+        {
+            if(autoCollectingLv < 0 || autoCollectingLv > ItemFunctionManager.Instance.autoCollectingList.Count)
+            {
+                Debug.LogError($"Index {autoCollectingLv} is out of bounds! List Count: {ItemFunctionManager.Instance.autoCollectingList.Count}");
+                return;
+            }
+            GameManager.Instance.Coin -= (int)ItemFunctionManager.Instance.autoCollectingList[autoCollectingLv].fee;
+            autoCollectingLv++;
+            itemMenuesLvText[4].text = $"Lv.{ ItemFunctionManager.Instance.autoCollectingList[autoCollectingLv].step}";
+            itemMenuesValueText[4].text = $"{ ItemFunctionManager.Instance.autoCollectingList[autoCollectingLv].value}sec"; // 30초마다 ... 15초마다
+            itemMenuesFeeText[4].text = $"{ ItemFunctionManager.Instance.autoCollectingList[autoCollectingLv].fee}";
         }
     }
 }

@@ -30,6 +30,7 @@ public class ItemFunctionManager : MonoBehaviour
     public List<(int step, float value, float fee)> reduceCollectingTimeList = new List<(int step, float value, float fee)>();
     public List<(int step, float value, float fee)> maxFoodsList = new List<(int step, float value, float fee)>();
     public List<(int step, float value, float fee)> reduceProducingFoodTimeList = new List<(int step, float value, float fee)>();
+    public List<(int step, float value, float fee)> autoCollectingList = new List<(int step, float value, float fee)>();
     private void Awake()
     {
         if (Instance == null)
@@ -58,38 +59,44 @@ public class ItemFunctionManager : MonoBehaviour
 
         // 재화 획득 시간 감소
         var itemData2 = ItemItemUpgradeDataLoader.Instance.GetDataByNumber(2);
+        if (itemData2 != null)
         {
-            if (itemData2 != null)
+            foreach (var item in itemData2)
             {
-                foreach (var item in itemData2)
-                {
-                    reduceCollectingTimeList.Add((item.step, item.value, item.fee));
-                }
+                reduceCollectingTimeList.Add((item.step, item.value, item.fee));
             }
         }
 
         // 먹이 최대치 증가
         var itemData3 = ItemItemUpgradeDataLoader.Instance.GetDataByNumber(3);
+        if (itemData3 != null)
         {
-            if (itemData3 != null)
+            foreach (var item in itemData3)
             {
-                foreach (var item in itemData3)
-                {
-                    maxFoodsList.Add((item.step, item.value, item.fee));
-                }
+                maxFoodsList.Add((item.step, item.value, item.fee));
             }
         }
 
         // 먹이 생성 시간 감소
         var itemData4 = ItemItemUpgradeDataLoader.Instance.GetDataByNumber(4);
+        if (itemData4 != null)
         {
-            if (itemData4 != null)
+            foreach (var item in itemData4)
             {
-                foreach (var item in itemData4)
-                {
-                    reduceProducingFoodTimeList.Add((item.step, item.value, item.fee));
-                }
+                reduceProducingFoodTimeList.Add((item.step, item.value, item.fee));
             }
         }
+
+        // 자동 먹이주기 시간
+        var itemData7 = ItemItemUpgradeDataLoader.Instance.GetDataByNumber(7);
+        if(itemData7 != null)
+        {
+            foreach(var item in itemData7)
+            {
+                autoCollectingList.Add((item.step, item.value, item.fee));
+            }
+        }
+
+        
     }
 }

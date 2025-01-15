@@ -17,9 +17,11 @@ public class SpawnManager : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI nowAndMaxFoodText;     // 스폰버튼 밑에 현재 먹이 갯수와 최대 먹이 갯수
     private int nowFood = 5;                                        // 현재 먹이 갯수
-    private bool isStoppedCoroutine = false;                        // 코루틴 종료 판별
+    private bool isStoppedReduceCoroutine = false;                        // 코루틴 종료 판별
+    private bool isStoppedAutoCoroutine = false;
 
     [SerializeField] private Image foodFillAmountImg;
+    [SerializeField] public Image autoFillAmountImg;
 
 
     // ======================================================================================================================
@@ -47,6 +49,7 @@ public class SpawnManager : MonoBehaviour
         }
 
         StartCoroutine(CreateFoodTime());
+        StartCoroutine(AutoCollectingTime());
     }
 
     private void Update()
@@ -81,10 +84,15 @@ public class SpawnManager : MonoBehaviour
             {
                 // 먹이가 줄고 코루틴이 종료되어있다면 다시 시작(현재 먹이가 최대치일때 코루틴 종료되어있음)
                 nowFood--;
-                if(isStoppedCoroutine)
+                if(isStoppedReduceCoroutine)
                 {
                     StartCoroutine(CreateFoodTime());
-                    isStoppedCoroutine = false;
+                    isStoppedReduceCoroutine = false;
+                }
+                if(isStoppedAutoCoroutine)
+                {
+                    StartCoroutine(AutoCollectingTime());
+                    isStoppedAutoCoroutine = false;
                 }
 
                 // 업그레이드 시스템 확장성을 위해 변경한 고양이 생성 코드
@@ -199,10 +207,8 @@ public class SpawnManager : MonoBehaviour
 
     // ======================================================================================================================
 
-    //private float duration = 3f; // fillAmount를 변경하는 데 걸리는 시간(이거 변수 나중에 지우고 먹이 생성 시간 감소에서 불러올것)(완료)
-    //private float duration = ItemFunctionManager.Instance.reduceProducingFoodTimeList[ItemMenuManager.Instance.ReduceProducingFoodTimeLv].value;
     // 먹이 생성 시간
-    public IEnumerator CreateFoodTime()
+    private IEnumerator CreateFoodTime()
     {
         float elapsed = 0f; // 경과 시간
         // 현재 먹이가 최대치 이하일 때 코루틴 시작
@@ -224,7 +230,32 @@ public class SpawnManager : MonoBehaviour
         if (nowFood == ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
         {
             StopCoroutine(CreateFoodTime());
-            isStoppedCoroutine = true;
+            isStoppedReduceCoroutine = true;
+        }
+    }
+
+    private IEnumerator AutoCollectingTime()
+    {
+        float elapsed = 0f;
+        // 현재 먹이가 1개 이상일때만 코루틴 진행
+        while(nowFood >= 1)
+        {
+            autoFillAmountImg.fillAmount = 0f;
+            while (elapsed < ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value)
+            {
+                elapsed += Time.deltaTime;
+                autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value); // 0 ~ 1 사이로 비율 계산
+                yield return null; // 다음 프레임까지 대기
+            }
+            nowFood--;
+            SpawnCat();
+            elapsed = 0f;
+        }
+
+        if(nowFood == 0)
+        {
+            StopCoroutine(AutoCollectingTime());
+            isStoppedAutoCoroutine = true;
         }
     }
 

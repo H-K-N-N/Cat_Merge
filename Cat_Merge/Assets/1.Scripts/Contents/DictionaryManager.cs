@@ -52,8 +52,15 @@ public class DictionaryManager : MonoBehaviour
     }
     private DictionaryMenuType activeMenuType;                      // 현재 활성화된 메뉴 타입
 
+    [Header("---[Information Panel UI]")]
+    [SerializeField] private GameObject informationPanel;           // Information Panel
+    [SerializeField] private Image informationCatIcon;              // Information Cat Icon
+    [SerializeField] private TextMeshProUGUI informationCatDetails; // informationCatDetails Text
+    [SerializeField] private Button catInformationPanelButton;      // catInformation Panel Button
+
     // 임시 (다른 서브 메뉴들을 추가한다면 어떻게 정리 할까 고민)
-    [SerializeField] private Transform scrollRectContents;          // 노말 고양이 scrollRectContents (도감에서 노멀 고양이의 정보를 초기화 하기 위해)
+    [Header("---[Sub Contents]")]
+    [SerializeField] private Transform scrollRectContents;          // 노말 고양이 scrollRectContents (도감에서 노말 고양이의 정보를 초기화 하기 위해)
                                                                     // 희귀 고양이 scrollRectContents
                                                                     // 특수 고양이 scrollRectContents
                                                                     // 배경 scrollRectContents
@@ -188,10 +195,21 @@ public class DictionaryManager : MonoBehaviour
     // DictionaryButton 설정
     private void InitializeDictionaryButton()
     {
-        dictionaryButton.onClick.AddListener(() => activePanelManager.TogglePanel("DictionaryMenu"));
+        //dictionaryButton.onClick.AddListener(() => activePanelManager.TogglePanel("DictionaryMenu"));
+        dictionaryButton.onClick.AddListener(() =>
+        {
+            activePanelManager.TogglePanel("DictionaryMenu");
+
+            // DictionaryMenu가 활성화될 때 InformationPanel 초기화
+            if (activePanelManager.ActivePanelName == "DictionaryMenu")
+            {
+                UpdateInformationPanel();
+            }
+        });
         dictionaryBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("DictionaryMenu"));
 
         submitButton.onClick.AddListener(CloseNewCatPanel);
+        catInformationPanelButton.onClick.AddListener(ToggleMaskComponent);
     }
 
     // 서브 메뉴 버튼 초기화 및 클릭 이벤트 추가 함수
@@ -216,6 +234,7 @@ public class DictionaryManager : MonoBehaviour
             dictionaryMenus[i].SetActive(i == (int)menuType);
         }
 
+        UpdateInformationPanel();
         UpdateSubMenuButtonColors();
     }
 
@@ -264,18 +283,19 @@ public class DictionaryManager : MonoBehaviour
         GameObject slot = Instantiate(slotPrefab, scrollRectContents);
 
         Button button = slot.transform.Find("Button")?.GetComponent<Button>();
+        TextMeshProUGUI text = slot.transform.Find("Button/Name Text")?.GetComponent<TextMeshProUGUI>();
         Image iconImage = slot.transform.Find("Button/Icon")?.GetComponent<Image>();
-        TextMeshProUGUI text = slot.transform.Find("Text Image/Text")?.GetComponent<TextMeshProUGUI>();
         Image firstOpenBG = slot.transform.Find("Button/FirstOpenBG")?.GetComponent<Image>();
         TextMeshProUGUI firstOpenCashtext = slot.transform.Find("Button/FirstOpenBG/Cash Text")?.GetComponent<TextMeshProUGUI>();
 
-        // 나중에 데이터 불러오기 기능이 있다면 무조건 있어야하기 때문에 작성 (현재는 무조건 else문으로 넘어감)
+        RectTransform textRect = text.GetComponent<RectTransform>();
+
         if (IsCatUnlocked(cat.CatGrade - 1))
         {
             button.interactable = true;
+            text.text = $"{cat.CatGrade}. {cat.CatName}";
             iconImage.sprite = cat.CatImage;
             iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
-            text.text = $"{cat.CatGrade}. {cat.CatName}";
 
             // 첫 해금 보상을 받았다면 해당 슬롯의 firstOpenBG 비활성화 / 받지 않았다면 firstOpenBG 활성화
             if (IsGetFirstUnlockedReward(cat.CatGrade))
@@ -284,7 +304,6 @@ public class DictionaryManager : MonoBehaviour
             }
             else
             {
-                // 활성화
                 firstOpenBG.gameObject.SetActive(true);
                 firstOpenCashtext.text = $"+ {GameManager.Instance.AllCatData[cat.CatGrade].CatGetCoin}";
             }
@@ -292,9 +311,10 @@ public class DictionaryManager : MonoBehaviour
         else
         {
             button.interactable = false;
+            text.text = "???";
+            textRect.anchoredPosition = new Vector2(textRect.anchoredPosition.x, 0);
             iconImage.sprite = cat.CatImage;
             iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 0f);
-            text.text = "???";
 
             firstOpenBG.gameObject.SetActive(false);
         }
@@ -309,10 +329,12 @@ public class DictionaryManager : MonoBehaviour
         slot.gameObject.SetActive(true);
 
         Button button = slot.transform.Find("Button")?.GetComponent<Button>();
+        TextMeshProUGUI text = slot.transform.Find("Button/Name Text")?.GetComponent<TextMeshProUGUI>();
         Image iconImage = slot.transform.Find("Button/Icon")?.GetComponent<Image>();
-        TextMeshProUGUI text = slot.transform.Find("Text Image/Text")?.GetComponent<TextMeshProUGUI>();
         Image firstOpenBG = slot.transform.Find("Button/FirstOpenBG")?.GetComponent<Image>();
         TextMeshProUGUI firstOpenCashtext = slot.transform.Find("Button/FirstOpenBG/Cash Text")?.GetComponent<TextMeshProUGUI>();
+
+        RectTransform textRect = text.GetComponent<RectTransform>();
 
         button.interactable = true;
 
@@ -320,7 +342,8 @@ public class DictionaryManager : MonoBehaviour
         iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
 
         text.text = $"{catGrade + 1}. {GameManager.Instance.AllCatData[catGrade].CatName}";
-        
+        textRect.anchoredPosition = new Vector2(textRect.anchoredPosition.x, 110);
+
         if (!IsGetFirstUnlockedReward(catGrade))
         {
             firstOpenBG.gameObject.SetActive(true);
@@ -341,12 +364,60 @@ public class DictionaryManager : MonoBehaviour
             }
             else
             {
-                ShowNewCatPanel(catGrade);
+                ShowInformationPanel(catGrade);
             }
         });
     }
 
-    // 새로운 고양이 해금 효과 & 도감에서 해당 고양이 버튼을 누르면 나오는 New Cat Panel 함수
+    // 도감이 활성화 되거나 서브 메뉴를 누르면 InformationPanel을 기본 정보로 초기화 해주는 함수
+    private void UpdateInformationPanel()
+    {
+        // 이미지 설정
+        informationCatIcon.sprite = null;
+
+        // 텍스트 설정
+        informationCatDetails.text = $"Select Cat\n";
+
+        // 펼쳐놓은 세부사항 접기
+        catInformationPanelButton.GetComponent<Mask>().enabled = true;
+    }
+
+    // 고양이 정보를 Information Panel에 표시하는 함수
+    private void ShowInformationPanel(int catGrade)
+    {
+        // 고양이 정보 불러오기
+        var catData = GameManager.Instance.AllCatData[catGrade];
+
+        // 이미지 설정
+        informationCatIcon.sprite = catData.CatImage;
+
+        // 텍스트 설정
+        string catInfo = $"Name: {catData.CatName}\n" +
+                         $"Grade: {catData.CatGrade}\n" +
+                         $"Damage: {catData.CatDamage}\n" +
+                         $"HP: {catData.CatHp}\n" +
+                         $"GetCoin: {catData.CatGetCoin}";
+        informationCatDetails.text = catInfo;
+    }
+
+    // 정보 펼쳐보기 버튼 클릭 시 Mask제어 함수
+    public void ToggleMaskComponent()
+    {
+        // 버튼에 연결된 Mask 컴포넌트 가져오기
+        Mask mask = catInformationPanelButton.GetComponent<Mask>();
+
+        if (mask != null)
+        {
+            // 활성화 -> 비활성화 또는 비활성화 -> 활성화 상태 토글
+            mask.enabled = !mask.enabled;
+        }
+        else
+        {
+            Debug.LogWarning("Mask Component가 Button에 연결되어 있지 않습니다.");
+        }
+    }
+
+    // 새로운 고양이 해금 효과
     public void ShowNewCatPanel(int catGrade)
     {
         Cat newCat = GameManager.Instance.AllCatData[catGrade];

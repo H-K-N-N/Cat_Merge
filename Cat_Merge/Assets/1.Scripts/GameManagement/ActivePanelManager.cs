@@ -18,6 +18,7 @@ public class ActivePanelManager : MonoBehaviour
 
     private Dictionary<string, PanelInfo> panels;           // Panel과 버튼 정보를 저장할 Dictionary
     private string activePanelName;                         // 활성화된 Panel 이름
+    public string ActivePanelName => activePanelName;
 
     // ======================================================================================================================
 
@@ -82,6 +83,7 @@ public class ActivePanelManager : MonoBehaviour
         if (panels.ContainsKey(panelName))
         {
             PanelInfo panelInfo = panels[panelName];
+            activePanelName = null;
             panelInfo.Panel.SetActive(false);
             UpdateButtonColor(panelInfo.ButtonImage, false);
         }

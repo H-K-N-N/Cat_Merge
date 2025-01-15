@@ -73,7 +73,7 @@ public class CatData : MonoBehaviour
     }
 
     // ======================================================================================================================
-    // [전투 관련]
+    // [전투]
 
     // 자동이동 현재 상태 반환하는 함수
     public bool IsAutoMoveEnabled()
@@ -155,7 +155,7 @@ public class CatData : MonoBehaviour
         {
             // 체력 회복 시간동안 기절해있는 애니메이션이 재생되면서 해당 객체의 모든 기능 정지
             // 지금은 임시로 10초뒤에 체력이 회복된다고 가정(N초)
-            StartCoroutine(StunAndRecover(15f));     // 10초 후에 체력 회복 (예시)
+            StartCoroutine(StunAndRecover(10f));     // 10초 후에 체력 회복 (예시)
         }
     }
 
@@ -183,18 +183,21 @@ public class CatData : MonoBehaviour
         Debug.Log("고양이 체력 회복 완료!");
     }
 
+    // 타겟 활성화 & 비활성화 함수
     private void SetRaycastTarget(bool isActive)
     {
         catImage.raycastTarget = isActive;
         SetCollectingCoinsState(isActive);
     }
 
+    // 고양이 HP 회복 함수
     public void HealCatHP()
     {
         catHp = catData.CatHp;
     }
 
     // ======================================================================================================================
+    // [자동 이동]
 
     // 자동 이동을 활성화/비활성화하는 함수
     public void SetAutoMoveState(bool isEnabled)
@@ -323,6 +326,7 @@ public class CatData : MonoBehaviour
     }
 
     // ======================================================================================================================
+    // [자동 재화 수집]
 
     // 자동 재화 수집 활성화/비활성화 함수
     public void SetCollectingCoinsState(bool isEnabled)

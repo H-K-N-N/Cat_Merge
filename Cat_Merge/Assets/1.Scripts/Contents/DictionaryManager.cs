@@ -342,7 +342,7 @@ public class DictionaryManager : MonoBehaviour
         iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
 
         text.text = $"{catGrade + 1}. {GameManager.Instance.AllCatData[catGrade].CatName}";
-        textRect.anchoredPosition = new Vector2(textRect.anchoredPosition.x, 110);
+        textRect.anchoredPosition = new Vector2(textRect.anchoredPosition.x, 100);
 
         if (!IsGetFirstUnlockedReward(catGrade))
         {

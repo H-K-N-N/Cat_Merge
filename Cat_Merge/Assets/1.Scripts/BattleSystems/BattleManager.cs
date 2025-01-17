@@ -14,10 +14,10 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Transform bossUIParent;            // 보스를 배치할 부모 Transform (UI Panel 등)
     [SerializeField] private Slider respawnSlider;              // 보스 소환까지 남은 시간을 표시할 Slider UI
 
-    private float spawnInterval = 30f;                          // 보스 등장 주기 (나중에 유저가 변경할 수 있게 수정할 계획도 있음)
+    private float spawnInterval = 10f;                          // 보스 등장 주기 (나중에 유저가 변경할 수 있게 수정할 계획도 있음)
     private Coroutine respawnSliderCoroutine;                   // Slider 코루틴
     private float bossSpawnTimer = 0f;                          // 보스 스폰 타이머
-    private float sliderDuration = 28f;                         // Slider 유지 시간
+    private float sliderDuration;                               // Slider 유지 시간
     private float bossDuration;                                 // 보스 유지 시간 (sliderDuration + warningDuration)
     private int bossStage = 1;                                  // 보스 스테이지
 
@@ -83,6 +83,7 @@ public class BattleManager : MonoBehaviour
 
         // Slider 시간 설정 (보스 리스폰, 보스 전투 시간)
         spawnInterval = spawnInterval - warningDuration;
+        sliderDuration = spawnInterval;
         bossDuration = sliderDuration + warningDuration;
 
         // respawnSlider 설정

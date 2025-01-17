@@ -56,7 +56,8 @@ public class DictionaryManager : MonoBehaviour
     [SerializeField] private GameObject informationPanel;           // Information Panel
     [SerializeField] private Image informationCatIcon;              // Information Cat Icon
     [SerializeField] private TextMeshProUGUI informationCatDetails; // informationCatDetails Text
-    [SerializeField] private Button catInformationPanelButton;      // catInformation Panel Button
+    [SerializeField] private GameObject catInformationPanel;        // catInformation Panel (상세정보 칸 Panel)
+    [SerializeField] private RectTransform fullInformationPanel;    // fullInformation Panel (상세정보 스크로 Panel)
 
     // 임시 (다른 서브 메뉴들을 추가한다면 어떻게 정리 할까 고민)
     [Header("---[Sub Contents]")]
@@ -91,12 +92,13 @@ public class DictionaryManager : MonoBehaviour
     }
 
     // ======================================================================================================================
+    // [초기 설정]
 
-    // 모든 DictionaryManager 시작 함수들 모음
+    // 모든 시작 함수들
     private void InitializeDictionaryManager()
     {
         LoadUnlockedCats();
-        ResetScrollPositions();
+        //ResetScrollPositions();
         InitializeDictionaryButton();
         InitializeSubMenuButtons();
         PopulateDictionary();
@@ -109,14 +111,15 @@ public class DictionaryManager : MonoBehaviour
     }
 
     // ======================================================================================================================
+    // [해금 관련]
 
-    // 모든 해금 상태 불러오기
+    // 모든 해금 상태를 불러오는 함수
     public void LoadUnlockedCats()
     {
         InitializeCatUnlockData();
     }
 
-    // 고양이 해금 여부 초기화
+    // 고양이 해금 여부 초기화 함수
     public void InitializeCatUnlockData()
     {
         int allCatDataLength = GameManager.Instance.AllCatData.Length;
@@ -132,7 +135,7 @@ public class DictionaryManager : MonoBehaviour
         }
     }
 
-    // 특정 고양이를 해금
+    // 특정 고양이를 해금하는 함수
     public void UnlockCat(int CatGrade)
     {
         if (CatGrade < 0 || CatGrade >= isCatUnlocked.Length || isCatUnlocked[CatGrade])
@@ -147,13 +150,13 @@ public class DictionaryManager : MonoBehaviour
         OnCatDataChanged?.Invoke();
     }
 
-    // 특정 고양이의 해금 여부 확인
+    // 특정 고양이의 해금 여부 확인 함수
     public bool IsCatUnlocked(int catGrade)
     {
         return isCatUnlocked[catGrade];
     }
 
-    // 특정 고양이의 첫 해금 보상 획득
+    // 특정 고양이의 첫 해금 보상 획득 함수
     public void GetFirstUnlockedReward(int catGrade)
     {
         if (catGrade < 0 || catGrade >= isGetFirstUnlockedReward.Length || isGetFirstUnlockedReward[catGrade])
@@ -168,13 +171,13 @@ public class DictionaryManager : MonoBehaviour
         OnCatDataChanged?.Invoke();
     }
 
-    // 특정 고양이의 첫 해금 보상 획득 여부 확인
+    // 특정 고양이의 첫 해금 보상 획득 여부 확인 함수
     public bool IsGetFirstUnlockedReward(int catGrade)
     {
         return isGetFirstUnlockedReward[catGrade];
     }
 
-    // 모든 해금 상태 저장
+    // 모든 해금 상태 저장 함수
     public void SaveUnlockedCats(int CatGrade)
     {
         GetComponent<DictionaryManager>().UpdateDictionary(CatGrade);
@@ -182,25 +185,25 @@ public class DictionaryManager : MonoBehaviour
     }
 
     // ======================================================================================================================
+    // [메인 설정]
 
-    // 초기 스크롤 위치 초기화 함수
-    private void ResetScrollPositions()
-    {
-        foreach (var scrollRect in dictionaryScrollRects)
-        {
-            scrollRect.verticalNormalizedPosition = 1f;
-        }
-    }
+    //// 초기 스크롤 위치 초기화 함수
+    //private void ResetScrollPositions()
+    //{
+    //    foreach (var scrollRect in dictionaryScrollRects)
+    //    {
+    //        scrollRect.verticalNormalizedPosition = 1f;
+    //    }
+    //}
 
-    // DictionaryButton 설정
+    // DictionaryButton 설정하는 함수
     private void InitializeDictionaryButton()
     {
-        //dictionaryButton.onClick.AddListener(() => activePanelManager.TogglePanel("DictionaryMenu"));
         dictionaryButton.onClick.AddListener(() =>
         {
             activePanelManager.TogglePanel("DictionaryMenu");
 
-            // DictionaryMenu가 활성화될 때 InformationPanel 초기화
+            // DictionaryMenu가 활성화될 때 InformationPanel 업데이트
             if (activePanelManager.ActivePanelName == "DictionaryMenu")
             {
                 UpdateInformationPanel();
@@ -209,52 +212,6 @@ public class DictionaryManager : MonoBehaviour
         dictionaryBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("DictionaryMenu"));
 
         submitButton.onClick.AddListener(CloseNewCatPanel);
-        catInformationPanelButton.onClick.AddListener(ToggleMaskComponent);
-    }
-
-    // 서브 메뉴 버튼 초기화 및 클릭 이벤트 추가 함수
-    private void InitializeSubMenuButtons()
-    {
-        for (int i = 0; i < (int)DictionaryMenuType.End; i++)
-        {
-            int index = i;
-            dictionaryMenuButtons[index].onClick.AddListener(() => ActivateMenu((DictionaryMenuType)index));
-        }
-
-        ActivateMenu(DictionaryMenuType.Normal);
-    }
-
-    // 선택한 서브 메뉴를 활성화하는 함수
-    private void ActivateMenu(DictionaryMenuType menuType)
-    {
-        activeMenuType = menuType;
-
-        for (int i = 0; i < dictionaryMenus.Length; i++)
-        {
-            dictionaryMenus[i].SetActive(i == (int)menuType);
-        }
-
-        UpdateInformationPanel();
-        UpdateSubMenuButtonColors();
-    }
-
-    // 서브 메뉴 버튼 색상을 업데이트하는 함수
-    private void UpdateSubMenuButtonColors()
-    {
-        for (int i = 0; i < dictionaryMenuButtons.Length; i++)
-        {
-            UpdateSubButtonColor(dictionaryMenuButtons[i].GetComponent<Image>(), i == (int)activeMenuType);
-        }
-    }
-
-    // 서브 메뉴 버튼 색상을 활성 상태에 따라 업데이트하는 함수
-    private void UpdateSubButtonColor(Image buttonImage, bool isActive)
-    {
-        string colorCode = isActive ? "#5f5f5f" : "#FFFFFF";
-        if (ColorUtility.TryParseHtmlString(colorCode, out Color color))
-        {
-            buttonImage.color = color;
-        }
     }
 
     // 도감 데이터를 채우는 함수
@@ -342,7 +299,7 @@ public class DictionaryManager : MonoBehaviour
         iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
 
         text.text = $"{catGrade + 1}. {GameManager.Instance.AllCatData[catGrade].CatName}";
-        textRect.anchoredPosition = new Vector2(textRect.anchoredPosition.x, 110);
+        textRect.anchoredPosition = new Vector2(textRect.anchoredPosition.x, 100);
 
         if (!IsGetFirstUnlockedReward(catGrade))
         {
@@ -369,7 +326,7 @@ public class DictionaryManager : MonoBehaviour
         });
     }
 
-    // 도감이 활성화 되거나 서브 메뉴를 누르면 InformationPanel을 기본 정보로 초기화 해주는 함수
+    // 도감이 활성화 되거나 서브 메뉴를 누르면 InformationPanel을 기본 정보로 업데이트 해주는 함수
     private void UpdateInformationPanel()
     {
         // 이미지 설정
@@ -378,8 +335,11 @@ public class DictionaryManager : MonoBehaviour
         // 텍스트 설정
         informationCatDetails.text = $"Select Cat\n";
 
-        // 펼쳐놓은 세부사항 접기
-        catInformationPanelButton.GetComponent<Mask>().enabled = true;
+        // 스크롤 비활성화
+        catInformationPanel.GetComponent<ScrollRect>().enabled = false;
+
+        // 초기 catInformation Mask 초기화
+        catInformationPanel.GetComponent<Mask>().enabled = true;
     }
 
     // 고양이 정보를 Information Panel에 표시하는 함수
@@ -398,26 +358,16 @@ public class DictionaryManager : MonoBehaviour
                          $"HP: {catData.CatHp}\n" +
                          $"GetCoin: {catData.CatGetCoin}";
         informationCatDetails.text = catInfo;
+
+        // 스크롤 활성화, 스크롤 중이었다면 멈춤
+        catInformationPanel.GetComponent<ScrollRect>().enabled = true;
+        catInformationPanel.GetComponent<ScrollRect>().velocity = Vector2.zero;
+
+        // fullInformationPanel의 Y좌표를 -300으로 고정
+        fullInformationPanel.anchoredPosition = new Vector2(0, -300f);
     }
 
-    // 정보 펼쳐보기 버튼 클릭 시 Mask제어 함수
-    public void ToggleMaskComponent()
-    {
-        // 버튼에 연결된 Mask 컴포넌트 가져오기
-        Mask mask = catInformationPanelButton.GetComponent<Mask>();
-
-        if (mask != null)
-        {
-            // 활성화 -> 비활성화 또는 비활성화 -> 활성화 상태 토글
-            mask.enabled = !mask.enabled;
-        }
-        else
-        {
-            Debug.LogWarning("Mask Component가 Button에 연결되어 있지 않습니다.");
-        }
-    }
-
-    // 새로운 고양이 해금 효과
+    // 새로운 고양이 해금 효과 함수
     public void ShowNewCatPanel(int catGrade)
     {
         Cat newCat = GameManager.Instance.AllCatData[catGrade];
@@ -438,6 +388,54 @@ public class DictionaryManager : MonoBehaviour
     private void CloseNewCatPanel()
     {
         newCatPanel.SetActive(false);
+    }
+
+    // ======================================================================================================================
+    // [서브 메뉴]
+
+    // 서브 메뉴 버튼 초기화 및 클릭 이벤트 추가 함수
+    private void InitializeSubMenuButtons()
+    {
+        for (int i = 0; i < (int)DictionaryMenuType.End; i++)
+        {
+            int index = i;
+            dictionaryMenuButtons[index].onClick.AddListener(() => ActivateMenu((DictionaryMenuType)index));
+        }
+
+        ActivateMenu(DictionaryMenuType.Normal);
+    }
+
+    // 선택한 서브 메뉴를 활성화하는 함수
+    private void ActivateMenu(DictionaryMenuType menuType)
+    {
+        activeMenuType = menuType;
+
+        for (int i = 0; i < dictionaryMenus.Length; i++)
+        {
+            dictionaryMenus[i].SetActive(i == (int)menuType);
+        }
+
+        UpdateInformationPanel();
+        UpdateSubMenuButtonColors();
+    }
+
+    // 서브 메뉴 버튼 색상을 업데이트하는 함수
+    private void UpdateSubMenuButtonColors()
+    {
+        for (int i = 0; i < dictionaryMenuButtons.Length; i++)
+        {
+            UpdateSubButtonColor(dictionaryMenuButtons[i].GetComponent<Image>(), i == (int)activeMenuType);
+        }
+    }
+
+    // 서브 메뉴 버튼 색상을 활성 상태에 따라 업데이트하는 함수
+    private void UpdateSubButtonColor(Image buttonImage, bool isActive)
+    {
+        string colorCode = isActive ? "#5f5f5f" : "#FFFFFF";
+        if (ColorUtility.TryParseHtmlString(colorCode, out Color color))
+        {
+            buttonImage.color = color;
+        }
     }
 
     // ======================================================================================================================
@@ -473,6 +471,7 @@ public class DictionaryManager : MonoBehaviour
         }
     }
 
+    // 
     private void OnDestroy()
     {
         // 이벤트 핸들러 해제

@@ -23,7 +23,6 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] private Image foodFillAmountImg;
     [SerializeField] public Image autoFillAmountImg;
 
-
     // ======================================================================================================================
 
     private void Awake()
@@ -78,18 +77,18 @@ public class SpawnManager : MonoBehaviour
     public void OnClickedSpawn()
     {
         if (gameManager.CanSpawnCat())
-        { 
+        {
             // 먹이가 1개 이상이거나 최대치 이하일 때 스폰
-            if(nowFood > 0 && nowFood <= ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
+            if (nowFood > 0 && nowFood <= ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
             {
                 // 먹이가 줄고 코루틴이 종료되어있다면 다시 시작(현재 먹이가 최대치일때 코루틴 종료되어있음)
                 nowFood--;
-                if(isStoppedReduceCoroutine)
+                if (isStoppedReduceCoroutine)
                 {
                     StartCoroutine(CreateFoodTime());
                     isStoppedReduceCoroutine = false;
                 }
-                if(isStoppedAutoCoroutine)
+                if (isStoppedAutoCoroutine)
                 {
                     StartCoroutine(AutoCollectingTime());
                     isStoppedAutoCoroutine = false;
@@ -105,7 +104,7 @@ public class SpawnManager : MonoBehaviour
             {
                 Debug.LogError("일어나면 안됨(먹이 갯수 부족)");
             }
-            
+
         }
         else
         {
@@ -216,7 +215,7 @@ public class SpawnManager : MonoBehaviour
         {
             foodFillAmountImg.fillAmount = 0f; // 정확히 1로 설정
             while (elapsed < ItemFunctionManager.Instance.reduceProducingFoodTimeList[ItemMenuManager.Instance.ReduceProducingFoodTimeLv].value)
-            {                
+            {
                 elapsed += Time.deltaTime; // 매 프레임마다 경과 시간 증가
                 foodFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / ItemFunctionManager.Instance.reduceProducingFoodTimeList[ItemMenuManager.Instance.ReduceProducingFoodTimeLv].value); // 0 ~ 1 사이로 비율 계산
                 yield return null; // 다음 프레임까지 대기
@@ -237,26 +236,77 @@ public class SpawnManager : MonoBehaviour
     private IEnumerator AutoCollectingTime()
     {
         float elapsed = 0f;
-        // 현재 먹이가 1개 이상일때만 코루틴 진행
-        while(nowFood >= 1)
+
+        // 전투 중인지 확인하며 진행
+        while (true)
         {
-            autoFillAmountImg.fillAmount = 0f;
-            while (elapsed < ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value)
+            // 전투 중일 때 대기
+            if (BattleManager.Instance.IsBattleActive)
             {
-                elapsed += Time.deltaTime;
-                autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value); // 0 ~ 1 사이로 비율 계산
-                yield return null; // 다음 프레임까지 대기
+                yield return null;
+                continue;
             }
-            nowFood--;
-            SpawnCat();
-            elapsed = 0f;
+
+            // 먹이가 1 이상일경우 자동 수집 시작 (흐으음..)
+            if (nowFood >= 1)
+            {
+                autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value);
+
+                // 수집 시간 완료될때까지 대기
+                while (elapsed < ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value)
+                {
+                    if (BattleManager.Instance.IsBattleActive)
+                    {
+                        yield return null;
+                        break;
+                    }
+
+                    elapsed += Time.deltaTime;
+                    autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value);
+                    yield return null;
+                }
+
+                // 완료되면 먹이 줄이고 고양이 생성
+                if (!BattleManager.Instance.IsBattleActive && elapsed >= ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value)
+                {
+                    nowFood--;
+                    SpawnCat();
+                    elapsed = 0f; // 진행 상태 초기화
+                }
+            }
+
+            // 먹이가 0개면 종료
+            if (nowFood == 0)
+            {
+                isStoppedAutoCoroutine = true;
+                yield break;
+            }
+
+            yield return null;
         }
 
-        if(nowFood == 0)
-        {
-            StopCoroutine(AutoCollectingTime());
-            isStoppedAutoCoroutine = true;
-        }
+        //float elapsed = 0f;
+        //// 현재 먹이가 1개 이상일때만 코루틴 진행
+        //while(nowFood >= 1)
+        //{
+        //    autoFillAmountImg.fillAmount = 0f;
+        //    while (elapsed < ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value)
+        //    {
+        //        elapsed += Time.deltaTime;
+        //        autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value); // 0 ~ 1 사이로 비율 계산
+        //        yield return null; // 다음 프레임까지 대기
+        //    }
+        //    nowFood--;
+        //    SpawnCat();
+        //    elapsed = 0f;
+        //}
+
+        //if(nowFood == 0)
+        //{
+        //    StopCoroutine(AutoCollectingTime());
+        //    isStoppedAutoCoroutine = true;
+        //}
     }
+
 
 }

@@ -358,8 +358,6 @@ public class CatData : MonoBehaviour
     {
         while (isCollectingCoins)
         {
-            //yield return new WaitForSeconds(collectingTime);
-
             // 재화 획득 시간(아이템 상점 레벨)
             yield return new WaitForSeconds(ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value); 
 
@@ -367,7 +365,6 @@ public class CatData : MonoBehaviour
             {
                 int collectedCoins = catData.CatGetCoin;
                 GameManager.Instance.Coin += collectedCoins;
-                QuestManager.Instance.AddGetCoinCount(collectedCoins);
 
                 // 모션 실행 및 재화 획득 텍스트 활성화
                 StartCoroutine(PlayCollectingAnimation(collectedCoins));

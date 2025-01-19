@@ -535,6 +535,9 @@ public class BattleManager : MonoBehaviour
         // 전투 종료시 비활성화했던 기능들 다시 기존 상태로 복구
         SetEndFunctions();
 
+        // 배틀 퀘스트 갱신
+        QuestManager.Instance.AddBattleCount();
+
         // 모든 고양이의 체력을 회복시켜줘야함
         CatData[] allCats = FindObjectsOfType<CatData>();
         foreach (var cat in allCats)

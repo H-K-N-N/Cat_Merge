@@ -97,7 +97,7 @@ public class SpawnManager : MonoBehaviour
                 // 업그레이드 시스템 확장성을 위해 변경한 고양이 생성 코드
                 Cat catData = GetCatDataForSpawn();
                 LoadAndDisplayCats(catData);
-                QuestManager.Instance.AddFeedCount();
+                QuestManager.Instance.AddSpawnCount();
                 gameManager.AddCatCount();
             }
             else

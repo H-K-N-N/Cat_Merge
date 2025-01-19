@@ -10,8 +10,7 @@ public class DictionaryManager : MonoBehaviour
     public static DictionaryManager Instance { get; private set; }
 
     [Header("---[Dictionary Manager]")]
-    [SerializeField] private ScrollRect[] dictionaryScrollRects;    // 도감의 스크롤뷰 배열
-    [SerializeField] private GameObject[] dictionaryMenus;          // 도감 메뉴 Panel
+    //[SerializeField] private ScrollRect[] dictionaryScrollRects;    // 도감의 스크롤뷰 배열
     [SerializeField] private Button dictionaryButton;               // 도감 버튼
     [SerializeField] private Image dictionaryButtonImage;           // 도감 버튼 이미지
     [SerializeField] private GameObject dictionaryMenuPanel;        // 도감 메뉴 Panel
@@ -19,6 +18,7 @@ public class DictionaryManager : MonoBehaviour
     private ActivePanelManager activePanelManager;                  // ActivePanelManager
 
     [SerializeField] private GameObject slotPrefab;                 // 도감 슬롯 프리팹
+    [SerializeField] private GameObject[] dictionaryMenus;          // 도감 메뉴 Panels
     [SerializeField] private Button[] dictionaryMenuButtons;        // 도감의 서브 메뉴 버튼 배열
 
     [SerializeField] private GameObject normalCatButtonNewImage;    // Normal Cat Button의 New Image

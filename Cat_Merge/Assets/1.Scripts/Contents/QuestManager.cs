@@ -15,6 +15,9 @@ public class QuestManager : MonoBehaviour
     [SerializeField] private Button questBackButton;                    // 퀘스트 뒤로가기 버튼
     private ActivePanelManager activePanelManager;                      // ActivePanelManager
 
+    [SerializeField] private GameObject[] questMenus;                   // 퀘스트 메뉴 Panels
+    [SerializeField] private Button[] questMenuButtons;                 // 퀘스트 서브 메뉴 버튼 배열
+
     [Header("---[New Image UI]")]
     [SerializeField] private GameObject newImage;                       // 퀘스트 버튼의 New Image 
 
@@ -98,7 +101,8 @@ public class QuestManager : MonoBehaviour
 
 
 
-
+    [Header("---[All Reward Button]")]
+    [SerializeField] private Button dailyAllRewardButton;               // Daily All RewardButton
 
     [Header("---[Special Reward UI]")]
     [SerializeField] private Slider specialRewardQuestSlider;           // Special Reward Slider
@@ -110,6 +114,18 @@ public class QuestManager : MonoBehaviour
     private int specialRewardTargetCount = 5;                           // 목표 횟수
     private int specialRewardQuestRewardCash = 500;                     // Special Reward 퀘스트 보상 캐쉬 재화 개수 == 500
     private bool isSpecialRewardQuestComplete;                          // Special Reward 퀘스트 완료 여부 상태
+
+    // ======================================================================================================================
+
+    // Enum으로 메뉴 타입 정의 (서브 메뉴를 구분하기 위해 사용)
+    private enum QuestMenuType
+    {
+        Daily,                  // 일일 퀘스트 메뉴
+        Weekly,                 // 주간 퀘스트 메뉴
+        Repeat,                 // 반복 퀘스트 메뉴
+        End                     // Enum의 끝
+    }
+    private QuestMenuType activeMenuType;                               // 현재 활성화된 메뉴 타입
 
     // ======================================================================================================================
 
@@ -125,6 +141,7 @@ public class QuestManager : MonoBehaviour
         }
         questMenuPanel.SetActive(false);
         newImage.SetActive(false);
+        activeMenuType = QuestMenuType.Daily;
 
         InitializeQuestManager();
     }
@@ -139,6 +156,7 @@ public class QuestManager : MonoBehaviour
     {
         AddPlayTimeCount();
         UpdateQuestUI();
+        UpdateAllRewardButtonState();
     }
 
     // ======================================================================================================================
@@ -147,6 +165,7 @@ public class QuestManager : MonoBehaviour
     private void InitializeQuestManager()
     {
         InitializeQuestButton();
+        InitializeSubMenuButtons();
 
         InitializePlayTimeQuest();
         InitializeMergeQuest();
@@ -155,6 +174,8 @@ public class QuestManager : MonoBehaviour
         InitializeBattleQuest();
 
         InitializeSpecialReward();
+
+        InitializeAllRewardButton();
     }
 
     // ======================================================================================================================
@@ -192,6 +213,12 @@ public class QuestManager : MonoBehaviour
     {
         questButton.onClick.AddListener(() => activePanelManager.TogglePanel("QuestMenu"));
         questBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("QuestMenu"));
+    }
+
+    // AllRewardButton 설정 함수
+    private void InitializeAllRewardButton()
+    {
+        dailyAllRewardButton.onClick.AddListener(ReceiveAllRewards);
     }
 
     // 캐쉬 추가 함수
@@ -243,9 +270,10 @@ public class QuestManager : MonoBehaviour
         if (!playTimeRewardButton.interactable || isPlayTimeQuestComplete) return;
 
         // 보상 지급 처리 & 퀘스트 완료 처리
-        isPlayTimeQuestComplete = true;
-        AddCash(playTimeQuestRewardCash);
-        AddSpecialRewardCount();
+        ReceiveQuestReward(ref isPlayTimeQuestComplete, playTimeQuestRewardCash, playTimeRewardButton, playTimeRewardDisabledBG);
+        //isPlayTimeQuestComplete = true;
+        //AddCash(playTimeQuestRewardCash);
+        //AddSpecialRewardCount();
     }
 
     // 플레이타임 증가 함수
@@ -302,9 +330,10 @@ public class QuestManager : MonoBehaviour
         if (!mergeRewardButton.interactable || isMergeQuestComplete) return;
 
         // 보상 지급 처리 & 퀘스트 완료 처리
-        isMergeQuestComplete = true;
-        AddCash(mergeQuestRewardCash);
-        AddSpecialRewardCount();
+        ReceiveQuestReward(ref isMergeQuestComplete, mergeQuestRewardCash, mergeRewardButton, mergeRewardDisabledBG);
+        //isMergeQuestComplete = true;
+        //AddCash(mergeQuestRewardCash);
+        //AddSpecialRewardCount();
     }
 
     // 고양이 머지 횟수 증가 함수
@@ -361,9 +390,10 @@ public class QuestManager : MonoBehaviour
         if (!spawnRewardButton.interactable || isSpawnQuestComplete) return;
 
         // 보상 지급 처리 & 퀘스트 완료 처리
-        isSpawnQuestComplete = true;
-        AddCash(spawnQuestRewardCash);
-        AddSpecialRewardCount();
+        ReceiveQuestReward(ref isSpawnQuestComplete, spawnQuestRewardCash, spawnRewardButton, spawnRewardDisabledBG);
+        //isSpawnQuestComplete = true;
+        //AddCash(spawnQuestRewardCash);
+        //AddSpecialRewardCount();
     }
 
     // 고양이 스폰 횟수 증가 함수
@@ -420,9 +450,10 @@ public class QuestManager : MonoBehaviour
         if (!purchaseCatsRewardButton.interactable || isPurchaseCatsQuestComplete) return;
 
         // 보상 지급 처리 & 퀘스트 완료 처리
-        AddCash(purchaseCatsQuestRewardCash);
-        isPurchaseCatsQuestComplete = true;
-        AddSpecialRewardCount();
+        ReceiveQuestReward(ref isPurchaseCatsQuestComplete, purchaseCatsQuestRewardCash, purchaseCatsRewardButton, purchaseCatsRewardDisabledBG);
+        //AddCash(purchaseCatsQuestRewardCash);
+        //isPurchaseCatsQuestComplete = true;
+        //AddSpecialRewardCount();
     }
 
     // 고양이 구매 횟수 증가 함수
@@ -479,9 +510,10 @@ public class QuestManager : MonoBehaviour
         if (!battleRewardButton.interactable || isBattleQuestComplete) return;
 
         // 보상 지급 처리 & 퀘스트 완료 처리
-        isBattleQuestComplete = true;
-        AddCash(battleQuestRewardCash);
-        AddSpecialRewardCount();
+        ReceiveQuestReward(ref isBattleQuestComplete, battleQuestRewardCash, battleRewardButton, battleRewardDisabledBG);
+        //isBattleQuestComplete = true;
+        //AddCash(battleQuestRewardCash);
+        //AddSpecialRewardCount();
     }
 
     // 배틀 횟수 증가 함수
@@ -566,6 +598,130 @@ public class QuestManager : MonoBehaviour
         }
     }
 
+
+
+
+    // ======================================================================================================================
+    // [전체 보상 받기 관련]
+
+    // 모든 활성화된 보상을 지급하는 함수
+    private void ReceiveAllRewards()
+    {
+        //bool isAnyRewardGiven = false;
+
+        // 플레이타임 퀘스트 보상 처리
+        if (playTimeRewardButton.interactable && !isPlayTimeQuestComplete)
+        {
+            ReceiveQuestReward(ref isPlayTimeQuestComplete, playTimeQuestRewardCash, playTimeRewardButton, playTimeRewardDisabledBG);
+            //isAnyRewardGiven = true;
+        }
+
+        // 고양이 머지 퀘스트 보상 처리
+        if (mergeRewardButton.interactable && !isMergeQuestComplete)
+        {
+            ReceiveQuestReward(ref isMergeQuestComplete, mergeQuestRewardCash, mergeRewardButton, mergeRewardDisabledBG);
+            //isAnyRewardGiven = true;
+        }
+
+        // 고양이 스폰 퀘스트 보상 처리
+        if (spawnRewardButton.interactable && !isSpawnQuestComplete)
+        {
+            ReceiveQuestReward(ref isSpawnQuestComplete, spawnQuestRewardCash, spawnRewardButton, spawnRewardDisabledBG);
+            //isAnyRewardGiven = true;
+        }
+
+        // 고양이 구매 퀘스트 보상 처리
+        if (purchaseCatsRewardButton.interactable && !isPurchaseCatsQuestComplete)
+        {
+            ReceiveQuestReward(ref isPurchaseCatsQuestComplete, purchaseCatsQuestRewardCash, purchaseCatsRewardButton, purchaseCatsRewardDisabledBG);
+            //isAnyRewardGiven = true;
+        }
+
+        // 전투 퀘스트 보상 처리
+        if (battleRewardButton.interactable && !isBattleQuestComplete)
+        {
+            ReceiveQuestReward(ref isBattleQuestComplete, battleQuestRewardCash, battleRewardButton, battleRewardDisabledBG);
+            //isAnyRewardGiven = true;
+        }
+
+        //// 보상을 지급한 경우 UI 업데이트 (Update문을 바꿔야 쓸듯)
+        //if (isAnyRewardGiven)
+        //{
+        //    UpdateQuestsUI();
+        //}
+    }
+
+    // 개별 퀘스트 보상 지급 처리 함수
+    private void ReceiveQuestReward(ref bool isQuestComplete, int rewardCash, Button rewardButton, GameObject disabledBG)
+    {
+        isQuestComplete = true;
+        AddCash(rewardCash);
+        rewardButton.interactable = false;
+        disabledBG.SetActive(true);
+
+        AddSpecialRewardCount();
+    }
+
+    // All Reward 버튼 상태를 업데이트하는 함수
+    private void UpdateAllRewardButtonState()
+    {
+        // 보상을 받을 수 있는 버튼이 하나라도 활성화되어 있는지 확인
+        bool isAnyRewardAvailable =
+            (playTimeRewardButton.interactable && !isPlayTimeQuestComplete) ||
+            (mergeRewardButton.interactable && !isMergeQuestComplete) ||
+            (spawnRewardButton.interactable && !isSpawnQuestComplete) ||
+            (purchaseCatsRewardButton.interactable && !isPurchaseCatsQuestComplete) ||
+            (battleRewardButton.interactable && !isBattleQuestComplete);
+
+        dailyAllRewardButton.interactable = isAnyRewardAvailable;
+    }
+
+    // ======================================================================================================================
+    // [서브 메뉴]
+
+    // 서브 메뉴 버튼 초기화 및 클릭 이벤트 추가 함수
+    private void InitializeSubMenuButtons()
+    {
+        for (int i = 0; i < (int)QuestMenuType.End; i++)
+        {
+            int index = i;
+            questMenuButtons[index].onClick.AddListener(() => ActivateMenu((QuestMenuType)index));
+        }
+
+        ActivateMenu(QuestMenuType.Daily);
+    }
+
+    // 선택한 서브 메뉴를 활성화하는 함수
+    private void ActivateMenu(QuestMenuType menuType)
+    {
+        activeMenuType = menuType;
+
+        for (int i = 0; i < questMenus.Length; i++)
+        {
+            questMenus[i].SetActive(i == (int)menuType);
+        }
+
+        UpdateSubMenuButtonColors();
+    }
+
+    // 서브 메뉴 버튼 색상을 업데이트하는 함수
+    private void UpdateSubMenuButtonColors()
+    {
+        for (int i = 0; i < questMenuButtons.Length; i++)
+        {
+            UpdateSubButtonColor(questMenuButtons[i].GetComponent<Image>(), i == (int)activeMenuType);
+        }
+    }
+
+    // 서브 메뉴 버튼 색상을 활성 상태에 따라 업데이트하는 함수
+    private void UpdateSubButtonColor(Image buttonImage, bool isActive)
+    {
+        string colorCode = isActive ? "#5f5f5f" : "#FFFFFF";
+        if (ColorUtility.TryParseHtmlString(colorCode, out Color color))
+        {
+            buttonImage.color = color;
+        }
+    }
 
 
 }

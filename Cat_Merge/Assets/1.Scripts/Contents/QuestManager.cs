@@ -36,6 +36,9 @@ public class QuestManager : MonoBehaviour
     private int battleCount;                                            // 전투 횟수
     public int BattleCount { get => battleCount; set => battleCount = value; }
 
+    private int specialRewardCount;                                    // 최종 퀘스트 진행 횟수
+    public int SpecialRewardCount { get => specialRewardCount; set => specialRewardCount = value; }
+
     // ======================================================================================================================
 
     [Header("---[PlayTime Quest UI]")]
@@ -43,6 +46,7 @@ public class QuestManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI playTimeCountText;         // "?/?" 텍스트
     [SerializeField] private Button playTimeRewardButton;               // 플레이타임 보상 버튼
     [SerializeField] private TextMeshProUGUI playTimePlusCashText;      // 플레이타임 보상 재화 개수 Text
+    [SerializeField] private TextMeshProUGUI playTimeRewardText;        // 플레이타임 보상 획득 Text
     [SerializeField] private GameObject playTimeRewardDisabledBG;       // 플레이타임 보상 버튼 비활성화 BG
     private int playTimeTargetCount = 10;                               // 목표 플레이타임 (초 단위)                 == 720
     private int playTimeQuestRewardCash = 5;                            // 플레이타임 퀘스트 보상 캐쉬 재화 개수
@@ -53,6 +57,7 @@ public class QuestManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI mergeCountText;            // "?/?" 텍스트
     [SerializeField] private Button mergeRewardButton;                  // 고양이 머지 보상 버튼
     [SerializeField] private TextMeshProUGUI mergePlusCashText;         // 고양이 머지 보상 재화 개수 Text
+    [SerializeField] private TextMeshProUGUI mergeRewardText;           // 고양이 머지 보상 획득 Text
     [SerializeField] private GameObject mergeRewardDisabledBG;          // 고양이 머지 보상 버튼 비활성화 BG
     private int mergeTargetCount = 1;                                   // 목표 고양이 머지 횟수                     == 100
     private int mergeQuestRewardCash = 5;                               // 고양이 머지 퀘스트 보상 캐쉬 재화 개수
@@ -63,6 +68,7 @@ public class QuestManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI spawnCountText;            // "?/?" 텍스트
     [SerializeField] private Button spawnRewardButton;                  // 고양이 스폰 보상 버튼
     [SerializeField] private TextMeshProUGUI spawnPlusCashText;         // 고양이 스폰 보상 재화 개수 Text
+    [SerializeField] private TextMeshProUGUI spawnRewardText;           // 고양이 스폰 보상 획득 Text
     [SerializeField] private GameObject spawnRewardDisabledBG;          // 고양이 스폰 보상 버튼 비활성화 BG
     private int spawnTargetCount = 1;                                   // 목표 고양이 스폰 횟수                     == 100
     private int spawnQuestRewardCash = 5;                               // 고양이 스폰 퀘스트 보상 캐쉬 재화 개수
@@ -73,6 +79,7 @@ public class QuestManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI purchaseCatsCountText;     // "?/?" 텍스트
     [SerializeField] private Button purchaseCatsRewardButton;           // 고양이 구매 보상 버튼
     [SerializeField] private TextMeshProUGUI purchaseCatsPlusCashText;  // 고양이 구매 보상 재화 개수 Text
+    [SerializeField] private TextMeshProUGUI purchaseCatsRewardText;    // 고양이 구매 보상 획득 Text
     [SerializeField] private GameObject purchaseCatsRewardDisabledBG;   // 고양이 구매 보상 버튼 비활성화 BG
     private int purchaseCatsTargetCount = 1;                            // 목표 고양이 구매 횟수                     == 10
     private int purchaseCatsQuestRewardCash = 5;                        // 고양이 구매 퀘스트 보상 캐쉬 재화 개수
@@ -83,15 +90,24 @@ public class QuestManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI battleCountText;           // "?/?" 텍스트
     [SerializeField] private Button battleRewardButton;                 // 전투 보상 버튼
     [SerializeField] private TextMeshProUGUI battlePlusCashText;        // 전투 보상 재화 개수 Text
+    [SerializeField] private TextMeshProUGUI battleRewardText;          // 전투 보상 획득 Text
     [SerializeField] private GameObject battleRewardDisabledBG;         // 전투 보상 버튼 비활성화 BG
     private int battleTargetCount = 1;                                  // 목표 전투 횟수                           == 1
     private int battleQuestRewardCash = 5;                              // 전투 퀘스트 보상 캐쉬 재화 개수
     private bool isBattleQuestComplete;                                 // 전투 퀘스트 완료 여부
 
+
+
+
+
     [Header("---[Special Reward UI]")]
+    [SerializeField] private Slider specialRewardQuestSlider;           // Special Reward Slider
+    [SerializeField] private TextMeshProUGUI specialRewardCountText;    // "?/?" 텍스트
     [SerializeField] private Button specialRewardButton;                // Special Reward 버튼
     [SerializeField] private TextMeshProUGUI specialRewardPlusCashText; // Special Reward 보상 재화 개수 Text
+    [SerializeField] private TextMeshProUGUI specialRewardText;         // Special Reward 보상 획득 Text
     [SerializeField] private GameObject specialRewardDisabledBG;        // Special Reward 보상 버튼 비활성화 BG
+    private int specialRewardTargetCount = 5;                           // 목표 횟수
     private int specialRewardQuestRewardCash = 500;                     // Special Reward 퀘스트 보상 캐쉬 재화 개수 == 500
     private bool isSpecialRewardQuestComplete;                          // Special Reward 퀘스트 완료 여부 상태
 
@@ -194,7 +210,8 @@ public class QuestManager : MonoBehaviour
         isPlayTimeQuestComplete = false;
         playTimeRewardButton.interactable = false;
         playTimeRewardDisabledBG.SetActive(false);
-        playTimePlusCashText.text = $"+{playTimeQuestRewardCash}";
+        playTimePlusCashText.text = $"x {playTimeQuestRewardCash}";
+        playTimeRewardText.text = "Accept";
     }
 
     // 플레이타임 퀘스트 UI를 업데이트하는 함수
@@ -208,13 +225,10 @@ public class QuestManager : MonoBehaviour
         playTimeQuestSlider.value = currentTime;
 
         // "?/?" 텍스트 업데이트
+        playTimeCountText.text = $"{currentTime} / {playTimeTargetCount}";
         if (isPlayTimeQuestComplete)
         {
-            playTimeCountText.text = "Complete";
-        }
-        else
-        {
-            playTimeCountText.text = $"{currentTime}/{playTimeTargetCount}";
+            playTimeRewardText.text = "Complete";
         }
 
         // 보상 버튼 활성화 조건 체크
@@ -231,6 +245,7 @@ public class QuestManager : MonoBehaviour
         // 보상 지급 처리 & 퀘스트 완료 처리
         isPlayTimeQuestComplete = true;
         AddCash(playTimeQuestRewardCash);
+        AddSpecialRewardCount();
     }
 
     // 플레이타임 증가 함수
@@ -239,7 +254,7 @@ public class QuestManager : MonoBehaviour
         PlayTimeCount += Time.deltaTime;
     }
 
-    // 
+    // 플레이타임 리셋 함수
     public void ResetPlayTimeCount()
     {
         PlayTimeCount = 0;
@@ -255,7 +270,8 @@ public class QuestManager : MonoBehaviour
         isMergeQuestComplete = false;
         mergeRewardButton.interactable = false;
         mergeRewardDisabledBG.SetActive(false);
-        mergePlusCashText.text = $"+{mergeQuestRewardCash}";
+        mergePlusCashText.text = $"x {mergeQuestRewardCash}";
+        mergeRewardText.text = "Accept";
     }
 
     // 고양이 머지 퀘스트 UI를 업데이트하는 함수
@@ -268,13 +284,10 @@ public class QuestManager : MonoBehaviour
         mergeQuestSlider.value = currentCount;
 
         // "?/?" 텍스트 업데이트
+        mergeCountText.text = $"{currentCount} / {mergeTargetCount}";
         if (isMergeQuestComplete)
         {
-            mergeCountText.text = "Complete";
-        }
-        else
-        {
-            mergeCountText.text = $"{currentCount}/{mergeTargetCount}";
+            mergeRewardText.text = "Complete";
         }
 
         // 보상 버튼 활성화 조건 체크
@@ -291,6 +304,7 @@ public class QuestManager : MonoBehaviour
         // 보상 지급 처리 & 퀘스트 완료 처리
         isMergeQuestComplete = true;
         AddCash(mergeQuestRewardCash);
+        AddSpecialRewardCount();
     }
 
     // 고양이 머지 횟수 증가 함수
@@ -299,7 +313,7 @@ public class QuestManager : MonoBehaviour
         MergeCount++;
     }
 
-    // 
+    // 고양이 머지 횟수 리셋 함수
     public void ResetMergeCount()
     {
         MergeCount = 0;
@@ -315,7 +329,8 @@ public class QuestManager : MonoBehaviour
         isSpawnQuestComplete = false;
         spawnRewardButton.interactable = false;
         spawnRewardDisabledBG.SetActive(false);
-        spawnPlusCashText.text = $"+{spawnQuestRewardCash}";
+        spawnPlusCashText.text = $"x {spawnQuestRewardCash}";
+        spawnRewardText.text = "Accept";
     }
 
     // 고양이 스폰 퀘스트 UI를 업데이트하는 함수
@@ -328,13 +343,10 @@ public class QuestManager : MonoBehaviour
         spawnQuestSlider.value = currentCount;
 
         // "?/?" 텍스트 업데이트
+        spawnCountText.text = $"{currentCount} / {spawnTargetCount}";
         if (isSpawnQuestComplete)
         {
-            spawnCountText.text = "Complete";
-        }
-        else
-        {
-            spawnCountText.text = $"{currentCount}/{spawnTargetCount}";
+            spawnRewardText.text = "Complete";
         }
 
         // 보상 버튼 활성화 조건 체크
@@ -351,6 +363,7 @@ public class QuestManager : MonoBehaviour
         // 보상 지급 처리 & 퀘스트 완료 처리
         isSpawnQuestComplete = true;
         AddCash(spawnQuestRewardCash);
+        AddSpecialRewardCount();
     }
 
     // 고양이 스폰 횟수 증가 함수
@@ -359,7 +372,7 @@ public class QuestManager : MonoBehaviour
         SpawnCount++;
     }
 
-    // 
+    // 고양이 스폰 횟수 리셋 함수
     public void ResetSpawnCount()
     {
         SpawnCount = 0;
@@ -375,7 +388,8 @@ public class QuestManager : MonoBehaviour
         isPurchaseCatsQuestComplete = false;
         purchaseCatsRewardButton.interactable = false;
         purchaseCatsRewardDisabledBG.SetActive(false);
-        purchaseCatsPlusCashText.text = $"+{purchaseCatsQuestRewardCash}";
+        purchaseCatsPlusCashText.text = $"x {purchaseCatsQuestRewardCash}";
+        purchaseCatsRewardText.text = "Accept";
     }
 
     // 고양이 구매 퀘스트 UI를 업데이트하는 함수
@@ -388,13 +402,10 @@ public class QuestManager : MonoBehaviour
         purchaseCatsQuestSlider.value = currentCount;
 
         // "?/?" 텍스트 업데이트
+        purchaseCatsCountText.text = $"{currentCount} / {purchaseCatsTargetCount}";
         if (isPurchaseCatsQuestComplete)
         {
-            purchaseCatsCountText.text = "Complete";
-        }
-        else
-        {
-            purchaseCatsCountText.text = $"{currentCount}/{purchaseCatsTargetCount}";
+            purchaseCatsRewardText.text = "Complete";
         }
 
         // 보상 버튼 활성화 조건 체크
@@ -411,6 +422,7 @@ public class QuestManager : MonoBehaviour
         // 보상 지급 처리 & 퀘스트 완료 처리
         AddCash(purchaseCatsQuestRewardCash);
         isPurchaseCatsQuestComplete = true;
+        AddSpecialRewardCount();
     }
 
     // 고양이 구매 횟수 증가 함수
@@ -419,7 +431,7 @@ public class QuestManager : MonoBehaviour
         PurchaseCatsCount++;
     }
 
-    // 
+    // 고양이 구매 횟수 리셋 함수
     public void ResetPurchaseCatsCount()
     {
         PurchaseCatsCount = 0;
@@ -435,7 +447,8 @@ public class QuestManager : MonoBehaviour
         isBattleQuestComplete = false;
         battleRewardButton.interactable = false;
         battleRewardDisabledBG.SetActive(false);
-        battlePlusCashText.text = $"+{battleQuestRewardCash}";
+        battlePlusCashText.text = $"x {battleQuestRewardCash}";
+        battleRewardText.text = "Accept";
     }
 
     // 배틀 퀘스트 UI를 업데이트하는 함수
@@ -448,13 +461,10 @@ public class QuestManager : MonoBehaviour
         battleQuestSlider.value = currentCount;
 
         // "?/?" 텍스트 업데이트
+        battleCountText.text = $"{currentCount} / {battleTargetCount}";
         if (isBattleQuestComplete)
         {
-            battleCountText.text = "Complete";
-        }
-        else
-        {
-            battleCountText.text = $"{currentCount}/{battleTargetCount}";
+            battleRewardText.text = "Complete";
         }
 
         // 보상 버튼 활성화 조건 체크
@@ -471,6 +481,7 @@ public class QuestManager : MonoBehaviour
         // 보상 지급 처리 & 퀘스트 완료 처리
         isBattleQuestComplete = true;
         AddCash(battleQuestRewardCash);
+        AddSpecialRewardCount();
     }
 
     // 배틀 횟수 증가 함수
@@ -479,7 +490,7 @@ public class QuestManager : MonoBehaviour
         BattleCount++;
     }
 
-    // 
+    // 배틀 횟수 리셋 함수
     public void ResetBattleCount()
     {
         BattleCount = 0;
@@ -495,7 +506,51 @@ public class QuestManager : MonoBehaviour
         isSpecialRewardQuestComplete = false;
         specialRewardButton.interactable = false;
         specialRewardDisabledBG.SetActive(true);
-        specialRewardPlusCashText.text = $"+{specialRewardQuestRewardCash}";
+        specialRewardPlusCashText.text = $"x {specialRewardQuestRewardCash}";
+        specialRewardText.text = "Accept";
+    }
+
+    // Special Reward 퀘스트 UI를 업데이트하는 함수
+    private void UpdateSpecialRewardUI()
+    {
+        int currentCount = Mathf.Min((int)SpecialRewardCount, specialRewardTargetCount);
+
+        // Slider 값 설정
+        specialRewardQuestSlider.maxValue = specialRewardTargetCount;
+        specialRewardQuestSlider.value = currentCount;
+
+        //// "?/?" 텍스트 업데이트
+        specialRewardCountText.text = $"{currentCount} / {specialRewardTargetCount}";
+        if (isSpecialRewardQuestComplete)
+        {
+            specialRewardText.text = "Complete";
+        }
+
+        bool isComplete = AllQuestsCompleted() && !isSpecialRewardQuestComplete;
+        specialRewardButton.interactable = isComplete;
+        specialRewardDisabledBG.SetActive(!isComplete);
+    }
+
+    // Special Reward 보상 버튼 클릭 시 호출되는 함수
+    private void ReceiveSpecialReward()
+    {
+        if (!specialRewardButton.interactable || isSpecialRewardQuestComplete) return;
+
+        // 보상 지급 처리 & 퀘스트 완료 처리
+        AddCash(specialRewardQuestRewardCash);
+        isSpecialRewardQuestComplete = true;
+    }
+
+    // Special Reward 증가 함수
+    public void AddSpecialRewardCount()
+    {
+        SpecialRewardCount++;
+    }
+
+    // Special Reward 리셋 함수
+    public void ResetSpecialRewardCount()
+    {
+        SpecialRewardCount = 0;
     }
 
     // 모든 퀘스트가 완료되었는지 확인하는 함수
@@ -511,22 +566,6 @@ public class QuestManager : MonoBehaviour
         }
     }
 
-    // Special Reward 퀘스트 UI를 업데이트하는 함수
-    private void UpdateSpecialRewardUI()
-    {
-        bool isComplete = AllQuestsCompleted() && !isSpecialRewardQuestComplete;
-        specialRewardButton.interactable = isComplete;
-        specialRewardDisabledBG.SetActive(!isComplete);
-    }
 
-    // Special Reward 보상 버튼 클릭 시 호출되는 함수
-    private void ReceiveSpecialReward()
-    {
-        if (!specialRewardButton.interactable || isSpecialRewardQuestComplete) return;
-
-        // 보상 지급 처리 & 퀘스트 완료 처리
-        AddCash(specialRewardQuestRewardCash);
-        isSpecialRewardQuestComplete = true;
-    }
 
 }

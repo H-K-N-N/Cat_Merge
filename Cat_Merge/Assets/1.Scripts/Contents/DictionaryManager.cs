@@ -21,8 +21,8 @@ public class DictionaryManager : MonoBehaviour
     [SerializeField] private GameObject[] dictionaryMenus;          // 도감 메뉴 Panels
     [SerializeField] private Button[] dictionaryMenuButtons;        // 도감의 서브 메뉴 버튼 배열
 
-    [SerializeField] private GameObject normalCatButtonNewImage;    // Normal Cat Button의 New Image
     [SerializeField] private GameObject dictionaryButtonNewImage;   // 도감 Button의 New Image
+    [SerializeField] private GameObject normalCatButtonNewImage;    // Normal Cat Button의 New Image
     private event Action OnCatDataChanged;                          // 이벤트 정의
 
     // ======================================================================================================================
@@ -103,11 +103,11 @@ public class DictionaryManager : MonoBehaviour
         InitializeSubMenuButtons();
         PopulateDictionary();
 
-        // 이벤트 등록 (상태가 변경될 때 UpdateNewImageIndicators 호출)
-        OnCatDataChanged += UpdateNewImageIndicators;
+        // 이벤트 등록 (상태가 변경될 때 UpdateNewImageStatus 호출)
+        OnCatDataChanged += UpdateNewImageStatus;
 
         // 초기화 시 New Image UI 갱신
-        UpdateNewImageIndicators();
+        UpdateNewImageStatus();
     }
 
     // ======================================================================================================================
@@ -454,20 +454,20 @@ public class DictionaryManager : MonoBehaviour
     }
 
     // New Image UI를 갱신하는 함수
-    private void UpdateNewImageIndicators()
+    private void UpdateNewImageStatus()
     {
         bool hasUnclaimedRewards = HasUnclaimedRewards();
-
-        // Normal Cat Button의 New Image 활성화/비활성화
-        if (normalCatButtonNewImage != null)
-        {
-            normalCatButtonNewImage.SetActive(hasUnclaimedRewards);
-        }
 
         // 도감 Button의 New Image 활성화/비활성화
         if (dictionaryButtonNewImage != null)
         {
             dictionaryButtonNewImage.SetActive(hasUnclaimedRewards);
+        }
+
+        // Normal Cat Button의 New Image 활성화/비활성화
+        if (normalCatButtonNewImage != null)
+        {
+            normalCatButtonNewImage.SetActive(hasUnclaimedRewards);
         }
     }
 
@@ -475,7 +475,7 @@ public class DictionaryManager : MonoBehaviour
     private void OnDestroy()
     {
         // 이벤트 핸들러 해제
-        OnCatDataChanged -= UpdateNewImageIndicators;
+        OnCatDataChanged -= UpdateNewImageStatus;
     }
 
 }

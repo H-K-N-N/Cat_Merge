@@ -6930,14 +6930,23 @@ MonoBehaviour:
   - {fileID: 1814465266}
   - {fileID: 304515051}
   questSlotPrefab: {fileID: 7215860381645921271, guid: eb602f8bdbfc6a44da1da13fad3adff7, type: 3}
-  questSlotParent: {fileID: 1001344182}
+  questSlotParents:
+  - {fileID: 1001344182}
+  - {fileID: 1108073332}
+  - {fileID: 2063816138}
   repeatQuestScrollRects: {fileID: 1206107792}
-  specialRewardQuestSlider: {fileID: 1227552083}
-  specialRewardCountText: {fileID: 103527795}
-  specialRewardButton: {fileID: 1786152934}
-  specialRewardPlusCashText: {fileID: 1758870108}
-  specialRewardText: {fileID: 465979768}
-  specialRewardDisabledBG: {fileID: 1702609126}
+  dailySpecialRewardSlider: {fileID: 1227552083}
+  dailySpecialRewardCountText: {fileID: 103527795}
+  dailySpecialRewardPlusCashText: {fileID: 1758870108}
+  dailySpecialRewardButton: {fileID: 1786152934}
+  dailySpecialRewardText: {fileID: 465979768}
+  dailySpecialRewardDisabledBG: {fileID: 1702609126}
+  weeklySpecialRewardSlider: {fileID: 1279564870}
+  weeklySpecialRewardCountText: {fileID: 788791251}
+  weeklySpecialRewardPlusCashText: {fileID: 108573327}
+  weeklySpecialRewardButton: {fileID: 593644539}
+  weeklySpecialRewardText: {fileID: 55724650}
+  weeklySpecialRewardDisabledBG: {fileID: 143002289}
   questButtonNewImage: {fileID: 719886877}
   dailyQuestButtonNewImage: {fileID: 1952077524}
   weeklyQuestButtonNewImage: {fileID: 795942302}
@@ -9097,7 +9106,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &439602990
 RectTransform:
   m_ObjectHideFlags: 0
@@ -12835,7 +12844,7 @@ RectTransform:
   m_Father: {fileID: 1542406588}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -39145,7 +39154,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1832550280
 RectTransform:
   m_ObjectHideFlags: 0
@@ -44683,7 +44692,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 500, y: -615}
-  m_SizeDelta: {x: 1000, y: 1590}
+  m_SizeDelta: {x: 1000, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2063816139
 MonoBehaviour:

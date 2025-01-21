@@ -10,7 +10,7 @@ public class DictionaryManager : MonoBehaviour
     public static DictionaryManager Instance { get; private set; }
 
     [Header("---[Dictionary Manager]")]
-    //[SerializeField] private ScrollRect[] dictionaryScrollRects;    // 도감의 스크롤뷰 배열
+    [SerializeField] private ScrollRect[] dictionaryScrollRects;    // 도감의 스크롤뷰 배열
     [SerializeField] private Button dictionaryButton;               // 도감 버튼
     [SerializeField] private Image dictionaryButtonImage;           // 도감 버튼 이미지
     [SerializeField] private GameObject dictionaryMenuPanel;        // 도감 메뉴 Panel
@@ -98,7 +98,7 @@ public class DictionaryManager : MonoBehaviour
     private void InitializeDictionaryManager()
     {
         LoadUnlockedCats();
-        //ResetScrollPositions();
+        ResetScrollPositions();
         InitializeDictionaryButton();
         InitializeSubMenuButtons();
         PopulateDictionary();
@@ -187,14 +187,14 @@ public class DictionaryManager : MonoBehaviour
     // ======================================================================================================================
     // [메인 설정]
 
-    //// 초기 스크롤 위치 초기화 함수
-    //private void ResetScrollPositions()
-    //{
-    //    foreach (var scrollRect in dictionaryScrollRects)
-    //    {
-    //        scrollRect.verticalNormalizedPosition = 1f;
-    //    }
-    //}
+    // 초기 스크롤 위치 초기화 함수
+    private void ResetScrollPositions()
+    {
+        foreach (var scrollRect in dictionaryScrollRects)
+        {
+            scrollRect.verticalNormalizedPosition = 1f;
+        }
+    }
 
     // DictionaryButton 설정하는 함수
     private void InitializeDictionaryButton()

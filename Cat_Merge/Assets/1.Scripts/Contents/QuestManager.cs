@@ -39,6 +39,8 @@ public class QuestManager : MonoBehaviour
     [SerializeField] private GameObject[] questMenus;                   // 메인 퀘스트 메뉴 Panels
     [SerializeField] private Button[] questMenuButtons;                 // 서브 퀘스트 메뉴 버튼 배열
 
+    [SerializeField] private ScrollRect repeatQuestScrollRects;         // 반복퀘스트의 스크롤뷰 배열
+
     [Header("---[New Image UI]")]
     [SerializeField] private GameObject questButtonNewImage;            // Main 퀘스트 버튼의 New Image
     [SerializeField] private GameObject dailyQuestButtonNewImage;       // Daily 퀘스트 버튼의 New Image
@@ -76,6 +78,8 @@ public class QuestManager : MonoBehaviour
     public QuestUI purchaseCatsQuestUI;     // Purchase Cats Quest
     public QuestUI battleQuestUI;           // Battle Quest
     private Dictionary<string, QuestUI.QuestData> quests = new Dictionary<string, QuestUI.QuestData>();
+
+
 
     [Header("---[All Reward Button]")]
     [SerializeField] private Button dailyAllRewardButton;               // Daily All RewardButton
@@ -150,8 +154,8 @@ public class QuestManager : MonoBehaviour
         InitializeSubMenuButtons();
 
         InitializeDailyQuestManager();
-        //InitializeWeeklyQuestManager();
-        //InitializeRepeatQuestManager();
+        InitializeWeeklyQuestManager();
+        InitializeRepeatQuestManager();
     }
 
     // QuestButton 설정 함수
@@ -172,13 +176,21 @@ public class QuestManager : MonoBehaviour
 
         InitializeSpecialReward();
 
-        InitializeAllRewardButton();
+        // AllReward 버튼 등록
+        dailyAllRewardButton.onClick.AddListener(ReceiveAllRewards);
     }
 
-    // AllRewardButton 설정 함수
-    private void InitializeAllRewardButton()
+    // Weekly Quest 설정 함수
+    private void InitializeWeeklyQuestManager()
     {
-        dailyAllRewardButton.onClick.AddListener(ReceiveAllRewards);
+
+    }
+
+    // Repeat Quest 설정 함수
+    private void InitializeRepeatQuestManager()
+    {
+        // 초기 스크롤 위치 초기화
+        repeatQuestScrollRects.verticalNormalizedPosition = 1f;
     }
 
     // ======================================================================================================================
@@ -189,8 +201,8 @@ public class QuestManager : MonoBehaviour
         UpdateNewImageStatus();
 
         UpdateDailyQuestUI();
-        //UpdateWeeklyQuestManager();
-        //UpdateRepeatQuestManager();
+        UpdateWeeklyQuestUI();
+        UpdateRepeatQuestUI();
     }
 
     // Daily Quest UI 업데이트 함수
@@ -203,6 +215,18 @@ public class QuestManager : MonoBehaviour
         UpdateBattleQuestUI();
 
         UpdateSpecialRewardUI();
+    }
+
+    // Weekly Quest UI 업데이트 함수
+    private void UpdateWeeklyQuestUI()
+    {
+
+    }
+
+    // Repeat Quest UI 업데이트 함수
+    private void UpdateRepeatQuestUI()
+    {
+
     }
 
     // 캐쉬 추가 함수

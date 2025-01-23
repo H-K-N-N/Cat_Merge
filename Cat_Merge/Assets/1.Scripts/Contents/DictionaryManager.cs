@@ -11,7 +11,6 @@ public class DictionaryManager : MonoBehaviour
 
     [Header("---[Dictionary Manager]")]
     [SerializeField] private ScrollRect[] dictionaryScrollRects;    // 도감의 스크롤뷰 배열
-    [SerializeField] private GameObject[] dictionaryMenus;          // 도감 메뉴 Panel
     [SerializeField] private Button dictionaryButton;               // 도감 버튼
     [SerializeField] private Image dictionaryButtonImage;           // 도감 버튼 이미지
     [SerializeField] private GameObject dictionaryMenuPanel;        // 도감 메뉴 Panel
@@ -19,10 +18,11 @@ public class DictionaryManager : MonoBehaviour
     private ActivePanelManager activePanelManager;                  // ActivePanelManager
 
     [SerializeField] private GameObject slotPrefab;                 // 도감 슬롯 프리팹
+    [SerializeField] private GameObject[] dictionaryMenus;          // 도감 메뉴 Panels
     [SerializeField] private Button[] dictionaryMenuButtons;        // 도감의 서브 메뉴 버튼 배열
 
-    [SerializeField] private GameObject normalCatButtonNewImage;    // Normal Cat Button의 New Image
     [SerializeField] private GameObject dictionaryButtonNewImage;   // 도감 Button의 New Image
+    [SerializeField] private GameObject normalCatButtonNewImage;    // Normal Cat Button의 New Image
     private event Action OnCatDataChanged;                          // 이벤트 정의
 
     // ======================================================================================================================
@@ -98,16 +98,16 @@ public class DictionaryManager : MonoBehaviour
     private void InitializeDictionaryManager()
     {
         LoadUnlockedCats();
-        //ResetScrollPositions();
+        ResetScrollPositions();
         InitializeDictionaryButton();
         InitializeSubMenuButtons();
         PopulateDictionary();
 
-        // 이벤트 등록 (상태가 변경될 때 UpdateNewImageIndicators 호출)
-        OnCatDataChanged += UpdateNewImageIndicators;
+        // 이벤트 등록 (상태가 변경될 때 UpdateNewImageStatus 호출)
+        OnCatDataChanged += UpdateNewImageStatus;
 
         // 초기화 시 New Image UI 갱신
-        UpdateNewImageIndicators();
+        UpdateNewImageStatus();
     }
 
     // ======================================================================================================================
@@ -187,14 +187,14 @@ public class DictionaryManager : MonoBehaviour
     // ======================================================================================================================
     // [메인 설정]
 
-    //// 초기 스크롤 위치 초기화 함수
-    //private void ResetScrollPositions()
-    //{
-    //    foreach (var scrollRect in dictionaryScrollRects)
-    //    {
-    //        scrollRect.verticalNormalizedPosition = 1f;
-    //    }
-    //}
+    // 초기 스크롤 위치 초기화 함수
+    private void ResetScrollPositions()
+    {
+        foreach (var scrollRect in dictionaryScrollRects)
+        {
+            scrollRect.verticalNormalizedPosition = 1f;
+        }
+    }
 
     // DictionaryButton 설정하는 함수
     private void InitializeDictionaryButton()
@@ -454,20 +454,20 @@ public class DictionaryManager : MonoBehaviour
     }
 
     // New Image UI를 갱신하는 함수
-    private void UpdateNewImageIndicators()
+    private void UpdateNewImageStatus()
     {
         bool hasUnclaimedRewards = HasUnclaimedRewards();
-
-        // Normal Cat Button의 New Image 활성화/비활성화
-        if (normalCatButtonNewImage != null)
-        {
-            normalCatButtonNewImage.SetActive(hasUnclaimedRewards);
-        }
 
         // 도감 Button의 New Image 활성화/비활성화
         if (dictionaryButtonNewImage != null)
         {
             dictionaryButtonNewImage.SetActive(hasUnclaimedRewards);
+        }
+
+        // Normal Cat Button의 New Image 활성화/비활성화
+        if (normalCatButtonNewImage != null)
+        {
+            normalCatButtonNewImage.SetActive(hasUnclaimedRewards);
         }
     }
 
@@ -475,7 +475,7 @@ public class DictionaryManager : MonoBehaviour
     private void OnDestroy()
     {
         // 이벤트 핸들러 해제
-        OnCatDataChanged -= UpdateNewImageIndicators;
+        OnCatDataChanged -= UpdateNewImageStatus;
     }
 
 }

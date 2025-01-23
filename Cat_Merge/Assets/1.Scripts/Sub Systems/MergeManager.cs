@@ -118,7 +118,7 @@ public class MergeManager : MonoBehaviour
         {
             //Debug.Log($"합성 성공 : {nextCat.CatName}");
             DictionaryManager.Instance.UnlockCat(nextCat.CatGrade - 1);
-            QuestManager.Instance.AddCombineCount();
+            QuestManager.Instance.AddMergeCount();
             return nextCat;
         }
         else

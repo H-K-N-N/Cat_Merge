@@ -2,6 +2,8 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Linq;
+using System.Collections;
 
 // 퀘스트 Script
 public class QuestManager : MonoBehaviour
@@ -18,6 +20,7 @@ public class QuestManager : MonoBehaviour
         public Button rewardButton;                 // 보상 버튼
         public TextMeshProUGUI rewardText;          // 보상 획득 Text
         public GameObject rewardDisabledBG;         // 보상 버튼 비활성화 BG
+        public Transform slotTransform;             // 해당 슬롯의 Transform 참조
 
         public class QuestData
         {
@@ -48,6 +51,7 @@ public class QuestManager : MonoBehaviour
     private Dictionary<string, QuestUI> dailyQuestDictionary = new Dictionary<string, QuestUI>();       // Daily Quest Dictionary
     private Dictionary<string, QuestUI> weeklyQuestDictionary = new Dictionary<string, QuestUI>();      // Weekly Quest Dictionary
     private Dictionary<string, QuestUI> repeatQuestDictionary = new Dictionary<string, QuestUI>();      // Repeat Quest Dictionary
+    private List<string> repeatQuestList = new List<string>();                                          //
 
     // ======================================================================================================================
 
@@ -104,6 +108,9 @@ public class QuestManager : MonoBehaviour
     private int battleCount;                                            // 전투 횟수
     public int BattleCount { get => battleCount; set => battleCount = value; }
 
+    private int stageCount;                                             // 스테이지 단계
+    public int StageCount { get => BattleManager.Instance.BossStage; }
+
 
 
     private int dailySpecialRewardCount;                                // Daily 최종 퀘스트 진행 횟수
@@ -149,16 +156,20 @@ public class QuestManager : MonoBehaviour
         activePanelManager.RegisterPanel("QuestMenu", questMenuPanel, questButtonImage);
     }
 
+    // Update() - 최종적으로 최대한 줄일 생각중
     private void Update()
     {
         AddPlayTimeCount();
+
         UpdateQuestUI();
+
         UpdateAllDailyRewardButtonState();
         UpdateAllWeeklyRewardButtonState();
         UpdateAllRepeatRewardButtonState();
     }
 
     // ======================================================================================================================
+    // [Initialize]
 
     // 모든 QuestManager 시작 함수들 모음
     private void InitializeQuestManager()
@@ -216,7 +227,7 @@ public class QuestManager : MonoBehaviour
         InitializeQuest("Merge Cats", 1, 5, QuestMenuType.Repeat);
         InitializeQuest("Spawn Cats", 1, 5, QuestMenuType.Repeat);
         InitializeQuest("Purchase Cats", 1, 5, QuestMenuType.Repeat);
-        // 스테이지
+        InitializeQuest("Stage", 1, 5, QuestMenuType.Repeat);
         // 총 접속일
         // 애정도
 
@@ -225,43 +236,35 @@ public class QuestManager : MonoBehaviour
     }
 
     // ======================================================================================================================
+    // [Update]
 
     // 모든 퀘스트 UI를 업데이트하는 함수
     private void UpdateQuestUI()
     {
         UpdateNewImageStatus();
 
-        UpdateQuestProgress("PlayTime");
-        UpdateQuestProgress("Merge Cats");
-        UpdateQuestProgress("Spawn Cats");
-        UpdateQuestProgress("Purchase Cats");
-        UpdateQuestProgress("Battle");
-
-        UpdateDailySpecialRewardUI();
-        UpdateWeeklySpecialRewardUI();
-
-        //UpdateDailyQuestUI();
-        //UpdateWeeklyQuestUI();
-        //UpdateRepeatQuestUI();
+        UpdateDailyQuestUI();
+        UpdateWeeklyQuestUI();
+        UpdateRepeatQuestUI();
     }
 
-    //// Daily Quest UI 업데이트 함수
-    //private void UpdateDailyQuestUI()
-    //{
-    //    UpdateDailySpecialRewardUI();
-    //}
+    // Daily Quest UI 업데이트 함수
+    private void UpdateDailyQuestUI()
+    {
+        UpdateDailySpecialRewardUI();
+    }
 
-    //// Weekly Quest UI 업데이트 함수
-    //private void UpdateWeeklyQuestUI()
-    //{
-    //    UpdateWeeklySpecialRewardUI();
-    //}
+    // Weekly Quest UI 업데이트 함수
+    private void UpdateWeeklyQuestUI()
+    {
+        UpdateWeeklySpecialRewardUI();
+    }
 
-    //// Repeat Quest UI 업데이트 함수
-    //private void UpdateRepeatQuestUI()
-    //{
-
-    //}
+    // Repeat Quest UI 업데이트 함수
+    private void UpdateRepeatQuestUI()
+    {
+        SortRepeatQuests();
+    }
 
     // ======================================================================================================================
     // [서브 메뉴]
@@ -388,14 +391,6 @@ public class QuestManager : MonoBehaviour
     }
 
     // ======================================================================================================================
-
-    // 캐쉬 추가 함수
-    public void AddCash(int amount)
-    {
-        GameManager.Instance.Cash += amount;
-    }
-
-    // ======================================================================================================================
     // [퀘스트 관련]
 
     // 퀘스트 초기화
@@ -414,6 +409,8 @@ public class QuestManager : MonoBehaviour
             rewardButton = newQuestSlot.transform.Find("Reward Button").GetComponent<Button>(),
             rewardText = newQuestSlot.transform.Find("Reward Button/Reward Text").GetComponent<TextMeshProUGUI>(),
             rewardDisabledBG = newQuestSlot.transform.Find("Reward Button/DisabledBG").gameObject,
+            slotTransform = newQuestSlot.transform,
+
             questData = new QuestUI.QuestData
             {
                 currentCount = 0,
@@ -571,6 +568,8 @@ public class QuestManager : MonoBehaviour
 
         dailyQuestDictionary["PlayTime"].questData.currentCount = (int)PlayTimeCount;
         weeklyQuestDictionary["PlayTime"].questData.currentCount = (int)PlayTimeCount;
+
+        UpdateQuestProgress("PlayTime");
     }
 
     // 플레이타임 리셋 함수
@@ -590,6 +589,8 @@ public class QuestManager : MonoBehaviour
         dailyQuestDictionary["Merge Cats"].questData.currentCount = MergeCount;
         weeklyQuestDictionary["Merge Cats"].questData.currentCount = MergeCount;
         repeatQuestDictionary["Merge Cats"].questData.currentCount = MergeCount;
+
+        UpdateQuestProgress("Merge Cats");
     }
 
     // 고양이 머지 리셋 함수
@@ -609,6 +610,8 @@ public class QuestManager : MonoBehaviour
         dailyQuestDictionary["Spawn Cats"].questData.currentCount = SpawnCount;
         weeklyQuestDictionary["Spawn Cats"].questData.currentCount = SpawnCount;
         repeatQuestDictionary["Spawn Cats"].questData.currentCount = SpawnCount;
+
+        UpdateQuestProgress("Spawn Cats");
     }
 
     // 고양이 스폰 리셋 함수
@@ -628,6 +631,8 @@ public class QuestManager : MonoBehaviour
         dailyQuestDictionary["Purchase Cats"].questData.currentCount = PurchaseCatsCount;
         weeklyQuestDictionary["Purchase Cats"].questData.currentCount = PurchaseCatsCount;
         repeatQuestDictionary["Purchase Cats"].questData.currentCount = PurchaseCatsCount;
+
+        UpdateQuestProgress("Purchase Cats");
     }
 
     // 고양이 구매 리셋 함수
@@ -645,12 +650,25 @@ public class QuestManager : MonoBehaviour
         BattleCount++;
 
         dailyQuestDictionary["Battle"].questData.currentCount = BattleCount;
+
+        UpdateQuestProgress("Battle");
     }
 
     // 배틀 리셋 함수
     public void ResetBattleCount()
     {
         BattleCount = 0;
+    }
+
+    // ======================================================================================================================
+    // [Stage Count Quest]
+
+    // 스테이지 증가 함수
+    public void AddStageCount()
+    {
+        repeatQuestDictionary["Stage"].questData.currentCount = BattleManager.Instance.BossStage - 1;
+
+        UpdateQuestProgress("Stage");
     }
 
     // ======================================================================================================================
@@ -941,6 +959,85 @@ public class QuestManager : MonoBehaviour
     {
         repeatQuestDictionary[questName].questData.targetCount += repeatQuestDictionary[questName].questData.plusTargetCount;
         AddCash(rewardCash);
+    }
+
+    // ======================================================================================================================
+    // [추가 기능들]
+
+    // 캐쉬 추가 함수
+    public void AddCash(int amount)
+    {
+        GameManager.Instance.Cash += amount;
+    }
+
+    // 반복 퀘스트 정렬 로직
+    private void SortRepeatQuests()
+    {
+        // Dictionary 값을 리스트로 변환
+        var sortedQuests = repeatQuestDictionary.Values.ToList();
+
+        // 정렬
+        sortedQuests.Sort((a, b) =>
+        {
+            // 보상 버튼이 활성화된 퀘스트가 상단에 오도록 정렬
+            if (a.rewardButton.interactable && !b.rewardButton.interactable) return -1;
+            if (!a.rewardButton.interactable && b.rewardButton.interactable) return 1;
+
+            // 보상 버튼이 동일하게 활성화된 경우, 활성화된 순서로 정렬
+            if (a.rewardButton.interactable && b.rewardButton.interactable)
+            {
+                return a.slotTransform.GetSiblingIndex() - b.slotTransform.GetSiblingIndex();
+            }
+
+            return 0;
+        });
+
+        // 정렬된 순서로 슬롯 UI의 부모 내 위치 갱신
+        Transform parentTransform = questSlotParents[(int)QuestMenuType.Repeat];
+
+        // 슬롯들을 나누기: 보상 버튼이 활성화된 퀘스트와 그렇지 않은 퀘스트로
+        List<QuestUI> rewardAvailableQuests = new List<QuestUI>();
+        List<QuestUI> rewardUnavailableQuests = new List<QuestUI>();
+
+        // 활성화된 보상 버튼이 있는 퀘스트들을 먼저 상단에 배치
+        foreach (var quest in sortedQuests)
+        {
+            if (quest.rewardButton.interactable)
+            {
+                rewardAvailableQuests.Add(quest);
+            }
+            else
+            {
+                rewardUnavailableQuests.Add(quest);
+            }
+        }
+
+        // 활성화된 보상 버튼이 있는 퀘스트들 상단에 배치
+        int siblingIndex = 0;
+
+        // 보상 버튼 활성화된 퀘스트들 먼저 배치
+        foreach (var quest in rewardAvailableQuests)
+        {
+            Transform slotTransform = quest.slotTransform;
+            if (slotTransform.parent != parentTransform)
+            {
+                slotTransform.SetParent(parentTransform);
+            }
+
+            slotTransform.SetSiblingIndex(siblingIndex++);
+        }
+
+        // 보상 버튼이 활성화되지 않은 퀘스트들 그 아래에 배치
+        foreach (var quest in rewardUnavailableQuests)
+        {
+            Transform slotTransform = quest.slotTransform;
+            if (slotTransform.parent != parentTransform)
+            {
+                slotTransform.SetParent(parentTransform);
+            }
+
+            slotTransform.SetSiblingIndex(siblingIndex++);
+        }
     }
 
     // ======================================================================================================================

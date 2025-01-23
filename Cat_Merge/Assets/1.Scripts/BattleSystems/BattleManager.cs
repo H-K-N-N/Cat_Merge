@@ -20,6 +20,7 @@ public class BattleManager : MonoBehaviour
     private float sliderDuration;                               // Slider 유지 시간
     private float bossDuration;                                 // 보스 유지 시간 (sliderDuration + warningDuration)
     private int bossStage = 1;                                  // 보스 스테이지
+    public int BossStage { get => bossStage; }
 
     private float bossAttackDelay = 2f;                         // 보스 공격 딜레이
     private float catAttackDelay = 1f;                          // 고양이 공격 딜레이
@@ -530,12 +531,13 @@ public class BattleManager : MonoBehaviour
         if (isVictory)
         {
             bossStage++;
+            QuestManager.Instance.AddStageCount();
         }
 
         // 전투 종료시 비활성화했던 기능들 다시 기존 상태로 복구
         SetEndFunctions();
 
-        // 배틀 퀘스트 갱신
+        // 퀘스트 갱신
         QuestManager.Instance.AddBattleCount();
 
         // 모든 고양이의 체력을 회복시켜줘야함

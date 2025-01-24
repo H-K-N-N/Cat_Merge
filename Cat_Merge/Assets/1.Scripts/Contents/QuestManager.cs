@@ -43,7 +43,6 @@ public class QuestManager : MonoBehaviour
     private ActivePanelManager activePanelManager;                              // ActivePanelManager
     [SerializeField] private GameObject questSlotPrefab;                        // Quest Slot Prefab
 
-
     [SerializeField] private GameObject[] mainQuestMenus;                       // 메인 퀘스트 메뉴 Panels
     [SerializeField] private Button[] subQuestMenuButtons;                      // 서브 퀘스트 메뉴 버튼 배열
     [SerializeField] private Transform[] questSlotParents;                      // 슬롯들이 배치될 부모 객체들 (일일, 주간, 반복)
@@ -221,18 +220,48 @@ public class QuestManager : MonoBehaviour
     // Repeat Quest 설정 함수
     private void InitializeRepeatQuestManager()
     {
-        // 초기 스크롤 위치 초기화
-        mainQuestMenus[(int)QuestMenuType.Repeat].transform.Find("Quest").GetComponent<ScrollRect>().verticalNormalizedPosition = 1f;
-
         InitializeQuest("Merge Cats", 1, 5, QuestMenuType.Repeat);
         InitializeQuest("Spawn Cats", 1, 5, QuestMenuType.Repeat);
         InitializeQuest("Purchase Cats", 1, 5, QuestMenuType.Repeat);
         InitializeQuest("Stage", 1, 5, QuestMenuType.Repeat);
-        // 총 접속일
-        // 애정도
+        InitializeQuest("Sample", 1, 5, QuestMenuType.Repeat);
+        InitializeQuest("Sample", 1, 5, QuestMenuType.Repeat);
+        InitializeQuest("Sample", 1, 5, QuestMenuType.Repeat);
+        InitializeQuest("Sample", 1, 5, QuestMenuType.Repeat);
+        InitializeQuest("Sample", 1, 5, QuestMenuType.Repeat);
+        InitializeQuest("Sample", 1, 5, QuestMenuType.Repeat);
+        InitializeQuest("Sample", 1, 5, QuestMenuType.Repeat);
+        InitializeQuest("Sample", 1, 5, QuestMenuType.Repeat);
+        InitializeQuest("Sample", 1, 5, QuestMenuType.Repeat);
+
+        // 초기 스크롤 위치 초기화
+        InitializeScrollPosition();
 
         // AllReward 버튼 등록
         allRewardButtons[(int)QuestMenuType.Repeat].onClick.AddListener(ReceiveAllRepeatRewards);
+    }
+
+    // 스크롤 초기 위치를 설정하는 함수
+    private void InitializeScrollPosition()
+    {
+        ScrollRect scrollRect = mainQuestMenus[(int)QuestMenuType.Repeat].GetComponentInChildren<ScrollRect>();
+        RectTransform content = scrollRect.content;
+        GridLayoutGroup gridLayout = content.GetComponent<GridLayoutGroup>();
+
+        // 슬롯 개수와 콘텐츠 크기 계산
+        int slotCount = content.childCount;
+        float cellHeight = gridLayout.cellSize.y;
+        float spacingHeight = gridLayout.spacing.y;
+
+        // 콘텐츠 전체 높이 계산 후 적용
+        float contentHeight = (cellHeight + spacingHeight) * slotCount - spacingHeight;
+
+        // 콘텐츠 크기와 ScrollRect 크기를 비교
+        if (contentHeight > scrollRect.GetComponent<RectTransform>().rect.height)
+        {
+            content.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, contentHeight);
+            scrollRect.verticalNormalizedPosition = 1f;
+        }
     }
 
     // ======================================================================================================================
@@ -551,7 +580,7 @@ public class QuestManager : MonoBehaviour
         }
         else
         {
-            ReceiveQuestReward(ref questData.isComplete, questData.rewardCash, questUI.rewardButton, questUI.rewardDisabledBG, menuType);
+            ReceiveQuestReward(ref questData.isComplete, questData.rewardCash, questUI.rewardButton, questUI.rewardDisabledBG, menuType, questName);
         }
 
         // UI 업데이트
@@ -666,7 +695,7 @@ public class QuestManager : MonoBehaviour
     // 스테이지 증가 함수
     public void AddStageCount()
     {
-        repeatQuestDictionary["Stage"].questData.currentCount = BattleManager.Instance.BossStage - 1;
+        repeatQuestDictionary["Stage"].questData.currentCount = StageCount - 1;
 
         UpdateQuestProgress("Stage");
     }
@@ -827,7 +856,7 @@ public class QuestManager : MonoBehaviour
             if (dailyQuest.Value.rewardButton.interactable && !dailyQuest.Value.questData.isComplete)
             {
                 ReceiveQuestReward(ref dailyQuest.Value.questData.isComplete, dailyQuest.Value.questData.rewardCash,
-                    dailyQuest.Value.rewardButton, dailyQuest.Value.rewardDisabledBG, QuestMenuType.Daily);
+                    dailyQuest.Value.rewardButton, dailyQuest.Value.rewardDisabledBG, QuestMenuType.Daily, dailyQuest.Key);
             }
         }
 
@@ -837,7 +866,7 @@ public class QuestManager : MonoBehaviour
             ReceiveDailySpecialReward();
         }
     }
-    
+
     // All Reward 버튼 상태를 업데이트하는 함수 - Daily
     private void UpdateAllDailyRewardButtonState()
     {
@@ -870,7 +899,7 @@ public class QuestManager : MonoBehaviour
             if (weeklyQuest.Value.rewardButton.interactable && !weeklyQuest.Value.questData.isComplete)
             {
                 ReceiveQuestReward(ref weeklyQuest.Value.questData.isComplete, weeklyQuest.Value.questData.rewardCash,
-                    weeklyQuest.Value.rewardButton, weeklyQuest.Value.rewardDisabledBG, QuestMenuType.Weekly);
+                    weeklyQuest.Value.rewardButton, weeklyQuest.Value.rewardDisabledBG, QuestMenuType.Weekly, weeklyQuest.Key);
             }
         }
 
@@ -936,22 +965,25 @@ public class QuestManager : MonoBehaviour
 
 
     // 개별 퀘스트 보상 지급 처리 함수 - Daily, Weekly
-    private void ReceiveQuestReward(ref bool isQuestComplete, int rewardCash, Button rewardButton, GameObject disabledBG, QuestMenuType menuType)
+    private void ReceiveQuestReward(ref bool isQuestComplete, int rewardCash, Button rewardButton, GameObject disabledBG, QuestMenuType menuType, string questName)
     {
         isQuestComplete = true;
         AddCash(rewardCash);
         rewardButton.interactable = false;
         disabledBG.SetActive(true);
 
-        // QuestType을 받아와서 Daily와 Weekly를 판별해야함
+        // QuestType에 따라 특수 보상 카운트 추가
         if (menuType == QuestMenuType.Daily)
         {
             AddDailySpecialRewardCount();
         }
-        if (menuType == QuestMenuType.Weekly)
+        else if (menuType == QuestMenuType.Weekly)
         {
             AddWeeklySpecialRewardCount();
         }
+
+        // 퀘스트 UI 업데이트 호출
+        UpdateQuestUI(questName, menuType);
     }
 
     // 개별 퀘스트 보상 지급 처리 함수 - Repeat
@@ -959,6 +991,9 @@ public class QuestManager : MonoBehaviour
     {
         repeatQuestDictionary[questName].questData.targetCount += repeatQuestDictionary[questName].questData.plusTargetCount;
         AddCash(rewardCash);
+
+        // 퀘스트 UI 업데이트 호출
+        UpdateQuestUI(questName, QuestMenuType.Repeat);
     }
 
     // ======================================================================================================================
@@ -1039,6 +1074,79 @@ public class QuestManager : MonoBehaviour
             slotTransform.SetSiblingIndex(siblingIndex++);
         }
     }
+
+    /*
+    // 슬롯 이동을 관리하는 클래스
+    private Dictionary<Transform, Coroutine> activeAnimations = new Dictionary<Transform, Coroutine>();
+
+    private void SortRepeatQuests()
+    {
+        var sortedQuests = repeatQuestDictionary.Values.ToList();
+
+        // 보상 버튼이 활성화된 퀘스트가 상단에 오도록 정렬
+        sortedQuests.Sort((a, b) =>
+        {
+            if (a.rewardButton.interactable && !b.rewardButton.interactable) return -1;
+            if (!a.rewardButton.interactable && b.rewardButton.interactable) return 1;
+
+            // 보상 버튼이 동일하게 활성화된 경우, 현재 위치 순서를 유지
+            return a.slotTransform.GetSiblingIndex() - b.slotTransform.GetSiblingIndex();
+        });
+
+        // 정렬된 순서로 슬롯 UI의 부모 내 위치 갱신
+        Transform parentTransform = questSlotParents[(int)QuestMenuType.Repeat];
+
+        for (int i = 0; i < sortedQuests.Count; i++)
+        {
+            Transform slotTransform = sortedQuests[i].slotTransform;
+
+            // 목표 위치 계산
+            Vector3 targetPosition = parentTransform.position + new Vector3(0, -i * parentTransform.GetComponent<GridLayoutGroup>().spacing.y, 0);
+
+            // 현재 위치와 목표 위치가 다른 경우에만 애니메이션 실행
+            if (slotTransform.position != targetPosition)
+            {
+                // 이미 애니메이션이 실행 중이면 중단
+                if (activeAnimations.ContainsKey(slotTransform))
+                {
+                    StopCoroutine(activeAnimations[slotTransform]);
+                    activeAnimations.Remove(slotTransform);
+                }
+
+                // 새 애니메이션 실행
+                Coroutine animation = StartCoroutine(AnimateSlotPosition(slotTransform, targetPosition));
+                activeAnimations[slotTransform] = animation;
+            }
+        }
+    }
+
+    // 슬롯 이동 애니메이션 코루틴
+    private IEnumerator AnimateSlotPosition(Transform slotTransform, Vector3 targetPosition, System.Action onComplete = null)
+    {
+        const float animationDuration = 0.2f; // 애니메이션 지속 시간
+        float elapsedTime = 0f;
+
+        // 시작 위치 저장
+        Vector3 startPosition = slotTransform.position;
+
+        // 애니메이션 실행
+        while (elapsedTime < animationDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float time = Mathf.Clamp01(elapsedTime / animationDuration);
+
+            slotTransform.position = Vector3.Lerp(startPosition, targetPosition, time);
+
+            yield return null;
+        }
+
+        slotTransform.position = targetPosition;
+
+        onComplete?.Invoke();
+
+        activeAnimations.Remove(slotTransform);
+    }
+    */
 
     // ======================================================================================================================
 

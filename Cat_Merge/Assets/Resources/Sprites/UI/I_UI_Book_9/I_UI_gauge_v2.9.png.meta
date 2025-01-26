@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: c0b73282367702a4f9b1b357b327c4be
+guid: 16a29d68aa27ad54abe0f9746c7f78f1
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -110,45 +110,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: I_UI_gauge_frame.9_0
+      name: I_UI_gauge_v2.9_0
       rect:
         serializedVersion: 2
-        x: 3
+        x: 2
         y: 2
-        width: 162
-        height: 1023
+        width: 565
+        height: 39
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      border: {x: 50, y: 15, z: 50, w: 15}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ea735d8181932b94483c870ace28b37b
-      internalID: 998643878
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: I_UI_gauge_frame.9_1
-      rect:
-        serializedVersion: 2
-        x: 3
-        y: 1025
-        width: 162
-        height: 152
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 0b6b2557472b7d9459c7986224c37260
-      internalID: -1302398097
+      spriteID: cabd8afba411d4f4ea922d13ff87c4b0
+      internalID: 1901164143
       vertices: []
       indices: 
       edges: []
@@ -157,7 +135,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: fe326dc738128b24c8205786705dea64
+    spriteID: cbdb7e5924f273f48a32d51bc91e459a
     internalID: 0
     vertices: []
     indices: 
@@ -167,8 +145,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      I_UI_gauge_frame.9_0: 998643878
-      I_UI_gauge_frame.9_1: -1302398097
+      I_UI_gauge_v2.9_0: 1901164143
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

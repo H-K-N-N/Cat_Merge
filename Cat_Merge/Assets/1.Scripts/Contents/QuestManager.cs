@@ -1078,8 +1078,8 @@ public class QuestManager : MonoBehaviour
     /*
     // 슬롯 이동을 관리하는 클래스
     private Dictionary<Transform, Coroutine> activeAnimations = new Dictionary<Transform, Coroutine>();
-
-    private void SortRepeatQuests()
+    
+    private void SortRepeatQuestsTest()
     {
         var sortedQuests = repeatQuestDictionary.Values.ToList();
 

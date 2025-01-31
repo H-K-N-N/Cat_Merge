@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
 
-// 퀘스트 Script
+// Quest Script
 public class QuestManager : MonoBehaviour
 {
     // Singleton Instance
@@ -94,6 +94,19 @@ public class QuestManager : MonoBehaviour
     private string inactiveColorCode = "#FFFFFF";                               // 비활성화상태 Color
 
     // ======================================================================================================================
+
+    // Enum으로 메뉴 타입 정의 (서브 메뉴를 구분하기 위해 사용)
+    private enum QuestMenuType
+    {
+        Daily,                              // 일일 퀘스트 메뉴
+        Weekly,                             // 주간 퀘스트 메뉴
+        Repeat,                             // 반복 퀘스트 메뉴
+        End                                 // Enum의 끝
+    }
+    private QuestMenuType activeMenuType;   // 현재 활성화된 메뉴 타입
+
+
+    // ======================================================================================================================
     // [퀘스트 변수 모음]
 
     private float playTimeCount;                                        // 플레이타임 카운트
@@ -120,18 +133,6 @@ public class QuestManager : MonoBehaviour
 
     private int weeklySpecialRewardCount;                               // Weekly 최종 퀘스트 진행 횟수
     public int WeeklySpecialRewardCount { get => weeklySpecialRewardCount; set => weeklySpecialRewardCount = value; }
-
-    // ======================================================================================================================
-
-    // Enum으로 메뉴 타입 정의 (서브 메뉴를 구분하기 위해 사용)
-    private enum QuestMenuType
-    {
-        Daily,                              // 일일 퀘스트 메뉴
-        Weekly,                             // 주간 퀘스트 메뉴
-        Repeat,                             // 반복 퀘스트 메뉴
-        End                                 // Enum의 끝
-    }
-    private QuestMenuType activeMenuType;   // 현재 활성화된 메뉴 타입
 
     // ======================================================================================================================
 

@@ -34,8 +34,9 @@ public class OptionManager : MonoBehaviour
         // 볼륨 설정 함수
         public void SetVolume(float volume)
         {
-            if ((audioSource == Instance.bgmController.audioSource && !Instance.isBgmOn) || 
-                (audioSource == Instance.sfxController.audioSource && !Instance.isSfxOn))
+            bool isBgm = (audioSource == Instance.bgmController.audioSource);
+
+            if ((isBgm && !Instance.isBgmOn) || (!isBgm && !Instance.isSfxOn))
             {
                 audioSource.volume = 0f;
             }
@@ -43,6 +44,8 @@ public class OptionManager : MonoBehaviour
             {
                 audioSource.volume = volume;
             }
+
+            Instance.SetSoundToggleImage(isBgm);
         }
 
         // 사운드 재생
@@ -71,20 +74,28 @@ public class OptionManager : MonoBehaviour
     [SerializeField] private Button[] subOptionMenuButtons;     // 서브 옵션 메뉴 버튼 배열
 
     // ======================================================================================================================
+
+    [Header("---[Sub Menu UI Color]")]
+    private string activeColorCode = "#5f5f5f";                 // 활성화상태 Color
+    private string inactiveColorCode = "#FFFFFF";               // 비활성화상태 Color
+
+    // ======================================================================================================================
     // [Sound]
 
     [Header("---[BGM]")]
     [SerializeField] private Slider bgmSlider;                  // 배경음 사운드 조절 슬라이더
     [SerializeField] private Button bgmSoundToggleButton;       // 배경음 On/Off 버튼
     [SerializeField] private RectTransform bgmSoundHandle;      // 배경음 토글 핸들
+    [SerializeField] private Image bgmOnOffImage;               // 배경음 On/Off 이미지
     private SoundController bgmController;                      // 배경음 컨트롤러
     private Coroutine bgmToggleCoroutine;                       // 배경음 토글 애니메이션 코루틴
-    private bool isBgmOn = true;                                // 배경은 활성화 여부
+    private bool isBgmOn = true;                                // 배경음 활성화 여부
 
     [Header("---[SFX]")]
     [SerializeField] private Slider sfxSlider;                  // 효과음 볼륨 조절 슬라이더
     [SerializeField] private Button sfxSoundToggleButton;       // 효과음 On/Off 버튼
     [SerializeField] private RectTransform sfxSoundHandle;      // 효과음 토글 핸들
+    [SerializeField] private Image sfxOnOffImage;               // 효과음 On/Off 이미지
     private SoundController sfxController;                      // 효과음 컨트롤러
     private Coroutine sfxToggleCoroutine;                       // 효과음 토글 애니메이션 코루틴
     private bool isSfxOn = true;                                // 효과음 활성화 여부
@@ -92,12 +103,18 @@ public class OptionManager : MonoBehaviour
     [Header("---[Common]")]
     private float onX = 65f, offX = -65f;                       // 사운드 핸들 버튼 x좌표
     private float moveDuration = 0.2f;                          // 토글 애니메이션 지속 시간
+    private Sprite soundOnImage;
+    private Sprite soundOffImage;
 
     // ======================================================================================================================
+    // [Display]
 
-    [Header("---[Sub Menu UI Color]")]
-    private string activeColorCode = "#5f5f5f";                 // 활성화상태 Color
-    private string inactiveColorCode = "#FFFFFF";               // 비활성화상태 Color
+
+
+    // ======================================================================================================================
+    // [System]
+
+
 
     // ======================================================================================================================
 
@@ -141,7 +158,9 @@ public class OptionManager : MonoBehaviour
     {
         InitializeOptionButton();
         InitializeSubMenuButtons();
+
         InitializeSoundControllers();
+        InitializeDisplayControllers();
     }
 
     // OptionButton 초기 설정 함수
@@ -154,6 +173,7 @@ public class OptionManager : MonoBehaviour
     // Sound 초기 설정 함수
     private void InitializeSoundControllers()
     {
+        // Audio 초기화
         AudioClip bgmClip = Resources.Load<AudioClip>("Audios/BGM_Sound");
         AudioClip sfxClip = Resources.Load<AudioClip>("Audios/SFX_Sound");
         bgmController = new SoundController(gameObject, bgmSlider, true, bgmClip);
@@ -164,6 +184,13 @@ public class OptionManager : MonoBehaviour
 
         bgmController.Play();
 
+        // Image 초기화
+        soundOnImage = Resources.Load<Sprite>("Sprites/Cats/1");
+        soundOffImage = Resources.Load<Sprite>("Sprites/Cats/2");
+        bgmOnOffImage.sprite = soundOnImage;
+        sfxOnOffImage.sprite = soundOnImage;
+
+        // 
         bgmSoundToggleButton.onClick.AddListener(() => ToggleSound(true));
         sfxSoundToggleButton.onClick.AddListener(() => ToggleSound(false));
 
@@ -171,8 +198,61 @@ public class OptionManager : MonoBehaviour
         UpdateToggleUI(isSfxOn, false, true);
     }
 
+    // Display 초기 설정 함수
+    private void InitializeDisplayControllers()
+    {
+
+    }
+
     // ======================================================================================================================
-    // [사운드 조절]
+    // [서브 메뉴]
+
+    // 서브 메뉴 버튼 초기화 및 클릭 이벤트 추가 함수
+    private void InitializeSubMenuButtons()
+    {
+        for (int i = 0; i < (int)OptionMenuType.End; i++)
+        {
+            int index = i;
+            subOptionMenuButtons[index].onClick.AddListener(() => ActivateMenu((OptionMenuType)index));
+        }
+
+        ActivateMenu(OptionMenuType.Sound);
+    }
+
+    // 선택한 서브 메뉴를 활성화하는 함수
+    private void ActivateMenu(OptionMenuType menuType)
+    {
+        activeMenuType = menuType;
+
+        for (int i = 0; i < mainOptionMenus.Length; i++)
+        {
+            mainOptionMenus[i].SetActive(i == (int)menuType);
+        }
+
+        UpdateSubMenuButtonColors();
+    }
+
+    // 서브 메뉴 버튼 색상을 업데이트하는 함수
+    private void UpdateSubMenuButtonColors()
+    {
+        for (int i = 0; i < subOptionMenuButtons.Length; i++)
+        {
+            UpdateSubButtonColor(subOptionMenuButtons[i].GetComponent<Image>(), i == (int)activeMenuType);
+        }
+    }
+
+    // 서브 메뉴 버튼 색상을 활성 상태에 따라 업데이트하는 함수
+    private void UpdateSubButtonColor(Image buttonImage, bool isActive)
+    {
+        string colorCode = isActive ? activeColorCode : inactiveColorCode;
+        if (ColorUtility.TryParseHtmlString(colorCode, out Color color))
+        {
+            buttonImage.color = color;
+        }
+    }
+
+    // ======================================================================================================================
+    // [사운드 설정]
 
     // 사운드 On/Off 버튼 함수
     public void ToggleSound(bool isBgm)
@@ -180,13 +260,34 @@ public class OptionManager : MonoBehaviour
         if (isBgm)
         {
             isBgmOn = !isBgmOn;
+
+            SetSoundToggleImage(true);
         }
         else
         {
             isSfxOn = !isSfxOn;
+
+            SetSoundToggleImage(false);
         }
 
         UpdateToggleUI(isBgm ? isBgmOn : isSfxOn, isBgm);
+    }
+
+    // 사운드 On/Off 이미지 변경 함수
+    private void SetSoundToggleImage(bool isBgm)
+    {
+        bool isOn = isBgm ? isBgmOn : isSfxOn;
+        float volume = isBgm ? bgmSlider.value : sfxSlider.value;
+        Image targetImage = isBgm ? bgmOnOffImage : sfxOnOffImage;
+
+        if (!isOn || volume == 0)
+        {
+            targetImage.sprite = soundOffImage;
+        }
+        else
+        {
+            targetImage.sprite = soundOnImage;
+        }
     }
 
     // 사운드 버튼 UI 업데이트 함수
@@ -204,7 +305,6 @@ public class OptionManager : MonoBehaviour
         }
         else
         {
-            // 먼저 사용할 코루틴 변수를 선언
             ref Coroutine toggleCoroutine = ref (isBgm ? ref bgmToggleCoroutine : ref sfxToggleCoroutine);
 
             StopAndStartCoroutine(ref toggleCoroutine, AnimateToggle(soundHandle, targetX, controller, targetVolume));
@@ -240,52 +340,11 @@ public class OptionManager : MonoBehaviour
     }
 
     // ======================================================================================================================
-    // [서브 메뉴]
+    // [화면 설정]
 
-    // 서브 메뉴 버튼 초기화 및 클릭 이벤트 추가 함수
-    private void InitializeSubMenuButtons()
-    {
-        for (int i = 0; i < (int)OptionMenuType.End; i++)
-        {
-            int index = i;
-            subOptionMenuButtons[index].onClick.AddListener(() => ActivateMenu((OptionMenuType)index));
-        }
+    
 
-        ActivateMenu(OptionMenuType.Sound);
-    }
-    
-    // 선택한 서브 메뉴를 활성화하는 함수
-    private void ActivateMenu(OptionMenuType menuType)
-    {
-        activeMenuType = menuType;
 
-        for (int i = 0; i < mainOptionMenus.Length; i++)
-        {
-            mainOptionMenus[i].SetActive(i == (int)menuType);
-        }
-
-        UpdateSubMenuButtonColors();
-    }
-    
-    // 서브 메뉴 버튼 색상을 업데이트하는 함수
-    private void UpdateSubMenuButtonColors()
-    {
-        for (int i = 0; i < subOptionMenuButtons.Length; i++)
-        {
-            UpdateSubButtonColor(subOptionMenuButtons[i].GetComponent<Image>(), i == (int)activeMenuType);
-        }
-    }
-    
-    // 서브 메뉴 버튼 색상을 활성 상태에 따라 업데이트하는 함수
-    private void UpdateSubButtonColor(Image buttonImage, bool isActive)
-    {
-        string colorCode = isActive ? activeColorCode : inactiveColorCode;
-        if (ColorUtility.TryParseHtmlString(colorCode, out Color color))
-        {
-            buttonImage.color = color;
-        }
-    }
-    
     // ======================================================================================================================
 
 

@@ -34,9 +34,9 @@ public class OptionManager : MonoBehaviour
         // 볼륨 설정 함수
         public void SetVolume(float volume)
         {
-            bool isBgm = (audioSource == Instance.bgmController.audioSource);
+            bool isBgm = (audioSource == Instance.bgmSettings.controller.audioSource);
 
-            if ((isBgm && !Instance.isBgmOn) || (!isBgm && !Instance.isSfxOn))
+            if ((isBgm && !Instance.bgmSettings.isOn) || (!isBgm && !Instance.sfxSettings.isOn))
             {
                 audioSource.volume = 0f;
             }
@@ -59,9 +59,16 @@ public class OptionManager : MonoBehaviour
         {
             audioSource.Stop();
         }
+
+        // AudioSource getter 추가
+        public AudioSource GetAudioSource()
+        {
+            return audioSource;
+        }
     }
 
     // ======================================================================================================================
+    // [옵션 메뉴 UI 요소들]
 
     [Header("---[OptionManager]")]
     [SerializeField] private Button optionButton;               // 옵션 버튼
@@ -74,13 +81,14 @@ public class OptionManager : MonoBehaviour
     [SerializeField] private Button[] subOptionMenuButtons;     // 서브 옵션 메뉴 버튼 배열
 
     // ======================================================================================================================
+    // [서브 메뉴 UI 색상 설정]
 
     [Header("---[Sub Menu UI Color]")]
     private string activeColorCode = "#5f5f5f";                 // 활성화상태 Color
     private string inactiveColorCode = "#FFFFFF";               // 비활성화상태 Color
 
     // ======================================================================================================================
-    // [All]
+    // [토글 버튼 관련 설정]
 
     private float onX = 65f, offX = -65f;                       // 핸들 버튼 x좌표
     private float moveDuration = 0.2f;                          // 토글 애니메이션 지속 시간
@@ -88,23 +96,23 @@ public class OptionManager : MonoBehaviour
     // ======================================================================================================================
     // [Sound]
 
+    [System.Serializable]
+    private class SoundSettings
+    {
+        public Slider slider;                                   // 볼륨 조절 슬라이더
+        public Button toggleButton;                             // 토글 버튼
+        public RectTransform handle;                            // 토글 핸들
+        public Image onOffImage;                                // On/Off 이미지
+        public SoundController controller;                      // 사운드 컨트롤러
+        public Coroutine toggleCoroutine;                       // 토글 애니메이션 코루틴
+        public bool isOn = true;                                // 토글 상태
+    }
+
     [Header("---[BGM]")]
-    [SerializeField] private Slider bgmSlider;                  // 배경음 사운드 조절 슬라이더
-    [SerializeField] private Button bgmSoundToggleButton;       // 배경음 On/Off 버튼
-    [SerializeField] private RectTransform bgmSoundHandle;      // 배경음 토글 핸들
-    [SerializeField] private Image bgmOnOffImage;               // 배경음 On/Off 이미지
-    private SoundController bgmController;                      // 배경음 컨트롤러
-    private Coroutine bgmToggleCoroutine;                       // 배경음 토글 애니메이션 코루틴
-    private bool isBgmOn = true;                                // 배경음 활성화 여부
+    [SerializeField] private SoundSettings bgmSettings = new SoundSettings();
 
     [Header("---[SFX]")]
-    [SerializeField] private Slider sfxSlider;                  // 효과음 볼륨 조절 슬라이더
-    [SerializeField] private Button sfxSoundToggleButton;       // 효과음 On/Off 버튼
-    [SerializeField] private RectTransform sfxSoundHandle;      // 효과음 토글 핸들
-    [SerializeField] private Image sfxOnOffImage;               // 효과음 On/Off 이미지
-    private SoundController sfxController;                      // 효과음 컨트롤러
-    private Coroutine sfxToggleCoroutine;                       // 효과음 토글 애니메이션 코루틴
-    private bool isSfxOn = true;                                // 효과음 활성화 여부
+    [SerializeField] private SoundSettings sfxSettings = new SoundSettings();
 
     [Header("---[Common]")]
     private Sprite soundOnImage;                                // 사운드 On 이미지
@@ -113,25 +121,26 @@ public class OptionManager : MonoBehaviour
     // ======================================================================================================================
     // [Display]
 
+    [System.Serializable]
+    private class ToggleSettings
+    {
+        public Button toggleButton;                             // 토글 버튼
+        public RectTransform handle;                            // 토글 핸들
+        public Coroutine toggleCoroutine;                       // 토글 애니메이션 코루틴
+        public bool isOn = true;                                // 토글 상태
+    }
+
     [Header("---[Effect]")]
-    [SerializeField] private Button effecctToggleButton;        // 이펙트 On/Off 버튼
-    [SerializeField] private RectTransform  effectHandle;       // 이펙트 토글 핸들
-    private Coroutine effectToggleCoroutine;                    // 이펙트 토글 애니메이션 코루틴
-    private bool isEffectOn = true;                             // 이펙트 활성화 여부
+    [SerializeField] private ToggleSettings effectSettings = new ToggleSettings();
 
     [Header("---[Screen Shaking]")]
-    [SerializeField] private Button shakingToggleButton;        // 흔들림 On/Off 버튼
-    [SerializeField] private RectTransform shakingHandle;       // 흔들림 토글 핸들
-    private Coroutine shakingToggleCoroutine;                   // 흔들림 토글 애니메이션 코루틴
-    private bool isShakingOn = true;                            // 흔들림 활성화 여부
+    [SerializeField] private ToggleSettings shakingSettings = new ToggleSettings();
 
     [Header("---[Saving Mode]")]
-    [SerializeField] private Button savingToggleButton;         // 절전모드 On/Off 버튼
-    [SerializeField] private RectTransform savingHandle;        // 절전모드 토글 핸들
-    private Coroutine savingToggleCoroutine;                    // 절전모드 토글 애니메이션 코루틴
-    private bool isSavingOn = true;                             // 절전모드 활성화 여부
+    [SerializeField] private ToggleSettings savingSettings = new ToggleSettings();
 
     // ======================================================================================================================
+    // [옵션 메뉴 타입 정의]
 
     // Enum으로 메뉴 타입 정의 (서브 메뉴를 구분하기 위해 사용)
     private enum OptionMenuType
@@ -178,55 +187,54 @@ public class OptionManager : MonoBehaviour
         InitializeDisplayControllers();
     }
 
-    // OptionButton 초기 설정 함수
+    // OptionButton 초기화 함수
     private void InitializeOptionButton()
     {
         optionButton.onClick.AddListener(() => activePanelManager.TogglePanel("OptionMenu"));
         optionBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("OptionMenu"));
     }
 
-    // Sound 초기 설정 함수
+    // Sound 초기화 함수
     private void InitializeSoundControllers()
     {
         // Audio 초기화
         AudioClip bgmClip = Resources.Load<AudioClip>("Audios/BGM_Sound");
         AudioClip sfxClip = Resources.Load<AudioClip>("Audios/SFX_Sound");
-        bgmController = new SoundController(gameObject, bgmSlider, true, bgmClip);
-        sfxController = new SoundController(gameObject, sfxSlider, false, sfxClip);
+        bgmSettings.controller = new SoundController(gameObject, bgmSettings.slider, true, bgmClip);
+        sfxSettings.controller = new SoundController(gameObject, sfxSettings.slider, false, sfxClip);
 
-        bgmController.SetVolume(bgmSlider.value);
-        sfxController.SetVolume(sfxSlider.value);
+        bgmSettings.controller.SetVolume(bgmSettings.slider.value);
+        sfxSettings.controller.SetVolume(sfxSettings.slider.value);
 
-        bgmController.Play();
+        bgmSettings.controller.Play();
 
         // Image 초기화
         soundOnImage = Resources.Load<Sprite>("Sprites/Cats/1");
         soundOffImage = Resources.Load<Sprite>("Sprites/Cats/2");
-        bgmOnOffImage.sprite = soundOnImage;
-        sfxOnOffImage.sprite = soundOnImage;
+        bgmSettings.onOffImage.sprite = soundOnImage;
+        sfxSettings.onOffImage.sprite = soundOnImage;
 
-        // 
-        bgmSoundToggleButton.onClick.AddListener(() => ToggleSound(true));
-        sfxSoundToggleButton.onClick.AddListener(() => ToggleSound(false));
+        // 토글 버튼 이벤트 설정
+        bgmSettings.toggleButton.onClick.AddListener(() => ToggleSound(true));
+        sfxSettings.toggleButton.onClick.AddListener(() => ToggleSound(false));
 
-        UpdateToggleUI(isBgmOn, true, true);
-        UpdateToggleUI(isSfxOn, false, true);
+        UpdateToggleUI(bgmSettings.isOn, true, true);
+        UpdateToggleUI(sfxSettings.isOn, false, true);
     }
 
-    // Display 초기 설정 함수
+    // Display 초기화 함수
     private void InitializeDisplayControllers()
     {
-        // 이펙트 토글 버튼 초기화
-        effecctToggleButton.onClick.AddListener(() => ToggleEffect());
-        UpdateEffectToggleUI(isEffectOn, true);
+        InitializeToggle(effectSettings, ToggleEffect);
+        InitializeToggle(shakingSettings, ToggleShaking);
+        InitializeToggle(savingSettings, ToggleSaving);
+    }
 
-        // 화면 흔들림 토글 버튼 초기화 
-        shakingToggleButton.onClick.AddListener(() => ToggleShaking());
-        UpdateShakingToggleUI(isShakingOn, true);
-
-        // 절전모드 토글 버튼 초기화
-        savingToggleButton.onClick.AddListener(() => ToggleSaving());
-        UpdateSavingToggleUI(isSavingOn, true);
+    // 토글 초기화 함수
+    private void InitializeToggle(ToggleSettings settings, System.Action toggleAction)
+    {
+        settings.toggleButton.onClick.AddListener(() => toggleAction());
+        UpdateToggleUI(settings.handle, settings.isOn, true);
     }
 
     // ======================================================================================================================
@@ -279,60 +287,38 @@ public class OptionManager : MonoBehaviour
     // ======================================================================================================================
     // [사운드 설정]
 
-    // 사운드 On/Off 버튼 함수
+    // 사운드 On/Off 토글 함수
     public void ToggleSound(bool isBgm)
     {
-        if (isBgm)
-        {
-            isBgmOn = !isBgmOn;
-
-            SetSoundToggleImage(true);
-        }
-        else
-        {
-            isSfxOn = !isSfxOn;
-
-            SetSoundToggleImage(false);
-        }
-
-        UpdateToggleUI(isBgm ? isBgmOn : isSfxOn, isBgm);
+        var settings = isBgm ? bgmSettings : sfxSettings;
+        settings.isOn = !settings.isOn;
+        SetSoundToggleImage(isBgm);
+        UpdateToggleUI(settings.isOn, isBgm);
     }
 
     // 사운드 On/Off 이미지 변경 함수
     private void SetSoundToggleImage(bool isBgm)
     {
-        bool isOn = isBgm ? isBgmOn : isSfxOn;
-        float volume = isBgm ? bgmSlider.value : sfxSlider.value;
-        Image targetImage = isBgm ? bgmOnOffImage : sfxOnOffImage;
-
-        if (!isOn || volume == 0)
-        {
-            targetImage.sprite = soundOffImage;
-        }
-        else
-        {
-            targetImage.sprite = soundOnImage;
-        }
+        var settings = isBgm ? bgmSettings : sfxSettings;
+        Image targetImage = settings.onOffImage;
+        targetImage.sprite = (!settings.isOn || settings.slider.value == 0) ? soundOffImage : soundOnImage;
     }
 
-    // 사운드 버튼 UI 업데이트 함수
+    // 사운드 토글 UI 업데이트 함수
     private void UpdateToggleUI(bool state, bool isBgm, bool instant = false)
     {
+        var settings = isBgm ? bgmSettings : sfxSettings;
         float targetX = state ? onX : offX;
-        float targetVolume = state ? (isBgm ? bgmSlider.value : sfxSlider.value) : 0.0f;
-        RectTransform soundHandle = isBgm ? bgmSoundHandle : sfxSoundHandle;
-        SoundController controller = isBgm ? bgmController : sfxController;
+        float targetVolume = state ? settings.slider.value : 0.0f;
 
         if (instant)
         {
-            soundHandle.anchoredPosition = new Vector2(targetX, soundHandle.anchoredPosition.y);
-            controller.SetVolume(targetVolume);
+            settings.handle.anchoredPosition = new Vector2(targetX, settings.handle.anchoredPosition.y);
+            settings.controller.SetVolume(targetVolume);
         }
         else
         {
-            ref Coroutine toggleCoroutine = ref (isBgm ? ref bgmToggleCoroutine : ref sfxToggleCoroutine);
-
-            StopAndStartCoroutine(ref toggleCoroutine, AnimateToggle(soundHandle, targetX, controller, targetVolume));
+            StopAndStartCoroutine(ref settings.toggleCoroutine, AnimateToggle(settings.handle, targetX, settings.controller, targetVolume));
         }
     }
 
@@ -349,92 +335,54 @@ public class OptionManager : MonoBehaviour
     // 사운드 On/Off 버튼 애니메이션 코루틴
     private IEnumerator AnimateToggle(RectTransform handle, float targetX, SoundController controller, float targetVolume)
     {
-        float elapsedTime = 0f;
-        float startX = handle.anchoredPosition.x;
-
-        while (elapsedTime < moveDuration)
-        {
-            elapsedTime += Time.deltaTime;
-            float t = elapsedTime / moveDuration;
-            handle.anchoredPosition = new Vector2(Mathf.Lerp(startX, targetX, t), handle.anchoredPosition.y);
-            yield return null;
-        }
-
-        handle.anchoredPosition = new Vector2(targetX, handle.anchoredPosition.y);
+        yield return AnimateHandle(handle, targetX);
         controller.SetVolume(targetVolume);
     }
 
     // ======================================================================================================================
     // [디스플레이 설정]
 
-    // 이펙트 On/Off 토글 함수
-    public void ToggleEffect()
+    // 이펙트 토글 함수
+    private void ToggleEffect()
     {
-        isEffectOn = !isEffectOn;
-        UpdateEffectToggleUI(isEffectOn);
+        UpdateToggleState(effectSettings);
     }
 
-    // 이펙트 토글 UI 업데이트 함수
-    private void UpdateEffectToggleUI(bool state, bool instant = false)
+    // 화면 흔들림 토글 함수
+    private void ToggleShaking()
+    {
+        UpdateToggleState(shakingSettings);
+    }
+
+    // 절전 모드 토글 함수
+    private void ToggleSaving()
+    {
+        UpdateToggleState(savingSettings);
+    }
+
+    // 토글 상태 업데이트 함수
+    private void UpdateToggleState(ToggleSettings settings)
+    {
+        settings.isOn = !settings.isOn;
+        UpdateToggleUI(settings.handle, settings.isOn);
+    }
+
+    // 토글 UI 업데이트 함수
+    private void UpdateToggleUI(RectTransform handle, bool state, bool instant = false)
     {
         float targetX = state ? onX : offX;
-
         if (instant)
         {
-            effectHandle.anchoredPosition = new Vector2(targetX, effectHandle.anchoredPosition.y);
+            handle.anchoredPosition = new Vector2(targetX, handle.anchoredPosition.y);
         }
         else
         {
-            StopAndStartCoroutine(ref effectToggleCoroutine, AnimateDisplayToggle(effectHandle, targetX));
+            StopAndStartCoroutine(ref effectSettings.toggleCoroutine, AnimateHandle(handle, targetX));
         }
     }
 
-    // 화면 흔들림 On/Off 토글 함수
-    public void ToggleShaking()
-    {
-        isShakingOn = !isShakingOn;
-        UpdateShakingToggleUI(isShakingOn);
-    }
-
-    // 화면 흔들림 토글 UI 업데이트 함수
-    private void UpdateShakingToggleUI(bool state, bool instant = false)
-    {
-        float targetX = state ? onX : offX;
-
-        if (instant)
-        {
-            shakingHandle.anchoredPosition = new Vector2(targetX, shakingHandle.anchoredPosition.y);
-        }
-        else
-        {
-            StopAndStartCoroutine(ref shakingToggleCoroutine, AnimateDisplayToggle(shakingHandle, targetX));
-        }
-    }
-
-    // 절전모드 On/Off 토글 함수
-    public void ToggleSaving()
-    {
-        isSavingOn = !isSavingOn;
-        UpdateSavingToggleUI(isSavingOn);
-    }
-
-    // 절전모드 토글 UI 업데이트 함수
-    private void UpdateSavingToggleUI(bool state, bool instant = false)
-    {
-        float targetX = state ? onX : offX;
-
-        if (instant)
-        {
-            savingHandle.anchoredPosition = new Vector2(targetX, savingHandle.anchoredPosition.y);
-        }
-        else
-        {
-            StopAndStartCoroutine(ref savingToggleCoroutine, AnimateDisplayToggle(savingHandle, targetX));
-        }
-    }
-
-    // 디스플레이 토글 애니메이션 코루틴
-    private IEnumerator AnimateDisplayToggle(RectTransform handle, float targetX)
+    // 토글 핸들 애니메이션 코루틴
+    private IEnumerator AnimateHandle(RectTransform handle, float targetX)
     {
         float elapsedTime = 0f;
         float startX = handle.anchoredPosition.x;
@@ -449,5 +397,9 @@ public class OptionManager : MonoBehaviour
 
         handle.anchoredPosition = new Vector2(targetX, handle.anchoredPosition.y);
     }
+
+    // ======================================================================================================================
+
+
 
 }

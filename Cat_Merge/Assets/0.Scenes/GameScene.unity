@@ -7826,20 +7826,30 @@ MonoBehaviour:
   - {fileID: 1119297264}
   - {fileID: 1704469768}
   - {fileID: 330969943}
-  bgmSlider: {fileID: 838233943}
-  bgmSoundToggleButton: {fileID: 665473635}
-  bgmSoundHandle: {fileID: 1744564920}
-  bgmOnOffImage: {fileID: 1397973894}
-  sfxSlider: {fileID: 955937724}
-  sfxSoundToggleButton: {fileID: 108979623}
-  sfxSoundHandle: {fileID: 1670647310}
-  sfxOnOffImage: {fileID: 1559531020}
-  effecctToggleButton: {fileID: 33242983}
-  effectHandle: {fileID: 1429066293}
-  shakingToggleButton: {fileID: 1945470828}
-  shakingHandle: {fileID: 1452810566}
-  savingToggleButton: {fileID: 1625863178}
-  savingHandle: {fileID: 449944912}
+  bgmSettings:
+    slider: {fileID: 838233943}
+    toggleButton: {fileID: 665473635}
+    handle: {fileID: 1744564920}
+    onOffImage: {fileID: 1397973894}
+    isOn: 1
+  sfxSettings:
+    slider: {fileID: 955937724}
+    toggleButton: {fileID: 108979623}
+    handle: {fileID: 1670647310}
+    onOffImage: {fileID: 1559531020}
+    isOn: 1
+  effectSettings:
+    toggleButton: {fileID: 33242983}
+    handle: {fileID: 1429066293}
+    isOn: 1
+  shakingSettings:
+    toggleButton: {fileID: 1945470828}
+    handle: {fileID: 1452810566}
+    isOn: 1
+  savingSettings:
+    toggleButton: {fileID: 1625863178}
+    handle: {fileID: 449944912}
+    isOn: 1
 --- !u!1 &335345886
 GameObject:
   m_ObjectHideFlags: 0

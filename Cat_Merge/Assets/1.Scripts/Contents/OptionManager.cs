@@ -80,6 +80,12 @@ public class OptionManager : MonoBehaviour
     private string inactiveColorCode = "#FFFFFF";               // 비활성화상태 Color
 
     // ======================================================================================================================
+    // [All]
+
+    private float onX = 65f, offX = -65f;                       // 핸들 버튼 x좌표
+    private float moveDuration = 0.2f;                          // 토글 애니메이션 지속 시간
+
+    // ======================================================================================================================
     // [Sound]
 
     [Header("---[BGM]")]
@@ -101,20 +107,29 @@ public class OptionManager : MonoBehaviour
     private bool isSfxOn = true;                                // 효과음 활성화 여부
 
     [Header("---[Common]")]
-    private float onX = 65f, offX = -65f;                       // 사운드 핸들 버튼 x좌표
-    private float moveDuration = 0.2f;                          // 토글 애니메이션 지속 시간
-    private Sprite soundOnImage;
-    private Sprite soundOffImage;
+    private Sprite soundOnImage;                                // 사운드 On 이미지
+    private Sprite soundOffImage;                               // 사운드 Off 이미지
 
     // ======================================================================================================================
     // [Display]
 
+    [Header("---[Effect]")]
+    [SerializeField] private Button effecctToggleButton;        // 이펙트 On/Off 버튼
+    [SerializeField] private RectTransform  effectHandle;       // 이펙트 토글 핸들
+    private Coroutine effectToggleCoroutine;                    // 이펙트 토글 애니메이션 코루틴
+    private bool isEffectOn = true;                             // 이펙트 활성화 여부
 
+    [Header("---[Screen Shaking]")]
+    [SerializeField] private Button shakingToggleButton;        // 흔들림 On/Off 버튼
+    [SerializeField] private RectTransform shakingHandle;       // 흔들림 토글 핸들
+    private Coroutine shakingToggleCoroutine;                   // 흔들림 토글 애니메이션 코루틴
+    private bool isShakingOn = true;                            // 흔들림 활성화 여부
 
-    // ======================================================================================================================
-    // [System]
-
-
+    [Header("---[Saving Mode]")]
+    [SerializeField] private Button savingToggleButton;         // 절전모드 On/Off 버튼
+    [SerializeField] private RectTransform savingHandle;        // 절전모드 토글 핸들
+    private Coroutine savingToggleCoroutine;                    // 절전모드 토글 애니메이션 코루틴
+    private bool isSavingOn = true;                             // 절전모드 활성화 여부
 
     // ======================================================================================================================
 
@@ -201,7 +216,17 @@ public class OptionManager : MonoBehaviour
     // Display 초기 설정 함수
     private void InitializeDisplayControllers()
     {
+        // 이펙트 토글 버튼 초기화
+        effecctToggleButton.onClick.AddListener(() => ToggleEffect());
+        UpdateEffectToggleUI(isEffectOn, true);
 
+        // 화면 흔들림 토글 버튼 초기화 
+        shakingToggleButton.onClick.AddListener(() => ToggleShaking());
+        UpdateShakingToggleUI(isShakingOn, true);
+
+        // 절전모드 토글 버튼 초기화
+        savingToggleButton.onClick.AddListener(() => ToggleSaving());
+        UpdateSavingToggleUI(isSavingOn, true);
     }
 
     // ======================================================================================================================
@@ -340,12 +365,89 @@ public class OptionManager : MonoBehaviour
     }
 
     // ======================================================================================================================
-    // [화면 설정]
+    // [디스플레이 설정]
 
-    
+    // 이펙트 On/Off 토글 함수
+    public void ToggleEffect()
+    {
+        isEffectOn = !isEffectOn;
+        UpdateEffectToggleUI(isEffectOn);
+    }
 
+    // 이펙트 토글 UI 업데이트 함수
+    private void UpdateEffectToggleUI(bool state, bool instant = false)
+    {
+        float targetX = state ? onX : offX;
 
-    // ======================================================================================================================
+        if (instant)
+        {
+            effectHandle.anchoredPosition = new Vector2(targetX, effectHandle.anchoredPosition.y);
+        }
+        else
+        {
+            StopAndStartCoroutine(ref effectToggleCoroutine, AnimateDisplayToggle(effectHandle, targetX));
+        }
+    }
 
+    // 화면 흔들림 On/Off 토글 함수
+    public void ToggleShaking()
+    {
+        isShakingOn = !isShakingOn;
+        UpdateShakingToggleUI(isShakingOn);
+    }
+
+    // 화면 흔들림 토글 UI 업데이트 함수
+    private void UpdateShakingToggleUI(bool state, bool instant = false)
+    {
+        float targetX = state ? onX : offX;
+
+        if (instant)
+        {
+            shakingHandle.anchoredPosition = new Vector2(targetX, shakingHandle.anchoredPosition.y);
+        }
+        else
+        {
+            StopAndStartCoroutine(ref shakingToggleCoroutine, AnimateDisplayToggle(shakingHandle, targetX));
+        }
+    }
+
+    // 절전모드 On/Off 토글 함수
+    public void ToggleSaving()
+    {
+        isSavingOn = !isSavingOn;
+        UpdateSavingToggleUI(isSavingOn);
+    }
+
+    // 절전모드 토글 UI 업데이트 함수
+    private void UpdateSavingToggleUI(bool state, bool instant = false)
+    {
+        float targetX = state ? onX : offX;
+
+        if (instant)
+        {
+            savingHandle.anchoredPosition = new Vector2(targetX, savingHandle.anchoredPosition.y);
+        }
+        else
+        {
+            StopAndStartCoroutine(ref savingToggleCoroutine, AnimateDisplayToggle(savingHandle, targetX));
+        }
+    }
+
+    // 디스플레이 토글 애니메이션 코루틴
+    private IEnumerator AnimateDisplayToggle(RectTransform handle, float targetX)
+    {
+        float elapsedTime = 0f;
+        float startX = handle.anchoredPosition.x;
+
+        while (elapsedTime < moveDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / moveDuration;
+            handle.anchoredPosition = new Vector2(Mathf.Lerp(startX, targetX, t), handle.anchoredPosition.y);
+            yield return null;
+        }
+
+        handle.anchoredPosition = new Vector2(targetX, handle.anchoredPosition.y);
+    }
 
 }

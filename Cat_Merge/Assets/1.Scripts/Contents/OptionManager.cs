@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 // OptionManager Script
 public class OptionManager : MonoBehaviour
@@ -11,18 +12,15 @@ public class OptionManager : MonoBehaviour
     // 사운드 컨트롤 내부 클래스
     public class SoundController
     {
-        private AudioSource audioSource;
-        private Slider volumeSlider;
-        private AudioClip soundClip;
+        private readonly AudioSource audioSource;
+        private readonly Slider volumeSlider;
 
         public SoundController(GameObject parent, Slider slider, bool loop, AudioClip clip)
         {
             audioSource = parent.AddComponent<AudioSource>();
             audioSource.loop = loop;
+            audioSource.clip = clip;
             volumeSlider = slider;
-            soundClip = clip;
-
-            audioSource.clip = soundClip;
 
             if (volumeSlider != null)
             {
@@ -35,36 +33,13 @@ public class OptionManager : MonoBehaviour
         public void SetVolume(float volume)
         {
             bool isBgm = (audioSource == Instance.bgmSettings.controller.audioSource);
-
-            if ((isBgm && !Instance.bgmSettings.isOn) || (!isBgm && !Instance.sfxSettings.isOn))
-            {
-                audioSource.volume = 0f;
-            }
-            else
-            {
-                audioSource.volume = volume;
-            }
-
+            audioSource.volume = (isBgm && !Instance.bgmSettings.isOn) || (!isBgm && !Instance.sfxSettings.isOn) ? 0f : volume;
             Instance.SetSoundToggleImage(isBgm);
         }
 
-        // 사운드 재생
-        public void Play()
-        {
-            audioSource.Play();
-        }
-
-        // 사운드 정지
-        public void Stop()
-        {
-            audioSource.Stop();
-        }
-
-        // AudioSource getter 추가
-        public AudioSource GetAudioSource()
-        {
-            return audioSource;
-        }
+        public void Play() => audioSource.Play();
+        public void Stop() => audioSource.Stop();
+        public AudioSource GetAudioSource() => audioSource;
     }
 
     // ======================================================================================================================
@@ -84,14 +59,14 @@ public class OptionManager : MonoBehaviour
     // [서브 메뉴 UI 색상 설정]
 
     [Header("---[Sub Menu UI Color]")]
-    private string activeColorCode = "#5f5f5f";                 // 활성화상태 Color
-    private string inactiveColorCode = "#FFFFFF";               // 비활성화상태 Color
+    private const string activeColorCode = "#5f5f5f";           // 활성화상태 Color
+    private const string inactiveColorCode = "#FFFFFF";         // 비활성화상태 Color
 
     // ======================================================================================================================
     // [토글 버튼 관련 설정]
 
-    private float onX = 65f, offX = -65f;                       // 핸들 버튼 x좌표
-    private float moveDuration = 0.2f;                          // 토글 애니메이션 지속 시간
+    private const float onX = 65f, offX = -65f;                 // 핸들 버튼 x좌표
+    private const float moveDuration = 0.2f;                    // 토글 애니메이션 지속 시간
 
     // ======================================================================================================================
     // [Sound]
@@ -140,6 +115,22 @@ public class OptionManager : MonoBehaviour
     [SerializeField] private ToggleSettings savingSettings = new ToggleSettings();
 
     // ======================================================================================================================
+    // [System]
+
+    [Header("---[System]")]
+    [SerializeField] private Transform slotPanel;                   // 슬롯 버튼들의 부모 패널
+    [SerializeField] private Button[] slotButtons;                  // 슬롯 버튼 배열
+    [SerializeField] private Button exitButton;                     // 나가기 버튼
+    [SerializeField] private GameObject informationPanel;           // 정보 패널들의 부모 패널
+    [SerializeField] private GameObject[] informationPanels;        // 정보 패널 배열
+    [SerializeField] private Button informationPanelBackButton;     // 정보 패널 뒤로가기 버튼
+
+    private Vector2[] originalButtonPositions;                      // 버튼들의 원래 위치
+    private CanvasGroup slotPanelGroup;                             // 슬롯 패널의 CanvasGroup
+    private const float systemAnimDuration = 0.5f;                  // 시스템 애니메이션 지속 시간
+    private int currentActivePanel = -1;                            // 현재 활성화된 패널 인덱스
+
+    // ======================================================================================================================
     // [옵션 메뉴 타입 정의]
 
     // Enum으로 메뉴 타입 정의 (서브 메뉴를 구분하기 위해 사용)
@@ -159,14 +150,13 @@ public class OptionManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            optionMenuPanel.SetActive(false);
+            InitializeOptionManager();
         }
         else
         {
             Destroy(gameObject);
         }
-        optionMenuPanel.SetActive(false);
-
-        InitializeOptionManager();
     }
 
     private void Start()
@@ -176,6 +166,7 @@ public class OptionManager : MonoBehaviour
     }
 
     // ======================================================================================================================
+    // [OptionManager]
 
     // 모든 OptionManager 시작 함수들 모음
     private void InitializeOptionManager()
@@ -185,56 +176,31 @@ public class OptionManager : MonoBehaviour
 
         InitializeSoundControllers();
         InitializeDisplayControllers();
+        InitializeSystemSettings();
     }
 
     // OptionButton 초기화 함수
     private void InitializeOptionButton()
     {
-        optionButton.onClick.AddListener(() => activePanelManager.TogglePanel("OptionMenu"));
-        optionBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("OptionMenu"));
-    }
+        System.Action handleOptionMenu = () => 
+        {
+            if (activeMenuType == OptionMenuType.System && currentActivePanel != -1)
+            {
+                ResetSystemMenu();
+            }
+        };
 
-    // Sound 초기화 함수
-    private void InitializeSoundControllers()
-    {
-        // Audio 초기화
-        AudioClip bgmClip = Resources.Load<AudioClip>("Audios/BGM_Sound");
-        AudioClip sfxClip = Resources.Load<AudioClip>("Audios/SFX_Sound");
-        bgmSettings.controller = new SoundController(gameObject, bgmSettings.slider, true, bgmClip);
-        sfxSettings.controller = new SoundController(gameObject, sfxSettings.slider, false, sfxClip);
+        optionButton.onClick.AddListener(() => 
+        {
+            handleOptionMenu();
+            activePanelManager.TogglePanel("OptionMenu");
+        });
 
-        bgmSettings.controller.SetVolume(bgmSettings.slider.value);
-        sfxSettings.controller.SetVolume(sfxSettings.slider.value);
-
-        bgmSettings.controller.Play();
-
-        // Image 초기화
-        soundOnImage = Resources.Load<Sprite>("Sprites/Cats/1");
-        soundOffImage = Resources.Load<Sprite>("Sprites/Cats/2");
-        bgmSettings.onOffImage.sprite = soundOnImage;
-        sfxSettings.onOffImage.sprite = soundOnImage;
-
-        // 토글 버튼 이벤트 설정
-        bgmSettings.toggleButton.onClick.AddListener(() => ToggleSound(true));
-        sfxSettings.toggleButton.onClick.AddListener(() => ToggleSound(false));
-
-        UpdateToggleUI(bgmSettings.isOn, true, true);
-        UpdateToggleUI(sfxSettings.isOn, false, true);
-    }
-
-    // Display 초기화 함수
-    private void InitializeDisplayControllers()
-    {
-        InitializeToggle(effectSettings, ToggleEffect);
-        InitializeToggle(shakingSettings, ToggleShaking);
-        InitializeToggle(savingSettings, ToggleSaving);
-    }
-
-    // 토글 초기화 함수
-    private void InitializeToggle(ToggleSettings settings, System.Action toggleAction)
-    {
-        settings.toggleButton.onClick.AddListener(() => toggleAction());
-        UpdateToggleUI(settings.handle, settings.isOn, true);
+        optionBackButton.onClick.AddListener(() => 
+        {
+            handleOptionMenu();
+            activePanelManager.ClosePanel("OptionMenu");
+        });
     }
 
     // ======================================================================================================================
@@ -246,7 +212,14 @@ public class OptionManager : MonoBehaviour
         for (int i = 0; i < (int)OptionMenuType.End; i++)
         {
             int index = i;
-            subOptionMenuButtons[index].onClick.AddListener(() => ActivateMenu((OptionMenuType)index));
+            subOptionMenuButtons[index].onClick.AddListener(() => 
+            {
+                if (activeMenuType == OptionMenuType.System && currentActivePanel != -1)
+                {
+                    ResetSystemMenu();
+                }
+                ActivateMenu((OptionMenuType)index);
+            });
         }
 
         ActivateMenu(OptionMenuType.Sound);
@@ -277,8 +250,7 @@ public class OptionManager : MonoBehaviour
     // 서브 메뉴 버튼 색상을 활성 상태에 따라 업데이트하는 함수
     private void UpdateSubButtonColor(Image buttonImage, bool isActive)
     {
-        string colorCode = isActive ? activeColorCode : inactiveColorCode;
-        if (ColorUtility.TryParseHtmlString(colorCode, out Color color))
+        if (ColorUtility.TryParseHtmlString(isActive ? activeColorCode : inactiveColorCode, out Color color))
         {
             buttonImage.color = color;
         }
@@ -287,10 +259,38 @@ public class OptionManager : MonoBehaviour
     // ======================================================================================================================
     // [사운드 설정]
 
+    // Sound 초기화 함수
+    private void InitializeSoundControllers()
+    {
+        // Audio 초기화
+        AudioClip bgmClip = Resources.Load<AudioClip>("Audios/BGM_Sound");
+        AudioClip sfxClip = Resources.Load<AudioClip>("Audios/SFX_Sound");
+        bgmSettings.controller = new SoundController(gameObject, bgmSettings.slider, true, bgmClip);
+        sfxSettings.controller = new SoundController(gameObject, sfxSettings.slider, false, sfxClip);
+
+        bgmSettings.controller.SetVolume(bgmSettings.slider.value);
+        sfxSettings.controller.SetVolume(sfxSettings.slider.value);
+
+        bgmSettings.controller.Play();
+
+        // Image 초기화
+        soundOnImage = Resources.Load<Sprite>("Sprites/Cats/1");
+        soundOffImage = Resources.Load<Sprite>("Sprites/Cats/2");
+        bgmSettings.onOffImage.sprite = soundOnImage;
+        sfxSettings.onOffImage.sprite = soundOnImage;
+
+        // 토글 버튼 이벤트 설정
+        bgmSettings.toggleButton.onClick.AddListener(() => ToggleSound(true));
+        sfxSettings.toggleButton.onClick.AddListener(() => ToggleSound(false));
+
+        UpdateToggleUI(bgmSettings.isOn, true, true);
+        UpdateToggleUI(sfxSettings.isOn, false, true);
+    }
+
     // 사운드 On/Off 토글 함수
     public void ToggleSound(bool isBgm)
     {
-        var settings = isBgm ? bgmSettings : sfxSettings;
+        SoundSettings settings = isBgm ? bgmSettings : sfxSettings;
         settings.isOn = !settings.isOn;
         SetSoundToggleImage(isBgm);
         UpdateToggleUI(settings.isOn, isBgm);
@@ -299,15 +299,14 @@ public class OptionManager : MonoBehaviour
     // 사운드 On/Off 이미지 변경 함수
     private void SetSoundToggleImage(bool isBgm)
     {
-        var settings = isBgm ? bgmSettings : sfxSettings;
-        Image targetImage = settings.onOffImage;
-        targetImage.sprite = (!settings.isOn || settings.slider.value == 0) ? soundOffImage : soundOnImage;
+        SoundSettings settings = isBgm ? bgmSettings : sfxSettings;
+        settings.onOffImage.sprite = (!settings.isOn || settings.slider.value == 0) ? soundOffImage : soundOnImage;
     }
 
     // 사운드 토글 UI 업데이트 함수
     private void UpdateToggleUI(bool state, bool isBgm, bool instant = false)
     {
-        var settings = isBgm ? bgmSettings : sfxSettings;
+        SoundSettings settings = isBgm ? bgmSettings : sfxSettings;
         float targetX = state ? onX : offX;
         float targetVolume = state ? settings.slider.value : 0.0f;
 
@@ -341,6 +340,21 @@ public class OptionManager : MonoBehaviour
 
     // ======================================================================================================================
     // [디스플레이 설정]
+
+    // Display 초기화 함수
+    private void InitializeDisplayControllers()
+    {
+        InitializeToggle(effectSettings, ToggleEffect);
+        InitializeToggle(shakingSettings, ToggleShaking);
+        InitializeToggle(savingSettings, ToggleSaving);
+    }
+
+    // 토글 초기화 함수
+    private void InitializeToggle(ToggleSettings settings, System.Action toggleAction)
+    {
+        settings.toggleButton.onClick.AddListener(() => toggleAction());
+        UpdateToggleUI(settings.handle, settings.isOn, true);
+    }
 
     // 이펙트 토글 함수
     private void ToggleEffect()
@@ -396,6 +410,262 @@ public class OptionManager : MonoBehaviour
         }
 
         handle.anchoredPosition = new Vector2(targetX, handle.anchoredPosition.y);
+    }
+
+    // ======================================================================================================================
+    // [시스템 설정]
+
+    // System 초기화 함수
+    private void InitializeSystemSettings()
+    {
+        // SlotPanel CanvasGroup 초기화
+        slotPanelGroup = slotPanel.GetComponent<CanvasGroup>();
+        if (slotPanelGroup == null)
+        {
+            slotPanelGroup = slotPanel.gameObject.AddComponent<CanvasGroup>();
+        }
+
+        // InformationPanel 초기 설정
+        informationPanel.SetActive(false);
+
+        // 버튼 및 패널 초기화
+        originalButtonPositions = new Vector2[slotButtons.Length];
+        for (int i = 0; i < slotButtons.Length; i++)
+        {
+            int buttonIndex = i;
+            originalButtonPositions[i] = slotButtons[i].GetComponent<RectTransform>().anchoredPosition;
+            slotButtons[i].onClick.AddListener(() => OnSlotButtonClick(buttonIndex));
+            informationPanels[i].SetActive(false);
+
+            // 각 버튼에 CanvasGroup 추가
+            CanvasGroup buttonGroup = slotButtons[i].gameObject.GetComponent<CanvasGroup>();
+            if (buttonGroup == null)
+            {
+                buttonGroup = slotButtons[i].gameObject.AddComponent<CanvasGroup>();
+            }
+        }
+
+        // 공통 뒤로가기 버튼 이벤트 설정
+        informationPanelBackButton.onClick.AddListener(() =>
+        {
+            if (currentActivePanel != -1)
+            {
+                StartCoroutine(HideInformationPanel(currentActivePanel));
+            }
+        });
+
+        // exitButton에 CanvasGroup 추가
+        CanvasGroup exitButtonGroup = exitButton.gameObject.GetComponent<CanvasGroup>();
+        if (exitButtonGroup == null)
+        {
+            exitButtonGroup = exitButton.gameObject.AddComponent<CanvasGroup>();
+        }
+
+        // informationPanelBackButton에 CanvasGroup 추가
+        CanvasGroup backButtonGroup = informationPanelBackButton.gameObject.GetComponent<CanvasGroup>();
+        if (backButtonGroup == null)
+        {
+            backButtonGroup = informationPanelBackButton.gameObject.AddComponent<CanvasGroup>();
+        }
+        backButtonGroup.alpha = 0f;
+
+        // 시스템 버튼 클릭 이벤트 추가
+        subOptionMenuButtons[(int)OptionMenuType.System].onClick.AddListener(() =>
+        {
+            ActivateMenu(OptionMenuType.System);
+            ResetSystemMenu();
+        });
+
+        // Exit 버튼 클릭 이벤트 추가
+        exitButton.onClick.AddListener(() => { GameManager.Instance.HandleExitInput(); });
+    }
+
+    // 시스템 메뉴 초기화 함수
+    private void ResetSystemMenu()
+    {
+        // 모든 코루틴 정지
+        StopAllCoroutines();
+
+        // 현재 활성화된 패널이 있다면 비활성화
+        if (currentActivePanel != -1)
+        {
+            informationPanels[currentActivePanel].SetActive(false);
+        }
+
+        slotPanel.gameObject.SetActive(true);
+        informationPanel.SetActive(false);
+
+        // 모든 버튼 초기화
+        for (int i = 0; i < slotButtons.Length; i++)
+        {
+            slotButtons[i].gameObject.SetActive(true);
+            RectTransform buttonRect = slotButtons[i].GetComponent<RectTransform>();
+            buttonRect.anchoredPosition = originalButtonPositions[i];
+            CanvasGroup buttonGroup = slotButtons[i].GetComponent<CanvasGroup>();
+            buttonGroup.alpha = 1f;
+        }
+
+        // exit 버튼 초기화
+        exitButton.gameObject.SetActive(true);
+        exitButton.GetComponent<CanvasGroup>().alpha = 1f;
+
+        // back 버튼 초기화
+        informationPanelBackButton.GetComponent<CanvasGroup>().alpha = 0f;
+
+        currentActivePanel = -1;
+    }
+
+    // 슬롯 버튼 클릭 이벤트 처리 함수
+    private void OnSlotButtonClick(int index)
+    {
+        if (currentActivePanel != -1)
+        {
+            return;
+        }
+        currentActivePanel = index;
+        StartCoroutine(ShowInformationPanel(index));
+    }
+
+    // Information Panel 펼치는 코루틴
+    private IEnumerator ShowInformationPanel(int index)
+    {
+        // 선택된 버튼을 제외한 다른 버튼들 페이드 아웃 및 선택된 버튼 이동 동시 실행
+        List<IEnumerator> animations = new List<IEnumerator>();
+        animations.Add(MoveButton(slotButtons[index].GetComponent<RectTransform>(), originalButtonPositions[index], new Vector2(0, 540)));
+        for (int i = 0; i < slotButtons.Length; i++)
+        {
+            if (i != index)
+            {
+                animations.Add(FadeButton(slotButtons[i].GetComponent<CanvasGroup>(), 1f, 0f));
+            }
+        }
+        animations.Add(FadeButton(exitButton.GetComponent<CanvasGroup>(), 1f, 0f));
+
+        foreach (var anim in animations)
+        {
+            StartCoroutine(anim);
+        }
+
+        yield return new WaitForSeconds(systemAnimDuration);
+
+        // 애니메이션 완료 후 버튼들 비활성화
+        for (int i = 0; i < slotButtons.Length; i++)
+        {
+            if (i != index)
+            {
+                slotButtons[i].gameObject.SetActive(false);
+            }
+        }
+        exitButton.gameObject.SetActive(false);
+
+        // 정보 패널 활성화 및 펼치기 애니메이션
+        informationPanel.SetActive(true);
+        informationPanels[index].SetActive(true);
+        RectTransform panelRect = informationPanels[index].GetComponent<RectTransform>();
+
+        // 패널의 초기 크기와 위치 설정
+        panelRect.sizeDelta = new Vector2(panelRect.sizeDelta.x, 0);
+        panelRect.anchoredPosition = new Vector2(panelRect.anchoredPosition.x, 550);
+        float elapsedTime = 0f;
+
+        // Back 버튼 페이드 인 시작
+        StartCoroutine(FadeButton(informationPanelBackButton.GetComponent<CanvasGroup>(), 0f, 1f));
+
+        while (elapsedTime < systemAnimDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / systemAnimDuration;
+            float currentHeight = Mathf.Lerp(0, 1100, t);
+            panelRect.sizeDelta = new Vector2(panelRect.sizeDelta.x, currentHeight);
+            panelRect.anchoredPosition = new Vector2(panelRect.anchoredPosition.x, Mathf.Lerp(550, 0, t));
+            yield return null;
+        }
+
+        panelRect.sizeDelta = new Vector2(panelRect.sizeDelta.x, 1100);
+        panelRect.anchoredPosition = new Vector2(panelRect.anchoredPosition.x, 0);
+    }
+
+    // Information Panel 접는 코루틴
+    private IEnumerator HideInformationPanel(int index)
+    {
+        // Back 버튼 페이드 아웃 시작
+        StartCoroutine(FadeButton(informationPanelBackButton.GetComponent<CanvasGroup>(), 1f, 0f));
+
+        RectTransform panelRect = informationPanels[index].GetComponent<RectTransform>();
+        float elapsedTime = 0f;
+
+        while (elapsedTime < systemAnimDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / systemAnimDuration;
+            float currentHeight = Mathf.Lerp(1100, 0, t);
+            panelRect.sizeDelta = new Vector2(panelRect.sizeDelta.x, currentHeight);
+            panelRect.anchoredPosition = new Vector2(panelRect.anchoredPosition.x, Mathf.Lerp(0, 550, t));
+            yield return null;
+        }
+
+        informationPanels[index].SetActive(false);
+        informationPanel.SetActive(false);
+
+        // 모든 버튼 활성화
+        for (int i = 0; i < slotButtons.Length; i++)
+        {
+            slotButtons[i].gameObject.SetActive(true);
+        }
+        exitButton.gameObject.SetActive(true);
+
+        // 버튼 이동 및 페이드 인 동시 실행
+        List<IEnumerator> animations = new List<IEnumerator>();
+        animations.Add(MoveButton(slotButtons[index].GetComponent<RectTransform>(), new Vector2(0, 540), originalButtonPositions[index]));
+        for (int i = 0; i < slotButtons.Length; i++)
+        {
+            if (i != index)
+            {
+                animations.Add(FadeButton(slotButtons[i].GetComponent<CanvasGroup>(), 0f, 1f));
+            }
+        }
+        animations.Add(FadeButton(exitButton.GetComponent<CanvasGroup>(), 0f, 1f));
+
+        foreach (var anim in animations)
+        {
+            StartCoroutine(anim);
+        }
+
+        yield return new WaitForSeconds(systemAnimDuration);
+
+        currentActivePanel = -1;
+    }
+
+    // 버튼 이동 애니메이션 코루틴
+    private IEnumerator MoveButton(RectTransform buttonRect, Vector2 startPos, Vector2 endPos)
+    {
+        float elapsedTime = 0f;
+
+        while (elapsedTime < systemAnimDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / systemAnimDuration;
+            buttonRect.anchoredPosition = Vector2.Lerp(startPos, endPos, t);
+            yield return null;
+        }
+
+        buttonRect.anchoredPosition = endPos;
+    }
+
+    // 버튼 페이드 애니메이션 코루틴
+    private IEnumerator FadeButton(CanvasGroup canvasGroup, float startAlpha, float endAlpha)
+    {
+        float elapsedTime = 0f;
+
+        while (elapsedTime < systemAnimDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / systemAnimDuration;
+            canvasGroup.alpha = Mathf.Lerp(startAlpha, endAlpha, t);
+            yield return null;
+        }
+
+        canvasGroup.alpha = endAlpha;
     }
 
     // ======================================================================================================================

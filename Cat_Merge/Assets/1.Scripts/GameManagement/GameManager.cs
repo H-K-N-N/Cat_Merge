@@ -1,8 +1,7 @@
 using UnityEngine;
 using TMPro;
-using UnityEngine.UI;
-using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 // GameManager Script
 [DefaultExecutionOrder(-1)]     // 스크립트 실행 순서 조정(3번째)
@@ -71,6 +70,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    [Header("---[Exit Panel]")]
+    [SerializeField] private GameObject exitPanel;                          // 종료 확인 패널
+    [SerializeField] private Button closeButton;                            // 종료 패널 닫기 버튼
+    [SerializeField] private Button okButton;                               // 종료 확인 버튼
+
     // ======================================================================================================================
 
     private void Awake()
@@ -92,11 +96,14 @@ public class GameManager : MonoBehaviour
         UpdateCatCountText();
         UpdateCoinText();
         UpdateCashText();
+
+        InitializeExitSystem();
     }
 
     private void Update()
     {
         SortCatUIObjectsByYPosition();
+        CheckExitInput();
     }
 
     // ======================================================================================================================
@@ -218,6 +225,80 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < catUIObjects.Count; i++)
         {
             catUIObjects[i].SetSiblingIndex(i);
+        }
+    }
+
+    // ======================================================================================================================
+
+    // 게임 종료 버튼 초기화
+    private void InitializeExitSystem()
+    {
+        if (exitPanel != null)
+        {
+            exitPanel.SetActive(false);
+        }
+        if (closeButton != null)
+        {
+            closeButton.onClick.AddListener(CancelQuit);
+        }
+        if (okButton != null)
+        {
+            okButton.onClick.AddListener(QuitGame);
+        }
+    }
+
+    // 종료 입력 체크
+    private void CheckExitInput()
+    {
+        // 유니티 에디터 및 안드로이드에서 뒤로가기 버튼
+        if ((Application.platform == RuntimePlatform.Android && Input.GetKey(KeyCode.Escape)) ||
+            (Application.platform == RuntimePlatform.WindowsEditor && Input.GetKeyDown(KeyCode.Escape)))
+        {
+            HandleExitInput();
+        }
+    }
+
+    // 종료 입력 처리
+    public void HandleExitInput()
+    {
+        if (exitPanel != null)
+        {
+            if (exitPanel.activeSelf)
+            {
+                CancelQuit();
+            }
+            else
+            {
+                ShowExitPanel();
+            }
+        }
+    }
+
+    // 종료 패널 표시
+    private void ShowExitPanel()
+    {
+        if (exitPanel != null)
+        {
+            exitPanel.SetActive(true);
+        }
+    }
+
+    // 게임 종료
+    public void QuitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+    }
+
+    // 종료 취소
+    public void CancelQuit()
+    {
+        if (exitPanel != null)
+        {
+            exitPanel.SetActive(false);
         }
     }
 

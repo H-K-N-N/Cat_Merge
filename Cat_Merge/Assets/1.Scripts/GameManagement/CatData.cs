@@ -344,6 +344,20 @@ public class CatData : MonoBehaviour
                 StopCoroutine(autoCollectCoroutine);
                 autoCollectCoroutine = null;
             }
+            DisableCollectUI();
+        }
+    }
+
+    // UI 요소들을 즉시 비활성화하는 함수
+    public void DisableCollectUI()
+    {
+        if (collectCoinText != null)
+        {
+            collectCoinText.gameObject.SetActive(false);
+        }
+        if (collectCoinImage != null)
+        {
+            collectCoinImage.gameObject.SetActive(false);
         }
     }
 
@@ -387,5 +401,8 @@ public class CatData : MonoBehaviour
         collectCoinText.gameObject.SetActive(false);
         collectCoinImage.gameObject.SetActive(false);
     }
+
+    // ======================================================================================================================
+
 
 }

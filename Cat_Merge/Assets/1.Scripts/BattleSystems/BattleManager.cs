@@ -56,6 +56,10 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI topWarningText;    // 상단 경고 텍스트
     [SerializeField] private TextMeshProUGUI bossDangerText;    // 보스 위험 텍스트
     [SerializeField] private TextMeshProUGUI bottomWarningText; // 하단 경고 텍스트
+    private CanvasGroup warningPanelCanvasGroup;                // Warning Panel의 CanvasGroup
+    private CanvasGroup topWarningCanvasGroup;                  // 상단 경고 텍스트의 CanvasGroup
+    private CanvasGroup bossDangerCanvasGroup;                  // 보스 위험 텍스트의 CanvasGroup  
+    private CanvasGroup bottomWarningCanvasGroup;               // 하단 경고 텍스트의 CanvasGroup
 
     // ======================================================================================================================
 
@@ -79,7 +83,7 @@ public class BattleManager : MonoBehaviour
         StartCoroutine(BossSpawnRoutine());
     }
 
-    // 초기 설정
+    // BattleManager 초기 설정
     private void InitializeBattleManager()
     {
         // warningPanel 설정
@@ -111,9 +115,32 @@ public class BattleManager : MonoBehaviour
         {
             battleHPUI.SetActive(false);
         }
+
+        InitializeCanvasGroup();
+    }
+
+    // CanvasGroup 컴포넌트 초기화
+    private void InitializeCanvasGroup()
+    {
+        warningPanelCanvasGroup = warningPanel.GetComponent<CanvasGroup>();
+        if (warningPanelCanvasGroup == null)
+            warningPanelCanvasGroup = warningPanel.AddComponent<CanvasGroup>();
+
+        topWarningCanvasGroup = topWarningText.gameObject.GetComponent<CanvasGroup>();
+        if (topWarningCanvasGroup == null)
+            topWarningCanvasGroup = topWarningText.gameObject.AddComponent<CanvasGroup>();
+
+        bossDangerCanvasGroup = bossDangerText.gameObject.GetComponent<CanvasGroup>();
+        if (bossDangerCanvasGroup == null)
+            bossDangerCanvasGroup = bossDangerText.gameObject.AddComponent<CanvasGroup>();
+
+        bottomWarningCanvasGroup = bottomWarningText.gameObject.GetComponent<CanvasGroup>();
+        if (bottomWarningCanvasGroup == null)
+            bottomWarningCanvasGroup = bottomWarningText.gameObject.AddComponent<CanvasGroup>();
     }
 
     // ======================================================================================================================
+    // [BattleManager 핵심 기능]
 
     // 보스 스폰 코루틴
     private IEnumerator BossSpawnRoutine()
@@ -147,22 +174,61 @@ public class BattleManager : MonoBehaviour
     {
         warningPanel.SetActive(true);
         float elapsedTime = 0f;
+        float halfDuration = warningDuration / 2f;
+
+        // 초기 투명도 설정
+        warningPanelCanvasGroup.alpha = 0f;
+        topWarningCanvasGroup.alpha = 0f;
+        bossDangerCanvasGroup.alpha = 0f;
+        bottomWarningCanvasGroup.alpha = 0f;
 
         // Text 초기 위치 설정
         topWarningText.rectTransform.anchoredPosition = new Vector2(-755, 0);
         bossDangerText.rectTransform.anchoredPosition = new Vector2(810, 0);
         bottomWarningText.rectTransform.anchoredPosition = new Vector2(-755, 0);
 
-        // warningDuration 시간 동안 (경고 Text 애니메이션 + warningSlider 차오르게 하기)
+        // 첫 1초: 투명 -> 반투명
+        while (elapsedTime < halfDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float normalizedTime = elapsedTime / halfDuration;
+
+            // 투명도 조절 (0 -> 1.0)
+            float alpha = Mathf.Lerp(0f, 1.0f, normalizedTime);
+            warningPanelCanvasGroup.alpha = alpha;
+            topWarningCanvasGroup.alpha = alpha;
+            bossDangerCanvasGroup.alpha = alpha;
+            bottomWarningCanvasGroup.alpha = alpha;
+
+            // 텍스트 이동
+            float moveProgress = elapsedTime / warningDuration;
+            topWarningText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(-755, 0), new Vector2(755, 0), moveProgress);
+            bottomWarningText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(-755, 0), new Vector2(755, 0), moveProgress);
+            bossDangerText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(810, 0), new Vector2(-810, 0), moveProgress);
+
+            // slider 업데이트
+            warningSlider.value = elapsedTime;
+
+            yield return null;
+        }
+        // 다음 1초: 반투명 -> 투명
         while (elapsedTime < warningDuration)
         {
             elapsedTime += Time.deltaTime;
-            float normalizedTime = elapsedTime / warningDuration;
+            float normalizedTime = (elapsedTime - halfDuration) / halfDuration;
+
+            // 투명도 조절 (1.0 -> 0)
+            float alpha = Mathf.Lerp(1.0f, 0f, normalizedTime);
+            warningPanelCanvasGroup.alpha = alpha;
+            topWarningCanvasGroup.alpha = alpha;
+            bossDangerCanvasGroup.alpha = alpha;
+            bottomWarningCanvasGroup.alpha = alpha;
 
             // 텍스트 이동
-            topWarningText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(-755, 0), new Vector2(755, 0), normalizedTime);
-            bottomWarningText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(-755, 0), new Vector2(755, 0), normalizedTime);
-            bossDangerText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(810, 0), new Vector2(-810, 0), normalizedTime);
+            float moveProgress = elapsedTime / warningDuration;
+            topWarningText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(-755, 0), new Vector2(755, 0), moveProgress);
+            bottomWarningText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(-755, 0), new Vector2(755, 0), moveProgress);
+            bossDangerText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(810, 0), new Vector2(-810, 0), moveProgress);
 
             // slider 업데이트
             warningSlider.value = elapsedTime;
@@ -172,8 +238,6 @@ public class BattleManager : MonoBehaviour
 
         warningPanel.SetActive(false);
     }
-
-    
 
 
 
@@ -221,7 +285,7 @@ public class BattleManager : MonoBehaviour
         currentBossHP = maxBossHP;
         bossHPSlider.maxValue = maxBossHP;
         bossHPSlider.value = currentBossHP;
-        bossHPText.text = $"{maxBossHP}%";
+        bossHPText.text = $"{100f}%";
     }
 
     
@@ -229,7 +293,7 @@ public class BattleManager : MonoBehaviour
     // 전투 시작 함수
     private void StartBattle()
     {
-        // 전투 시작시 여러 기능들 비활성화
+        // 전투 시작시 여러 외부 기능들 비활성화
         SetStartFunctions();
 
         // Slider관련 코루틴 시작
@@ -237,18 +301,20 @@ public class BattleManager : MonoBehaviour
         StartCoroutine(BossBattleRoutine(bossDuration));
         isBattleActive = true;
 
-        // 보스 히트박스 내에 존재하는 고양이들 밀어내기
-        PushCatsAwayFromBoss();
+        // 고양이 자동 재화 수집 비활성화
+        SetStartBattleAutoCollectState();
 
-        // 보스 히트박스 범위 밖에 있는 고양이들을 보스를 향해 이동 시키기
+        // 보스 히트박스 내,외에 존재하는 고양이들 이동시키기
+        PushCatsAwayFromBoss();
         MoveCatsTowardBossBoundary();
 
-        // 보스 공격 코루틴 시작
+        // 보스 및 고양이 공격 코루틴 시작
         StartCoroutine(BossAttackRoutine());
-        
-        // 고양이 공격 코루틴 시작
         StartCoroutine(CatsAttackRoutine());
     }
+
+
+
 
     // Slider 감소 관리 코루틴
     private IEnumerator ExecuteBattleSliders(float warningDuration, float sliderDuration)
@@ -498,7 +564,7 @@ public class BattleManager : MonoBehaviour
     // 항복 버튼 함수
     private void GiveUpState()
     {
-        // giveup Panel 추가할거면 여기에 관련 함수 추가
+        // giveup Panel관련 추가할거면 여기에 관련 함수 추가
         EndBattle(false);
     }
 
@@ -540,6 +606,9 @@ public class BattleManager : MonoBehaviour
         // 전투 종료시 비활성화했던 기능들 다시 기존 상태로 복구
         SetEndFunctions();
 
+        // 고양이 자동 재화 수집 활성화
+        SetEndBattleAutoCollectState();
+
         // 퀘스트 갱신
         QuestManager.Instance.AddBattleCount();
 
@@ -554,8 +623,36 @@ public class BattleManager : MonoBehaviour
     }
 
     // ======================================================================================================================
-    // [전투시 비활성화 되는 기능들]
+    // [전투시 변경되는 기능들]
 
+    // 모든 고양이의 자동 재화 수집 비활성화
+    private void SetStartBattleAutoCollectState()
+    {
+        CatData[] allCats = FindObjectsOfType<CatData>();
+        foreach (var cat in allCats)
+        {
+            if (!cat.isStuned)
+            {
+                cat.SetCollectingCoinsState(false);
+                cat.DisableCollectUI();
+            }
+        }
+    }
+
+    // 모든 고양이의 자동 재화 수집 원래 상태로 복구 (활성화)
+    private void SetEndBattleAutoCollectState()
+    {
+        CatData[] allCats = FindObjectsOfType<CatData>();
+        foreach (var cat in allCats)
+        {
+            if (!cat.isStuned)
+            {
+                cat.SetCollectingCoinsState(true);
+            }
+        }
+    }
+
+    // 전투시작시 비활성화되는 외부 기능들
     private void SetStartFunctions()
     {
         MergeManager.Instance.StartBattleMergeState();
@@ -568,6 +665,8 @@ public class BattleManager : MonoBehaviour
         ItemMenuManager.Instance.StartBattleItemMenuState();
         BuyCatManager.Instance.StartBattleBuyCatState();
     }
+
+    // 전투종료시 활성화되는 외부 기능들
     private void SetEndFunctions()
     {
         MergeManager.Instance.EndBattleMergeState();

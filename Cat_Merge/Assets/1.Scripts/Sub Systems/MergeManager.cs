@@ -119,6 +119,11 @@ public class MergeManager : MonoBehaviour
             //Debug.Log($"합성 성공 : {nextCat.CatName}");
             DictionaryManager.Instance.UnlockCat(nextCat.CatGrade - 1);
             QuestManager.Instance.AddMergeCount();
+            if(cat1.CatGrade == 1 && cat2.CatGrade == 1)
+            {
+                DictionaryManager.Instance.friendshipLockImg[0].SetActive(false);
+                DictionaryManager.Instance.friendshipStarImg[0].SetActive(true);
+            }
             return nextCat;
         }
         else

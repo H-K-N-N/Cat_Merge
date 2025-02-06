@@ -68,6 +68,11 @@ public class DictionaryManager : MonoBehaviour
 
     // ======================================================================================================================
 
+    [Header("---[Friendship UnLock Buttons]")]
+    [SerializeField] private Button[] friendshipUnlockButtons;
+    [SerializeField] public GameObject[] friendshipStarImg;
+    [SerializeField] public GameObject[] friendshipLockImg;
+
     private void Awake()
     {
         if (Instance == null)
@@ -83,6 +88,8 @@ public class DictionaryManager : MonoBehaviour
         activeMenuType = DictionaryMenuType.Normal;
 
         InitializeDictionaryManager();
+
+        InitializeFriendshipButton();
     }
 
     private void Start()
@@ -477,5 +484,62 @@ public class DictionaryManager : MonoBehaviour
         // 이벤트 핸들러 해제
         OnCatDataChanged -= UpdateNewImageStatus;
     }
+
+    // ============================================================================================================
+
+    private void InitializeFriendshipButton()
+    {
+        friendshipUnlockButtons[0].onClick.AddListener(UnLockLevel1Friendship);
+        friendshipUnlockButtons[1].onClick.AddListener(UnLockLevel2Friendship);
+        friendshipUnlockButtons[2].onClick.AddListener(UnLockLevel3Friendship);
+        friendshipUnlockButtons[3].onClick.AddListener(UnLockLevel4Friendship);
+        friendshipUnlockButtons[4].onClick.AddListener(UnLockLevel5Friendship);
+
+    }
+
+    private void UnLockLevel1Friendship()
+    {
+        friendshipStarImg[0].SetActive(false);
+    }
+    private void UnLockLevel2Friendship()
+    {
+        friendshipStarImg[1].SetActive(false);
+    }
+    private void UnLockLevel3Friendship()
+    {
+        friendshipStarImg[2].SetActive(false);
+    }
+    private void UnLockLevel4Friendship()
+    {
+        friendshipStarImg[3].SetActive(false);
+    }
+    private void UnLockLevel5Friendship()
+    {
+        friendshipStarImg[4].SetActive(false);
+    }
+
+    //private void ShowFriendshipInfoPanel(int catGrade)
+    //{
+    //    // 고양이 정보 불러오기
+    //    var catData = GameManager.Instance.AllCatData[catGrade];
+
+    //    // 이미지 설정
+    //    informationCatIcon.sprite = catData.CatImage;
+
+    //    // 텍스트 설정
+    //    string catInfo = $"Name: {catData.CatName}\n" +
+    //                     $"Grade: {catData.CatGrade}\n" +
+    //                     $"Damage: {catData.CatDamage}\n" +
+    //                     $"HP: {catData.CatHp}\n" +
+    //                     $"GetCoin: {catData.CatGetCoin}";
+    //    informationCatDetails.text = catInfo;
+
+    //    // 스크롤 활성화, 스크롤 중이었다면 멈춤
+    //    catInformationPanel.GetComponent<ScrollRect>().enabled = true;
+    //    catInformationPanel.GetComponent<ScrollRect>().velocity = Vector2.zero;
+
+    //    // fullInformationPanel의 Y좌표를 -300으로 고정
+    //    fullInformationPanel.anchoredPosition = new Vector2(0, -300f);
+    //}
 
 }

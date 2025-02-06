@@ -9,6 +9,37 @@ public class OptionManager : MonoBehaviour
     // Singleton Instance
     public static OptionManager Instance { get; private set; }
 
+    // ======================================================================================================================
+    // [옵션 메뉴 UI 요소들]
+
+    [Header("---[OptionManager]")]
+    [SerializeField] private Button optionButton;               // 옵션 버튼
+    [SerializeField] private Image optionButtonImage;           // 옵션 버튼 이미지
+    [SerializeField] private GameObject optionMenuPanel;        // 옵션 메뉴 Panel
+    [SerializeField] private Button optionBackButton;           // 옵션 뒤로가기 버튼
+    private ActivePanelManager activePanelManager;              // ActivePanelManager
+
+    [SerializeField] private GameObject[] mainOptionMenus;      // 메인 옵션 메뉴 Panels
+    [SerializeField] private Button[] subOptionMenuButtons;     // 서브 옵션 메뉴 버튼 배열
+
+    // ======================================================================================================================
+    // [서브 메뉴 UI 색상 설정]
+
+    [Header("---[Sub Menu UI Color]")]
+    private const string activeColorCode = "#5f5f5f";           // 활성화상태 Color
+    private const string inactiveColorCode = "#FFFFFF";         // 비활성화상태 Color
+    private const string toggleOnColorCode = "#D9F2D0";         // 토글 On Color
+    private const string toggleOffColorCode = "#FFFFFF";        // 토글 Off Color
+
+    // ======================================================================================================================
+    // [토글 버튼 관련 설정]
+
+    private const float onX = 65f, offX = -65f;                 // 핸들 버튼 x좌표
+    private const float moveDuration = 0.2f;                    // 토글 애니메이션 지속 시간
+
+    // ======================================================================================================================
+    // [Sound]
+
     // 사운드 컨트롤 내부 클래스
     public class SoundController
     {
@@ -42,35 +73,6 @@ public class OptionManager : MonoBehaviour
         public AudioSource GetAudioSource() => audioSource;
     }
 
-    // ======================================================================================================================
-    // [옵션 메뉴 UI 요소들]
-
-    [Header("---[OptionManager]")]
-    [SerializeField] private Button optionButton;               // 옵션 버튼
-    [SerializeField] private Image optionButtonImage;           // 옵션 버튼 이미지
-    [SerializeField] private GameObject optionMenuPanel;        // 옵션 메뉴 Panel
-    [SerializeField] private Button optionBackButton;           // 옵션 뒤로가기 버튼
-    private ActivePanelManager activePanelManager;              // ActivePanelManager
-
-    [SerializeField] private GameObject[] mainOptionMenus;      // 메인 옵션 메뉴 Panels
-    [SerializeField] private Button[] subOptionMenuButtons;     // 서브 옵션 메뉴 버튼 배열
-
-    // ======================================================================================================================
-    // [서브 메뉴 UI 색상 설정]
-
-    [Header("---[Sub Menu UI Color]")]
-    private const string activeColorCode = "#5f5f5f";           // 활성화상태 Color
-    private const string inactiveColorCode = "#FFFFFF";         // 비활성화상태 Color
-
-    // ======================================================================================================================
-    // [토글 버튼 관련 설정]
-
-    private const float onX = 65f, offX = -65f;                 // 핸들 버튼 x좌표
-    private const float moveDuration = 0.2f;                    // 토글 애니메이션 지속 시간
-
-    // ======================================================================================================================
-    // [Sound]
-
     [System.Serializable]
     private class SoundSettings
     {
@@ -78,6 +80,7 @@ public class OptionManager : MonoBehaviour
         public Button toggleButton;                             // 토글 버튼
         public RectTransform handle;                            // 토글 핸들
         public Image onOffImage;                                // On/Off 이미지
+        public Image toggleButtonImage;                         // 토글 버튼 이미지
         public SoundController controller;                      // 사운드 컨트롤러
         public Coroutine toggleCoroutine;                       // 토글 애니메이션 코루틴
         public bool isOn = true;                                // 토글 상태
@@ -101,6 +104,7 @@ public class OptionManager : MonoBehaviour
     {
         public Button toggleButton;                             // 토글 버튼
         public RectTransform handle;                            // 토글 핸들
+        public Image toggleButtonImage;                         // 토글 버튼 이미지
         public Coroutine toggleCoroutine;                       // 토글 애니메이션 코루틴
         public bool isOn = true;                                // 토글 상태
     }
@@ -182,7 +186,7 @@ public class OptionManager : MonoBehaviour
     // OptionButton 초기화 함수
     private void InitializeOptionButton()
     {
-        System.Action handleOptionMenu = () => 
+        System.Action handleOptionMenu = () =>
         {
             if (activeMenuType == OptionMenuType.System && currentActivePanel != -1)
             {
@@ -190,13 +194,13 @@ public class OptionManager : MonoBehaviour
             }
         };
 
-        optionButton.onClick.AddListener(() => 
+        optionButton.onClick.AddListener(() =>
         {
             handleOptionMenu();
             activePanelManager.TogglePanel("OptionMenu");
         });
 
-        optionBackButton.onClick.AddListener(() => 
+        optionBackButton.onClick.AddListener(() =>
         {
             handleOptionMenu();
             activePanelManager.ClosePanel("OptionMenu");
@@ -212,7 +216,7 @@ public class OptionManager : MonoBehaviour
         for (int i = 0; i < (int)OptionMenuType.End; i++)
         {
             int index = i;
-            subOptionMenuButtons[index].onClick.AddListener(() => 
+            subOptionMenuButtons[index].onClick.AddListener(() =>
             {
                 if (activeMenuType == OptionMenuType.System && currentActivePanel != -1)
                 {
@@ -279,6 +283,12 @@ public class OptionManager : MonoBehaviour
         bgmSettings.onOffImage.sprite = soundOnImage;
         sfxSettings.onOffImage.sprite = soundOnImage;
 
+        // 토글 버튼 이미지 초기화
+        bgmSettings.toggleButtonImage = bgmSettings.toggleButton.GetComponent<Image>();
+        sfxSettings.toggleButtonImage = sfxSettings.toggleButton.GetComponent<Image>();
+        UpdateToggleButtonColor(bgmSettings.toggleButtonImage, bgmSettings.isOn);
+        UpdateToggleButtonColor(sfxSettings.toggleButtonImage, sfxSettings.isOn);
+
         // 토글 버튼 이벤트 설정
         bgmSettings.toggleButton.onClick.AddListener(() => ToggleSound(true));
         sfxSettings.toggleButton.onClick.AddListener(() => ToggleSound(false));
@@ -294,6 +304,16 @@ public class OptionManager : MonoBehaviour
         settings.isOn = !settings.isOn;
         SetSoundToggleImage(isBgm);
         UpdateToggleUI(settings.isOn, isBgm);
+        UpdateToggleButtonColor(settings.toggleButtonImage, settings.isOn);
+    }
+
+    // 토글 버튼 색상 업데이트 함수
+    private void UpdateToggleButtonColor(Image buttonImage, bool isOn)
+    {
+        if (ColorUtility.TryParseHtmlString(isOn ? toggleOnColorCode : toggleOffColorCode, out Color color))
+        {
+            buttonImage.color = color;
+        }
     }
 
     // 사운드 On/Off 이미지 변경 함수
@@ -353,6 +373,8 @@ public class OptionManager : MonoBehaviour
     private void InitializeToggle(ToggleSettings settings, System.Action toggleAction)
     {
         settings.toggleButton.onClick.AddListener(() => toggleAction());
+        settings.toggleButtonImage = settings.toggleButton.GetComponent<Image>();
+        UpdateToggleButtonColor(settings.toggleButtonImage, settings.isOn);
         UpdateToggleUI(settings.handle, settings.isOn, true);
     }
 
@@ -379,6 +401,7 @@ public class OptionManager : MonoBehaviour
     {
         settings.isOn = !settings.isOn;
         UpdateToggleUI(settings.handle, settings.isOn);
+        UpdateToggleButtonColor(settings.toggleButtonImage, settings.isOn);
     }
 
     // 토글 UI 업데이트 함수
@@ -669,6 +692,7 @@ public class OptionManager : MonoBehaviour
     }
 
     // ======================================================================================================================
+    // []
 
 
 

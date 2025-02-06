@@ -11,8 +11,9 @@ public class AutoMoveManager : MonoBehaviour
     [SerializeField] private GameObject autoMovePanel;              // 자동 이동 On/Off 패널
     [SerializeField] private Button closeAutoMovePanelButton;       // 자동 이동 패널 닫기 버튼
     [SerializeField] private Button autoMoveStateButton;            // 자동 이동 상태 버튼
-    [HideInInspector] public bool isAutoMoveEnabled = true;         // 자동 이동 활성화 상태
-    private bool previousAutoMoveState = true;                      // 이전 상태 저장
+    private bool isAutoMoveEnabled = true;                          // 자동 이동 활성화 상태
+    private float autoMoveTime = 5f;                                // 자동 이동 시간
+    private bool previousAutoMoveState;                             // 이전 상태 저장
 
     // ======================================================================================================================
 
@@ -61,6 +62,43 @@ public class AutoMoveManager : MonoBehaviour
         CloseAutoMovePanel();
     }
 
+    // 자동이동 버튼 색상 업데이트 함수
+    private void UpdateAutoMoveButtonColor()
+    {
+        if (openAutoMovePanelButton != null)
+        {
+            string colorCode = !isAutoMoveEnabled ? "#5f5f5f" : "#FFFFFF";
+            if (ColorUtility.TryParseHtmlString(colorCode, out Color color))
+            {
+                openAutoMovePanelButton.GetComponent<Image>().color = color;
+            }
+        }
+    }
+
+    // 자동이동 패널 닫는 함수
+    public void CloseAutoMovePanel()
+    {
+        if (autoMovePanel != null)
+        {
+            autoMovePanel.SetActive(false);
+        }
+    }
+
+    // 자동이동 현재 상태 반환하는 함수
+    public bool IsAutoMoveEnabled()
+    {
+        return isAutoMoveEnabled;
+    }
+
+    // 자동이동 주기 반환하는 함수
+    public float AutoMoveTime()
+    {
+        return autoMoveTime;
+    }
+
+    // ======================================================================================================================
+    // [전투 관련]
+
     // 전투 시작시 버튼 및 기능 비활성화시키는 함수
     public void StartBattleAutoMoveState()
     {
@@ -97,32 +135,8 @@ public class AutoMoveManager : MonoBehaviour
         openAutoMovePanelButton.interactable = true;
     }
 
-    // 자동이동 버튼 색상 업데이트 함수
-    private void UpdateAutoMoveButtonColor()
-    {
-        if (openAutoMovePanelButton != null)
-        {
-            string colorCode = !isAutoMoveEnabled ? "#5f5f5f" : "#FFFFFF";
-            if (ColorUtility.TryParseHtmlString(colorCode, out Color color))
-            {
-                openAutoMovePanelButton.GetComponent<Image>().color = color;
-            }
-        }
-    }
+    // ======================================================================================================================
 
-    // 자동이동 패널 닫는 함수
-    public void CloseAutoMovePanel()
-    {
-        if (autoMovePanel != null)
-        {
-            autoMovePanel.SetActive(false);
-        }
-    }
-
-    // 자동이동 현재 상태 반환하는 함수
-    public bool IsAutoMoveEnabled()
-    {
-        return isAutoMoveEnabled;
-    }
+    
 
 }

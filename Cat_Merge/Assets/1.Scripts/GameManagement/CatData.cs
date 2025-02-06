@@ -9,22 +9,24 @@ public class CatData : MonoBehaviour
     public Cat catData;                         // 고양이 데이터
     private Image catImage;                     // 고양이 이미지
     
+
     private RectTransform rectTransform;        // RectTransform 참조
     private RectTransform parentPanel;          // 부모 패널 RectTransform
     private DragAndDropManager catDragAndDrop;  // DragAndDropManager 참조
     
+
     private bool isAnimating = false;           // 애니메이션 중인지 확인 플래그
-    private bool isAutoMoveEnabled = true;      // 자동 이동 활성화 상태
     private Coroutine autoMoveCoroutine;        // 자동 이동 코루틴
+
 
     private TextMeshProUGUI collectCoinText;    // 자동 재화 획득 텍스트
     private Image collectCoinImage;             // 자동 재화 획득 이미지
     //private Animator catAnimator;               // 자동 재화 획득 Animator 컴포넌트 참조
-
-    private float collectingTime = 2f;          // 자동 재화 수집 시간
+    private float collectingTime;               // 자동 재화 수집 시간
     public float CollectingTime { get => collectingTime; set => collectingTime = value; }
     private bool isCollectingCoins = true;      // 자동 재화 수집 활성화 상태
     private Coroutine autoCollectCoroutine;     // 자동 재화 수집 코루틴
+
 
     public int catHp;                           // 고양이 체력
     public bool isStuned = false;               // 고양이 기절상태
@@ -74,12 +76,6 @@ public class CatData : MonoBehaviour
 
     // ======================================================================================================================
     // [전투]
-
-    // 자동이동 현재 상태 반환하는 함수
-    public bool IsAutoMoveEnabled()
-    {
-        return isAutoMoveEnabled;
-    }
 
     // 보스 히트박스 경계 내에 존재하는 고양이를 히트박스 경계로 이동 (보스 스폰시 히트박스 내부에 있던 고양이들이 히트박스 경계로 밀려나는 현상)
     public void MoveOppositeBoss(Vector3 bossPosition, Vector2 bossSize)
@@ -176,7 +172,7 @@ public class CatData : MonoBehaviour
         HealCatHP();
         isCollectingCoins = true;
         SetRaycastTarget(true);
-        SetAutoMoveState(true);
+        SetAutoMoveState(AutoMoveManager.Instance.IsAutoMoveEnabled());
         isStuned = false;
         catImage.color = Color.white;                       // 원래 색상 복구 (Idle 애니메이션 복구)
 
@@ -202,10 +198,8 @@ public class CatData : MonoBehaviour
     // 자동 이동을 활성화/비활성화하는 함수
     public void SetAutoMoveState(bool isEnabled)
     {
-        isAutoMoveEnabled = isEnabled;
-
         // 자동 이동을 활성화하려면 코루틴 시작
-        if (isAutoMoveEnabled && !isStuned)
+        if (isEnabled && !isStuned)
         {
             if (!isAnimating && autoMoveCoroutine == null)
             {
@@ -224,12 +218,12 @@ public class CatData : MonoBehaviour
         }
     }
 
-    // 10초마다 자동으로 이동하는 코루틴
+    // AutoMoveTime마다 자동으로 이동하는 코루틴
     public IEnumerator AutoMove()
     {
         while (true)
         {
-            yield return new WaitForSeconds(5f);
+            yield return new WaitForSeconds(AutoMoveManager.Instance.AutoMoveTime());
 
             if (!isAnimating && (catDragAndDrop == null || !catDragAndDrop.isDragging))
             {
@@ -350,6 +344,20 @@ public class CatData : MonoBehaviour
                 StopCoroutine(autoCollectCoroutine);
                 autoCollectCoroutine = null;
             }
+            DisableCollectUI();
+        }
+    }
+
+    // UI 요소들을 즉시 비활성화하는 함수
+    public void DisableCollectUI()
+    {
+        if (collectCoinText != null)
+        {
+            collectCoinText.gameObject.SetActive(false);
+        }
+        if (collectCoinImage != null)
+        {
+            collectCoinImage.gameObject.SetActive(false);
         }
     }
 
@@ -359,7 +367,8 @@ public class CatData : MonoBehaviour
         while (isCollectingCoins)
         {
             // 재화 획득 시간(아이템 상점 레벨)
-            yield return new WaitForSeconds(ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value); 
+            collectingTime = ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value;
+            yield return new WaitForSeconds(collectingTime);
 
             if (catData != null && GameManager.Instance != null)
             {
@@ -392,5 +401,8 @@ public class CatData : MonoBehaviour
         collectCoinText.gameObject.SetActive(false);
         collectCoinImage.gameObject.SetActive(false);
     }
+
+    // ======================================================================================================================
+
 
 }

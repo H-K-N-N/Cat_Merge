@@ -555,31 +555,27 @@ public class BattleManager : MonoBehaviour
 
     private void SetStartFunctions()
     {
-        GetComponent<MergeManager>().StartBattleMergeState();
-        GetComponent<AutoMoveManager>().StartBattleAutoMoveState();
+        MergeManager.Instance.StartBattleMergeState();
+        AutoMoveManager.Instance.StartBattleAutoMoveState();
         GetComponent<SortManager>().StartBattleSortState();
         //GetComponent<AutoMergeManager>().StartBattleAutoMergeState();
 
-        GetComponent<SpawnManager>().StartBattleSpawnState();
+        SpawnManager.Instance.StartBattleSpawnState();
 
-        GetComponent<ItemMenuManager>().StartBattleItemMenuState();
-        GetComponent<BuyCatManager>().StartBattleBuyCatState();
-        //GetComponent<DictionaryManager>().StartBattleDictionaryState();
-        //GetComponent<QuestManager>().StartBattleQuestState();
+        ItemMenuManager.Instance.StartBattleItemMenuState();
+        BuyCatManager.Instance.StartBattleBuyCatState();
     }
     private void SetEndFunctions()
     {
-        GetComponent<MergeManager>().EndBattleMergeState();
-        GetComponent<AutoMoveManager>().EndBattleAutoMoveState();
+        MergeManager.Instance.EndBattleMergeState();
+        AutoMoveManager.Instance.EndBattleAutoMoveState();
         GetComponent<SortManager>().EndBattleSortState();
         //GetComponent<AutoMergeManager>().EndBattleAutoMergeState();
 
-        GetComponent<SpawnManager>().EndBattleSpawnState();
+        SpawnManager.Instance.EndBattleSpawnState();
 
-        GetComponent<ItemMenuManager>().EndBattleItemMenuState();
-        GetComponent<BuyCatManager>().EndBattleBuyCatState();
-        //GetComponent<DictionaryManager>().EndBattleDictionaryState();
-        //GetComponent<QuestManager>().EndBattleQuestState();
+        ItemMenuManager.Instance.EndBattleItemMenuState();
+        BuyCatManager.Instance.EndBattleBuyCatState();
     }
 
     // ======================================================================================================================

@@ -9,6 +9,8 @@ public class BattleManager : MonoBehaviour
 {
     public static BattleManager Instance { get; private set; }
 
+    // ======================================================================================================================
+
     [Header("---[Battle System]")]
     [SerializeField] private GameObject bossPrefab;             // 보스 프리팹
     [SerializeField] private Transform bossUIParent;            // 보스를 배치할 부모 Transform (UI Panel 등)
@@ -30,6 +32,7 @@ public class BattleManager : MonoBehaviour
     private bool isBattleActive = false;                        // 전투 활성화 여부
     public bool IsBattleActive { get => isBattleActive; }
 
+    // ======================================================================================================================
 
     [Header("---[Boss UI]")]
     [SerializeField] private GameObject battleHPUI;             // Battle HP UI (활성화/비활성화 제어)
@@ -42,6 +45,7 @@ public class BattleManager : MonoBehaviour
     private float currentBossHP;                                // 보스의 현재 HP
     private float maxBossHP;                                    // 보스의 최대 HP
 
+    // ======================================================================================================================
 
     [Header("---[Warning Panel]")]
     [SerializeField] private GameObject warningPanel;           // 전투시스템 시작시 나오는 경고 Panel (warningDuration동안 지속)
@@ -52,7 +56,6 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI topWarningText;    // 상단 경고 텍스트
     [SerializeField] private TextMeshProUGUI bossDangerText;    // 보스 위험 텍스트
     [SerializeField] private TextMeshProUGUI bottomWarningText; // 하단 경고 텍스트
-    
 
     // ======================================================================================================================
 

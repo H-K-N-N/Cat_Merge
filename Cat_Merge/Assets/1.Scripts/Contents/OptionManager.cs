@@ -554,7 +554,7 @@ public class OptionManager : MonoBehaviour
     {
         // 선택된 버튼을 제외한 다른 버튼들 페이드 아웃 및 선택된 버튼 이동 동시 실행
         List<IEnumerator> animations = new List<IEnumerator>();
-        animations.Add(MoveButton(slotButtons[index].GetComponent<RectTransform>(), originalButtonPositions[index], new Vector2(0, 540)));
+        animations.Add(MoveButton(slotButtons[index].GetComponent<RectTransform>(), originalButtonPositions[index], new Vector2(0, 465)));
         for (int i = 0; i < slotButtons.Length; i++)
         {
             if (i != index)
@@ -588,7 +588,7 @@ public class OptionManager : MonoBehaviour
 
         // 패널의 초기 크기와 위치 설정
         panelRect.sizeDelta = new Vector2(panelRect.sizeDelta.x, 0);
-        panelRect.anchoredPosition = new Vector2(panelRect.anchoredPosition.x, 550);
+        panelRect.anchoredPosition = new Vector2(panelRect.anchoredPosition.x, 480);
         float elapsedTime = 0f;
 
         // Back 버튼 페이드 인 시작
@@ -598,13 +598,13 @@ public class OptionManager : MonoBehaviour
         {
             elapsedTime += Time.deltaTime;
             float t = elapsedTime / systemAnimDuration;
-            float currentHeight = Mathf.Lerp(0, 1100, t);
+            float currentHeight = Mathf.Lerp(0, 960, t);
             panelRect.sizeDelta = new Vector2(panelRect.sizeDelta.x, currentHeight);
-            panelRect.anchoredPosition = new Vector2(panelRect.anchoredPosition.x, Mathf.Lerp(550, 0, t));
+            panelRect.anchoredPosition = new Vector2(panelRect.anchoredPosition.x, Mathf.Lerp(480, 0, t));
             yield return null;
         }
 
-        panelRect.sizeDelta = new Vector2(panelRect.sizeDelta.x, 1100);
+        panelRect.sizeDelta = new Vector2(panelRect.sizeDelta.x, 960);
         panelRect.anchoredPosition = new Vector2(panelRect.anchoredPosition.x, 0);
     }
 
@@ -621,9 +621,9 @@ public class OptionManager : MonoBehaviour
         {
             elapsedTime += Time.deltaTime;
             float t = elapsedTime / systemAnimDuration;
-            float currentHeight = Mathf.Lerp(1100, 0, t);
+            float currentHeight = Mathf.Lerp(960, 0, t);
             panelRect.sizeDelta = new Vector2(panelRect.sizeDelta.x, currentHeight);
-            panelRect.anchoredPosition = new Vector2(panelRect.anchoredPosition.x, Mathf.Lerp(0, 550, t));
+            panelRect.anchoredPosition = new Vector2(panelRect.anchoredPosition.x, Mathf.Lerp(0, 480, t));
             yield return null;
         }
 
@@ -639,7 +639,7 @@ public class OptionManager : MonoBehaviour
 
         // 버튼 이동 및 페이드 인 동시 실행
         List<IEnumerator> animations = new List<IEnumerator>();
-        animations.Add(MoveButton(slotButtons[index].GetComponent<RectTransform>(), new Vector2(0, 540), originalButtonPositions[index]));
+        animations.Add(MoveButton(slotButtons[index].GetComponent<RectTransform>(), new Vector2(0, 465), originalButtonPositions[index]));
         for (int i = 0; i < slotButtons.Length; i++)
         {
             if (i != index)

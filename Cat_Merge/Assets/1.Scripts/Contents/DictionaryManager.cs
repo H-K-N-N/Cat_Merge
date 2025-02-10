@@ -53,11 +53,10 @@ public class DictionaryManager : MonoBehaviour
     private DictionaryMenuType activeMenuType;                      // 현재 활성화된 메뉴 타입
 
     [Header("---[Information Panel UI]")]
-    [SerializeField] private GameObject informationPanel;           // Information Panel
     [SerializeField] private Image informationCatIcon;              // Information Cat Icon
     [SerializeField] private TextMeshProUGUI informationCatDetails; // informationCatDetails Text
     [SerializeField] private GameObject catInformationPanel;        // catInformation Panel (상세정보 칸 Panel)
-    [SerializeField] private RectTransform fullInformationPanel;    // fullInformation Panel (상세정보 스크로 Panel)
+    [SerializeField] private RectTransform fullInformationPanel;    // fullInformation Panel (상세정보 스크롤 Panel)
 
     // 임시 (다른 서브 메뉴들을 추가한다면 어떻게 정리 할까 고민)
     [Header("---[Sub Contents]")]
@@ -67,12 +66,11 @@ public class DictionaryManager : MonoBehaviour
 
     // ======================================================================================================================
 
-
     [Header("---[Friendship UnLock Buttons]")]
-    [SerializeField] private Button[] friendshipUnlockButtons;
-    [SerializeField] public GameObject[] friendshipGetCrystalImg;
-    [SerializeField] public GameObject[] friendshipLockImg;
-    [SerializeField] public GameObject[] friendshipStarImg;                                                             // 배경 scrollRectContents
+    [SerializeField] private Button[] friendshipUnlockButtons;      // 
+    [SerializeField] public GameObject[] friendshipGetCrystalImg;   // 
+    [SerializeField] public GameObject[] friendshipLockImg;         // 
+    [SerializeField] public GameObject[] friendshipStarImg;         // 배경 scrollRectContents
 
     // ======================================================================================================================
 
@@ -373,8 +371,8 @@ public class DictionaryManager : MonoBehaviour
         catInformationPanel.GetComponent<ScrollRect>().enabled = true;
         catInformationPanel.GetComponent<ScrollRect>().velocity = Vector2.zero;
 
-        // fullInformationPanel의 Y좌표를 -300으로 고정
-        fullInformationPanel.anchoredPosition = new Vector2(0, -300f);
+        // fullInformationPanel의 Y좌표를 -312.5f로 고정
+        fullInformationPanel.anchoredPosition = new Vector2(0, -312.5f);
     }
 
     // 새로운 고양이 해금 효과 함수
@@ -537,7 +535,7 @@ public class DictionaryManager : MonoBehaviour
     //    // 스크롤 활성화, 스크롤 중이었다면 멈춤
     //    catInformationPanel.GetComponent<ScrollRect>().enabled = true;
     //    catInformationPanel.GetComponent<ScrollRect>().velocity = Vector2.zero;
-    //    // fullInformationPanel의 Y좌표를 -300으로 고정
-    //    fullInformationPanel.anchoredPosition = new Vector2(0, -300f);
+    //    //fullInformationPanel의 Y좌표를 -312.5f로 고정
+    //    fullInformationPanel.anchoredPosition = new Vector2(0, -312.5f);
     //}
 }

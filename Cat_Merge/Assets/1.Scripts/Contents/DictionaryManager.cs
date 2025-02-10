@@ -64,7 +64,15 @@ public class DictionaryManager : MonoBehaviour
     [SerializeField] private Transform scrollRectContents;          // 노말 고양이 scrollRectContents (도감에서 노말 고양이의 정보를 초기화 하기 위해)
                                                                     // 희귀 고양이 scrollRectContents
                                                                     // 특수 고양이 scrollRectContents
-                                                                    // 배경 scrollRectContents
+
+    // ======================================================================================================================
+
+
+    [Header("---[Friendship UnLock Buttons]")]
+    [SerializeField] private Button[] friendshipUnlockButtons;
+    [SerializeField] public GameObject[] friendshipGetCrystalImg;
+    [SerializeField] public GameObject[] friendshipLockImg;
+    [SerializeField] public GameObject[] friendshipStarImg;                                                             // 배경 scrollRectContents
 
     // ======================================================================================================================
 
@@ -83,6 +91,8 @@ public class DictionaryManager : MonoBehaviour
         activeMenuType = DictionaryMenuType.Normal;
 
         InitializeDictionaryManager();
+
+        InitializeFriendshipButton();
     }
 
     private void Start()
@@ -478,4 +488,56 @@ public class DictionaryManager : MonoBehaviour
         OnCatDataChanged -= UpdateNewImageStatus;
     }
 
+
+    // ============================================================================================================
+    private void InitializeFriendshipButton()
+    {
+        friendshipUnlockButtons[0].onClick.AddListener(UnLockLevel1Friendship);
+        friendshipUnlockButtons[1].onClick.AddListener(UnLockLevel2Friendship);
+        friendshipUnlockButtons[2].onClick.AddListener(UnLockLevel3Friendship);
+        friendshipUnlockButtons[3].onClick.AddListener(UnLockLevel4Friendship);
+        friendshipUnlockButtons[4].onClick.AddListener(UnLockLevel5Friendship);
+
+    }
+    private void UnLockLevel1Friendship()
+    {
+        friendshipGetCrystalImg[0].SetActive(false);
+        GameManager.Instance.Cash += 100;
+        friendshipUnlockButtons[0].interactable = false;
+    }
+    private void UnLockLevel2Friendship()
+    {
+        friendshipGetCrystalImg[1].SetActive(false);
+    }
+    private void UnLockLevel3Friendship()
+    {
+        friendshipGetCrystalImg[2].SetActive(false);
+    }
+    private void UnLockLevel4Friendship()
+    {
+        friendshipGetCrystalImg[3].SetActive(false);
+    }
+    private void UnLockLevel5Friendship()
+    {
+        friendshipGetCrystalImg[4].SetActive(false);
+    }
+    //private void ShowFriendshipInfoPanel(int catGrade)
+    //{
+    //    // 고양이 정보 불러오기
+    //    var catData = GameManager.Instance.AllCatData[catGrade];
+    //    // 이미지 설정
+    //    informationCatIcon.sprite = catData.CatImage;
+    //    // 텍스트 설정
+    //    string catInfo = $"Name: {catData.CatName}\n" +
+    //                     $"Grade: {catData.CatGrade}\n" +
+    //                     $"Damage: {catData.CatDamage}\n" +
+    //                     $"HP: {catData.CatHp}\n" +
+    //                     $"GetCoin: {catData.CatGetCoin}";
+    //    informationCatDetails.text = catInfo;
+    //    // 스크롤 활성화, 스크롤 중이었다면 멈춤
+    //    catInformationPanel.GetComponent<ScrollRect>().enabled = true;
+    //    catInformationPanel.GetComponent<ScrollRect>().velocity = Vector2.zero;
+    //    // fullInformationPanel의 Y좌표를 -300으로 고정
+    //    fullInformationPanel.anchoredPosition = new Vector2(0, -300f);
+    //}
 }

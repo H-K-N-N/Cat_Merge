@@ -21,7 +21,7 @@ public class MouseDataLoader : MonoBehaviour
     // CSV 파일을 읽어 Mouse 객체로 변환 후 Dictionary에 저장
     public void LoadMouseDataFromCSV()
     {
-        TextAsset csvFile = Resources.Load<TextAsset>("MouseDB1");
+        TextAsset csvFile = Resources.Load<TextAsset>("MouseDB");
         if (csvFile == null)
         {
             Debug.LogError("CSV 파일이 연결되지 않았습니다");

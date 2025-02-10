@@ -23,7 +23,7 @@ public class CatDataLoader : MonoBehaviour
     // CSV 파일을 읽어 Cat 객체로 변환 후 Dictionary에 저장
     public void LoadCatDataFromCSV()
     {
-        TextAsset csvFile = Resources.Load<TextAsset>("CatDB1");
+        TextAsset csvFile = Resources.Load<TextAsset>("CatDB");
         if (csvFile == null)
         {
             Debug.LogError("CSV 파일이 연결되지 않았습니다");

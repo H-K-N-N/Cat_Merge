@@ -172,6 +172,9 @@ public class BattleManager : MonoBehaviour
     // warningPanel 활성화시 코루틴
     private IEnumerator LoadWarningPanel()
     {
+        // 자동 머지 일시정지
+        AutoMergeManager.Instance.PauseAutoMerge();
+
         warningPanel.SetActive(true);
         float elapsedTime = 0f;
         float halfDuration = warningDuration / 2f;
@@ -620,6 +623,9 @@ public class BattleManager : MonoBehaviour
 
             cat.HealCatHP();
         }
+
+        // 자동 머지 재개
+        AutoMergeManager.Instance.ResumeAutoMerge();
     }
 
     // ======================================================================================================================
@@ -658,7 +664,6 @@ public class BattleManager : MonoBehaviour
         MergeManager.Instance.StartBattleMergeState();
         AutoMoveManager.Instance.StartBattleAutoMoveState();
         GetComponent<SortManager>().StartBattleSortState();
-        //GetComponent<AutoMergeManager>().StartBattleAutoMergeState();
 
         SpawnManager.Instance.StartBattleSpawnState();
 
@@ -672,7 +677,6 @@ public class BattleManager : MonoBehaviour
         MergeManager.Instance.EndBattleMergeState();
         AutoMoveManager.Instance.EndBattleAutoMoveState();
         GetComponent<SortManager>().EndBattleSortState();
-        //GetComponent<AutoMergeManager>().EndBattleAutoMergeState();
 
         SpawnManager.Instance.EndBattleSpawnState();
 

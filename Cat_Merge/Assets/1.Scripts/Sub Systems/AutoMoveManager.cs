@@ -11,9 +11,15 @@ public class AutoMoveManager : MonoBehaviour
     [SerializeField] private GameObject autoMovePanel;              // 자동 이동 On/Off 패널
     [SerializeField] private Button closeAutoMovePanelButton;       // 자동 이동 패널 닫기 버튼
     [SerializeField] private Button autoMoveStateButton;            // 자동 이동 상태 버튼
-    private bool isAutoMoveEnabled = true;                          // 자동 이동 활성화 상태
-    private float autoMoveTime = 5f;                                // 자동 이동 시간
+    private float autoMoveTime = 3f;                                // 자동 이동 시간
+    private bool isAutoMoveEnabled;                                 // 자동 이동 활성화 상태
     private bool previousAutoMoveState;                             // 이전 상태 저장
+
+    // ======================================================================================================================
+
+    [Header("---[UI Color]")]
+    private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
+    private const string inactiveColorCode = "#FFFFFF";             // 비활성화상태 Color
 
     // ======================================================================================================================
 
@@ -28,6 +34,11 @@ public class AutoMoveManager : MonoBehaviour
             Destroy(gameObject);
         }
 
+        isAutoMoveEnabled = true;
+    }
+
+    private void Start()
+    {
         UpdateAutoMoveButtonColor();
 
         openAutoMovePanelButton.onClick.AddListener(OpenAutoMovePanel);
@@ -52,10 +63,11 @@ public class AutoMoveManager : MonoBehaviour
         isAutoMoveEnabled = !isAutoMoveEnabled;
 
         // 모든 고양이에 상태 적용
-        CatData[] allCatDataObjects = FindObjectsOfType<CatData>();
-        foreach (var catData in allCatDataObjects)
+        CatData[] allCats = FindObjectsOfType<CatData>();
+        foreach (var cat in allCats)
         {
-            catData.SetAutoMoveState(isAutoMoveEnabled);
+            if (cat.isStuned) continue;
+            cat.SetAutoMoveState(isAutoMoveEnabled);
         }
 
         UpdateAutoMoveButtonColor();
@@ -67,7 +79,7 @@ public class AutoMoveManager : MonoBehaviour
     {
         if (openAutoMovePanelButton != null)
         {
-            string colorCode = !isAutoMoveEnabled ? "#5f5f5f" : "#FFFFFF";
+            string colorCode = !isAutoMoveEnabled ? activeColorCode : inactiveColorCode;
             if (ColorUtility.TryParseHtmlString(colorCode, out Color color))
             {
                 openAutoMovePanelButton.GetComponent<Image>().color = color;
@@ -106,10 +118,11 @@ public class AutoMoveManager : MonoBehaviour
         isAutoMoveEnabled = false;
 
         // 모든 고양이에 상태 적용
-        CatData[] allCatDataObjects = FindObjectsOfType<CatData>();
-        foreach (var catData in allCatDataObjects)
+        CatData[] allCats = FindObjectsOfType<CatData>();
+        foreach (var cat in allCats)
         {
-            catData.SetAutoMoveState(isAutoMoveEnabled);
+            if (cat.isStuned) continue;
+            cat.SetAutoMoveState(isAutoMoveEnabled);
         }
 
         openAutoMovePanelButton.interactable = false;
@@ -126,10 +139,11 @@ public class AutoMoveManager : MonoBehaviour
         isAutoMoveEnabled = previousAutoMoveState;
 
         // 모든 고양이에 상태 적용
-        CatData[] allCatDataObjects = FindObjectsOfType<CatData>();
-        foreach (var catData in allCatDataObjects)
+        CatData[] allCats = FindObjectsOfType<CatData>();
+        foreach (var cat in allCats)
         {
-            catData.SetAutoMoveState(isAutoMoveEnabled);
+            if (cat.isStuned) continue;
+            cat.SetAutoMoveState(isAutoMoveEnabled);
         }
 
         openAutoMovePanelButton.interactable = true;

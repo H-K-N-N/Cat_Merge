@@ -90,7 +90,7 @@ public class QuestManager : MonoBehaviour
     [SerializeField] private Button[] allRewardButtons;                         // All RewardButtons
 
     [Header("---[Text UI Color]")]
-    private string activeColorCode = "#5f5f5f";                                 // 활성화상태 Color
+    private string activeColorCode = "#FFCC74";                                 // 활성화상태 Color
     private string inactiveColorCode = "#FFFFFF";                               // 비활성화상태 Color
 
     // ======================================================================================================================

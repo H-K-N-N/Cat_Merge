@@ -26,16 +26,16 @@ public class OptionManager : MonoBehaviour
     // [서브 메뉴 UI 색상 설정]
 
     [Header("---[Sub Menu UI Color]")]
-    private const string activeColorCode = "#5f5f5f";           // 활성화상태 Color
+    private const string activeColorCode = "#FFCC74";           // 활성화상태 Color
     private const string inactiveColorCode = "#FFFFFF";         // 비활성화상태 Color
-    private const string toggleOnColorCode = "#D9F2D0";         // 토글 On Color
-    private const string toggleOffColorCode = "#FFFFFF";        // 토글 Off Color
 
     // ======================================================================================================================
     // [토글 버튼 관련 설정]
 
     private const float onX = 65f, offX = -65f;                 // 핸들 버튼 x좌표
     private const float moveDuration = 0.2f;                    // 토글 애니메이션 지속 시간
+    private const string toggleOnColorCode = "#D9F2D0";         // 토글 On Color
+    private const string toggleOffColorCode = "#FFFFFF";        // 토글 Off Color
 
     // ======================================================================================================================
     // [Sound]

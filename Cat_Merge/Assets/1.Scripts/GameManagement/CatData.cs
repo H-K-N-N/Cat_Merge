@@ -159,7 +159,7 @@ public class CatData : MonoBehaviour
     private IEnumerator StunAndRecover(float recoveryTime)
     {
         // 고양이 기절 상태 처리 (기능 정지, 애니메이션 등)
-        isCollectingCoins = false;
+        SetCollectingCoinsState(false);
         SetAutoMoveState(false);
         SetRaycastTarget(false);
         isStuned = true;
@@ -170,9 +170,9 @@ public class CatData : MonoBehaviour
 
         // 체력 회복 및 상태 복구
         HealCatHP();
-        isCollectingCoins = true;
         SetRaycastTarget(true);
         SetAutoMoveState(AutoMoveManager.Instance.IsAutoMoveEnabled());
+        SetCollectingCoinsState(true);
         isStuned = false;
         catImage.color = Color.white;                       // 원래 색상 복구 (Idle 애니메이션 복구)
 
@@ -183,7 +183,6 @@ public class CatData : MonoBehaviour
     private void SetRaycastTarget(bool isActive)
     {
         catImage.raycastTarget = isActive;
-        SetCollectingCoinsState(isActive);
     }
 
     // 고양이 HP 회복 함수

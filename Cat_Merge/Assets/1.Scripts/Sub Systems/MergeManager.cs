@@ -12,8 +12,14 @@ public class MergeManager : MonoBehaviour
     [SerializeField] private GameObject mergePanel;                 // 머지 On/Off 패널
     [SerializeField] private Button closeMergePanelButton;          // 머지 패널 닫기 버튼
     [SerializeField] private Button mergeStateButton;               // 머지 상태 버튼
-    private bool isMergeEnabled = true;                             // 머지 활성화 상태
-    private bool previousMergeState = true;                         // 이전 상태 저장
+    private bool isMergeEnabled;                                    // 머지 활성화 상태
+    private bool previousMergeState;                                // 이전 상태 저장
+
+    // ======================================================================================================================
+
+    [Header("---[UI Color]")]
+    private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
+    private const string inactiveColorCode = "#FFFFFF";             // 비활성화상태 Color
 
     // ======================================================================================================================
 
@@ -28,6 +34,11 @@ public class MergeManager : MonoBehaviour
             Destroy(gameObject);
         }
 
+        isMergeEnabled = true;
+    }
+
+    private void Start()
+    {
         UpdateMergeButtonColor();
 
         openMergePanelButton.onClick.AddListener(OpenMergePanel);
@@ -79,7 +90,7 @@ public class MergeManager : MonoBehaviour
     {
         if (openMergePanelButton != null)
         {
-            string colorCode = !isMergeEnabled ? "#5f5f5f" : "#FFFFFF";
+            string colorCode = !isMergeEnabled ? activeColorCode : inactiveColorCode;
             if (ColorUtility.TryParseHtmlString(colorCode, out Color color))
             {
                 openMergePanelButton.GetComponent<Image>().color = color;

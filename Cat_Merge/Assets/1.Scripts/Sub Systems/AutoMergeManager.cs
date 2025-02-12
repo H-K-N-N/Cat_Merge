@@ -387,6 +387,8 @@ public class AutoMergeManager : MonoBehaviour
         {
             openAutoMergePanelButton.interactable = false;
         }
+
+        DisableAutoMergeUI();
     }
 
     // 자동 머지 이어하기 함수
@@ -403,6 +405,16 @@ public class AutoMergeManager : MonoBehaviour
         else
         {
             openAutoMergePanelButton.interactable = true;
+        }
+    }
+
+    // 전투 시작시 자동머지 UI 비활성화 함수
+    private void DisableAutoMergeUI()
+    {
+        openAutoMergePanelButton.interactable = false;
+        if (autoMergePanel.activeSelf)
+        {
+            autoMergePanel.SetActive(false);
         }
     }
     #endregion

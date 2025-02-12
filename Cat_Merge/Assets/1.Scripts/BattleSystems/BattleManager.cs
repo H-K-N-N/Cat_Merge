@@ -7,32 +7,31 @@ using TMPro;
 // BattleManager Script
 public class BattleManager : MonoBehaviour
 {
+    #region Variables
     public static BattleManager Instance { get; private set; }
-
-    // ======================================================================================================================
 
     [Header("---[Battle System]")]
     [SerializeField] private GameObject bossPrefab;             // 보스 프리팹
     [SerializeField] private Transform bossUIParent;            // 보스를 배치할 부모 Transform (UI Panel 등)
     [SerializeField] private Slider respawnSlider;              // 보스 소환까지 남은 시간을 표시할 Slider UI
 
-    private float spawnInterval = 10f;                          // 보스 등장 주기 (나중에 유저가 변경할 수 있게 수정할 계획도 있음)
+    private const float DEFAULT_SPAWN_INTERVAL = 10f;           // 보스 등장 주기 (나중에 유저가 변경할 수 있게 수정할 계획도 있음)
+    private float spawnInterval;                                // 
     private Coroutine respawnSliderCoroutine;                   // Slider 코루틴
     private float bossSpawnTimer = 0f;                          // 보스 스폰 타이머
     private float sliderDuration;                               // Slider 유지 시간
     private float bossDuration;                                 // 보스 유지 시간 (sliderDuration + warningDuration)
     private int bossStage = 1;                                  // 보스 스테이지
-    public int BossStage { get => bossStage; }
+    public int BossStage => bossStage;
 
-    private float bossAttackDelay = 2f;                         // 보스 공격 딜레이
-    private float catAttackDelay = 1f;                          // 고양이 공격 딜레이
+    private const float BOSS_ATTACK_DELAY = 2f;                 // 보스 공격 딜레이
+    private const float CAT_ATTACK_DELAY = 1f;                  // 고양이 공격 딜레이
+    private const float GIVEUP_BUTTON_DELAY = 2f;               // 항복 버튼 활성화 딜레이
 
-    private GameObject currentBoss = null;                      // 현재 보스
+    private GameObject currentBoss;                             // 현재 보스
     [HideInInspector] public BossHitbox bossHitbox;             // 보스 히트박스
-    private bool isBattleActive = false;                        // 전투 활성화 여부
-    public bool IsBattleActive { get => isBattleActive; }
-
-    // ======================================================================================================================
+    private bool isBattleActive;                                // 전투 활성화 여부
+    public bool IsBattleActive => isBattleActive;
 
     [Header("---[Boss UI]")]
     [SerializeField] private GameObject battleHPUI;             // Battle HP UI (활성화/비활성화 제어)
@@ -41,11 +40,9 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI bossHPText;        // HP % Text
     [SerializeField] private Button giveupButton;               // 항복 버튼
 
-    private Mouse currentBossData = null;                       // 현재 보스 데이터
+    private Mouse currentBossData;                              // 현재 보스 데이터
     private float currentBossHP;                                // 보스의 현재 HP
     private float maxBossHP;                                    // 보스의 최대 HP
-
-    // ======================================================================================================================
 
     [Header("---[Warning Panel]")]
     [SerializeField] private GameObject warningPanel;           // 전투시스템 시작시 나오는 경고 Panel (warningDuration동안 지속)
@@ -61,8 +58,16 @@ public class BattleManager : MonoBehaviour
     private CanvasGroup bossDangerCanvasGroup;                  // 보스 위험 텍스트의 CanvasGroup  
     private CanvasGroup bottomWarningCanvasGroup;               // 하단 경고 텍스트의 CanvasGroup
 
+    private const float WARNING_TEXT_START_X = -755f;           // 
+    private const float WARNING_TEXT_END_X = 755f;              // 
+    private const float BOSS_DANGER_START_X = 810f;             // 
+    private const float BOSS_DANGER_END_X = -810f;              // 
+    private const float WARNING_TEXT_Y = 0f;                    // 
+    #endregion
+
     // ======================================================================================================================
 
+    #region Unity Methods
     private void Awake()
     {
         if (Instance == null)
@@ -75,26 +80,45 @@ public class BattleManager : MonoBehaviour
         }
 
         InitializeBattleManager();
-        giveupButton.onClick.AddListener(GiveUpState);
     }
 
     private void Start()
     {
         StartCoroutine(BossSpawnRoutine());
     }
+    #endregion
 
+    // ======================================================================================================================
+
+    #region Initialization
     // BattleManager 초기 설정
     private void InitializeBattleManager()
     {
-        // warningPanel 설정
-        warningPanel.SetActive(false);
+        InitializeWarningPanel();
+        InitializeTimers();
+        InitializeSliders();
+        InitializeBattleUI();
+        InitializeCanvasGroups();
+        InitializeButtonListeners();
+    }
 
-        // Slider 시간 설정 (보스 리스폰, 보스 전투 시간)
-        spawnInterval = spawnInterval - warningDuration;
+    // warningPanel 초기화 함수
+    private void InitializeWarningPanel()
+    {
+        warningPanel.SetActive(false);
+    }
+
+    // 시간 초기화 함수 (보스 리스폰, 보스 전투 시간)
+    private void InitializeTimers()
+    {
+        spawnInterval = DEFAULT_SPAWN_INTERVAL - warningDuration;
         sliderDuration = spawnInterval;
         bossDuration = sliderDuration + warningDuration;
+    }
 
-        // respawnSlider 설정
+    // Sliders UI 초기화 함수
+    private void InitializeSliders()
+    {
         if (respawnSlider != null)
         {
             respawnSliderCoroutine = null;
@@ -102,46 +126,54 @@ public class BattleManager : MonoBehaviour
             respawnSlider.value = 0f;
         }
 
-        // warning Slider 설정
         if (warningSlider != null)
         {
             warningSliderCoroutine = null;
             warningSlider.maxValue = warningDuration;
             warningSlider.value = 0f;
         }
+    }
 
-        // Battle HP UI 초기화
+    // Battle HP UI 초기화 함수
+    private void InitializeBattleUI()
+    {
         if (battleHPUI != null)
         {
             battleHPUI.SetActive(false);
         }
-
-        InitializeCanvasGroup();
     }
 
-    // CanvasGroup 컴포넌트 초기화
-    private void InitializeCanvasGroup()
+    // 경고 UI 관련 CanvasGroup 초기화 함수
+    private void InitializeCanvasGroups()
     {
-        warningPanelCanvasGroup = warningPanel.GetComponent<CanvasGroup>();
-        if (warningPanelCanvasGroup == null)
-            warningPanelCanvasGroup = warningPanel.AddComponent<CanvasGroup>();
-
-        topWarningCanvasGroup = topWarningText.gameObject.GetComponent<CanvasGroup>();
-        if (topWarningCanvasGroup == null)
-            topWarningCanvasGroup = topWarningText.gameObject.AddComponent<CanvasGroup>();
-
-        bossDangerCanvasGroup = bossDangerText.gameObject.GetComponent<CanvasGroup>();
-        if (bossDangerCanvasGroup == null)
-            bossDangerCanvasGroup = bossDangerText.gameObject.AddComponent<CanvasGroup>();
-
-        bottomWarningCanvasGroup = bottomWarningText.gameObject.GetComponent<CanvasGroup>();
-        if (bottomWarningCanvasGroup == null)
-            bottomWarningCanvasGroup = bottomWarningText.gameObject.AddComponent<CanvasGroup>();
+        warningPanelCanvasGroup = SetupCanvasGroup(warningPanel);
+        topWarningCanvasGroup = SetupCanvasGroup(topWarningText.gameObject);
+        bossDangerCanvasGroup = SetupCanvasGroup(bossDangerText.gameObject);
+        bottomWarningCanvasGroup = SetupCanvasGroup(bottomWarningText.gameObject);
     }
+
+    // UI 오브젝트에 CanvasGroup 컴포넌트가 없으면 추가하고 반환하는 함수
+    private CanvasGroup SetupCanvasGroup(GameObject uiObject)
+    {
+        // 기존 CanvasGroup이 있으면 사용, 없으면 새로 추가
+        CanvasGroup canvasGroup = uiObject.GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+        {
+            canvasGroup = uiObject.AddComponent<CanvasGroup>();
+        }
+        return canvasGroup;
+    }
+
+    // 버튼 리스너 초기화 함수
+    private void InitializeButtonListeners()
+    {
+        giveupButton.onClick.AddListener(GiveUpState);
+    }
+    #endregion
 
     // ======================================================================================================================
-    // [BattleManager 핵심 기능]
 
+    #region Battle Core
     // 보스 스폰 코루틴
     private IEnumerator BossSpawnRoutine()
     {
@@ -176,6 +208,7 @@ public class BattleManager : MonoBehaviour
         AutoMergeManager.Instance.PauseAutoMerge();
 
         warningPanel.SetActive(true);
+
         float elapsedTime = 0f;
         float halfDuration = warningDuration / 2f;
 
@@ -186,9 +219,9 @@ public class BattleManager : MonoBehaviour
         bottomWarningCanvasGroup.alpha = 0f;
 
         // Text 초기 위치 설정
-        topWarningText.rectTransform.anchoredPosition = new Vector2(-755, 0);
-        bossDangerText.rectTransform.anchoredPosition = new Vector2(810, 0);
-        bottomWarningText.rectTransform.anchoredPosition = new Vector2(-755, 0);
+        topWarningText.rectTransform.anchoredPosition = new Vector2(WARNING_TEXT_START_X, WARNING_TEXT_Y);
+        bossDangerText.rectTransform.anchoredPosition = new Vector2(BOSS_DANGER_START_X, WARNING_TEXT_Y);
+        bottomWarningText.rectTransform.anchoredPosition = new Vector2(WARNING_TEXT_START_X, WARNING_TEXT_Y);
 
         // 첫 1초: 투명 -> 반투명
         while (elapsedTime < halfDuration)
@@ -205,9 +238,18 @@ public class BattleManager : MonoBehaviour
 
             // 텍스트 이동
             float moveProgress = elapsedTime / warningDuration;
-            topWarningText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(-755, 0), new Vector2(755, 0), moveProgress);
-            bottomWarningText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(-755, 0), new Vector2(755, 0), moveProgress);
-            bossDangerText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(810, 0), new Vector2(-810, 0), moveProgress);
+            topWarningText.rectTransform.anchoredPosition = Vector2.Lerp(
+                new Vector2(WARNING_TEXT_START_X, WARNING_TEXT_Y),
+                new Vector2(WARNING_TEXT_END_X, WARNING_TEXT_Y),
+                moveProgress);
+            bottomWarningText.rectTransform.anchoredPosition = Vector2.Lerp(
+                new Vector2(WARNING_TEXT_START_X, WARNING_TEXT_Y),
+                new Vector2(WARNING_TEXT_END_X, WARNING_TEXT_Y),
+                moveProgress);
+            bossDangerText.rectTransform.anchoredPosition = Vector2.Lerp(
+                new Vector2(BOSS_DANGER_START_X, WARNING_TEXT_Y),
+                new Vector2(BOSS_DANGER_END_X, WARNING_TEXT_Y),
+                moveProgress);
 
             // slider 업데이트
             warningSlider.value = elapsedTime;
@@ -229,9 +271,18 @@ public class BattleManager : MonoBehaviour
 
             // 텍스트 이동
             float moveProgress = elapsedTime / warningDuration;
-            topWarningText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(-755, 0), new Vector2(755, 0), moveProgress);
-            bottomWarningText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(-755, 0), new Vector2(755, 0), moveProgress);
-            bossDangerText.rectTransform.anchoredPosition = Vector2.Lerp(new Vector2(810, 0), new Vector2(-810, 0), moveProgress);
+            topWarningText.rectTransform.anchoredPosition = Vector2.Lerp(
+                new Vector2(WARNING_TEXT_START_X, WARNING_TEXT_Y),
+                new Vector2(WARNING_TEXT_END_X, WARNING_TEXT_Y),
+                moveProgress);
+            bottomWarningText.rectTransform.anchoredPosition = Vector2.Lerp(
+                new Vector2(WARNING_TEXT_START_X, WARNING_TEXT_Y),
+                new Vector2(WARNING_TEXT_END_X, WARNING_TEXT_Y),
+                moveProgress);
+            bossDangerText.rectTransform.anchoredPosition = Vector2.Lerp(
+                new Vector2(BOSS_DANGER_START_X, WARNING_TEXT_Y),
+                new Vector2(BOSS_DANGER_END_X, WARNING_TEXT_Y),
+                moveProgress);
 
             // slider 업데이트
             warningSlider.value = elapsedTime;
@@ -241,8 +292,6 @@ public class BattleManager : MonoBehaviour
 
         warningPanel.SetActive(false);
     }
-
-
 
     // 보스 스폰 함수
     private void LoadAndDisplayBoss()
@@ -291,13 +340,15 @@ public class BattleManager : MonoBehaviour
         bossHPText.text = $"{100f}%";
     }
 
-    
-
     // 전투 시작 함수
     private void StartBattle()
     {
         // 전투 시작시 여러 외부 기능들 비활성화
         SetStartFunctions();
+
+        // 항복 버튼 비활성화 후 2초 뒤 활성화
+        giveupButton.interactable = false;
+        StartCoroutine(EnableGiveupButton());
 
         // Slider관련 코루틴 시작
         StartCoroutine(ExecuteBattleSliders(warningDuration, sliderDuration));
@@ -316,9 +367,15 @@ public class BattleManager : MonoBehaviour
         StartCoroutine(CatsAttackRoutine());
     }
 
+    // 항복 버튼 활성화 코루틴
+    private IEnumerator EnableGiveupButton()
+    {
+        yield return new WaitForSeconds(GIVEUP_BUTTON_DELAY);
+        giveupButton.interactable = true;
+    }
+    #endregion
 
-
-
+    #region Battle Sliders
     // Slider 감소 관리 코루틴
     private IEnumerator ExecuteBattleSliders(float warningDuration, float sliderDuration)
     {
@@ -366,9 +423,9 @@ public class BattleManager : MonoBehaviour
 
         respawnSliderCoroutine = null;
     }
+    #endregion
 
-
-
+    #region Battle Management
     // 보스 배틀 코루틴
     private IEnumerator BossBattleRoutine(float duration)
     {
@@ -397,7 +454,6 @@ public class BattleManager : MonoBehaviour
     {
         if (currentBoss == null)
         {
-            Debug.LogError("No boss to push cats away from.");
             return;
         }
 
@@ -407,10 +463,9 @@ public class BattleManager : MonoBehaviour
             RectTransform catRectTransform = cat.GetComponent<RectTransform>();
             Vector3 catPosition = catRectTransform.anchoredPosition;
 
-            // 고양이가 히트박스 경계 내에 있는지 확인
+            // 고양이가 히트박스 경계 내에 있는지 확인 후 히트박스 외곽으로 밀어내기
             if (bossHitbox.IsInHitbox(catPosition))
             {
-                // 고양이를 보스의 히트박스 외곽으로 밀어내기
                 cat.MoveOppositeBoss(bossHitbox.Position, bossHitbox.Size);
             }
         }
@@ -421,7 +476,6 @@ public class BattleManager : MonoBehaviour
     {
         if (currentBoss == null || bossHitbox == null)
         {
-            Debug.LogError("No boss or BossHitbox component is missing.");
             return;
         }
 
@@ -431,21 +485,20 @@ public class BattleManager : MonoBehaviour
             RectTransform catRectTransform = cat.GetComponent<RectTransform>();
             Vector3 catPosition = catRectTransform.anchoredPosition;
 
-            // 고양이가 히트박스 경계 밖에 있는지 확인
+            // 고양이가 히트박스 경계 밖에 있는지 확인 후 히트박스 외곽으로 모으기
             if (!bossHitbox.IsInHitbox(catPosition))
             {
-                // 고양이를 보스 히트박스 외곽으로 모으기
                 cat.MoveTowardBossBoundary(bossHitbox.Position, bossHitbox.Size);
             }
         }
     }
+    #endregion
 
-
-
+    #region Battle System
     // 보스가 받는 데미지 함수
     public void TakeBossDamage(float damage)
     {
-        if (!isBattleActive || currentBoss == null)
+        if (!IsBattleActive || currentBoss == null)
         {
             return;
         }
@@ -463,15 +516,12 @@ public class BattleManager : MonoBehaviour
         bossHPText.text = $"{hpPercentage:F2}%";
     }
 
-    // ======================================================================================================================
-    // [보스 공격 관련]
-
     // 보스 공격 코루틴
     private IEnumerator BossAttackRoutine()
     {
-        while (isBattleActive)
+        while (IsBattleActive)
         {
-            yield return new WaitForSeconds(bossAttackDelay);
+            yield return new WaitForSeconds(BOSS_ATTACK_DELAY);
             BossAttackCats();
         }
     }
@@ -479,16 +529,20 @@ public class BattleManager : MonoBehaviour
     // 보스가 히트박스 내 고양이 N마리를 공격하는 함수
     private void BossAttackCats()
     {
-        if (currentBoss == null || bossHitbox == null) return;
+        if (currentBoss == null || bossHitbox == null)
+        {
+            return;
+        }
 
         // 히트박스 경계에 있는 고양이를 찾음
         List<CatData> catsAtBoundary = new List<CatData>();
         CatData[] allCats = FindObjectsOfType<CatData>();
-
         foreach (var cat in allCats)
         {
-            // 기절 상태의 고양이는 제외
-            if (cat.isStuned) continue;
+            if (cat.isStuned)
+            {
+                continue;
+            }
 
             RectTransform catRectTransform = cat.GetComponent<RectTransform>();
             Vector3 catPosition = catRectTransform.anchoredPosition;
@@ -499,12 +553,14 @@ public class BattleManager : MonoBehaviour
             }
         }
 
-        if (catsAtBoundary.Count == 0) return;
+        if (catsAtBoundary.Count == 0)
+        {
+            return;
+        }
 
         // 보스 공격 대상 선정
         int attackCount = Mathf.Min(catsAtBoundary.Count, currentBossData.NumOfAttack);
         List<CatData> selectedCats = new List<CatData>();
-
         while (selectedCats.Count < attackCount)
         {
             int randomIndex = Random.Range(0, catsAtBoundary.Count);
@@ -524,16 +580,12 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    // ======================================================================================================================
-    // [고양이 공격 관련]
-
     // 고양이 공격 코루틴
     private IEnumerator CatsAttackRoutine()
     {
-        while (isBattleActive)
+        while (IsBattleActive)
         {
-            // 고양이 공격
-            yield return new WaitForSeconds(catAttackDelay);
+            yield return new WaitForSeconds(CAT_ATTACK_DELAY);
             CatsAttackBoss();
         }
     }
@@ -541,14 +593,18 @@ public class BattleManager : MonoBehaviour
     // 히트박스 내 고양이들이 보스를 공격하는 함수
     private void CatsAttackBoss()
     {
-        if (currentBoss == null || bossHitbox == null) return;
+        if (currentBoss == null || bossHitbox == null)
+        {
+            return;
+        }
 
         CatData[] allCats = FindObjectsOfType<CatData>();
-
         foreach (var cat in allCats)
         {
-            // 기절 상태인 고양이는 공격하지 않도록 처리
-            if (cat.isStuned) continue;
+            if (cat.isStuned)
+            {
+                continue;
+            }
 
             RectTransform catRectTransform = cat.GetComponent<RectTransform>();
             Vector3 catPosition = catRectTransform.anchoredPosition;
@@ -560,10 +616,9 @@ public class BattleManager : MonoBehaviour
             }
         }
     }
+    #endregion
 
-    // ======================================================================================================================
-    // [게임 종료 관련]
-
+    #region Battle End
     // 항복 버튼 함수
     private void GiveUpState()
     {
@@ -619,18 +674,20 @@ public class BattleManager : MonoBehaviour
         CatData[] allCats = FindObjectsOfType<CatData>();
         foreach (var cat in allCats)
         {
-            if (cat.isStuned) continue;
-
-            cat.HealCatHP();
+            if (!cat.isStuned)
+            {
+                cat.HealCatHP();
+            }
         }
 
         // 자동 머지 재개
         AutoMergeManager.Instance.ResumeAutoMerge();
     }
+    #endregion
 
     // ======================================================================================================================
-    // [전투시 변경되는 기능들]
 
+    #region State Management
     // 모든 고양이의 자동 재화 수집 비활성화
     private void SetStartBattleAutoCollectState()
     {
@@ -683,6 +740,7 @@ public class BattleManager : MonoBehaviour
         ItemMenuManager.Instance.EndBattleItemMenuState();
         BuyCatManager.Instance.EndBattleBuyCatState();
     }
+    #endregion
 
     // ======================================================================================================================
 

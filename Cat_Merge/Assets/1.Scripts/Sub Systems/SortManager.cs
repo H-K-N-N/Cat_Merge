@@ -26,7 +26,7 @@ public class SortManager : MonoBehaviour
         InitializeButtonListeners();
     }
 
-    // 버튼 리스너 초기화
+    // 버튼 리스너 초기화 함수
     private void InitializeButtonListeners()
     {
         sortButton.onClick.AddListener(SortCats);

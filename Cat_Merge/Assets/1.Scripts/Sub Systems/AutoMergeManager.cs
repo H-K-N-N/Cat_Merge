@@ -5,10 +5,10 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using TMPro;
 
-// 자동 머지 Script
+// 자동머지 관련 스크립트
 public class AutoMergeManager : MonoBehaviour
 {
-    // Singleton Instance
+    #region Variables
     public static AutoMergeManager Instance { get; private set; }
 
     [Header("---[AutoMerge System]")]
@@ -20,8 +20,7 @@ public class AutoMergeManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI autoMergeTimerText;    // 자동 머지 타이머 텍스트
     private int autoMergeCost = 30;
 
-    // ======================================================================================================================
-
+    [Header("---[???]")]
     private float startTime;                                // 자동 머지 시작 시간
     private float autoMergeDuration = 10.0f;                // 자동 머지 기본 지속 시간
     private float currentAutoMergeDuration;                 // 현재 자동 머지 지속 시간
@@ -32,14 +31,14 @@ public class AutoMergeManager : MonoBehaviour
 
     private HashSet<DragAndDropManager> mergingCats;        // 머지 중인 고양이 추적
 
-    // ======================================================================================================================
-    // [전투 관련]
-
+    [Header("---[Battle System]")]
     private bool isPaused = false;                          // 일시정지 상태
     private float pausedTimeRemaining = 0f;                 // 일시정지 시점의 남은 시간
+    #endregion
 
     // ======================================================================================================================
 
+    #region Unity Methods
     private void Awake()
     {
         if (Instance == null)
@@ -85,9 +84,11 @@ public class AutoMergeManager : MonoBehaviour
             UpdateAutoMergeTimerText((int)pausedTimeRemaining);
         }
     }
+    #endregion
 
     // ======================================================================================================================
 
+    #region Initialize
     // AutoMergeManager 초기 설정
     private void InitializeAutoMergeManager()
     {
@@ -101,10 +102,11 @@ public class AutoMergeManager : MonoBehaviour
         closeAutoMergePanelButton.onClick.AddListener(CloseAutoMergePanel);
         autoMergeStateButton.onClick.AddListener(StartAutoMerge);
     }
+    #endregion
 
     // ======================================================================================================================
-    // ---[자동머지 UI]
 
+    #region UI System
     // 자동머지 비용 Text 업데이트 함수
     private void UpdateAutoMergeCostText()
     {
@@ -132,7 +134,7 @@ public class AutoMergeManager : MonoBehaviour
         }
     }
 
-    // 자동머지 시작 함수
+    // 자동 머지 시작 함수 (재화 판별)
     private void StartAutoMerge()
     {
         if (GameManager.Instance.Cash >= autoMergeCost)
@@ -168,10 +170,11 @@ public class AutoMergeManager : MonoBehaviour
             autoMergeTimerText.text = $"{remainingTime}";
         }
     }
+    #endregion
 
     // ======================================================================================================================
-    // ---[자동머지 기능]
 
+    #region Auto Merge System
     // 자동 머지 시작 함수
     public void OnClickedAutoMerge()
     {
@@ -358,10 +361,11 @@ public class AutoMergeManager : MonoBehaviour
     {
         mergingCats.Remove(cat);
     }
+    #endregion
 
     // ======================================================================================================================
-    // [전투시]
 
+    #region Battle System
     // 자동 머지 일시정지 함수
     public void PauseAutoMerge()
     {
@@ -379,9 +383,13 @@ public class AutoMergeManager : MonoBehaviour
                 autoMergePanel.SetActive(false);
             }
         }
+        else
+        {
+            openAutoMergePanelButton.interactable = false;
+        }
     }
 
-    // 자동 머지 재개 함수
+    // 자동 머지 이어하기 함수
     public void ResumeAutoMerge()
     {
         if (isPaused && pausedTimeRemaining > 0)
@@ -392,10 +400,14 @@ public class AutoMergeManager : MonoBehaviour
             openAutoMergePanelButton.interactable = true;
             StartCoroutine(AutoMergeCoroutine());
         }
+        else
+        {
+            openAutoMergePanelButton.interactable = true;
+        }
     }
+    #endregion
 
     // ======================================================================================================================
-
 
 
 }

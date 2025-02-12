@@ -50,7 +50,7 @@ public class BattleManager : MonoBehaviour
     [Header("---[Warning Panel]")]
     [SerializeField] private GameObject warningPanel;           // 전투시스템 시작시 나오는 경고 Panel (warningDuration동안 지속)
     [SerializeField] private Slider warningSlider;              // 리스폰시간이 됐을때 차오르는 Slider (warningDuration만큼 차오름)
-    private float warningDuration = 2f;                         // warningPanel 활성화 시간
+    public float warningDuration = 2f;                          // warningPanel 활성화 시간
     private Coroutine warningSliderCoroutine;                   // warningSlider 코루틴
 
     [SerializeField] private TextMeshProUGUI topWarningText;    // 상단 경고 텍스트

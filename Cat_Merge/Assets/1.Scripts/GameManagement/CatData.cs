@@ -3,49 +3,41 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-// 객체가 가지고있는 고양이의 정보를 담는 Script
+// 고양이의 정보와 행동을 관리하는 스크립트
 public class CatData : MonoBehaviour
 {
-    public Cat catData;                         // 고양이 데이터
-    private Image catImage;                     // 고양이 이미지
-    
+    #region Variables
+    [Header("Cat Data")]
+    public Cat catData;                             // 고양이 기본 데이터
+    private Image catImage;                         // 고양이 이미지 컴포넌트
+    public int catHp;                               // 현재 고양이 체력
+    public bool isStuned = false;                   // 기절 상태 여부
 
-    private RectTransform rectTransform;        // RectTransform 참조
-    private RectTransform parentPanel;          // 부모 패널 RectTransform
-    private DragAndDropManager catDragAndDrop;  // DragAndDropManager 참조
-    
+    [Header("Transform")]
+    private RectTransform rectTransform;            // 현재 오브젝트의 RectTransform
+    private RectTransform parentPanel;              // 부모 패널의 RectTransform
+    private DragAndDropManager catDragAndDrop;      // 드래그 앤 드롭 매니저
 
-    private bool isAnimating = false;           // 애니메이션 중인지 확인 플래그
-    private Coroutine autoMoveCoroutine;        // 자동 이동 코루틴
+    [Header("Movement")]
+    private bool isAnimating = false;               // 이동 애니메이션 진행 여부
+    private Coroutine autoMoveCoroutine;            // 자동 이동 코루틴
+    private Coroutine currentMoveCoroutine;         // 현재 진행 중인 이동 코루틴
 
-
-    private TextMeshProUGUI collectCoinText;    // 자동 재화 획득 텍스트
-    private Image collectCoinImage;             // 자동 재화 획득 이미지
-    //private Animator catAnimator;               // 자동 재화 획득 Animator 컴포넌트 참조
-    private float collectingTime;               // 자동 재화 수집 시간
+    [Header("Coin Collection")]
+    private TextMeshProUGUI collectCoinText;        // 코인 획득 텍스트
+    private Image collectCoinImage;                 // 코인 획득 이미지
+    private float collectingTime;                   // 코인 수집 간격
     public float CollectingTime { get => collectingTime; set => collectingTime = value; }
-    private bool isCollectingCoins = true;      // 자동 재화 수집 활성화 상태
-    private Coroutine autoCollectCoroutine;     // 자동 재화 수집 코루틴
-
-
-    public int catHp;                           // 고양이 체력
-    public bool isStuned = false;               // 고양이 기절상태
+    private bool isCollectingCoins = true;          // 코인 수집 활성화 상태
+    private Coroutine autoCollectCoroutine;         // 코인 수집 코루틴
+    #endregion
 
     // ======================================================================================================================
 
+    #region Unity Methods
     private void Awake()
     {
-        catImage = GetComponent<Image>();
-        rectTransform = GetComponent<RectTransform>();
-        parentPanel = rectTransform.parent.GetComponent<RectTransform>();
-        catDragAndDrop = GetComponentInParent<DragAndDropManager>();
-
-        collectCoinText = transform.Find("CollectCoinText").GetComponent<TextMeshProUGUI>();
-        collectCoinImage = transform.Find("CollectCoinImage").GetComponent<Image>();
-        //catAnimator = GetComponent<Animator>();
-
-        collectCoinText.gameObject.SetActive(false);
-        collectCoinImage.gameObject.SetActive(false);
+        InitializeComponents();
     }
 
     private void Start()
@@ -54,9 +46,35 @@ public class CatData : MonoBehaviour
         autoCollectCoroutine = StartCoroutine(AutoCollectCoins());
     }
 
+    // 오브젝트 파괴시 고양이 수 감소
+    private void OnDestroy()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.DeleteCatCount();
+        }
+    }
+    #endregion
+
     // ======================================================================================================================
 
-    // CatUI 최신화하는 함수
+    #region Initialization
+    // 컴포넌트 초기화
+    private void InitializeComponents()
+    {
+        catImage = GetComponent<Image>();
+        rectTransform = GetComponent<RectTransform>();
+        parentPanel = rectTransform.parent.GetComponent<RectTransform>();
+        catDragAndDrop = GetComponentInParent<DragAndDropManager>();
+
+        collectCoinText = transform.Find("CollectCoinText").GetComponent<TextMeshProUGUI>();
+        collectCoinImage = transform.Find("CollectCoinImage").GetComponent<Image>();
+
+        collectCoinText.gameObject.SetActive(false);
+        collectCoinImage.gameObject.SetActive(false);
+    }
+
+    // UI 업데이트
     public void UpdateCatUI()
     {
         if (catDragAndDrop != null)
@@ -66,82 +84,66 @@ public class CatData : MonoBehaviour
         catImage.sprite = catData.CatImage;
     }
 
-    // Cat 데이터 설정 함수
+    // 고양이 데이터 설정
     public void SetCatData(Cat cat)
     {
         catData = cat;
         catHp = catData.CatHp;
         UpdateCatUI();
     }
+    #endregion
 
     // ======================================================================================================================
-    // [전투]
 
-    // 보스 히트박스 경계 내에 존재하는 고양이를 히트박스 경계로 이동 (보스 스폰시 히트박스 내부에 있던 고양이들이 히트박스 경계로 밀려나는 현상)
+    #region Combat System
+    // 보스 히트박스 경계로 고양이 밀어내기
     public void MoveOppositeBoss(Vector3 bossPosition, Vector2 bossSize)
     {
         Vector3 catPosition = rectTransform.anchoredPosition;
         Vector3 offset = catPosition - bossPosition;
-
-        float halfWidth = bossSize.x / 2f;
-        float halfHeight = bossSize.y / 2f;
-
-        // 히트박스의 외곽 라인 상에서 가장 가까운 x, y 좌표를 계산
-        float closestX = Mathf.Clamp(catPosition.x, bossPosition.x - halfWidth, bossPosition.x + halfWidth);
-        float closestY = Mathf.Clamp(catPosition.y, bossPosition.y - halfHeight, bossPosition.y + halfHeight);
-
-        // x 방향과 y 방향 중 어떤 면이 더 가까운지 판단하여 이동 위치 설정
-        float distanceToVerticalEdge = Mathf.Min(Mathf.Abs(catPosition.x - (bossPosition.x - halfWidth)), Mathf.Abs(catPosition.x - (bossPosition.x + halfWidth)));
-        float distanceToHorizontalEdge = Mathf.Min(Mathf.Abs(catPosition.y - (bossPosition.y - halfHeight)), Mathf.Abs(catPosition.y - (bossPosition.y + halfHeight)));
-
-        if (distanceToVerticalEdge < distanceToHorizontalEdge)
-        {
-            // x 방향 가장 가까운 외곽으로 이동
-            closestX = offset.x < 0 ? bossPosition.x - halfWidth : bossPosition.x + halfWidth;
-        }
-        else
-        {
-            // y 방향 가장 가까운 외곽으로 이동
-            closestY = offset.y < 0 ? bossPosition.y - halfHeight : bossPosition.y + halfHeight;
-        }
-
-        Vector3 targetPosition = new Vector3(closestX, closestY, catPosition.z);
+        Vector3 targetPosition = CalculateBoundaryPosition(bossPosition, bossSize, offset, true);
         StartCoroutine(SmoothMoveToPosition(targetPosition));
     }
 
-    // 보스 히트박스 경계 외에 존재하는 고양이를 히트박스 경계로 이동 (보스 스폰 완료 후 전투 시작시 히트박스 경계에서 전투할 수 있도록 이동)
+    // 보스 히트박스 경계로 고양이 이동
     public void MoveTowardBossBoundary(Vector3 bossPosition, Vector2 bossSize)
     {
         Vector3 catPosition = rectTransform.anchoredPosition;
         Vector3 offset = bossPosition - catPosition;
+        Vector3 targetPosition = CalculateBoundaryPosition(bossPosition, bossSize, offset, false);
+        StartCoroutine(SmoothMoveToPosition(targetPosition));
+    }
 
+    // 히트박스 경계 위치 계산
+    private Vector3 CalculateBoundaryPosition(Vector3 bossPosition, Vector2 bossSize, Vector3 offset, bool isOpposite)
+    {
         float halfWidth = bossSize.x / 2f;
         float halfHeight = bossSize.y / 2f;
+        Vector3 catPosition = rectTransform.anchoredPosition;
 
-        // 히트박스 외곽 라인 상에서 가장 가까운 x, y 좌표 계산
         float closestX = Mathf.Clamp(catPosition.x, bossPosition.x - halfWidth, bossPosition.x + halfWidth);
         float closestY = Mathf.Clamp(catPosition.y, bossPosition.y - halfHeight, bossPosition.y + halfHeight);
 
-        // x 방향과 y 방향 중 어떤 면이 더 가까운지 판단하여 이동 위치 설정
         float distanceToVerticalEdge = Mathf.Min(Mathf.Abs(catPosition.x - (bossPosition.x - halfWidth)), Mathf.Abs(catPosition.x - (bossPosition.x + halfWidth)));
         float distanceToHorizontalEdge = Mathf.Min(Mathf.Abs(catPosition.y - (bossPosition.y - halfHeight)), Mathf.Abs(catPosition.y - (bossPosition.y + halfHeight)));
 
         if (distanceToVerticalEdge < distanceToHorizontalEdge)
         {
-            // x 방향 가장 가까운 외곽으로 이동
-            closestX = offset.x > 0 ? bossPosition.x - halfWidth : bossPosition.x + halfWidth;
+            closestX = isOpposite ?
+                (offset.x < 0 ? bossPosition.x - halfWidth : bossPosition.x + halfWidth) :
+                (offset.x > 0 ? bossPosition.x - halfWidth : bossPosition.x + halfWidth);
         }
         else
         {
-            // y 방향 가장 가까운 외곽으로 이동
-            closestY = offset.y > 0 ? bossPosition.y - halfHeight : bossPosition.y + halfHeight;
+            closestY = isOpposite ?
+                (offset.y < 0 ? bossPosition.y - halfHeight : bossPosition.y + halfHeight) :
+                (offset.y > 0 ? bossPosition.y - halfHeight : bossPosition.y + halfHeight);
         }
 
-        Vector3 targetPosition = new Vector3(closestX, closestY, catPosition.z);
-        StartCoroutine(SmoothMoveToPosition(targetPosition));
+        return new Vector3(closestX, closestY, catPosition.z);
     }
 
-    // 보스한테 공격당했을때 실행되는 함수
+    // 데미지 처리
     public void TakeDamage(int damage)
     {
         catHp -= damage;
@@ -149,55 +151,53 @@ public class CatData : MonoBehaviour
 
         if (catHp <= 0)
         {
-            // 체력 회복 시간동안 기절해있는 애니메이션이 재생되면서 해당 객체의 모든 기능 정지
-            // 지금은 임시로 10초뒤에 체력이 회복된다고 가정(N초)
-            StartCoroutine(StunAndRecover(10f));     // 10초 후에 체력 회복 (예시)
+            StartCoroutine(StunAndRecover(10f));
         }
     }
 
-    // 기절 상태 및 체력 회복 처리 코루틴
+    // 기절 및 회복 처리
     private IEnumerator StunAndRecover(float recoveryTime)
     {
-        // 고양이 기절 상태 처리 (기능 정지, 애니메이션 등)
-        SetCollectingCoinsState(false);
-        SetAutoMoveState(false);
-        SetRaycastTarget(false);
-        isStuned = true;
-        catImage.color = new Color(1f, 0.5f, 0.5f, 0.7f);   // 임시 투명도 (Stun 애니메이션 실행)
-
-        // 기절 상태 유지 시간
+        SetStunState(true);
         yield return new WaitForSeconds(recoveryTime);
-
-        // 체력 회복 및 상태 복구
-        HealCatHP();
-        SetRaycastTarget(true);
-        SetAutoMoveState(AutoMoveManager.Instance.IsAutoMoveEnabled());
-        SetCollectingCoinsState(true);
-        isStuned = false;
-        catImage.color = Color.white;                       // 원래 색상 복구 (Idle 애니메이션 복구)
-
+        SetStunState(false);
         Debug.Log("고양이 체력 회복 완료!");
     }
 
-    // 타겟 활성화 & 비활성화 함수
+    // 기절 상태 설정
+    private void SetStunState(bool isStunned)
+    {
+        SetCollectingCoinsState(!isStunned);
+        SetAutoMoveState(!isStunned);
+        SetRaycastTarget(!isStunned);
+        isStuned = isStunned;
+        catImage.color = isStunned ? new Color(1f, 0.5f, 0.5f, 0.7f) : Color.white;
+
+        if (!isStunned)
+        {
+            HealCatHP();
+        }
+    }
+
+    // 레이캐스트 타겟 설정
     private void SetRaycastTarget(bool isActive)
     {
         catImage.raycastTarget = isActive;
     }
 
-    // 고양이 HP 회복 함수
+    // 체력 회복
     public void HealCatHP()
     {
         catHp = catData.CatHp;
     }
+    #endregion
 
     // ======================================================================================================================
-    // [자동 이동]
 
-    // 자동 이동을 활성화/비활성화하는 함수
+    #region Auto Movement
+    // 자동 이동 상태 설정
     public void SetAutoMoveState(bool isEnabled)
     {
-        // 자동 이동을 활성화하려면 코루틴 시작
         if (isEnabled && !isStuned)
         {
             if (!isAnimating && autoMoveCoroutine == null)
@@ -207,7 +207,6 @@ public class CatData : MonoBehaviour
         }
         else
         {
-            // 모든 코루틴 중단 -> 자동 이동만 중단
             if (autoMoveCoroutine != null)
             {
                 StopCoroutine(autoMoveCoroutine);
@@ -217,8 +216,8 @@ public class CatData : MonoBehaviour
         }
     }
 
-    // AutoMoveTime마다 자동으로 이동하는 코루틴
-    public IEnumerator AutoMove()
+    // 자동 이동 실행
+    private IEnumerator AutoMove()
     {
         while (true)
         {
@@ -231,7 +230,6 @@ public class CatData : MonoBehaviour
 
                 yield return StartCoroutine(SmoothMoveToPosition(targetPosition));
 
-                // 위치가 범위를 초과했으면 안쪽으로 조정
                 if (IsOutOfBounds(targetPosition))
                 {
                     Vector3 adjustedPosition = AdjustPositionToBounds(targetPosition);
@@ -241,12 +239,10 @@ public class CatData : MonoBehaviour
         }
     }
 
-    // 랜덤 방향 계산 함수
+    // 랜덤 이동 방향 반환
     private Vector3 GetRandomDirection()
     {
         float moveRange = 30f;
-
-        // 8방향 (상, 하, 좌, 우, 대각선 포함)
         Vector2[] directions = new Vector2[]
         {
             new Vector2(moveRange, 0f),
@@ -259,12 +255,10 @@ public class CatData : MonoBehaviour
             new Vector2(-moveRange, -moveRange)
         };
 
-        // 랜덤으로 방향 선택
-        int randomIndex = Random.Range(0, directions.Length);
-        return directions[randomIndex];
+        return directions[Random.Range(0, directions.Length)];
     }
 
-    // 범위 초과 여부를 확인하는 함수
+    // 이동 범위 초과 확인
     private bool IsOutOfBounds(Vector3 position)
     {
         Vector2 minBounds = (Vector2)parentPanel.rect.min + parentPanel.anchoredPosition;
@@ -273,11 +267,10 @@ public class CatData : MonoBehaviour
         return position.x <= minBounds.x || position.x >= maxBounds.x || position.y <= minBounds.y || position.y >= maxBounds.y;
     }
 
-    // 초과된 위치를 안쪽으로 조정하는 함수
+    // 범위 초과시 위치 조정
     private Vector3 AdjustPositionToBounds(Vector3 position)
     {
         Vector3 adjustedPosition = position;
-
         Vector2 minBounds = (Vector2)parentPanel.rect.min + parentPanel.anchoredPosition;
         Vector2 maxBounds = (Vector2)parentPanel.rect.max + parentPanel.anchoredPosition;
 
@@ -289,11 +282,23 @@ public class CatData : MonoBehaviour
         return adjustedPosition;
     }
 
-    // 부드럽게 이동하는 코루틴
+    // 부드러운 이동 시작
     private IEnumerator SmoothMoveToPosition(Vector3 targetPosition)
     {
         isAnimating = true;
 
+        if (currentMoveCoroutine != null)
+        {
+            StopCoroutine(currentMoveCoroutine);
+        }
+
+        currentMoveCoroutine = StartCoroutine(DoSmoothMove(targetPosition));
+        yield return currentMoveCoroutine;
+    }
+
+    // 실제 이동 실행
+    private IEnumerator DoSmoothMove(Vector3 targetPosition)
+    {
         Vector3 startPosition = rectTransform.anchoredPosition;
         float elapsed = 0f;
         float duration = 0.5f;
@@ -307,27 +312,18 @@ public class CatData : MonoBehaviour
 
         rectTransform.anchoredPosition = targetPosition;
         isAnimating = false;
+        currentMoveCoroutine = null;
     }
-
-    // 고양이가 파괴될때 고양이 수 감소시키는 함수
-    private void OnDestroy()
-    {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.DeleteCatCount();
-        }
-    }
+    #endregion
 
     // ======================================================================================================================
-    // [자동 재화 수집]
 
-    // 자동 재화 수집 활성화/비활성화 함수
+    #region Auto Coin Collection
+    // 자동 재화 수집 상태 설정
     public void SetCollectingCoinsState(bool isEnabled)
     {
-        // 자동 재화 수집 상태 변경
         isCollectingCoins = isEnabled;
 
-        // 수집을 활성화하려면 코루틴 시작
         if (isCollectingCoins)
         {
             if (autoCollectCoroutine == null)
@@ -337,7 +333,6 @@ public class CatData : MonoBehaviour
         }
         else
         {
-            // 수집을 비활성화하려면 코루틴 중단
             if (autoCollectCoroutine != null)
             {
                 StopCoroutine(autoCollectCoroutine);
@@ -347,7 +342,7 @@ public class CatData : MonoBehaviour
         }
     }
 
-    // UI 요소들을 즉시 비활성화하는 함수
+    // 코인 수집 UI 비활성화
     public void DisableCollectUI()
     {
         if (collectCoinText != null)
@@ -360,12 +355,11 @@ public class CatData : MonoBehaviour
         }
     }
 
-    // 자동 재화 수집 코루틴
+    // 자동 재화 수집 실행
     private IEnumerator AutoCollectCoins()
     {
         while (isCollectingCoins)
         {
-            // 재화 획득 시간(아이템 상점 레벨)
             collectingTime = ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value;
             yield return new WaitForSeconds(collectingTime);
 
@@ -373,33 +367,46 @@ public class CatData : MonoBehaviour
             {
                 int collectedCoins = catData.CatGetCoin;
                 GameManager.Instance.Coin += collectedCoins;
-
-                // 모션 실행 및 재화 획득 텍스트 활성화
                 StartCoroutine(PlayCollectingAnimation(collectedCoins));
             }
         }
     }
 
-    // 모션과 재화 획득 텍스트 처리 코루틴
+    // 재화 수집 애니메이션 실행
     private IEnumerator PlayCollectingAnimation(int collectedCoins)
     {
-        //// 애니메이션 시작 (아직 제작 안함)
-        //if (catAnimator != null)
-        //{
-        //    catAnimator.SetTrigger("CollectCoin");      // CollectCoin 트리거 실행
-        //}
-
         collectCoinText.text = $"+{collectedCoins}";
         collectCoinText.gameObject.SetActive(true);
         collectCoinImage.gameObject.SetActive(true);
 
-        // 애니메이션 대기 (애니메이션 길이 설정에 맞추기)
-        float animationDuration = 0.5f;     // 애니메이션 길이 (Animator 설정에 따라 조정)
-        yield return new WaitForSeconds(animationDuration);
+        yield return new WaitForSeconds(0.5f);
 
         collectCoinText.gameObject.SetActive(false);
         collectCoinImage.gameObject.SetActive(false);
     }
+    #endregion
+
+    // ======================================================================================================================
+
+    #region Movement Control
+    // 모든 이동 코루틴 중지
+    public void StopAllMovement()
+    {
+        if (autoMoveCoroutine != null)
+        {
+            StopCoroutine(autoMoveCoroutine);
+            autoMoveCoroutine = null;
+        }
+
+        if (currentMoveCoroutine != null)
+        {
+            StopCoroutine(currentMoveCoroutine);
+            currentMoveCoroutine = null;
+        }
+
+        isAnimating = false;
+    }
+    #endregion
 
     // ======================================================================================================================
 

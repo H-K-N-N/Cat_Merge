@@ -12,6 +12,11 @@ public class CatData : MonoBehaviour
     private Image catImage;                         // 고양이 이미지 컴포넌트
     public int catHp;                               // 현재 고양이 체력
     public bool isStuned = false;                   // 기절 상태 여부
+    private float stunTime = 10f;                   // 기절 시간
+
+    [Header("HP UI")]
+    [SerializeField] private GameObject hpImage;    // HP 이미지 오브젝트
+    [SerializeField] private Image hpFillImage;     // HP Fill 이미지
 
     [Header("Transform")]
     private RectTransform rectTransform;            // 현재 오브젝트의 RectTransform
@@ -44,6 +49,7 @@ public class CatData : MonoBehaviour
     {
         UpdateCatUI();
         autoCollectCoroutine = StartCoroutine(AutoCollectCoins());
+        UpdateHPBar();
     }
 
     // 오브젝트 파괴시 고양이 수 감소
@@ -70,6 +76,10 @@ public class CatData : MonoBehaviour
         collectCoinText = transform.Find("CollectCoinText").GetComponent<TextMeshProUGUI>();
         collectCoinImage = transform.Find("CollectCoinImage").GetComponent<Image>();
 
+        hpImage = transform.Find("HP Image").gameObject;
+        hpFillImage = hpImage.transform.Find("Fill Image").GetComponent<Image>();
+        hpImage.SetActive(false);
+
         collectCoinText.gameObject.SetActive(false);
         collectCoinImage.gameObject.SetActive(false);
     }
@@ -90,6 +100,24 @@ public class CatData : MonoBehaviour
         catData = cat;
         catHp = catData.CatHp;
         UpdateCatUI();
+        UpdateHPBar();
+    }
+
+    // HP 바 업데이트 함수
+    private void UpdateHPBar()
+    {
+        float hpRatio = (float)catHp / catData.CatHp;
+        hpFillImage.fillAmount = hpRatio;
+
+        // 전투중이고, 체력이 최대치가 아닐 때 HP 바 표시
+        if (BattleManager.Instance != null && BattleManager.Instance.IsBattleActive && hpRatio < 1f && hpRatio > 0f)
+        {
+            hpImage.SetActive(true);
+        }
+        else
+        {
+            hpImage.SetActive(false);
+        }
     }
     #endregion
 
@@ -147,26 +175,28 @@ public class CatData : MonoBehaviour
     public void TakeDamage(int damage)
     {
         catHp -= damage;
-        Debug.Log($"남은 체력 : {catHp}");
+        UpdateHPBar();
+        //Debug.Log($"남은 체력 : {catHp}");
 
         if (catHp <= 0)
         {
-            StartCoroutine(StunAndRecover(10f));
+            StartCoroutine(StunAndRecover(stunTime));
         }
     }
 
     // 기절 및 회복 처리
-    private IEnumerator StunAndRecover(float recoveryTime)
+    private IEnumerator StunAndRecover(float stunTime)
     {
         SetStunState(true);
-        yield return new WaitForSeconds(recoveryTime);
+        yield return new WaitForSeconds(stunTime);
         SetStunState(false);
-        Debug.Log("고양이 체력 회복 완료!");
+        //Debug.Log("고양이 체력 회복 완료!");
     }
 
     // 기절 상태 설정
     private void SetStunState(bool isStunned)
     {
+        UpdateHPBar();
         SetCollectingCoinsState(!isStunned);
         SetAutoMoveState(!isStunned);
         SetRaycastTarget(!isStunned);
@@ -189,6 +219,7 @@ public class CatData : MonoBehaviour
     public void HealCatHP()
     {
         catHp = catData.CatHp;
+        UpdateHPBar();
     }
     #endregion
 

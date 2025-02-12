@@ -16,7 +16,7 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Slider respawnSlider;              // 보스 소환까지 남은 시간을 표시할 Slider UI
 
     private const float DEFAULT_SPAWN_INTERVAL = 10f;           // 보스 등장 주기 (나중에 유저가 변경할 수 있게 수정할 계획도 있음)
-    private float spawnInterval;                                // 
+    private float spawnInterval;                                // 보스 등장 주기
     private Coroutine respawnSliderCoroutine;                   // Slider 코루틴
     private float bossSpawnTimer = 0f;                          // 보스 스폰 타이머
     private float sliderDuration;                               // Slider 유지 시간
@@ -58,11 +58,11 @@ public class BattleManager : MonoBehaviour
     private CanvasGroup bossDangerCanvasGroup;                  // 보스 위험 텍스트의 CanvasGroup  
     private CanvasGroup bottomWarningCanvasGroup;               // 하단 경고 텍스트의 CanvasGroup
 
-    private const float WARNING_TEXT_START_X = -755f;           // 
-    private const float WARNING_TEXT_END_X = 755f;              // 
-    private const float BOSS_DANGER_START_X = 810f;             // 
-    private const float BOSS_DANGER_END_X = -810f;              // 
-    private const float WARNING_TEXT_Y = 0f;                    // 
+    private const float WARNING_TEXT_START_X = -755f;           // 경고 텍스트 시작 좌표
+    private const float WARNING_TEXT_END_X = 755f;              // 경고 텍스트 끝 좌표
+    private const float BOSS_DANGER_START_X = 810f;             // Boss Danger 텍스트 시작 좌표
+    private const float BOSS_DANGER_END_X = -810f;              // Boss Danger 텍스트 끝 좌표
+    private const float WARNING_TEXT_Y = 0f;                    // 경고 텍스트 Y 좌표
     #endregion
 
     // ======================================================================================================================
@@ -503,6 +503,13 @@ public class BattleManager : MonoBehaviour
             return;
         }
         currentBossHP -= damage;
+
+        // 보스의 MouseData 컴포넌트를 통해 데미지 텍스트 표시
+        MouseData mouseData = currentBoss.GetComponent<MouseData>();
+        if (mouseData != null)
+        {
+            mouseData.ShowDamageText(damage);
+        }
 
         UpdateBossHPUI();
     }

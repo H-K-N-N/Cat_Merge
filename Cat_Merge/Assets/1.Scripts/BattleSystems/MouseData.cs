@@ -1,14 +1,25 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
 
 // 객체가 가지고있는 쥐의 정보를 담는 Script
 public class MouseData : MonoBehaviour
 {
-    public Mouse mouseData;                     // 쥐 데이터
+    [HideInInspector] public Mouse mouseData;   // 쥐 데이터
     private Image mouseImage;                   // 쥐 이미지
 
     private RectTransform rectTransform;        // RectTransform 참조
-    private RectTransform parentPanel;          // 부모 패널 RectTransform
+
+    [Header("---[Damage Text]")]
+    [SerializeField] private GameObject damageTextPrefab;   // 데미지 텍스트 프리펩
+    private Queue<GameObject> damageTextPool;               // 데미지 텍스트 오브젝트 풀
+    private const int POOL_SIZE = 100;                      // 풀 사이즈
+
+    private const float DAMAGE_TEXT_START_Y = 200f;         // 데미지 텍스트 시작 Y 위치
+    private const float DAMAGE_TEXT_MOVE_DISTANCE = 50f;    // 데미지 텍스트 이동 거리
+    private const float DAMAGE_TEXT_DURATION = 1f;          // 데미지 텍스트 지속 시간
 
     // ======================================================================================================================
 
@@ -16,15 +27,27 @@ public class MouseData : MonoBehaviour
     {
         mouseImage = GetComponent<Image>();
         rectTransform = GetComponent<RectTransform>();
-        parentPanel = rectTransform.parent.GetComponent<RectTransform>();
+        InitializeDamageTextPool();
     }
 
     private void Start()
     {
-        UpdateMouseUI(); 
+        UpdateMouseUI();
     }
 
     // ======================================================================================================================
+
+    // 데미지 텍스트 풀 초기화
+    private void InitializeDamageTextPool()
+    {
+        damageTextPool = new Queue<GameObject>();
+        for (int i = 0; i < POOL_SIZE; i++)
+        {
+            GameObject damageTextObj = Instantiate(damageTextPrefab, transform);
+            damageTextObj.SetActive(false);
+            damageTextPool.Enqueue(damageTextObj);
+        }
+    }
 
     // MouseUI 최신화하는 함수
     public void UpdateMouseUI()
@@ -39,19 +62,65 @@ public class MouseData : MonoBehaviour
         UpdateMouseUI();
     }
 
+    // 데미지 텍스트 생성 함수
+    public void ShowDamageText(float damage)
+    {
+        GameObject damageTextObj;
+        if (damageTextPool.Count > 0)
+        {
+            damageTextObj = damageTextPool.Dequeue();
+        }
+        else
+        {
+            // 풀이 비어있으면 가장 오래된 텍스트를 재활용
+            damageTextObj = transform.GetChild(0).gameObject;
+            transform.GetChild(0).SetSiblingIndex(transform.childCount - 1);
+        }
+
+        damageTextObj.SetActive(true);
+
+        RectTransform textRect = damageTextObj.GetComponent<RectTransform>();
+        Vector3 startPosition = rectTransform.anchoredPosition;
+        startPosition.y = DAMAGE_TEXT_START_Y;
+        textRect.anchoredPosition = startPosition;
+
+        TextMeshProUGUI damageText = damageTextObj.GetComponent<TextMeshProUGUI>();
+        damageText.text = damage.ToString();
+        damageText.color = Color.white;
+
+        StartCoroutine(AnimateDamageText(damageTextObj, textRect));
+    }
+
+    // 데미지 텍스트 애니메이션 코루틴
+    private IEnumerator AnimateDamageText(GameObject textObj, RectTransform textRect)
+    {
+        float elapsedTime = 0f;
+        Vector3 startPos = textRect.anchoredPosition;
+        Vector3 endPos = startPos + Vector3.up * DAMAGE_TEXT_MOVE_DISTANCE;
+
+        TextMeshProUGUI text = textObj.GetComponent<TextMeshProUGUI>();
+        Color originalColor = text.color;
+
+        while (elapsedTime < DAMAGE_TEXT_DURATION)
+        {
+            elapsedTime += Time.deltaTime;
+            float progress = elapsedTime / DAMAGE_TEXT_DURATION;
+
+            // 위치 보간
+            textRect.anchoredPosition = Vector3.Lerp(startPos, endPos, progress);
+
+            // 알파값 감소
+            Color newColor = originalColor;
+            newColor.a = 1 - progress;
+            text.color = newColor;
+
+            yield return null;
+        }
+
+        textObj.SetActive(false);
+        damageTextPool.Enqueue(textObj);
+    }
+
     // ======================================================================================================================
-    // [전투관련] - 현재 BattleManager에 다 있음
-    // Mouse Prefab에 MouseData, BossHitbox 스크립트 포함되어있음
-
-
-    // [보스 행동]
-    // 히트박스 내 존재하는 고양이 중 N마리 공격하기 (애니메이션은 나중에 추가할 예정)
-
-    // HP가 다 닳으면 사망
-
-
-
-    // ======================================================================================================================
-
 
 }

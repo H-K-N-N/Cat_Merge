@@ -4,7 +4,7 @@ using UnityEngine.UI;
 // 고양이 머지 Script
 public class MergeManager : MonoBehaviour
 {
-    // Singleton Instance
+    #region Variables
     public static MergeManager Instance { get; private set; }
 
     [Header("---[Merge On/Off System]")]
@@ -15,14 +15,14 @@ public class MergeManager : MonoBehaviour
     private bool isMergeEnabled;                                    // 머지 활성화 상태
     private bool previousMergeState;                                // 이전 상태 저장
 
-    // ======================================================================================================================
-
     [Header("---[UI Color]")]
     private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
     private const string inactiveColorCode = "#FFFFFF";             // 비활성화상태 Color
+    #endregion
 
     // ======================================================================================================================
 
+    #region Unity Methods
     private void Awake()
     {
         if (Instance == null)
@@ -40,15 +40,22 @@ public class MergeManager : MonoBehaviour
     private void Start()
     {
         UpdateMergeButtonColor();
+        InitializeButtonListeners();
+    }
 
+    // 버튼 리스너 초기화 함수
+    private void InitializeButtonListeners()
+    {
         openMergePanelButton.onClick.AddListener(OpenMergePanel);
         closeMergePanelButton.onClick.AddListener(CloseMergePanel);
         mergeStateButton.onClick.AddListener(ToggleMergeState);
     }
+    #endregion
 
     // ======================================================================================================================
 
-    // 머지 On/Off 패널 여는 함수
+    #region Panel Control
+    // 머지 패널 여는 함수
     private void OpenMergePanel()
     {
         if (mergePanel != null)
@@ -57,22 +64,35 @@ public class MergeManager : MonoBehaviour
         }
     }
 
-    // 머지 상태 전환 함수
+    // 머지 패널 닫는 함수
+    public void CloseMergePanel()
+    {
+        if (mergePanel != null)
+        {
+            mergePanel.SetActive(false);
+        }
+    }
+
+    // 머지 상태 토글 함수
     private void ToggleMergeState()
     {
         isMergeEnabled = !isMergeEnabled;
         UpdateMergeButtonColor();
         CloseMergePanel();
     }
+    #endregion
 
+    // ======================================================================================================================
+
+    #region Battle System
     // 전투 시작시 버튼 및 기능 비활성화시키는 함수
     public void StartBattleMergeState()
     {
         previousMergeState = isMergeEnabled;
         isMergeEnabled = false;
-        openMergePanelButton.interactable = false;
 
-        if (mergePanel.activeSelf == true)
+        openMergePanelButton.interactable = false;
+        if (mergePanel.activeSelf)
         {
             mergePanel.SetActive(false);
         }
@@ -82,9 +102,14 @@ public class MergeManager : MonoBehaviour
     public void EndBattleMergeState()
     {
         isMergeEnabled = previousMergeState;
+
         openMergePanelButton.interactable = true;
     }
+    #endregion
 
+    // ======================================================================================================================
+
+    #region UI System
     // 머지 버튼 색상 업데이트 함수
     private void UpdateMergeButtonColor()
     {
@@ -98,23 +123,16 @@ public class MergeManager : MonoBehaviour
         }
     }
 
-    // 머지 패널 닫는 함수
-    public void CloseMergePanel()
-    {
-        if (mergePanel != null)
-        {
-            mergePanel.SetActive(false);
-        }
-    }
-
     // 머지 상태 반환 함수
     public bool IsMergeEnabled()
     {
         return isMergeEnabled;
     }
+    #endregion
 
     // ======================================================================================================================
 
+    #region Merge System
     // 고양이 Merge 함수
     public Cat MergeCats(Cat cat1, Cat cat2)
     {
@@ -160,18 +178,19 @@ public class MergeManager : MonoBehaviour
         }
     }
 
-    // 고양이 ID 반환 함수
+    // 고양이 등급 반환 함수
     public Cat GetCatByGrade(int grade)
     {
         GameManager gameManager = GameManager.Instance;
-
         foreach (Cat cat in gameManager.AllCatData)
         {
-            if (cat.CatId == grade)
+            if (cat.CatGrade == grade)
+            {
                 return cat;
+            }
         }
         return null;
     }
-
+    #endregion
 
 }

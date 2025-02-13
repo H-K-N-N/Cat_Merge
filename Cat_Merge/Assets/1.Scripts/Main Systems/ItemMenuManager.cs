@@ -81,6 +81,12 @@ public class ItemMenuManager : MonoBehaviour
 
     // ======================================================================================================================
 
+    [Header("---[Sub Menu UI Color]")]
+    private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
+    private const string inactiveColorCode = "#FFFFFF";             // 비활성화상태 Color
+
+    // ======================================================================================================================
+
     private void Awake()
     {
         if (Instance == null)
@@ -93,7 +99,7 @@ public class ItemMenuManager : MonoBehaviour
         }
 
         itemMenues[(int)EitemMenues.itemMenues].SetActive(true);
-        if (ColorUtility.TryParseHtmlString("#5f5f5f", out Color parsedColor))
+        if (ColorUtility.TryParseHtmlString(activeColorCode, out Color parsedColor))
         {
             itemMenuButtons[(int)EitemMenuButton.itemMenuButton].GetComponent<Image>().color = parsedColor;
         }
@@ -231,7 +237,7 @@ public class ItemMenuManager : MonoBehaviour
     {
         if (menues.gameObject.activeSelf)
         {
-            if (ColorUtility.TryParseHtmlString("#5f5f5f", out Color parsedColorT))
+            if (ColorUtility.TryParseHtmlString(activeColorCode, out Color parsedColorT))
             {
                 for (int i = 0; i < (int)EitemMenues.end; i++)
                 {
@@ -241,7 +247,7 @@ public class ItemMenuManager : MonoBehaviour
                     }
                     else
                     {
-                        if (ColorUtility.TryParseHtmlString("#FFFFFF", out Color parsedColorF))
+                        if (ColorUtility.TryParseHtmlString(inactiveColorCode, out Color parsedColorF))
                         {
                             itemMenuButtons[i].GetComponent<Image>().color = parsedColorF;
                         }

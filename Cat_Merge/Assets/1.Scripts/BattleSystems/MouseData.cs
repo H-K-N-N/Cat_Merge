@@ -15,7 +15,7 @@ public class MouseData : MonoBehaviour
     [Header("---[Damage Text]")]
     [SerializeField] private GameObject damageTextPrefab;   // 데미지 텍스트 프리펩
     private Queue<GameObject> damageTextPool;               // 데미지 텍스트 오브젝트 풀
-    private const int POOL_SIZE = 100;                      // 풀 사이즈
+    private const int POOL_SIZE = 200;                      // 풀 사이즈
 
     private const float DAMAGE_TEXT_START_Y = 200f;         // 데미지 텍스트 시작 Y 위치
     private const float DAMAGE_TEXT_MOVE_DISTANCE = 50f;    // 데미지 텍스트 이동 거리
@@ -106,10 +106,8 @@ public class MouseData : MonoBehaviour
             elapsedTime += Time.deltaTime;
             float progress = elapsedTime / DAMAGE_TEXT_DURATION;
 
-            // 위치 보간
             textRect.anchoredPosition = Vector3.Lerp(startPos, endPos, progress);
 
-            // 알파값 감소
             Color newColor = originalColor;
             newColor.a = 1 - progress;
             text.color = newColor;

@@ -64,9 +64,11 @@ public class MouseDataLoader : MonoBehaviour
                 float mouseHp = float.Parse(validValues[4]);
                 Sprite mouseImage = LoadSprite(validValues[5]);
                 int numOfAttack = int.Parse(validValues[6]);
+                int mouseAttackSpeed = int.Parse(validValues[7]);
+                int mouseArmor = int.Parse(validValues[8]);
 
                 // Mouse 객체 생성 및 Dictionary에 추가
-                Mouse newMouse = new Mouse(mouseId, mouseName, mouseGrade, mouseDamage, mouseHp, mouseImage, numOfAttack);
+                Mouse newMouse = new Mouse(mouseId, mouseName, mouseGrade, mouseDamage, mouseHp, mouseImage, numOfAttack, mouseAttackSpeed, mouseArmor);
                 if (!mouseDictionary.ContainsKey(mouseId))
                 {
                     mouseDictionary.Add(mouseId, newMouse);

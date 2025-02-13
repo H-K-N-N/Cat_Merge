@@ -28,7 +28,17 @@ public class Cat
     private string catExplain;   // 고양이 설명
     public string CatExplain { get => catExplain; set => catExplain = value; }
 
-    public Cat(int catId, string catName, int catGrade, int catDamage, int catGetCoin, int catHp, Sprite catImage, string catExplain)
+    private int catAttackSpeed;  // 고양이 공격속도
+    public int CatAttackSpeed { get => catAttackSpeed; set => catAttackSpeed = value; }
+
+    private int catArmor;        // 고양이 방어력
+    public int CatArmor { get => catArmor; set => catArmor = value; }
+
+    private int catMoveSpeed;    // 고양이 이동속도
+    public int CatMoveSpeed { get => catMoveSpeed; set => catMoveSpeed = value; }
+
+    public Cat(int catId, string catName, int catGrade, int catDamage, int catGetCoin, int catHp, Sprite catImage, 
+        string catExplain, int catAttackSpeed, int catArmor, int catMoveSpeed)
     {
         CatId = catId;
         CatName = catName;
@@ -38,5 +48,8 @@ public class Cat
         CatHp = catHp;
         CatImage = catImage;
         CatExplain = catExplain;
+        CatAttackSpeed = catAttackSpeed;
+        CatArmor = catArmor;
+        CatMoveSpeed = catMoveSpeed;
     }
 }

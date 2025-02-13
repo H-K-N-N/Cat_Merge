@@ -26,16 +26,16 @@ public class OptionManager : MonoBehaviour
     // [서브 메뉴 UI 색상 설정]
 
     [Header("---[Sub Menu UI Color]")]
-    private const string activeColorCode = "#5f5f5f";           // 활성화상태 Color
+    private const string activeColorCode = "#FFCC74";           // 활성화상태 Color
     private const string inactiveColorCode = "#FFFFFF";         // 비활성화상태 Color
-    private const string toggleOnColorCode = "#D9F2D0";         // 토글 On Color
-    private const string toggleOffColorCode = "#FFFFFF";        // 토글 Off Color
 
     // ======================================================================================================================
     // [토글 버튼 관련 설정]
 
     private const float onX = 65f, offX = -65f;                 // 핸들 버튼 x좌표
     private const float moveDuration = 0.2f;                    // 토글 애니메이션 지속 시간
+    private const string toggleOnColorCode = "#D9F2D0";         // 토글 On Color
+    private const string toggleOffColorCode = "#FFFFFF";        // 토글 Off Color
 
     // ======================================================================================================================
     // [Sound]
@@ -466,6 +466,18 @@ public class OptionManager : MonoBehaviour
             {
                 buttonGroup = slotButtons[i].gameObject.AddComponent<CanvasGroup>();
             }
+
+            // 각 Information Panel의 Content Panel에 RectMask2D와 CanvasGroup 추가
+            Transform contentPanel = informationPanels[i].transform.GetChild(0);
+            RectTransform contentRect = contentPanel.GetComponent<RectTransform>();
+            if (contentRect.GetComponent<RectMask2D>() == null)
+            {
+                contentRect.gameObject.AddComponent<RectMask2D>();
+            }
+            if (contentRect.GetComponent<CanvasGroup>() == null)
+            {
+                contentRect.gameObject.AddComponent<CanvasGroup>();
+            }
         }
 
         // 공통 뒤로가기 버튼 이벤트 설정
@@ -584,9 +596,24 @@ public class OptionManager : MonoBehaviour
         // 정보 패널 활성화 및 펼치기 애니메이션
         informationPanel.SetActive(true);
         informationPanels[index].SetActive(true);
-        RectTransform panelRect = informationPanels[index].GetComponent<RectTransform>();
 
         // 패널의 초기 크기와 위치 설정
+        RectTransform panelRect = informationPanels[index].GetComponent<RectTransform>();
+        Transform contentPanel = panelRect.GetChild(0);
+        RectTransform contentRect = contentPanel.GetComponent<RectTransform>();
+        CanvasGroup contentGroup = contentPanel.GetComponent<CanvasGroup>();
+
+        // 컨텐츠 패널의 Mask 설정
+        RectMask2D mask = contentRect.GetComponent<RectMask2D>();
+        if (mask == null)
+        {
+            mask = contentRect.gameObject.AddComponent<RectMask2D>();
+        }
+        mask.enabled = true;
+
+        // 컨텐츠 패널 초기 알파값 설정
+        contentGroup.alpha = 0f;
+
         panelRect.sizeDelta = new Vector2(panelRect.sizeDelta.x, 0);
         panelRect.anchoredPosition = new Vector2(panelRect.anchoredPosition.x, 480);
         float elapsedTime = 0f;
@@ -606,6 +633,17 @@ public class OptionManager : MonoBehaviour
 
         panelRect.sizeDelta = new Vector2(panelRect.sizeDelta.x, 960);
         panelRect.anchoredPosition = new Vector2(panelRect.anchoredPosition.x, 0);
+
+        // 패널이 다 펼쳐진 후 컨텐츠 페이드 인
+        elapsedTime = 0f;
+        while (elapsedTime < systemAnimDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / systemAnimDuration;
+            contentGroup.alpha = Mathf.Lerp(0f, 1f, t);
+            yield return null;
+        }
+        contentGroup.alpha = 1f;
     }
 
     // Information Panel 접는 코루틴
@@ -615,8 +653,22 @@ public class OptionManager : MonoBehaviour
         StartCoroutine(FadeButton(informationPanelBackButton.GetComponent<CanvasGroup>(), 1f, 0f));
 
         RectTransform panelRect = informationPanels[index].GetComponent<RectTransform>();
-        float elapsedTime = 0f;
+        Transform contentPanel = panelRect.GetChild(0);
+        CanvasGroup contentGroup = contentPanel.GetComponent<CanvasGroup>();
 
+        // 먼저 컨텐츠 페이드 아웃
+        float elapsedTime = 0f;
+        while (elapsedTime < systemAnimDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / systemAnimDuration;
+            contentGroup.alpha = Mathf.Lerp(1f, 0f, t);
+            yield return null;
+        }
+        contentGroup.alpha = 0f;
+
+        // 컨텐츠가 완전히 페이드 아웃된 후 패널 접기
+        elapsedTime = 0f;
         while (elapsedTime < systemAnimDuration)
         {
             elapsedTime += Time.deltaTime;
@@ -625,6 +677,14 @@ public class OptionManager : MonoBehaviour
             panelRect.sizeDelta = new Vector2(panelRect.sizeDelta.x, currentHeight);
             panelRect.anchoredPosition = new Vector2(panelRect.anchoredPosition.x, Mathf.Lerp(0, 480, t));
             yield return null;
+        }
+
+        // Mask 비활성화
+        RectTransform contentRect = contentPanel.GetComponent<RectTransform>();
+        RectMask2D mask = contentRect.GetComponent<RectMask2D>();
+        if (mask != null)
+        {
+            mask.enabled = false;
         }
 
         informationPanels[index].SetActive(false);
@@ -692,8 +752,6 @@ public class OptionManager : MonoBehaviour
     }
 
     // ======================================================================================================================
-    // []
-
 
 
 }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using System.Text.RegularExpressions;
 
 // CatDataLoader Script
 [DefaultExecutionOrder(-3)]     // 스크립트 실행 순서 조정 (1번째)
@@ -42,7 +43,32 @@ public class CatDataLoader : MonoBehaviour
             if (lineNumber <= 1) continue;
             if (lineNumber >= 5) continue;
 
-            string[] values = line.Split(',');
+            //// CSV 파싱을 위한 정규식 패턴 (따옴표로 둘러싸인 내용 내의 쉼표는 무시하고, 실제 구분자 역할을 하는 쉼표만 찾아서 분리)
+            //string[] values = Regex.Split(line, ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+
+            // CSV 파싱 - 따옴표 내부의 쉼표는 무시하고 실제 구분자만 처리
+            List<string> values = new List<string>();
+            bool insideQuotes = false;
+            int startIndex = 0;
+
+            for (int i = 0; i < line.Length; i++)
+            {
+                if (line[i] == '"')
+                {
+                    insideQuotes = !insideQuotes;
+                }
+                else if (line[i] == ',' && !insideQuotes)
+                {
+                    string value = line.Substring(startIndex, i - startIndex).Trim();
+                    value = value.Trim('"');
+                    values.Add(value);
+                    startIndex = i + 1;
+                }
+            }
+            // 마지막 값 추가
+            string lastValue = line.Substring(startIndex).Trim();
+            lastValue = lastValue.Trim('"');
+            values.Add(lastValue);
 
             // 빈 칸을 발견하면 거기까지만 처리
             List<string> validValues = new List<string>();
@@ -50,9 +76,11 @@ public class CatDataLoader : MonoBehaviour
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    //Debug.Log($"라인 {lineNumber}: 빈 칸 발견 - 해당 칸 이후 데이터를 무시합니다.");
                     break;
                 }
+                //// 따옴표 제거 및 값 추가 (정규식 패턴을 사용하면 이것을 사용)
+                //validValues.Add(value.Trim('"'));
+
                 validValues.Add(value);
             }
 
@@ -67,9 +95,12 @@ public class CatDataLoader : MonoBehaviour
                 int catHp = int.Parse(validValues[5]);
                 Sprite catImage = LoadSprite(validValues[6]);
                 string catExplain = validValues[7];
+                int catAttackSpeed = int.Parse(validValues[8]);
+                int catArmor = int.Parse(validValues[9]);
+                int catMoveSpeed = int.Parse(validValues[10]);
 
                 // Cat 객체 생성 및 Dictionary에 추가
-                Cat newCat = new Cat(catId, catName, catGrade, catDamage, catGetCoin, catHp, catImage, catExplain);
+                Cat newCat = new Cat(catId, catName, catGrade, catDamage, catGetCoin, catHp, catImage, catExplain, catAttackSpeed, catArmor, catMoveSpeed);
                 if (!catDictionary.ContainsKey(catId))
                 {
                     catDictionary.Add(catId, newCat);
@@ -84,8 +115,6 @@ public class CatDataLoader : MonoBehaviour
                 Debug.LogError($"라인 {lineNumber}: 데이터 처리 중 오류 발생 - {ex.Message}");
             }
         }
-
-        //Debug.Log("고양이 데이터 로드 완료: " + catDictionary.Count + "개");
     }
 
     // Resources 폴더에서 스프라이트 로드

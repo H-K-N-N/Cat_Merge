@@ -25,7 +25,14 @@ public class Mouse : MonoBehaviour
     private int numOfAttack;            // °ø°Ý Å¸°Ù ¼ö
     public int NumOfAttack { get => numOfAttack; set => numOfAttack = value; }
 
-    public Mouse(int mouseId, string mouseName, int mouseGrade, int mouseDamage, float mouseHp, Sprite mouseImage, int numOfAttack)
+    private int mouseAttackSpeed;       // Áã °ø°Ý¼Óµµ
+    public int MouseAttackSpeed { get => mouseAttackSpeed; set => mouseAttackSpeed = value; }
+
+    private int mouseArmor;             // Áã ¹æ¾î·Â
+    public int MouseArmor { get => mouseArmor; set => mouseArmor = value; }
+
+    public Mouse(int mouseId, string mouseName, int mouseGrade, int mouseDamage, float mouseHp, Sprite mouseImage, 
+        int numOfAttack, int mouseAttackSpeed, int mouseArmor)
     {
         MouseId = mouseId;
         MouseName = mouseName;
@@ -34,6 +41,8 @@ public class Mouse : MonoBehaviour
         MouseHp = mouseHp;
         MouseImage = mouseImage;
         NumOfAttack = numOfAttack;
+        MouseAttackSpeed = mouseAttackSpeed;
+        MouseArmor = mouseArmor;
     }
 
 }

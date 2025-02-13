@@ -66,6 +66,12 @@ public class DictionaryManager : MonoBehaviour
 
     // ======================================================================================================================
 
+    [Header("---[Sub Menu UI Color]")]
+    private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
+    private const string inactiveColorCode = "#FFFFFF";             // 비활성화상태 Color
+
+    // ======================================================================================================================
+
     [Header("---[Friendship UnLock Buttons]")]
     [SerializeField] private Button[] friendshipUnlockButtons;      // 
     [SerializeField] public GameObject[] friendshipGetCrystalImg;   // 
@@ -439,7 +445,7 @@ public class DictionaryManager : MonoBehaviour
     // 서브 메뉴 버튼 색상을 활성 상태에 따라 업데이트하는 함수
     private void UpdateSubButtonColor(Image buttonImage, bool isActive)
     {
-        string colorCode = isActive ? "#5f5f5f" : "#FFFFFF";
+        string colorCode = isActive ? activeColorCode : inactiveColorCode;
         if (ColorUtility.TryParseHtmlString(colorCode, out Color color))
         {
             buttonImage.color = color;

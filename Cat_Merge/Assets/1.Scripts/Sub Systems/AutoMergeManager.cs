@@ -5,9 +5,12 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using TMPro;
 
-// 자동 머지 Script
+// 자동머지 관련 스크립트
 public class AutoMergeManager : MonoBehaviour
 {
+    #region Variables
+    public static AutoMergeManager Instance { get; private set; }
+
     [Header("---[AutoMerge System]")]
     [SerializeField] private Button openAutoMergePanelButton;       // 자동 머지 패널 열기 버튼
     [SerializeField] private GameObject autoMergePanel;             // 자동 머지 패널
@@ -17,31 +20,37 @@ public class AutoMergeManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI autoMergeTimerText;    // 자동 머지 타이머 텍스트
     private int autoMergeCost = 30;
 
-    // ======================================================================================================================
-
-    private float startTime;                            // 자동 머지 시작 시간
-    private float autoMergeDuration = 10.0f;            // 자동 머지 기본 지속 시간
-    private float currentAutoMergeDuration;             // 현재 자동 머지 지속 시간
-    private float plusAutoMergeDuration;                // 자동 머지 추가 시간
-    private float autoMergeInterval = 0.5f;             // 자동 머지 간격
-    private float moveDuration = 0.2f;                  // 고양이가 이동하는 데 걸리는 시간 (이동 속도)
-    private bool isAutoMergeActive = false;             // 자동 머지 활성화 상태
+    [Header("---[???]")]
+    private float startTime;                                // 자동 머지 시작 시간
+    private float autoMergeDuration = 10.0f;                // 자동 머지 기본 지속 시간
+    private float currentAutoMergeDuration;                 // 현재 자동 머지 지속 시간
+    private float plusAutoMergeDuration;                    // 자동 머지 추가 시간
+    private float autoMergeInterval = 0.5f;                 // 자동 머지 간격
+    private float moveDuration = 0.2f;                      // 고양이가 이동하는 데 걸리는 시간 (이동 속도)
+    private bool isAutoMergeActive = false;                 // 자동 머지 활성화 상태
 
     private HashSet<DragAndDropManager> mergingCats;        // 머지 중인 고양이 추적
 
+    [Header("---[Battle System]")]
+    private bool isPaused = false;                          // 일시정지 상태
+    private float pausedTimeRemaining = 0f;                 // 일시정지 시점의 남은 시간
+    #endregion
+
     // ======================================================================================================================
 
+    #region Unity Methods
     private void Awake()
     {
-        plusAutoMergeDuration = autoMergeDuration;
-        currentAutoMergeDuration = autoMergeDuration;
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
 
-        UpdateAutoMergeCostText();
-        UpdateAutoMergeTimerVisibility(false);
-
-        openAutoMergePanelButton.onClick.AddListener(OpenAutoMergePanel);
-        closeAutoMergePanelButton.onClick.AddListener(CloseAutoMergePanel);
-        autoMergeStateButton.onClick.AddListener(StartAutoMerge);
+        InitializeAutoMergeManager();
     }
 
     private void Start()
@@ -51,7 +60,7 @@ public class AutoMergeManager : MonoBehaviour
 
     private void Update()
     {
-        if (isAutoMergeActive)
+        if (isAutoMergeActive && !isPaused)
         {
             // 남은 시간 계산
             float remainingTime = currentAutoMergeDuration - (Time.time - startTime);
@@ -64,14 +73,40 @@ public class AutoMergeManager : MonoBehaviour
             if (remainingTime <= 0)
             {
                 isAutoMergeActive = false;
+                isPaused = false;
+                pausedTimeRemaining = 0f;
                 UpdateAutoMergeTimerVisibility(false);
             }
         }
+        else if (isPaused)
+        {
+            // 일시정지 상태일 때는 남은 시간을 고정된 값으로 표시
+            UpdateAutoMergeTimerText((int)pausedTimeRemaining);
+        }
     }
+    #endregion
 
     // ======================================================================================================================
-    // ---[자동머지 UI]
 
+    #region Initialize
+    // AutoMergeManager 초기 설정
+    private void InitializeAutoMergeManager()
+    {
+        plusAutoMergeDuration = autoMergeDuration;
+        currentAutoMergeDuration = autoMergeDuration;
+
+        UpdateAutoMergeCostText();
+        UpdateAutoMergeTimerVisibility(false);
+
+        openAutoMergePanelButton.onClick.AddListener(OpenAutoMergePanel);
+        closeAutoMergePanelButton.onClick.AddListener(CloseAutoMergePanel);
+        autoMergeStateButton.onClick.AddListener(StartAutoMerge);
+    }
+    #endregion
+
+    // ======================================================================================================================
+
+    #region UI System
     // 자동머지 비용 Text 업데이트 함수
     private void UpdateAutoMergeCostText()
     {
@@ -99,7 +134,7 @@ public class AutoMergeManager : MonoBehaviour
         }
     }
 
-    // 자동머지 시작 함수
+    // 자동 머지 시작 함수 (재화 판별)
     private void StartAutoMerge()
     {
         if (GameManager.Instance.Cash >= autoMergeCost)
@@ -114,7 +149,7 @@ public class AutoMergeManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("Not enough coins to start AutoMerge!");
+            //Debug.Log("Not enough coins");
         }
     }
 
@@ -135,10 +170,11 @@ public class AutoMergeManager : MonoBehaviour
             autoMergeTimerText.text = $"{remainingTime}";
         }
     }
+    #endregion
 
     // ======================================================================================================================
-    // ---[자동머지 기능]
 
+    #region Auto Merge System
     // 자동 머지 시작 함수
     public void OnClickedAutoMerge()
     {
@@ -325,6 +361,65 @@ public class AutoMergeManager : MonoBehaviour
     {
         mergingCats.Remove(cat);
     }
+    #endregion
+
+    // ======================================================================================================================
+
+    #region Battle System
+    // 자동 머지 일시정지 함수
+    public void PauseAutoMerge()
+    {
+        if (isAutoMergeActive && !isPaused)
+        {
+            isPaused = true;
+            pausedTimeRemaining = currentAutoMergeDuration - (Time.time - startTime);
+            StopAllCoroutines();
+
+            mergingCats.Clear();
+
+            openAutoMergePanelButton.interactable = false;
+            if (autoMergePanel.activeSelf == true)
+            {
+                autoMergePanel.SetActive(false);
+            }
+        }
+        else
+        {
+            openAutoMergePanelButton.interactable = false;
+        }
+
+        DisableAutoMergeUI();
+    }
+
+    // 자동 머지 이어하기 함수
+    public void ResumeAutoMerge()
+    {
+        if (isPaused && pausedTimeRemaining > 0)
+        {
+            isPaused = false;
+            startTime = Time.time;
+            currentAutoMergeDuration = pausedTimeRemaining;
+            openAutoMergePanelButton.interactable = true;
+            StartCoroutine(AutoMergeCoroutine());
+        }
+        else
+        {
+            openAutoMergePanelButton.interactable = true;
+        }
+    }
+
+    // 전투 시작시 자동머지 UI 비활성화 함수
+    private void DisableAutoMergeUI()
+    {
+        openAutoMergePanelButton.interactable = false;
+        if (autoMergePanel.activeSelf)
+        {
+            autoMergePanel.SetActive(false);
+        }
+    }
+    #endregion
+
+    // ======================================================================================================================
 
 
 }

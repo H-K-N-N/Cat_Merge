@@ -20,6 +20,12 @@ public class ActivePanelManager : MonoBehaviour
     private string activePanelName;                         // 활성화된 Panel 이름
     public string ActivePanelName => activePanelName;
 
+    [Header("---[UI Color]")]
+    private const float inactiveAlpha = 180f / 255f;        // 비활성화상태 Alpha값
+
+    private string[] topPanels = { "DictionaryMenu", "OptionMenu", "QuestMenu" };
+    private string[] bottomPanels = { "BottomItemMenu", "BuyCatMenu" };
+
     // ======================================================================================================================
 
     private void Awake()
@@ -35,6 +41,7 @@ public class ActivePanelManager : MonoBehaviour
             foreach (var panel in panels.Values)
             {
                 panel.Panel.SetActive(false);
+                UpdateButtonColor(panel.ButtonImage, true);
             }
         }
     }
@@ -58,6 +65,14 @@ public class ActivePanelManager : MonoBehaviour
             {
                 ClosePanel(activePanelName);
                 activePanelName = null;
+                // 특별 패널만 버튼 색상 변경
+                foreach (var kvp in panels)
+                {
+                    if (System.Array.Exists(topPanels, x => x == kvp.Key))
+                    {
+                        UpdateButtonColor(kvp.Value.ButtonImage, true);
+                    }
+                }
             }
             else
             {
@@ -70,9 +85,16 @@ public class ActivePanelManager : MonoBehaviour
                 // 새로운 Panel 열기
                 PanelInfo panelInfo = panels[panelName];
                 panelInfo.Panel.SetActive(true);
-                UpdateButtonColor(panelInfo.ButtonImage, true);
-
                 activePanelName = panelName;
+
+                // 특별 패널만 버튼 색상 업데이트
+                foreach (var kvp in panels)
+                {
+                    if (System.Array.Exists(topPanels, x => x == kvp.Key))
+                    {
+                        UpdateButtonColor(kvp.Value.ButtonImage, kvp.Key == panelName);
+                    }
+                }
             }
         }
     }
@@ -85,18 +107,24 @@ public class ActivePanelManager : MonoBehaviour
             PanelInfo panelInfo = panels[panelName];
             activePanelName = null;
             panelInfo.Panel.SetActive(false);
-            UpdateButtonColor(panelInfo.ButtonImage, false);
+
+            // 특별 패널만 버튼 색상 변경
+            foreach (var kvp in panels)
+            {
+                if (System.Array.Exists(topPanels, x => x == kvp.Key))
+                {
+                    UpdateButtonColor(kvp.Value.ButtonImage, true);
+                }
+            }
         }
     }
 
     // 버튼 색상 업데이트하는 함수
     private void UpdateButtonColor(Image buttonImage, bool isActive)
     {
-        string colorCode = isActive ? "#5f5f5f" : "#FFFFFF";
-        if (ColorUtility.TryParseHtmlString(colorCode, out Color color))
-        {
-            buttonImage.color = color;
-        }
+        Color color = buttonImage.color;
+        color.a = isActive ? 1f : inactiveAlpha;
+        buttonImage.color = color;
     }
 
 }

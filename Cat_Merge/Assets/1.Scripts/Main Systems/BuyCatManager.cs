@@ -244,6 +244,7 @@ public class BuyCatManager : MonoBehaviour
 
     private void InitializeItemMenuManager()
     {
+        buyCatMenuPanel.SetActive(false);
         OpenCloseBottomBuyCatMenuPanel();
     }
 

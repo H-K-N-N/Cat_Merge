@@ -51,10 +51,6 @@ public class ItemMenuManager : MonoBehaviour
 
     [SerializeField] private GameObject[] disabledBg;                     // 버튼 클릭 못할 때의 배경
 
-    // [SerializeField] private TextMeshProUGUI catMaximumIncreaseFeeText; // 고양이 최대치 증가 비용 텍스트
-    // [SerializeField] private TextMeshProUGUI catMaximumIncreaseLvText;  // 고양이 최대치 증가 레벨 텍스트
-    // [SerializeField] private TextMeshProUGUI catHowManyIncreaseText;    // 고양이 증가 얼마나 했는지 텍스트
-
     [SerializeField] private TextMeshProUGUI[] itemMenuesLvText;
     [SerializeField] private TextMeshProUGUI[] itemMenuesValueText;
     [SerializeField] private TextMeshProUGUI[] itemMenuesFeeText;
@@ -127,18 +123,6 @@ public class ItemMenuManager : MonoBehaviour
         // 판넬 토글
         activePanelManager = FindObjectOfType<ActivePanelManager>();
         activePanelManager.RegisterPanel("BottomItemMenu", itemMenuPanel, bottomItemButtonImg);
-
-        //itemMenuesLvText[0].text = $"Lv.{ ItemFunctionManager.Instance.maxCatsList[0].step}";
-        //itemMenuesValueText[0].text = $"{ ItemFunctionManager.Instance.maxCatsList[0].value}->{ ItemFunctionManager.Instance.maxCatsList[1].value}"; // 1->2 2->3 3->4
-        //itemMenuesFeeText[0].text = $"{ ItemFunctionManager.Instance.maxCatsList[0].fee}";
-
-        //itemMenuesLvText[1].text = $"Lv.{ ItemFunctionManager.Instance.reduceCollectingTimeList[0].step}";
-        //itemMenuesValueText[1].text = $"{ ItemFunctionManager.Instance.reduceCollectingTimeList[0].value}->{ ItemFunctionManager.Instance.reduceCollectingTimeList[1].value}"; // 1->2 2->3 3->4
-        //itemMenuesFeeText[1].text = $"{ ItemFunctionManager.Instance.reduceCollectingTimeList[0].fee}";
-
-        //itemMenuesLvText[2].text = $"Lv.{ ItemFunctionManager.Instance.maxFoodsList[0].step}";
-        //itemMenuesValueText[2].text = $"{ ItemFunctionManager.Instance.maxFoodsList[0].value}->{ ItemFunctionManager.Instance.maxFoodsList[1].value}"; // 1->2 2->3 3->4
-        //itemMenuesFeeText[2].text = $"{ ItemFunctionManager.Instance.maxFoodsList[0].fee}";
 
         InitItemMenuText();
     }

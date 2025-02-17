@@ -35,7 +35,7 @@ public class BattleManager : MonoBehaviour
 
     [Header("---[Boss UI]")]
     [SerializeField] private GameObject battleHPUI;             // Battle HP UI (활성화/비활성화 제어)
-    [SerializeField] private TextMeshProUGUI bossNameText;      // Boss Name Text
+    [SerializeField] private TextMeshProUGUI bossStageText;     // Boss Stage Text
     [SerializeField] private Slider bossHPSlider;               // HP Slider
     [SerializeField] private TextMeshProUGUI bossHPText;        // HP % Text
     [SerializeField] private Button giveupButton;               // 항복 버튼
@@ -331,7 +331,7 @@ public class BattleManager : MonoBehaviour
     private void UpdateBossUI()
     {
         battleHPUI.SetActive(true);
-        bossNameText.text = currentBossData.MouseName;
+        bossStageText.text = $"{currentBossData.MouseGrade} Stage";
 
         maxBossHP = currentBossData.MouseHp;
         currentBossHP = maxBossHP;

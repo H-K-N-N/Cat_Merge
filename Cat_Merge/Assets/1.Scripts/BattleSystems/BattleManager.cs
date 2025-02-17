@@ -50,22 +50,22 @@ public class BattleManager : MonoBehaviour
     public float warningDuration = 2f;                          // warningPanel 활성화 시간
     private Coroutine warningSliderCoroutine;                   // warningSlider 코루틴
 
-    [SerializeField] private TextMeshProUGUI topWarningText;    // 상단 경고 텍스트
-    [SerializeField] private TextMeshProUGUI bossDangerText;    // 보스 위험 텍스트
-    [SerializeField] private TextMeshProUGUI bottomWarningText; // 하단 경고 텍스트
+    [SerializeField] private Image topWarningImage;             // 상단 경고 이미지
+    [SerializeField] private Image bossDangerImage;             // 보스 위험 이미지
+    [SerializeField] private Image bottomWarningImage;          // 하단 경고 이미지
     private CanvasGroup warningPanelCanvasGroup;                // Warning Panel의 CanvasGroup
-    private CanvasGroup topWarningCanvasGroup;                  // 상단 경고 텍스트의 CanvasGroup
-    private CanvasGroup bossDangerCanvasGroup;                  // 보스 위험 텍스트의 CanvasGroup  
-    private CanvasGroup bottomWarningCanvasGroup;               // 하단 경고 텍스트의 CanvasGroup
+    private CanvasGroup topWarningCanvasGroup;                  // 상단 경고 이미지의 CanvasGroup
+    private CanvasGroup bossDangerCanvasGroup;                  // 보스 위험 이미지의 CanvasGroup  
+    private CanvasGroup bottomWarningCanvasGroup;               // 하단 경고 이미지의 CanvasGroup
 
-    private const float WARNING_TEXT_START_X = -755f;           // 경고 텍스트 시작 좌표
-    private const float WARNING_TEXT_END_X = 755f;              // 경고 텍스트 끝 좌표
-    private const float BOSS_DANGER_START_X = 810f;             // Boss Danger 텍스트 시작 좌표
-    private const float BOSS_DANGER_END_X = -810f;              // Boss Danger 텍스트 끝 좌표
-    private const float WARNING_TEXT_Y = 0f;                    // 경고 텍스트 Y 좌표
+    private const float WARNING_IMAGE_START_X = -640f;          // 경고 이미지 시작 좌표
+    private const float WARNING_IMAGE_END_X = 640f;             // 경고 이미지 끝 좌표
+    private const float BOSS_DANGER_START_X = 1040f;            // Boss Danger 이미지 시작 좌표
+    private const float BOSS_DANGER_END_X = -1040f;             // Boss Danger 이미지 끝 좌표
+    private const float WARNING_IMAGE_Y = 0f;                   // 경고 이미지 Y 좌표
     #endregion
 
-    // ======================================================================================================================
+    // ======================================================================================================================================================================
 
     #region Unity Methods
     private void Awake()
@@ -147,9 +147,9 @@ public class BattleManager : MonoBehaviour
     private void InitializeCanvasGroups()
     {
         warningPanelCanvasGroup = SetupCanvasGroup(warningPanel);
-        topWarningCanvasGroup = SetupCanvasGroup(topWarningText.gameObject);
-        bossDangerCanvasGroup = SetupCanvasGroup(bossDangerText.gameObject);
-        bottomWarningCanvasGroup = SetupCanvasGroup(bottomWarningText.gameObject);
+        topWarningCanvasGroup = SetupCanvasGroup(topWarningImage.gameObject);
+        bossDangerCanvasGroup = SetupCanvasGroup(bossDangerImage.gameObject);
+        bottomWarningCanvasGroup = SetupCanvasGroup(bottomWarningImage.gameObject);
     }
 
     // UI 오브젝트에 CanvasGroup 컴포넌트가 없으면 추가하고 반환하는 함수
@@ -218,10 +218,10 @@ public class BattleManager : MonoBehaviour
         bossDangerCanvasGroup.alpha = 0f;
         bottomWarningCanvasGroup.alpha = 0f;
 
-        // Text 초기 위치 설정
-        topWarningText.rectTransform.anchoredPosition = new Vector2(WARNING_TEXT_START_X, WARNING_TEXT_Y);
-        bossDangerText.rectTransform.anchoredPosition = new Vector2(BOSS_DANGER_START_X, WARNING_TEXT_Y);
-        bottomWarningText.rectTransform.anchoredPosition = new Vector2(WARNING_TEXT_START_X, WARNING_TEXT_Y);
+        // Image 초기 위치 설정
+        topWarningImage.rectTransform.anchoredPosition = new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y);
+        bossDangerImage.rectTransform.anchoredPosition = new Vector2(BOSS_DANGER_START_X, WARNING_IMAGE_Y);
+        bottomWarningImage.rectTransform.anchoredPosition = new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y);
 
         // 첫 1초: 투명 -> 반투명
         while (elapsedTime < halfDuration)
@@ -236,19 +236,19 @@ public class BattleManager : MonoBehaviour
             bossDangerCanvasGroup.alpha = alpha;
             bottomWarningCanvasGroup.alpha = alpha;
 
-            // 텍스트 이동
+            // 이미지 이동
             float moveProgress = elapsedTime / warningDuration;
-            topWarningText.rectTransform.anchoredPosition = Vector2.Lerp(
-                new Vector2(WARNING_TEXT_START_X, WARNING_TEXT_Y),
-                new Vector2(WARNING_TEXT_END_X, WARNING_TEXT_Y),
+            topWarningImage.rectTransform.anchoredPosition = Vector2.Lerp(
+                new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y),
+                new Vector2(WARNING_IMAGE_END_X, WARNING_IMAGE_Y),
                 moveProgress);
-            bottomWarningText.rectTransform.anchoredPosition = Vector2.Lerp(
-                new Vector2(WARNING_TEXT_START_X, WARNING_TEXT_Y),
-                new Vector2(WARNING_TEXT_END_X, WARNING_TEXT_Y),
+            bottomWarningImage.rectTransform.anchoredPosition = Vector2.Lerp(
+                new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y),
+                new Vector2(WARNING_IMAGE_END_X, WARNING_IMAGE_Y),
                 moveProgress);
-            bossDangerText.rectTransform.anchoredPosition = Vector2.Lerp(
-                new Vector2(BOSS_DANGER_START_X, WARNING_TEXT_Y),
-                new Vector2(BOSS_DANGER_END_X, WARNING_TEXT_Y),
+            bossDangerImage.rectTransform.anchoredPosition = Vector2.Lerp(
+                new Vector2(BOSS_DANGER_START_X, WARNING_IMAGE_Y),
+                new Vector2(BOSS_DANGER_END_X, WARNING_IMAGE_Y),
                 moveProgress);
 
             // slider 업데이트
@@ -269,19 +269,19 @@ public class BattleManager : MonoBehaviour
             bossDangerCanvasGroup.alpha = alpha;
             bottomWarningCanvasGroup.alpha = alpha;
 
-            // 텍스트 이동
+            // 이미지 이동
             float moveProgress = elapsedTime / warningDuration;
-            topWarningText.rectTransform.anchoredPosition = Vector2.Lerp(
-                new Vector2(WARNING_TEXT_START_X, WARNING_TEXT_Y),
-                new Vector2(WARNING_TEXT_END_X, WARNING_TEXT_Y),
+            topWarningImage.rectTransform.anchoredPosition = Vector2.Lerp(
+                new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y),
+                new Vector2(WARNING_IMAGE_END_X, WARNING_IMAGE_Y),
                 moveProgress);
-            bottomWarningText.rectTransform.anchoredPosition = Vector2.Lerp(
-                new Vector2(WARNING_TEXT_START_X, WARNING_TEXT_Y),
-                new Vector2(WARNING_TEXT_END_X, WARNING_TEXT_Y),
+            bottomWarningImage.rectTransform.anchoredPosition = Vector2.Lerp(
+                new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y),
+                new Vector2(WARNING_IMAGE_END_X, WARNING_IMAGE_Y),
                 moveProgress);
-            bossDangerText.rectTransform.anchoredPosition = Vector2.Lerp(
-                new Vector2(BOSS_DANGER_START_X, WARNING_TEXT_Y),
-                new Vector2(BOSS_DANGER_END_X, WARNING_TEXT_Y),
+            bossDangerImage.rectTransform.anchoredPosition = Vector2.Lerp(
+                new Vector2(BOSS_DANGER_START_X, WARNING_IMAGE_Y),
+                new Vector2(BOSS_DANGER_END_X, WARNING_IMAGE_Y),
                 moveProgress);
 
             // slider 업데이트

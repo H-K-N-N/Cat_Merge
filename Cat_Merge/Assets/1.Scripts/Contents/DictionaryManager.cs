@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System;
+using System.Collections;
 
 // 고양이 도감 Script
 public class DictionaryManager : MonoBehaviour
@@ -35,6 +36,7 @@ public class DictionaryManager : MonoBehaviour
 
     [Header("---[New Cat Panel UI]")]
     [SerializeField] private GameObject newCatPanel;                // New Cat Panel
+    [SerializeField] private Image newCatHighlightImage;            // New Cat Highlight Image
     [SerializeField] private Image newCatIcon;                      // New Cat Icon
     [SerializeField] private TextMeshProUGUI newCatName;            // New Cat Name Text
     [SerializeField] private TextMeshProUGUI newCatExplain;         // New Cat Explanation Text
@@ -393,9 +395,22 @@ public class DictionaryManager : MonoBehaviour
         newCatExplain.text = newCat.CatExplain;
         newCatGetCoin.text = "Get Coin : " + newCat.CatGetCoin.ToString();
 
+        // Highlight Image 회전 애니메이션 시작
+        StartCoroutine(RotateHighlightImage());
+
         // 확인 버튼을 누르면 패널을 비활성화
         submitButton.onClick.RemoveAllListeners();
         submitButton.onClick.AddListener(CloseNewCatPanel);
+    }
+
+    // Highlight Image 회전 애니메이션 코루틴
+    private IEnumerator RotateHighlightImage()
+    {
+        while (newCatPanel.activeSelf)
+        {
+            newCatHighlightImage.transform.Rotate(new Vector3(0, 0, 1), 180 * Time.deltaTime);
+            yield return null;
+        }
     }
 
     // New Cat Panel을 닫는 함수

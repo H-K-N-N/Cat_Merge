@@ -408,7 +408,7 @@ public class DictionaryManager : MonoBehaviour
     {
         while (newCatPanel.activeSelf)
         {
-            newCatHighlightImage.transform.Rotate(new Vector3(0, 0, 1), 180 * Time.deltaTime);
+            newCatHighlightImage.transform.Rotate(new Vector3(0, 0, 1), 90 * Time.deltaTime);
             yield return null;
         }
     }

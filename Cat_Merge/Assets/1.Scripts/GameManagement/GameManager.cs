@@ -111,19 +111,29 @@ public class GameManager : MonoBehaviour
     // 고양이 정보 Load 함수
     private void LoadAllCats()
     {
-        // CatDataLoader에서 catDictionary 가져오기
         CatDataLoader catDataLoader = FindObjectOfType<CatDataLoader>();
+        TrainingDataLoader trainingDataLoader = FindObjectOfType<TrainingDataLoader>();
+
         if (catDataLoader == null || catDataLoader.catDictionary == null)
         {
             Debug.LogError("CatDataLoader가 없거나 고양이 데이터가 로드되지 않았습니다.");
             return;
         }
 
-        // Dictionary의 모든 값을 배열로 변환
         allCatData = new Cat[catDataLoader.catDictionary.Count];
         catDataLoader.catDictionary.Values.CopyTo(allCatData, 0);
 
-        //Debug.Log($"고양이 데이터 {allCatData.Length}개가 로드되었습니다.");
+        // 훈련 데이터 적용
+        if (trainingDataLoader != null && trainingDataLoader.trainingDictionary != null)
+        {
+            foreach (Cat cat in allCatData)
+            {
+                if (trainingDataLoader.trainingDictionary.TryGetValue(cat.CatId, out TrainingData trainingData))
+                {
+                    cat.GrowStat(trainingData.GrowthDamage, trainingData.GrowthHp);
+                }
+            }
+        }
     }
 
     // 쥐 정보 Load 함수
@@ -182,7 +192,8 @@ public class GameManager : MonoBehaviour
     {
         if (coinText != null)
         {
-            coinText.text = $"{coin}";
+            // 숫자를 3자리마다 콤마를 추가하여 표시
+            coinText.text = coin.ToString("N0");
         }
     }
 
@@ -303,6 +314,36 @@ public class GameManager : MonoBehaviour
     }
 
     // ======================================================================================================================
+
+    // 필드의 모든 고양이 정보 업데이트
+    public void UpdateAllCatsInField()
+    {
+        // 이미 생성된 고양이의 데이터 수치를 새로 업데이트된 수치로 적용
+        // 기존 Cat 수치로 생성된 고양이들을 성장으로 추가된 수치가 적용된 Cat으로 업데이트하기 위함
+        foreach (Transform child in gamePanel)
+        {
+            CatData catData = child.GetComponent<CatData>();
+            if (catData != null)
+            {
+                foreach (Cat cat in allCatData)
+                {
+                    if (cat.CatId == catData.catData.CatId)
+                    {
+                        catData.SetCatData(cat);
+                        //Debug.Log($"{catData.catData.CatDamage}, {catData.catData.CatHp}");
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    // 모든 고양이의 훈련 데이터를 저장하는 메서드
+    public void SaveTrainingData(Cat[] cats)
+    {
+        // 여기에 실제 저장 로직 구현
+        // 예: PlayerPrefs나 파일 시스템을 사용하여 각 고양이의 성장 스탯 저장
+    }
 
 
 }

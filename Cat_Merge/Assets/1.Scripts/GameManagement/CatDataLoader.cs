@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using System.Text.RegularExpressions;
 
 // CatDataLoader Script
 [DefaultExecutionOrder(-3)]     // 스크립트 실행 순서 조정 (1번째)
@@ -15,8 +14,6 @@ public class CatDataLoader : MonoBehaviour
     private void Awake()
     {
         LoadCatDataFromCSV();
-
-        // catDataDictionary.TryGetValue(1, out Cat cat) : 1번 인덱스의 Cat 정보를 가져오는 코드
     }
 
     // ======================================================================================================================
@@ -42,9 +39,6 @@ public class CatDataLoader : MonoBehaviour
             lineNumber++;
             if (lineNumber <= 1) continue;
             if (lineNumber >= 5) continue;
-
-            //// CSV 파싱을 위한 정규식 패턴 (따옴표로 둘러싸인 내용 내의 쉼표는 무시하고, 실제 구분자 역할을 하는 쉼표만 찾아서 분리)
-            //string[] values = Regex.Split(line, ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
 
             // CSV 파싱 - 따옴표 내부의 쉼표는 무시하고 실제 구분자만 처리
             List<string> values = new List<string>();
@@ -78,8 +72,6 @@ public class CatDataLoader : MonoBehaviour
                 {
                     break;
                 }
-                //// 따옴표 제거 및 값 추가 (정규식 패턴을 사용하면 이것을 사용)
-                //validValues.Add(value.Trim('"'));
 
                 validValues.Add(value);
             }

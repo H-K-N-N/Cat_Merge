@@ -123,7 +123,7 @@ public class CatData : MonoBehaviour
 
     // ======================================================================================================================
 
-    #region Combat System
+    #region Battle System
     // 보스 히트박스 경계로 고양이 밀어내기
     public void MoveOppositeBoss(Vector3 bossPosition, Vector2 bossSize)
     {

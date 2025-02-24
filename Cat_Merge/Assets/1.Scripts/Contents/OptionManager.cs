@@ -154,13 +154,13 @@ public class OptionManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            optionMenuPanel.SetActive(false);
-            InitializeOptionManager();
         }
         else
         {
             Destroy(gameObject);
         }
+        optionMenuPanel.SetActive(false);
+        InitializeOptionManager();
     }
 
     private void Start()

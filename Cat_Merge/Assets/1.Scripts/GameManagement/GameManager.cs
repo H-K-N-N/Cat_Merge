@@ -182,7 +182,8 @@ public class GameManager : MonoBehaviour
     {
         if (coinText != null)
         {
-            coinText.text = $"{coin}";
+            // 숫자를 3자리마다 콤마를 추가하여 표시
+            coinText.text = coin.ToString("N0");
         }
     }
 

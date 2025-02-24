@@ -226,8 +226,25 @@ public class AutoMergeManager : MonoBehaviour
 
                 while (catsInGroup.Count >= 2 && (Time.time - startTime - currentAutoMergeDuration < 0))
                 {
+                    // 매 반복마다 cat1과 cat2가 여전히 존재하는지 확인
+                    if (catsInGroup.Count < 2)
+                    {
+                        break;
+                    }
+
                     var cat1 = catsInGroup[0];
                     var cat2 = catsInGroup[1];
+
+                    // 고양이가 이미 파괴되었거나 드래그 중인지 확인
+                    if (cat1 == null || cat2 == null || cat1.isDragging || cat2.isDragging)
+                    {
+                        // 없어진 고양이 제거
+                        if (cat1 == null || cat1.isDragging) catsInGroup.Remove(cat1);
+                        if (cat2 == null || cat2.isDragging) catsInGroup.Remove(cat2);
+                        mergingCats.Remove(cat1);
+                        mergingCats.Remove(cat2);
+                        continue;
+                    }
 
                     // 최고 등급 고양이인지 확인
                     if (IsMaxLevelCat(cat1.catData) || IsMaxLevelCat(cat2.catData))
@@ -237,14 +254,6 @@ public class AutoMergeManager : MonoBehaviour
                         continue;
                     }
 
-                    // 고양이 상태 확인
-                    if (cat1 == null || cat2 == null || cat1.isDragging || cat2.isDragging ||
-                        mergingCats.Contains(cat1) || mergingCats.Contains(cat2))
-                    {
-                        catsInGroup.Remove(cat1);
-                        catsInGroup.Remove(cat2);
-                        continue;
-                    }
                     mergingCats.Add(cat1);
                     mergingCats.Add(cat2);
 
@@ -260,29 +269,35 @@ public class AutoMergeManager : MonoBehaviour
 
                     Vector2 mergePosition = GetRandomPosition(parentRect);
 
-                    StartCoroutine(MoveCatSmoothly(cat1, mergePosition));
-                    StartCoroutine(MoveCatSmoothly(cat2, mergePosition));
-
-                    yield return new WaitUntil(() =>
-                        cat1 == null || cat2 == null ||
-                        (!mergingCats.Contains(cat1) && !mergingCats.Contains(cat2)) ||
-                        (cat1.rectTransform.anchoredPosition == mergePosition && cat2.rectTransform.anchoredPosition == mergePosition)
-                    );
-
-                    if (cat1 != null && cat2 != null && mergingCats.Contains(cat1) && mergingCats.Contains(cat2))
+                    // 이동 코루틴 시작 전 다시 한번 확인
+                    if (cat1 != null && cat2 != null && !cat1.isDragging && !cat2.isDragging)
                     {
-                        Cat mergedCat = FindObjectOfType<MergeManager>().MergeCats(cat1.catData, cat2.catData);
-                        if (mergedCat != null)
+                        StartCoroutine(MoveCatSmoothly(cat1, mergePosition));
+                        StartCoroutine(MoveCatSmoothly(cat2, mergePosition));
+
+                        yield return new WaitUntil(() =>
+                            cat1 == null || cat2 == null ||
+                            (!mergingCats.Contains(cat1) && !mergingCats.Contains(cat2)) ||
+                            (cat1.rectTransform.anchoredPosition == mergePosition && cat2.rectTransform.anchoredPosition == mergePosition)
+                        );
+
+                        // 마지막으로 한번 더 확인 후 머지 실행
+                        if (cat1 != null && cat2 != null &&
+                            mergingCats.Contains(cat1) && mergingCats.Contains(cat2) &&
+                            !cat1.isDragging && !cat2.isDragging)
                         {
-                            cat1.catData = mergedCat;
-                            cat1.UpdateCatUI();
-                            Destroy(cat2.gameObject);
+                            Cat mergedCat = FindObjectOfType<MergeManager>().MergeCats(cat1.catData, cat2.catData);
+                            if (mergedCat != null)
+                            {
+                                cat1.catData = mergedCat;
+                                cat1.UpdateCatUI();
+                                Destroy(cat2.gameObject);
+                            }
                         }
                     }
 
                     mergingCats.Remove(cat1);
                     mergingCats.Remove(cat2);
-
                     catsInGroup.Remove(cat1);
                     catsInGroup.Remove(cat2);
 

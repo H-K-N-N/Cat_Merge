@@ -2,29 +2,24 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-// CatDataLoader Script
-[DefaultExecutionOrder(-3)]     // 스크립트 실행 순서 조정 (1번째)
-public class CatDataLoader : MonoBehaviour
+[DefaultExecutionOrder(-3)]  // CatDataLoader와 같은 순서로 실행
+public class TrainingDataLoader : MonoBehaviour
 {
-    // 고양이 데이터를 관리할 Dictionary
-    public Dictionary<int, Cat> catDictionary = new Dictionary<int, Cat>();
-
-    // ======================================================================================================================
+    // 고양이별 훈련 데이터를 관리할 Dictionary (Key: CatId)
+    public Dictionary<int, TrainingData> trainingDictionary = new Dictionary<int, TrainingData>();
 
     private void Awake()
     {
-        LoadCatDataFromCSV();
+        LoadTrainingDataFromCSV();
     }
 
-    // ======================================================================================================================
-
-    // CSV 파일을 읽어 Cat 객체로 변환 후 Dictionary에 저장
-    public void LoadCatDataFromCSV()
+    // CSV 파일을 읽어 TrainingData 객체로 변환 후 Dictionary에 저장
+    private void LoadTrainingDataFromCSV()
     {
-        TextAsset csvFile = Resources.Load<TextAsset>("CatDB");
+        TextAsset csvFile = Resources.Load<TextAsset>("TrainingDB");
         if (csvFile == null)
         {
-            Debug.LogError("CSV 파일이 연결되지 않았습니다");
+            Debug.LogError("Training CSV 파일이 연결되지 않았습니다");
             return;
         }
 
@@ -72,7 +67,6 @@ public class CatDataLoader : MonoBehaviour
                 {
                     break;
                 }
-
                 validValues.Add(value);
             }
 
@@ -80,22 +74,14 @@ public class CatDataLoader : MonoBehaviour
             {
                 // 데이터 파싱
                 int catId = int.Parse(validValues[0]);
-                string catName = validValues[1];
-                int catGrade = int.Parse(validValues[2]);
-                int catDamage = int.Parse(validValues[3]);
-                int catGetCoin = int.Parse(validValues[4]);
-                int catHp = int.Parse(validValues[5]);
-                Sprite catImage = LoadSprite(validValues[6]);
-                string catExplain = validValues[7];
-                int catAttackSpeed = int.Parse(validValues[8]);
-                int catArmor = int.Parse(validValues[9]);
-                int catMoveSpeed = int.Parse(validValues[10]);
+                int growthDamage = int.Parse(validValues[2]);
+                int growthHp = int.Parse(validValues[3]);
 
-                // Cat 객체 생성 및 Dictionary에 추가
-                Cat newCat = new Cat(catId, catName, catGrade, catDamage, catGetCoin, catHp, catImage, catExplain, catAttackSpeed, catArmor, catMoveSpeed);
-                if (!catDictionary.ContainsKey(catId))
+                // TrainingData 객체 생성 및 Dictionary에 추가
+                TrainingData trainingData = new TrainingData(growthDamage, growthHp);
+                if (!trainingDictionary.ContainsKey(catId))
                 {
-                    catDictionary.Add(catId, newCat);
+                    trainingDictionary.Add(catId, trainingData);
                 }
                 else
                 {
@@ -108,15 +94,20 @@ public class CatDataLoader : MonoBehaviour
             }
         }
     }
+}
 
-    // Resources 폴더에서 스프라이트 로드
-    private Sprite LoadSprite(string path)
+// 훈련 데이터를 담는 클래스
+public class TrainingData
+{
+    private int growthDamage;
+    public int GrowthDamage { get => growthDamage; set => growthDamage = value; }
+
+    private int growthHp;
+    public int GrowthHp { get => growthHp; set => growthHp = value; }
+
+    public TrainingData(int growthDamage, int growthHp)
     {
-        Sprite sprite = Resources.Load<Sprite>("Sprites/Cats/" + path);
-        if (sprite == null)
-        {
-            Debug.LogError($"이미지를 찾을 수 없습니다: {path}");
-        }
-        return sprite;
+        GrowthDamage = growthDamage;
+        GrowthHp = growthHp;
     }
 }

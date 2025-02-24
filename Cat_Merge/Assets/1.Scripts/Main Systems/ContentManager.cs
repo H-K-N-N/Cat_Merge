@@ -31,6 +31,10 @@ public class ContentManager : MonoBehaviour
         End             // Enum의 끝
     }
     private ContentMenuType activeMenuType;                         // 현재 활성화된 메뉴 타입
+
+    [Header("---[Training Settings]")]
+    public Button trainingLevelUpButton;                            // 훈련 레벨업 버튼
+    private int currentTrainingStage = 0;                           // 현재 훈련 단계
     #endregion
 
     #region Unity Methods
@@ -61,6 +65,7 @@ public class ContentManager : MonoBehaviour
     {
         InitializeContentButton();
         InitializeSubMenuButtons();
+        InitializeTrainingSystem();
     }
 
     // ContentButton 초기화 함수
@@ -75,6 +80,64 @@ public class ContentManager : MonoBehaviour
         {
             activePanelManager.ClosePanel("ContentMenu");
         });
+    }
+
+    private void InitializeTrainingSystem()
+    {
+        if (trainingLevelUpButton != null)
+        {
+            trainingLevelUpButton.onClick.AddListener(OnTrainingLevelUp);
+            UpdateTrainingButtonUI();
+        }
+    }
+    #endregion
+
+    #region Training System
+    // 훈련 레벨업 버튼 클릭 처리
+    private void OnTrainingLevelUp()
+    {
+        TrainingDataLoader trainingLoader = FindObjectOfType<TrainingDataLoader>();
+        if (trainingLoader != null)
+        {
+            // 현재 훈련 단계 + 1의 데이터 가져오기
+            int nextStage = currentTrainingStage + 1;
+            if (trainingLoader.trainingDictionary.TryGetValue(nextStage, out TrainingData trainingData))
+            {
+                // GameManager에서 모든 고양이 데이터 가져오기
+                Cat[] allCats = GameManager.Instance.AllCatData;
+
+                // 모든 고양이에게 성장 스탯 적용
+                foreach (Cat cat in allCats)
+                {
+                    cat.GrowStat(trainingData.GrowthDamage, trainingData.GrowthHp);
+                }
+
+                // 현재 훈련 단계 증가
+                currentTrainingStage = nextStage;
+
+                // 성장 데이터 저장
+                GameManager.Instance.SaveTrainingData(allCats);
+
+                // 필드에 있는 모든 고양이정보 업데이트
+                GameManager.Instance.UpdateAllCatsInField();
+
+                // 버튼 UI 업데이트
+                UpdateTrainingButtonUI();
+            }
+        }
+    }
+
+    // 체력단련 버튼UI 업데이트
+    private void UpdateTrainingButtonUI()
+    {
+        if (trainingLevelUpButton != null)
+        {
+            // 다음 단계가 존재하는 경우에만 버튼 활성화
+            TrainingDataLoader trainingLoader = FindObjectOfType<TrainingDataLoader>();
+            bool canLevelUp = trainingLoader != null && trainingLoader.trainingDictionary.ContainsKey(currentTrainingStage + 1);
+
+            trainingLevelUpButton.interactable = canLevelUp;
+        }
     }
     #endregion
 
@@ -144,15 +207,4 @@ public class ContentManager : MonoBehaviour
     }
     #endregion
 
-    #region Utility Functions
-    // 코루틴 정지 후 실행시키는 함수
-    private void StopAndStartCoroutine(ref Coroutine coroutine, IEnumerator routine)
-    {
-        if (coroutine != null)
-        {
-            StopCoroutine(coroutine);
-        }
-        coroutine = StartCoroutine(routine);
-    }
-    #endregion
 }

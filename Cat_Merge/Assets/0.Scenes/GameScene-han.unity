@@ -10438,9 +10438,14 @@ MonoBehaviour:
   - {fileID: 1055984525}
   - {fileID: 1775883501}
   - {fileID: 1543844601}
-  levelUpCoin: {fileID: 1546202318}
+  nextLevelAblityInformationText: {fileID: 485174096}
+  trainingLevelInformationText: {fileID: 183366690}
+  trainingProgressText: {fileID: 962628959}
+  trainingLevelText: {fileID: 688472764}
+  trainingDataText: {fileID: 1639996951}
+  levelUpCoinText: {fileID: 1546202318}
   levelUpButton: {fileID: 888205432}
-  trainingCoin: {fileID: 1793394945}
+  trainingCoinText: {fileID: 1793394945}
   trainingButton: {fileID: 570479796}
 --- !u!114 &331588661
 MonoBehaviour:
@@ -22852,7 +22857,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\uAE30\uBCF8 \uACF5\uACA9\uB825\n\uAE30\uBCF8 \uCCB4\uB825\n\uACF5\uACA9
     \uC18D\uB3C4\n\uCE58\uBA85\uD0C0 \uD655\uB960\n\uCE58\uBA85\uD0C0 \uD53C\uD574\uB7C9\n\uC7AC\uD654
-    \uC218\uAE09\uB7C9\n\uC7AC\uD654 \uC218\uAE09 \uC18D\uB3C4"
+    \uC218\uAE09\uB7C9\n\uC7AC\uD654 \uC218\uAE09 \uC18D\uB3C4\n\uACE0\uC591\uC774
+    \uBCF4\uC720 \uC22B\uC790 \uC99D\uAC00"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c7f9e1d048d0987499eff167c931517f, type: 2}
   m_sharedMaterial: {fileID: -8525234839207697280, guid: c7f9e1d048d0987499eff167c931517f, type: 2}
@@ -46418,10 +46424,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uD604\uC7AC \uC815\uBCF4 \uC218\uCE58\n\uD604\uC7AC \uC815\uBCF4 \uC218\uCE58\n\uD604\uC7AC
-    \uC815\uBCF4 \uC218\uCE58\n\uD604\uC7AC \uC815\uBCF4 \uC218\uCE58\n\uD604\uC7AC
-    \uC815\uBCF4 \uC218\uCE58\n\uD604\uC7AC \uC815\uBCF4 \uC218\uCE58\n\uD604\uC7AC
-    \uC815\uBCF4 \uC218\uCE58"
+  m_text: "\uC815\uBCF4\n\uC815\uBCF4\n\uC815\uBCF4\n\uC815\uBCF4\n\uC815\uBCF4\n\uC815\uBCF4\n\uC815\uBCF4\n\uC815\uBCF4"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c7f9e1d048d0987499eff167c931517f, type: 2}
   m_sharedMaterial: {fileID: -8525234839207697280, guid: c7f9e1d048d0987499eff167c931517f, type: 2}
@@ -59764,7 +59767,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2100453766
 RectTransform:
   m_ObjectHideFlags: 0

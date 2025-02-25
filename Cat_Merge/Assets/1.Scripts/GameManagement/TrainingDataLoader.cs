@@ -75,15 +75,16 @@ public class TrainingDataLoader : MonoBehaviour
                 int catId = int.Parse(validValues[1]);
                 int growthDamage = int.Parse(validValues[2]);
                 int growthHp = int.Parse(validValues[3]);
-                //string extraSkill = validValues[4];
-                //double extraSkillValue = double.Parse(validValues[5]);
-                //string extraSkillUnit = validValues[6];
-                //string extraSkillSymbol = validValues[7];
+                string extraAbilityName = validValues[4];                   // 추가 획득 능력치 이름
+                double extraAbilityValue = double.Parse(validValues[5]);    // 추가 획득 능력치 수치
+                string extraAbilityUnit = validValues[6];                   // 단위
+                string extraAbilitySymbol = validValues[7];                 // 보조 기호
                 double trainingCoin = double.Parse(validValues[8]);
                 double levelUpCoin = double.Parse(validValues[9]);
 
                 // TrainingData 객체 생성 및 Dictionary에 추가
-                TrainingData trainingData = new TrainingData(growthDamage, growthHp, trainingCoin, levelUpCoin);
+                TrainingData trainingData = new TrainingData(growthDamage, growthHp, trainingCoin, levelUpCoin,
+                    extraAbilityName, extraAbilityValue, extraAbilityUnit, extraAbilitySymbol);
                 if (!trainingDictionary.ContainsKey(catId))
                 {
                     trainingDictionary.Add(catId, trainingData);
@@ -116,11 +117,29 @@ public class TrainingData
     private double levelUpCoin;
     public double LevelUpCoin { get => levelUpCoin; set => levelUpCoin = value; }
 
-    public TrainingData(int growthDamage, int growthHp, double trainingCoin, double levelUpCoin)
+    // 추가 능력치 관련 변수들
+    private string extraAbilityName;    // 추가 획득 능력치 이름
+    public string ExtraAbilityName { get => extraAbilityName; set => extraAbilityName = value; }
+
+    private double extraAbilityValue;   // 추가 획득 능력치 수치
+    public double ExtraAbilityValue { get => extraAbilityValue; set => extraAbilityValue = value; }
+
+    private string extraAbilityUnit;    // 단위
+    public string ExtraAbilityUnit { get => extraAbilityUnit; set => extraAbilityUnit = value; }
+
+    private string extraAbilitySymbol;  // 보조 기호
+    public string ExtraAbilitySymbol { get => extraAbilitySymbol; set => extraAbilitySymbol = value; }
+
+    public TrainingData(int growthDamage, int growthHp, double trainingCoin, double levelUpCoin,
+        string extraAbilityName, double extraAbilityValue, string extraAbilityUnit, string extraAbilitySymbol)
     {
         GrowthDamage = growthDamage;
         GrowthHp = growthHp;
         TrainingCoin = trainingCoin;
         LevelUpCoin = levelUpCoin;
+        ExtraAbilityName = extraAbilityName;
+        ExtraAbilityValue = extraAbilityValue;
+        ExtraAbilityUnit = extraAbilityUnit;
+        ExtraAbilitySymbol = extraAbilitySymbol;
     }
 }

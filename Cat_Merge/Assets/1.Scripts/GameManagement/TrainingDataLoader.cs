@@ -72,12 +72,18 @@ public class TrainingDataLoader : MonoBehaviour
             try
             {
                 // 데이터 파싱
-                int catId = int.Parse(validValues[0]);
+                int catId = int.Parse(validValues[1]);
                 int growthDamage = int.Parse(validValues[2]);
                 int growthHp = int.Parse(validValues[3]);
+                //string extraSkill = validValues[4];
+                //double extraSkillValue = double.Parse(validValues[5]);
+                //string extraSkillUnit = validValues[6];
+                //string extraSkillSymbol = validValues[7];
+                double trainingCoin = double.Parse(validValues[8]);
+                double levelUpCoin = double.Parse(validValues[9]);
 
                 // TrainingData 객체 생성 및 Dictionary에 추가
-                TrainingData trainingData = new TrainingData(growthDamage, growthHp);
+                TrainingData trainingData = new TrainingData(growthDamage, growthHp, trainingCoin, levelUpCoin);
                 if (!trainingDictionary.ContainsKey(catId))
                 {
                     trainingDictionary.Add(catId, trainingData);
@@ -104,9 +110,17 @@ public class TrainingData
     private int growthHp;
     public int GrowthHp { get => growthHp; set => growthHp = value; }
 
-    public TrainingData(int growthDamage, int growthHp)
+    private double trainingCoin;
+    public double TrainingCoin { get => trainingCoin; set => trainingCoin = value; }
+
+    private double levelUpCoin;
+    public double LevelUpCoin { get => levelUpCoin; set => levelUpCoin = value; }
+
+    public TrainingData(int growthDamage, int growthHp, double trainingCoin, double levelUpCoin)
     {
         GrowthDamage = growthDamage;
         GrowthHp = growthHp;
+        TrainingCoin = trainingCoin;
+        LevelUpCoin = levelUpCoin;
     }
 }

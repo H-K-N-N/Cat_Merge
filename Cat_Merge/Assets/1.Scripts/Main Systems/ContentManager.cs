@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
+using TMPro;
 
 public class ContentManager : MonoBehaviour
 {
@@ -26,16 +26,21 @@ public class ContentManager : MonoBehaviour
     private enum ContentMenuType
     {
         Training,       // 체력 단련
-        Menu2,          // 두 번째 메뉴
+        JellyDungeon,   // 젤리 던전
         Menu3,          // 세 번째 메뉴
         End             // Enum의 끝
     }
     private ContentMenuType activeMenuType;                         // 현재 활성화된 메뉴 타입
 
     [Header("---[Training Settings]")]
-    public Button levelUpButton;                                    // 단계 상승 버튼
+    public TextMeshProUGUI levelUpCoin;                             // 다음 단계 상승 필요 재화
+    public Button levelUpButton;                                    // 다음 단계 상승 버튼
+
+    public TextMeshProUGUI trainingCoin;                            // 체력 단련 필요 재화
     public Button trainingButton;                                   // 체력 단련 버튼
     private int currentTrainingStage = 0;                           // 현재 체력단련 단계
+    private bool isTrainingCompleted = false;                       // 체력단련 완료 여부
+
     #endregion
 
     #region Unity Methods
@@ -98,57 +103,105 @@ public class ContentManager : MonoBehaviour
 
         if (levelUpButton != null)
         {
-            levelUpButton.onClick.AddListener(OnTrainingLevelUp);
-            UpdateTrainingButtonUI();
+            levelUpButton.onClick.AddListener(OnLevelUp);
         }
+        if (trainingButton != null)
+        {
+            trainingButton.onClick.AddListener(OnTraining);
+        }
+
+        UpdateTrainingButtonUI();
     }
     #endregion
 
     #region Training System
     // 훈련 레벨업 버튼 클릭 처리
-    private void OnTrainingLevelUp()
+    private void OnLevelUp()
     {
+        if (!isTrainingCompleted)
+        {
+            return;
+        }
+
         TrainingDataLoader trainingLoader = FindObjectOfType<TrainingDataLoader>();
         if (trainingLoader != null)
         {
-            // 현재 훈련 단계 + 1의 데이터 가져오기
             int nextStage = currentTrainingStage + 1;
             if (trainingLoader.trainingDictionary.TryGetValue(nextStage, out TrainingData trainingData))
             {
-                // GameManager에서 모든 고양이 데이터 가져오기
-                Cat[] allCats = GameManager.Instance.AllCatData;
+                double requiredCoin = double.Parse(levelUpCoin.text);
+                if (GameManager.Instance.Coin < requiredCoin)
+                {
+                    NotificationManager.Instance.ShowNotification("재화가 부족합니다!");
+                    return;
+                }
+                GameManager.Instance.Coin -= (int)requiredCoin;
 
-                // 모든 고양이에게 성장 스탯 적용
+                Cat[] allCats = GameManager.Instance.AllCatData;
                 foreach (Cat cat in allCats)
                 {
                     cat.GrowStat(trainingData.GrowthDamage, trainingData.GrowthHp);
                 }
-
-                // 현재 훈련 단계 증가
                 currentTrainingStage = nextStage;
 
-                // 성장 데이터 저장
+                // 성장 데이터 저장 및 필드 고양이 정보 업데이트
                 GameManager.Instance.SaveTrainingData(allCats);
-
-                // 필드에 있는 모든 고양이정보 업데이트
                 GameManager.Instance.UpdateAllCatsInField();
 
-                // 버튼 UI 업데이트
+                isTrainingCompleted = false;
+                levelUpButton.interactable = false;
+
                 UpdateTrainingButtonUI();
             }
+        }
+    }
+
+    // 체력단련 버튼 클릭 처리
+    private void OnTraining()
+    {
+        TrainingDataLoader trainingLoader = FindObjectOfType<TrainingDataLoader>();
+        if (trainingLoader != null && trainingLoader.trainingDictionary.TryGetValue(currentTrainingStage, out TrainingData trainingData))
+        {
+            double requiredCoin = double.Parse(trainingCoin.text);
+            if (GameManager.Instance.Coin < requiredCoin)
+            {
+                NotificationManager.Instance.ShowNotification("재화가 부족합니다!");
+                return;
+            }
+            GameManager.Instance.Coin -= (int)requiredCoin;
+
+            isTrainingCompleted = true;
+
+            UpdateTrainingButtonUI();
         }
     }
 
     // 체력단련 버튼UI 업데이트
     private void UpdateTrainingButtonUI()
     {
-        if (levelUpButton != null)
+        TrainingDataLoader trainingLoader = FindObjectOfType<TrainingDataLoader>();
+        if (trainingLoader != null)
         {
-            // 다음 단계가 존재하는 경우에만 버튼 활성화
-            TrainingDataLoader trainingLoader = FindObjectOfType<TrainingDataLoader>();
-            bool canLevelUp = trainingLoader != null && trainingLoader.trainingDictionary.ContainsKey(currentTrainingStage + 1);
+            // 레벨업 버튼 상태 및 필요 재화 업데이트
+            bool canLevelUp = trainingLoader.trainingDictionary.ContainsKey(currentTrainingStage + 1);
+            levelUpButton.interactable = canLevelUp && isTrainingCompleted;
 
-            levelUpButton.interactable = canLevelUp;
+            // 다음 단계의 레벨업 필요 재화 표시
+            if (canLevelUp)
+            {
+                levelUpCoin.text = trainingLoader.trainingDictionary[currentTrainingStage + 1].LevelUpCoin.ToString("N0");
+            }
+
+            // 다음 단계의 훈련 필요 재화 표시
+            if (trainingLoader.trainingDictionary.TryGetValue(currentTrainingStage + 1, out TrainingData nextData))
+            {
+                trainingCoin.text = nextData.TrainingCoin.ToString("N0");
+                trainingButton.interactable = !isTrainingCompleted;
+            }
+            else
+            {
+                trainingButton.interactable = false;
+            }
         }
     }
     #endregion

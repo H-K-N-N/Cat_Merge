@@ -393,7 +393,7 @@ public class DictionaryManager : MonoBehaviour
         newCatIcon.sprite = newCat.CatImage;
         newCatName.text = newCat.CatName;
         newCatExplain.text = newCat.CatExplain;
-        newCatGetCoin.text = "Get Coin : " + newCat.CatGetCoin.ToString();
+        newCatGetCoin.text = "재화 획득량: " + newCat.CatGetCoin.ToString();
 
         // Highlight Image 회전 애니메이션 시작
         StartCoroutine(RotateHighlightImage());

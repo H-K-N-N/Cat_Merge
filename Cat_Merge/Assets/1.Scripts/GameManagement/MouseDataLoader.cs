@@ -38,7 +38,6 @@ public class MouseDataLoader : MonoBehaviour
 
             lineNumber++;
             if (lineNumber <= 1) continue;
-            if (lineNumber >= 5) continue;
 
             string[] values = line.Split(',');
 

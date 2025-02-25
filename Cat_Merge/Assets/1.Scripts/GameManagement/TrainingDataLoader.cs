@@ -33,7 +33,6 @@ public class TrainingDataLoader : MonoBehaviour
 
             lineNumber++;
             if (lineNumber <= 1) continue;
-            if (lineNumber >= 5) continue;
 
             // CSV 파싱 - 따옴표 내부의 쉼표는 무시하고 실제 구분자만 처리
             List<string> values = new List<string>();

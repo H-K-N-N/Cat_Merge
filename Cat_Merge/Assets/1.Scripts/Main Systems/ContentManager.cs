@@ -33,8 +33,9 @@ public class ContentManager : MonoBehaviour
     private ContentMenuType activeMenuType;                         // 현재 활성화된 메뉴 타입
 
     [Header("---[Training Settings]")]
-    public Button trainingLevelUpButton;                            // 훈련 레벨업 버튼
-    private int currentTrainingStage = 0;                           // 현재 훈련 단계
+    public Button levelUpButton;                                    // 단계 상승 버튼
+    public Button trainingButton;                                   // 체력 단련 버튼
+    private int currentTrainingStage = 0;                           // 현재 체력단련 단계
     #endregion
 
     #region Unity Methods
@@ -84,9 +85,20 @@ public class ContentManager : MonoBehaviour
 
     private void InitializeTrainingSystem()
     {
-        if (trainingLevelUpButton != null)
+        // 0레벨 TraingingDB를 불러와서 모든 데이터에 적용 (기본 데이터)
+        TrainingDataLoader trainingLoader = FindObjectOfType<TrainingDataLoader>();
+        if (trainingLoader != null && trainingLoader.trainingDictionary.TryGetValue(0, out TrainingData trainingData))
         {
-            trainingLevelUpButton.onClick.AddListener(OnTrainingLevelUp);
+            Cat[] allCats = GameManager.Instance.AllCatData;
+            foreach (Cat cat in allCats)
+            {
+                cat.GrowStat(trainingData.GrowthDamage, trainingData.GrowthHp);
+            }
+        }
+
+        if (levelUpButton != null)
+        {
+            levelUpButton.onClick.AddListener(OnTrainingLevelUp);
             UpdateTrainingButtonUI();
         }
     }
@@ -130,13 +142,13 @@ public class ContentManager : MonoBehaviour
     // 체력단련 버튼UI 업데이트
     private void UpdateTrainingButtonUI()
     {
-        if (trainingLevelUpButton != null)
+        if (levelUpButton != null)
         {
             // 다음 단계가 존재하는 경우에만 버튼 활성화
             TrainingDataLoader trainingLoader = FindObjectOfType<TrainingDataLoader>();
             bool canLevelUp = trainingLoader != null && trainingLoader.trainingDictionary.ContainsKey(currentTrainingStage + 1);
 
-            trainingLevelUpButton.interactable = canLevelUp;
+            levelUpButton.interactable = canLevelUp;
         }
     }
     #endregion

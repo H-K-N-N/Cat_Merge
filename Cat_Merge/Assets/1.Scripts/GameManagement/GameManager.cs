@@ -112,7 +112,6 @@ public class GameManager : MonoBehaviour
     private void LoadAllCats()
     {
         CatDataLoader catDataLoader = FindObjectOfType<CatDataLoader>();
-        TrainingDataLoader trainingDataLoader = FindObjectOfType<TrainingDataLoader>();
 
         if (catDataLoader == null || catDataLoader.catDictionary == null)
         {
@@ -122,18 +121,6 @@ public class GameManager : MonoBehaviour
 
         allCatData = new Cat[catDataLoader.catDictionary.Count];
         catDataLoader.catDictionary.Values.CopyTo(allCatData, 0);
-
-        // 훈련 데이터 적용
-        if (trainingDataLoader != null && trainingDataLoader.trainingDictionary != null)
-        {
-            foreach (Cat cat in allCatData)
-            {
-                if (trainingDataLoader.trainingDictionary.TryGetValue(cat.CatId, out TrainingData trainingData))
-                {
-                    cat.GrowStat(trainingData.GrowthDamage, trainingData.GrowthHp);
-                }
-            }
-        }
     }
 
     // 쥐 정보 Load 함수

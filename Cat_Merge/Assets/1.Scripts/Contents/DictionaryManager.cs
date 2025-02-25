@@ -391,7 +391,7 @@ public class DictionaryManager : MonoBehaviour
         newCatPanel.SetActive(true);
 
         newCatIcon.sprite = newCat.CatImage;
-        newCatName.text = newCat.CatName;
+        newCatName.text = newCat.CatGrade.ToString() + ". " + newCat.CatName;
         newCatExplain.text = newCat.CatExplain;
         newCatGetCoin.text = "¿Á»≠ »πµÊ∑Æ: " + newCat.CatGetCoin.ToString();
 

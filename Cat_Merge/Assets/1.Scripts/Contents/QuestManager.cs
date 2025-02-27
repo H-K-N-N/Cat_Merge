@@ -707,6 +707,8 @@ public class QuestManager : MonoBehaviour
         dailySpecialRewardDisabledBG.SetActive(true);
         dailySpecialRewardPlusCashText.text = $"x {dailySpecialRewardQuestRewardCash}";
         dailySpecialRewardText.text = "받기";
+
+        UpdateDailySpecialRewardUI();
     }
 
     // Daily Special Reward 퀘스트 UI를 업데이트하는 함수
@@ -780,6 +782,7 @@ public class QuestManager : MonoBehaviour
         weeklySpecialRewardDisabledBG.SetActive(true);
         weeklySpecialRewardPlusCashText.text = $"x {weeklySpecialRewardQuestRewardCash}";
         weeklySpecialRewardText.text = "받기";
+        UpdateWeeklySpecialRewardUI();
     }
 
     // Weekly Special Reward 퀘스트 UI를 업데이트하는 함수

@@ -56,6 +56,7 @@ public class DictionaryManager : MonoBehaviour
 
     [Header("---[Information Panel UI]")]
     [SerializeField] private Image informationCatIcon;              // Information Cat Icon
+    private Sprite informationCatDefaultImage;                      // Information Cat Default Image
     [SerializeField] private TextMeshProUGUI informationCatDetails; // informationCatDetails Text
     [SerializeField] private GameObject catInformationPanel;        // catInformation Panel (상세정보 칸 Panel)
     [SerializeField] private RectTransform fullInformationPanel;    // fullInformation Panel (상세정보 스크롤 Panel)
@@ -97,7 +98,6 @@ public class DictionaryManager : MonoBehaviour
         activeMenuType = DictionaryMenuType.Normal;
 
         InitializeDictionaryManager();
-
         InitializeFriendshipButton();
     }
 
@@ -118,6 +118,7 @@ public class DictionaryManager : MonoBehaviour
         InitializeDictionaryButton();
         InitializeSubMenuButtons();
         PopulateDictionary();
+        InitializeInformationCatDefaultImage();
 
         // 이벤트 등록 (상태가 변경될 때 UpdateNewImageStatus 호출)
         OnCatDataChanged += UpdateNewImageStatus;
@@ -342,11 +343,16 @@ public class DictionaryManager : MonoBehaviour
         });
     }
 
+    private void InitializeInformationCatDefaultImage()
+    {
+        informationCatDefaultImage = Resources.Load<Sprite>("Sprites/UI/I_UI_Book_mission/I_UI_Book_CatBG.9");
+    }
+
     // 도감이 활성화 되거나 서브 메뉴를 누르면 InformationPanel을 기본 정보로 업데이트 해주는 함수
     private void UpdateInformationPanel()
     {
         // 이미지 설정
-        informationCatIcon.sprite = null;
+        informationCatIcon.sprite = informationCatDefaultImage;
 
         // 텍스트 설정
         informationCatDetails.text = $"고양이를 선택하세요\n";
@@ -356,6 +362,9 @@ public class DictionaryManager : MonoBehaviour
 
         // 초기 catInformation Mask 초기화
         catInformationPanel.GetComponent<Mask>().enabled = true;
+
+        // fullInformationPanel의 Y좌표를 -312.5f로 고정
+        fullInformationPanel.anchoredPosition = new Vector2(0, -312.5f);
     }
 
     // 고양이 정보를 Information Panel에 표시하는 함수

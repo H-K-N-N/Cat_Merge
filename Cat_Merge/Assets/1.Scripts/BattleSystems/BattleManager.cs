@@ -41,8 +41,8 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Button giveupButton;               // 항복 버튼
 
     private Mouse currentBossData;                              // 현재 보스 데이터
-    private float currentBossHP;                                // 보스의 현재 HP
-    private float maxBossHP;                                    // 보스의 최대 HP
+    private double currentBossHP;                                // 보스의 현재 HP
+    private double maxBossHP;                                    // 보스의 최대 HP
 
     [Header("---[Warning Panel]")]
     [SerializeField] private GameObject warningPanel;           // 전투시스템 시작시 나오는 경고 Panel (warningDuration동안 지속)
@@ -335,8 +335,8 @@ public class BattleManager : MonoBehaviour
 
         maxBossHP = currentBossData.MouseHp;
         currentBossHP = maxBossHP;
-        bossHPSlider.maxValue = maxBossHP;
-        bossHPSlider.value = currentBossHP;
+        bossHPSlider.maxValue = (float)maxBossHP;
+        bossHPSlider.value = (float)currentBossHP;
         bossHPText.text = $"{100f}%";
     }
 
@@ -517,9 +517,9 @@ public class BattleManager : MonoBehaviour
     // 보스 HP Slider 및 텍스트 업데이트 함수
     private void UpdateBossHPUI()
     {
-        bossHPSlider.value = currentBossHP;
+        bossHPSlider.value = (float)currentBossHP;
 
-        float hpPercentage = (currentBossHP / maxBossHP) * 100f;
+        double hpPercentage = (currentBossHP / maxBossHP) * 100f;
         bossHPText.text = $"{hpPercentage:F2}%";
     }
 
@@ -582,7 +582,7 @@ public class BattleManager : MonoBehaviour
         // 선택된 고양이들에게 데미지 적용
         foreach (var cat in selectedCats)
         {
-            int damage = currentBossData.MouseDamage;
+            double damage = currentBossData.MouseDamage;
             cat.TakeDamage(damage);
         }
     }

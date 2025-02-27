@@ -2,7 +2,7 @@ using UnityEngine;
 
 // ÁãÀÇ Á¤º¸¸¦ ´ã´Â Script
 [System.Serializable]
-public class Mouse : MonoBehaviour
+public class Mouse
 {
     private int mouseId;                // Áã ÀÎµ¦½º
     public int MouseId { get => mouseId; set => mouseId = value; }
@@ -13,11 +13,11 @@ public class Mouse : MonoBehaviour
     private int mouseGrade;             // Áã µî±Þ (½ºÅ×ÀÌÁö)
     public int MouseGrade { get => mouseGrade; set => mouseGrade = value; }
 
-    private int mouseDamage;            // Áã ÀüÅõ·Â
-    public int MouseDamage { get => mouseDamage; set => mouseDamage = value; }
+    private double mouseDamage;            // Áã ÀüÅõ·Â
+    public double MouseDamage { get => mouseDamage; set => mouseDamage = value; }
 
-    private float mouseHp;              // Áã Ã¼·Â
-    public float MouseHp { get => mouseHp; set => mouseHp = value; }
+    private double mouseHp;              // Áã Ã¼·Â
+    public double MouseHp { get => mouseHp; set => mouseHp = value; }
 
     private Sprite mouseImage;          // Áã ÀÌ¹ÌÁö
     public Sprite MouseImage { get => mouseImage; set => mouseImage = value; }
@@ -31,7 +31,7 @@ public class Mouse : MonoBehaviour
     private int mouseArmor;             // Áã ¹æ¾î·Â
     public int MouseArmor { get => mouseArmor; set => mouseArmor = value; }
 
-    public Mouse(int mouseId, string mouseName, int mouseGrade, int mouseDamage, float mouseHp, Sprite mouseImage, 
+    public Mouse(int mouseId, string mouseName, int mouseGrade, double mouseDamage, double mouseHp, Sprite mouseImage, 
         int numOfAttack, int mouseAttackSpeed, int mouseArmor)
     {
         MouseId = mouseId;

@@ -13,6 +13,8 @@ public class Cat
     private int catGrade;        // 고양이 등급
     public int CatGrade { get => catGrade; set => catGrade = value; }
 
+
+
     private int baseDamage;      // 기본 공격력
     public int BaseDamage { get => baseDamage; set => baseDamage = value; }
 
@@ -26,8 +28,10 @@ public class Cat
     public int GrowthHp { get => growthHp; set => growthHp = value; }
 
     // 최종 스탯 계산용 프로퍼티
-    public int CatDamage => BaseDamage + GrowthDamage;
-    public int CatHp => BaseHp + GrowthHp;
+    public int CatDamage => (int)(GrowthDamage * (BaseDamage * 0.01)) + GrowthDamage; 
+    public int CatHp => (int)(GrowthHp * (BaseHp * 0.01)) + GrowthHp;
+
+
 
     private int catGetCoin;      // 고양이 자동 재화 획득량
     public int CatGetCoin { get => catGetCoin; set => catGetCoin = value; }
@@ -78,4 +82,5 @@ public class Cat
         GrowthDamage = 0;
         GrowthHp = 0;
     }
+
 }

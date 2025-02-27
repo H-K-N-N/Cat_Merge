@@ -33,7 +33,6 @@ public class TrainingDataLoader : MonoBehaviour
 
             lineNumber++;
             if (lineNumber <= 1) continue;
-            if (lineNumber >= 5) continue;
 
             // CSV 파싱 - 따옴표 내부의 쉼표는 무시하고 실제 구분자만 처리
             List<string> values = new List<string>();
@@ -73,12 +72,19 @@ public class TrainingDataLoader : MonoBehaviour
             try
             {
                 // 데이터 파싱
-                int catId = int.Parse(validValues[0]);
+                int catId = int.Parse(validValues[1]);
                 int growthDamage = int.Parse(validValues[2]);
                 int growthHp = int.Parse(validValues[3]);
+                string extraAbilityName = validValues[4];                   // 추가 획득 능력치 이름
+                double extraAbilityValue = double.Parse(validValues[5]);    // 추가 획득 능력치 수치
+                string extraAbilityUnit = validValues[6];                   // 단위
+                string extraAbilitySymbol = validValues[7];                 // 보조 기호
+                double trainingCoin = double.Parse(validValues[8]);
+                double levelUpCoin = double.Parse(validValues[9]);
 
                 // TrainingData 객체 생성 및 Dictionary에 추가
-                TrainingData trainingData = new TrainingData(growthDamage, growthHp);
+                TrainingData trainingData = new TrainingData(growthDamage, growthHp, trainingCoin, levelUpCoin,
+                    extraAbilityName, extraAbilityValue, extraAbilityUnit, extraAbilitySymbol);
                 if (!trainingDictionary.ContainsKey(catId))
                 {
                     trainingDictionary.Add(catId, trainingData);
@@ -105,9 +111,35 @@ public class TrainingData
     private int growthHp;
     public int GrowthHp { get => growthHp; set => growthHp = value; }
 
-    public TrainingData(int growthDamage, int growthHp)
+    private double trainingCoin;
+    public double TrainingCoin { get => trainingCoin; set => trainingCoin = value; }
+
+    private double levelUpCoin;
+    public double LevelUpCoin { get => levelUpCoin; set => levelUpCoin = value; }
+
+    // 추가 능력치 관련 변수들
+    private string extraAbilityName;    // 추가 획득 능력치 이름
+    public string ExtraAbilityName { get => extraAbilityName; set => extraAbilityName = value; }
+
+    private double extraAbilityValue;   // 추가 획득 능력치 수치
+    public double ExtraAbilityValue { get => extraAbilityValue; set => extraAbilityValue = value; }
+
+    private string extraAbilityUnit;    // 단위
+    public string ExtraAbilityUnit { get => extraAbilityUnit; set => extraAbilityUnit = value; }
+
+    private string extraAbilitySymbol;  // 보조 기호
+    public string ExtraAbilitySymbol { get => extraAbilitySymbol; set => extraAbilitySymbol = value; }
+
+    public TrainingData(int growthDamage, int growthHp, double trainingCoin, double levelUpCoin,
+        string extraAbilityName, double extraAbilityValue, string extraAbilityUnit, string extraAbilitySymbol)
     {
         GrowthDamage = growthDamage;
         GrowthHp = growthHp;
+        TrainingCoin = trainingCoin;
+        LevelUpCoin = levelUpCoin;
+        ExtraAbilityName = extraAbilityName;
+        ExtraAbilityValue = extraAbilityValue;
+        ExtraAbilityUnit = extraAbilityUnit;
+        ExtraAbilitySymbol = extraAbilitySymbol;
     }
 }

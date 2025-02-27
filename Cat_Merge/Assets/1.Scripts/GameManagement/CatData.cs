@@ -10,7 +10,7 @@ public class CatData : MonoBehaviour
     [Header("Cat Data")]
     public Cat catData;                             // 고양이 기본 데이터
     private Image catImage;                         // 고양이 이미지 컴포넌트
-    public int catHp;                               // 현재 고양이 체력
+    public double catHp;                               // 현재 고양이 체력
     public bool isStuned = false;                   // 기절 상태 여부
     private float stunTime = 10f;                   // 기절 시간
 
@@ -172,7 +172,7 @@ public class CatData : MonoBehaviour
     }
 
     // 데미지 처리
-    public void TakeDamage(int damage)
+    public void TakeDamage(double damage)
     {
         catHp -= damage;
         UpdateHPBar();

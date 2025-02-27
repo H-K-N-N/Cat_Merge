@@ -2,7 +2,7 @@ using UnityEngine;
 
 // ÁãÀÇ Á¤º¸¸¦ ´ã´Â Script
 [System.Serializable]
-public class Mouse : MonoBehaviour
+public class Mouse
 {
     private int mouseId;                // Áã ÀÎµ¦½º
     public int MouseId { get => mouseId; set => mouseId = value; }

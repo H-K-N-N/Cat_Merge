@@ -1,16 +1,148 @@
+using System.Collections.Generic;
 using UnityEngine;
 
+[DefaultExecutionOrder(-2)]
 public class FriendshipDataLoader : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+
+    public static FriendshipDataLoader Instance { get; private set; }
+
+    // 고양이 데이터를 관리할 Dictionary
+    public Dictionary<int, List<(int grade, int exp, int reward, int passive)>> dataByGrade = new Dictionary<int, List<(int grade, int exp, int reward, int passive)>>();
+
+    private void Awake()
     {
-        
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+
+        LoadCSV("FriendshipDB");
     }
 
-    // Update is called once per frame
-    void Update()
+    [System.Serializable]
+    public class LevelData
     {
-        
+        public int grade; // 등급 (int)
+        public int[] expRequirements = new int[5]; // 1~5단계 경험치 요구량
+        public int[] rewards = new int[5]; // 1~5단계 보상 (int로 변경)
+        public int[] passiveEffects = new int[5]; // 1~5단계 패시브 효과 수치
     }
+
+    //public List<LevelData> levelDataList = new List<LevelData>();
+
+    void LoadCSV(string fileName)
+    {
+        TextAsset csvFile = Resources.Load<TextAsset>(fileName);
+        if (csvFile == null)
+        {
+            Debug.LogError("CSV 파일을 찾을 수 없습니다: " + fileName);
+            return;
+        }
+
+        string[] lines = csvFile.text.Split('\n');
+
+        for (int i = 1; i < lines.Length; i++) // 첫 줄(헤더) 제외
+        {
+            string line = lines[i].Trim(); // 공백 제거
+            if (string.IsNullOrEmpty(line)) continue; // 빈 줄 건너뜀
+
+            string[] values = line.Split(',');
+
+            if (values.Length < 16)
+            {
+                Debug.LogWarning($"데이터 부족 (라인 {i + 1}): {line}");
+                continue;
+            }
+
+            LevelData data = new LevelData();
+
+            // grade (등급) 변환
+            if (int.TryParse(values[0].Trim(), out int parsedGrade))
+            {
+                data.grade = parsedGrade;
+            }
+            else
+            {
+                Debug.LogError($"등급 파싱 오류 (라인 {i + 1}): {values[0]}");
+                continue; // 등급 변환 실패 시 해당 데이터 스킵
+            }
+
+            for (int j = 0; j < 5; j++)
+            {
+                // 경험치 요구량 변환
+                if (int.TryParse(values[1 + j].Trim(), out int exp))
+                    data.expRequirements[j] = exp;
+                else
+                    Debug.LogError($"경험치 파싱 오류 (라인 {i + 1}): {values[1 + j]}");
+
+                // 보상 변환 (string → int)
+                if (int.TryParse(values[6 + j].Trim(), out int reward))
+                    data.rewards[j] = reward;
+                else
+                    Debug.LogError($"보상 파싱 오류 (라인 {i + 1}): {values[6 + j]}");
+
+                // 패시브 효과 변환
+                if (int.TryParse(values[11 + j].Trim(), out int passive))
+                    data.passiveEffects[j] = passive;
+                else
+                    Debug.LogError($"패시브 효과 파싱 오류 (라인 {i + 1}): {values[11 + j]}");
+            }
+
+            //levelDataList.Add(data);
+
+            // 번호별로 데이터 추가
+            if (!dataByGrade.ContainsKey(data.grade))
+            {
+                dataByGrade[data.grade] = new List<(int grade, int exp, int reward, int passive)>();
+            }
+            for(int k = 0; k < 5; k++)
+            {
+                dataByGrade[data.grade].Add((data.grade, data.expRequirements[k], data.rewards[k], data.passiveEffects[k]));
+            }
+            
+        }
+    }
+
+    public List<(int grade, int exp, int reward, int passive)> GetDataByGrade(int grade)
+    {
+        if (dataByGrade.ContainsKey(grade))
+        {
+            return dataByGrade[grade];
+        }
+        else
+        {
+            Debug.LogWarning($"No data found for number {grade}");
+            return null;
+        }
+    }
+
+    // 디버깅용
+    //void PrintLevelData()
+    //{
+    //    foreach (var data in levelDataList)
+    //    {
+    //        Debug.Log($"{data.grade} 등급");
+    //        for (int i = 0; i < 5; i++)
+    //        {
+    //            Debug.Log($"{i + 1}단계 - 경험치 요구량: {data.expRequirements[i]}, 보상: {data.rewards[i]}, 패시브 효과: {data.passiveEffects[i]}");
+    //        }
+    //    }
+    //}
+
+    // Resources 폴더에서 스프라이트 로드 (언젠간 쓰일듯)
+    //private Sprite LoadSprite(string path)
+    //{
+    //    Sprite sprite = Resources.Load<Sprite>("Sprites/Cats/" + path);
+    //    if (sprite == null)
+    //    {
+    //        Debug.LogError($"이미지를 찾을 수 없습니다: {path}");
+    //    }
+    //    return sprite;
+    //}
 }
+

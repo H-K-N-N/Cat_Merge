@@ -151,25 +151,11 @@ public class MergeManager : MonoBehaviour
 
             if (cat1.CatGrade == 1 && cat2.CatGrade == 1)
             {
-                DictionaryManager.Instance.friendshipLockImg[0].SetActive(false);
-                DictionaryManager.Instance.friendshipGetCrystalImg[0].SetActive(true);
-
-                // 총 호감도 레벨 달성 별 표시
-                RectTransform rectTransform = DictionaryManager.Instance.friendshipStarImg[0].GetComponent<RectTransform>();
-                Debug.Log("rectTransform의 right 값 : " + rectTransform.offsetMax.x);
-                Vector2 offset = rectTransform.offsetMax;
-                offset.x = -168f;
-                rectTransform.offsetMax = offset;
-
-                // 호감도 1레벨 달성 별 표시
-                rectTransform = DictionaryManager.Instance.friendshipStarImg[1].GetComponent<RectTransform>();
-                Debug.Log("rectTransform의 right 값 : " + rectTransform.offsetMax.x);
-                offset = rectTransform.offsetMax;
-                offset.x = -168f;
-                rectTransform.offsetMax = offset;
+                FriendshipManager.Instance.nowExp += 2;
+                FriendshipManager.Instance.expGauge.value += 0.1f;
             }
 
-            return nextCat;
+                return nextCat;
         }
         else
         {

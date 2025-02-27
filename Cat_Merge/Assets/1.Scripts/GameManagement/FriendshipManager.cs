@@ -21,6 +21,7 @@ public class FriendshipManager : MonoBehaviour
     //object[] grade = new object[60];
 
     public int nowExp;
+    bool[] unlockLv = new bool[5];
     private void Awake()
     {
         if (Instance == null)
@@ -36,17 +37,58 @@ public class FriendshipManager : MonoBehaviour
     }
 
     private void Update()
-    {
-         //expRequirementText.text= $"{nowExp} / {FriendshipDataLoader.Instance.levelDataList[0].expRequirements[0]}";
+    {    
+        if (unlockLv[0])
+        {
+            if(nowExp >= FriendshipDataLoader.Instance.GetDataByGrade(1)[0].exp)
+            {
+                nowExp = FriendshipDataLoader.Instance.GetDataByGrade(1)[0].exp;
+            }
+            expRequirementText.text = ($"{nowExp} / {FriendshipDataLoader.Instance.GetDataByGrade(1)[0].exp}");
+            UnlockStep1();        
+        }
     }
 
     private void Start()
     {
+        unlockLv[0] = true;
+        unlockLv[1] = false;
+        unlockLv[2] = false;
+        unlockLv[3] = false;
+        unlockLv[4] = false;
+
         nowExp = 0;
         expRequirementText.text= ($"{nowExp} / {FriendshipDataLoader.Instance.GetDataByGrade(1)[0].exp}");
         expGauge.value = 0.00f;
 
-        //Debug.Log($"{nowExp} / {FriendshipDataLoader.Instance.GetDataByGrade(1)[0].exp}");
+    }
+
+    public void UnlockStep1()
+    {
+        if (nowExp >= FriendshipDataLoader.Instance.GetDataByGrade(1)[0].exp)
+        {
+            nowExp = FriendshipDataLoader.Instance.GetDataByGrade(1)[0].exp;
+
+            DictionaryManager.Instance.friendshipUnlockButtons[0].interactable = true;
+
+            DictionaryManager.Instance.friendshipLockImg[0].SetActive(false);
+            DictionaryManager.Instance.friendshipGetCrystalImg[0].SetActive(true);
+
+            // 총 호감도 레벨 달성 별 표시
+            RectTransform rectTransform = DictionaryManager.Instance.friendshipStarImg[0].GetComponent<RectTransform>();
+            Vector2 offset = rectTransform.offsetMax;
+            offset.x = -168f;
+            rectTransform.offsetMax = offset;
+
+            // 호감도 1레벨 달성 별 표시
+            rectTransform = DictionaryManager.Instance.friendshipStarImg[1].GetComponent<RectTransform>();
+            offset = rectTransform.offsetMax;
+            offset.x = -168f;
+            rectTransform.offsetMax = offset;
+
+            unlockLv[0] = false;
+
+        }
     }
 
     private void InitializeGradeList()

@@ -75,7 +75,7 @@ public class DictionaryManager : MonoBehaviour
     // ======================================================================================================================
 
     [Header("---[Friendship UnLock Buttons]")]
-    [SerializeField] private Button[] friendshipUnlockButtons;      // 
+    [SerializeField] public Button[] friendshipUnlockButtons;      // 
     [SerializeField] public GameObject[] friendshipGetCrystalImg;   // 
     [SerializeField] public GameObject[] friendshipLockImg;         // 
     [SerializeField] public GameObject[] friendshipStarImg;         // ¹è°æ scrollRectContents
@@ -517,12 +517,22 @@ public class DictionaryManager : MonoBehaviour
         friendshipUnlockButtons[3].onClick.AddListener(UnLockLevel4Friendship);
         friendshipUnlockButtons[4].onClick.AddListener(UnLockLevel5Friendship);
 
+        for (int i = 0; i < friendshipUnlockButtons.Length; i++)
+        {
+            friendshipUnlockButtons[i].interactable = false;
+        }
     }
     private void UnLockLevel1Friendship()
     {
+
         friendshipGetCrystalImg[0].SetActive(false);
-        GameManager.Instance.Cash += 100;
+        GameManager.Instance.Cash += FriendshipDataLoader.Instance.GetDataByGrade(1)[0].reward;
         friendshipUnlockButtons[0].interactable = false;
+
+        FriendshipManager.Instance.nowExp = 0;
+        FriendshipManager.Instance.expGauge.value = 0;
+        FriendshipManager.Instance.expRequirementText.text = ($"{FriendshipManager.Instance.nowExp} / {FriendshipDataLoader.Instance.GetDataByGrade(2)[0].exp}");
+
     }
     private void UnLockLevel2Friendship()
     {

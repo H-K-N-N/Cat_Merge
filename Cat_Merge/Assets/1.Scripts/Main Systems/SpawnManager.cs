@@ -104,15 +104,13 @@ public class SpawnManager : MonoBehaviour
             }
             else
             {
-                NotificationManager.Instance.ShowNotification("No Food");
-                //Debug.Log("먹이 갯수 부족");
+                NotificationManager.Instance.ShowNotification("먹이가 부족합니다!!");
             }
 
         }
         else
         {
-            NotificationManager.Instance.ShowNotification("Full Cats");
-            //Debug.Log("고양이 최대 보유 갯수에 도달했습니다!");
+            NotificationManager.Instance.ShowNotification("고양이 보유수가 최대입니다!!");
         }
     }
 

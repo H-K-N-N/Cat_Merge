@@ -55,7 +55,7 @@ public class BuyCatManager : MonoBehaviour
             buyCatCoinFee[i] = i * 5 + 10;
             buyCatCashFee[i] = 5;
 
-            buyCatCountExplainTexts[i].text = $"BuyCount :{buyCatCoinCounts[i]}cnt + {buyCatCashCounts[i]}cnt";
+            buyCatCountExplainTexts[i].text = $"구매 횟수 :{buyCatCoinCounts[i]}회 + {buyCatCashCounts[i]}회";
             buyCatCoinFeeTexts[i].text = $"{buyCatCoinFee[i]}";
             buyCatCashFeeTexts[i].text = $"{buyCatCashFee[i]}";
         }
@@ -125,7 +125,7 @@ public class BuyCatManager : MonoBehaviour
                 SpawnManager catSpawn = GetComponent<SpawnManager>();
                 catSpawn.SpawnGradeCat(0);
 
-                buyCatCountExplainTexts[0].text = $"BuyCount :{buyCatCoinCounts[0]}cnt + {buyCatCashCounts[0]}cnt";
+                buyCatCountExplainTexts[0].text = $"구매 횟수 :{buyCatCoinCounts[0]}회 + {buyCatCashCounts[0]}회";
                 buyCatCoinFeeTexts[0].text = $"{buyCatCoinFee[0]}";
             }
             else if (b == buyCatCoinButtons[1])
@@ -142,7 +142,7 @@ public class BuyCatManager : MonoBehaviour
                 SpawnManager catSpawn = GetComponent<SpawnManager>();
                 catSpawn.SpawnGradeCat(1);
 
-                buyCatCountExplainTexts[1].text = $"BuyCount :{buyCatCoinCounts[1]}cnt + {buyCatCashCounts[1]}cnt";
+                buyCatCountExplainTexts[1].text = $"구매 횟수 :{buyCatCoinCounts[1]}회 + {buyCatCashCounts[1]}회";
                 buyCatCoinFeeTexts[1].text = $"{buyCatCoinFee[1]}";
             }
             else if (b == buyCatCoinButtons[2])
@@ -159,7 +159,7 @@ public class BuyCatManager : MonoBehaviour
                 SpawnManager catSpawn = GetComponent<SpawnManager>();
                 catSpawn.SpawnGradeCat(2);
 
-                buyCatCountExplainTexts[2].text = $"BuyCount :{buyCatCoinCounts[2]}cnt + {buyCatCashCounts[2]}cnt";
+                buyCatCountExplainTexts[2].text = $"구매 횟수 :{buyCatCoinCounts[2]}회 + {buyCatCashCounts[2]}회";
                 buyCatCoinFeeTexts[2].text = $"{buyCatCoinFee[2]}";
             }
         }
@@ -184,7 +184,7 @@ public class BuyCatManager : MonoBehaviour
                 SpawnManager catSpawn = GetComponent<SpawnManager>();
                 catSpawn.SpawnGradeCat(0);
 
-                buyCatCountExplainTexts[0].text = $"BuyCount :{buyCatCoinCounts[0]}cnt + {buyCatCashCounts[0]}cnt";
+                buyCatCountExplainTexts[0].text = $"구매 횟수 :{buyCatCoinCounts[0]}회 + {buyCatCashCounts[0]}회";
                 buyCatCashFeeTexts[0].text = $"{buyCatCashFee[0]}";
             }
             else if (b == buyCatCashButtons[1])
@@ -200,7 +200,7 @@ public class BuyCatManager : MonoBehaviour
                 SpawnManager catSpawn = GetComponent<SpawnManager>();
                 catSpawn.SpawnGradeCat(1);
 
-                buyCatCountExplainTexts[1].text = $"BuyCount :{buyCatCoinCounts[1]}cnt + {buyCatCashCounts[1]}cnt";
+                buyCatCountExplainTexts[1].text = $"구매 횟수 :{buyCatCoinCounts[1]}회 + {buyCatCashCounts[1]}회";
                 buyCatCashFeeTexts[1].text = $"{buyCatCashFee[1]}";
             }
             else if (b == buyCatCashButtons[2])
@@ -216,7 +216,7 @@ public class BuyCatManager : MonoBehaviour
                 SpawnManager catSpawn = GetComponent<SpawnManager>();
                 catSpawn.SpawnGradeCat(2);
 
-                buyCatCountExplainTexts[2].text = $"BuyCount :{buyCatCoinCounts[2]}cnt + {buyCatCashCounts[2]}cnt";
+                buyCatCountExplainTexts[2].text = $"구매 횟수 :{buyCatCoinCounts[2]}회 + {buyCatCashCounts[2]}회";
                 buyCatCashFeeTexts[2].text = $"{buyCatCashFee[2]}";
             }
         }

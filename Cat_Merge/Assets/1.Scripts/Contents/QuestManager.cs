@@ -192,11 +192,11 @@ public class QuestManager : MonoBehaviour
     // Daily Quest 설정 함수
     private void InitializeDailyQuestManager()
     {
-        InitializeQuest("PlayTime", 10, 5, QuestMenuType.Daily);
-        InitializeQuest("Merge Cats", 1, 5, QuestMenuType.Daily);
-        InitializeQuest("Spawn Cats", 1, 5, QuestMenuType.Daily);
-        InitializeQuest("Purchase Cats", 1, 5, QuestMenuType.Daily);
-        InitializeQuest("Battle", 1, 5, QuestMenuType.Daily);
+        InitializeQuest("플레이 시간", 10, 5, QuestMenuType.Daily);
+        InitializeQuest("고양이 머지 횟수", 1, 5, QuestMenuType.Daily);
+        InitializeQuest("고양이 소환 횟수", 1, 5, QuestMenuType.Daily);
+        InitializeQuest("고양이 구매 횟수", 1, 5, QuestMenuType.Daily);
+        InitializeQuest("전투 횟수", 1, 5, QuestMenuType.Daily);
 
         InitializeDailySpecialReward();
 
@@ -207,10 +207,10 @@ public class QuestManager : MonoBehaviour
     // Weekly Quest 설정 함수
     private void InitializeWeeklyQuestManager()
     {
-        InitializeQuest("PlayTime", 20, 50, QuestMenuType.Weekly);
-        InitializeQuest("Merge Cats", 10, 50, QuestMenuType.Weekly);
-        InitializeQuest("Spawn Cats", 10, 50, QuestMenuType.Weekly);
-        InitializeQuest("Purchase Cats", 10, 50, QuestMenuType.Weekly);
+        InitializeQuest("플레이 시간", 20, 50, QuestMenuType.Weekly);
+        InitializeQuest("고양이 머지 횟수", 10, 50, QuestMenuType.Weekly);
+        InitializeQuest("고양이 소환 횟수", 10, 50, QuestMenuType.Weekly);
+        InitializeQuest("고양이 구매 횟수", 10, 50, QuestMenuType.Weekly);
 
         InitializeWeeklySpecialReward();
 
@@ -221,16 +221,16 @@ public class QuestManager : MonoBehaviour
     // Repeat Quest 설정 함수
     private void InitializeRepeatQuestManager()
     {
-        InitializeQuest("Merge Cats", 1, 5, QuestMenuType.Repeat);
-        InitializeQuest("Spawn Cats", 1, 5, QuestMenuType.Repeat);
-        InitializeQuest("Purchase Cats", 1, 5, QuestMenuType.Repeat);
-        InitializeQuest("Stage", 1, 5, QuestMenuType.Repeat);
-        InitializeQuest("Sample1", 1, 5, QuestMenuType.Repeat);
-        InitializeQuest("Sample2", 1, 5, QuestMenuType.Repeat);
-        InitializeQuest("Sample3", 1, 5, QuestMenuType.Repeat);
-        InitializeQuest("Sample4", 1, 5, QuestMenuType.Repeat);
-        InitializeQuest("Sample5", 1, 5, QuestMenuType.Repeat);
-        InitializeQuest("Sample6", 1, 5, QuestMenuType.Repeat);
+        InitializeQuest("고양이 머지 횟수", 1, 5, QuestMenuType.Repeat);
+        InitializeQuest("고양이 소환 횟수", 1, 5, QuestMenuType.Repeat);
+        InitializeQuest("고양이 구매 횟수", 1, 5, QuestMenuType.Repeat);
+        InitializeQuest("보스 스테이지", 1, 5, QuestMenuType.Repeat);
+        InitializeQuest("샘플1", 1, 5, QuestMenuType.Repeat);
+        InitializeQuest("샘플2", 1, 5, QuestMenuType.Repeat);
+        InitializeQuest("샘플3", 1, 5, QuestMenuType.Repeat);
+        InitializeQuest("샘플4", 1, 5, QuestMenuType.Repeat);
+        InitializeQuest("샘플5", 1, 5, QuestMenuType.Repeat);
+        InitializeQuest("샘플6", 1, 5, QuestMenuType.Repeat);
 
         // 초기 스크롤 위치 초기화
         InitializeScrollPosition();
@@ -433,7 +433,7 @@ public class QuestManager : MonoBehaviour
         // UI 텍스트 초기화
         questUI.questName.text = questName;
         questUI.plusCashText.text = $"x {rewardCash}";
-        questUI.rewardText.text = "Accept";
+        questUI.rewardText.text = "받기";
 
         // 보상 버튼 리스너 등록
         questUI.rewardButton.onClick.AddListener(() => ReceiveQuestReward(questName, menuType));
@@ -501,7 +501,7 @@ public class QuestManager : MonoBehaviour
 
             if (questData.isComplete)
             {
-                questUI.rewardText.text = "Complete";
+                questUI.rewardText.text = "수령 완료";
             }
         }
 
@@ -587,10 +587,10 @@ public class QuestManager : MonoBehaviour
     {
         PlayTimeCount += Time.deltaTime;
 
-        dailyQuestDictionary["PlayTime"].questData.currentCount = (int)PlayTimeCount;
-        weeklyQuestDictionary["PlayTime"].questData.currentCount = (int)PlayTimeCount;
+        dailyQuestDictionary["플레이 시간"].questData.currentCount = (int)PlayTimeCount;
+        weeklyQuestDictionary["플레이 시간"].questData.currentCount = (int)PlayTimeCount;
 
-        UpdateQuestProgress("PlayTime");
+        UpdateQuestProgress("플레이 시간");
     }
 
     // 플레이타임 리셋 함수
@@ -607,11 +607,11 @@ public class QuestManager : MonoBehaviour
     {
         MergeCount++;
 
-        dailyQuestDictionary["Merge Cats"].questData.currentCount = MergeCount;
-        weeklyQuestDictionary["Merge Cats"].questData.currentCount = MergeCount;
-        repeatQuestDictionary["Merge Cats"].questData.currentCount = MergeCount;
+        dailyQuestDictionary["고양이 머지 횟수"].questData.currentCount = MergeCount;
+        weeklyQuestDictionary["고양이 머지 횟수"].questData.currentCount = MergeCount;
+        repeatQuestDictionary["고양이 머지 횟수"].questData.currentCount = MergeCount;
 
-        UpdateQuestProgress("Merge Cats");
+        UpdateQuestProgress("고양이 머지 횟수");
     }
 
     // 고양이 머지 리셋 함수
@@ -628,11 +628,11 @@ public class QuestManager : MonoBehaviour
     {
         SpawnCount++;
 
-        dailyQuestDictionary["Spawn Cats"].questData.currentCount = SpawnCount;
-        weeklyQuestDictionary["Spawn Cats"].questData.currentCount = SpawnCount;
-        repeatQuestDictionary["Spawn Cats"].questData.currentCount = SpawnCount;
+        dailyQuestDictionary["고양이 소환 횟수"].questData.currentCount = SpawnCount;
+        weeklyQuestDictionary["고양이 소환 횟수"].questData.currentCount = SpawnCount;
+        repeatQuestDictionary["고양이 소환 횟수"].questData.currentCount = SpawnCount;
 
-        UpdateQuestProgress("Spawn Cats");
+        UpdateQuestProgress("고양이 소환 횟수");
     }
 
     // 고양이 스폰 리셋 함수
@@ -649,11 +649,11 @@ public class QuestManager : MonoBehaviour
     {
         PurchaseCatsCount++;
 
-        dailyQuestDictionary["Purchase Cats"].questData.currentCount = PurchaseCatsCount;
-        weeklyQuestDictionary["Purchase Cats"].questData.currentCount = PurchaseCatsCount;
-        repeatQuestDictionary["Purchase Cats"].questData.currentCount = PurchaseCatsCount;
+        dailyQuestDictionary["고양이 구매 횟수"].questData.currentCount = PurchaseCatsCount;
+        weeklyQuestDictionary["고양이 구매 횟수"].questData.currentCount = PurchaseCatsCount;
+        repeatQuestDictionary["고양이 구매 횟수"].questData.currentCount = PurchaseCatsCount;
 
-        UpdateQuestProgress("Purchase Cats");
+        UpdateQuestProgress("고양이 구매 횟수");
     }
 
     // 고양이 구매 리셋 함수
@@ -670,9 +670,9 @@ public class QuestManager : MonoBehaviour
     {
         BattleCount++;
 
-        dailyQuestDictionary["Battle"].questData.currentCount = BattleCount;
+        dailyQuestDictionary["전투 횟수"].questData.currentCount = BattleCount;
 
-        UpdateQuestProgress("Battle");
+        UpdateQuestProgress("전투 횟수");
     }
 
     // 배틀 리셋 함수
@@ -687,9 +687,9 @@ public class QuestManager : MonoBehaviour
     // 스테이지 증가 함수
     public void AddStageCount()
     {
-        repeatQuestDictionary["Stage"].questData.currentCount = StageCount - 1;
+        repeatQuestDictionary["보스 스테이지"].questData.currentCount = StageCount - 1;
 
-        UpdateQuestProgress("Stage");
+        UpdateQuestProgress("보스 스테이지");
     }
 
     // ======================================================================================================================
@@ -706,7 +706,7 @@ public class QuestManager : MonoBehaviour
         dailySpecialRewardButton.interactable = false;
         dailySpecialRewardDisabledBG.SetActive(true);
         dailySpecialRewardPlusCashText.text = $"x {dailySpecialRewardQuestRewardCash}";
-        dailySpecialRewardText.text = "Accept";
+        dailySpecialRewardText.text = "받기";
     }
 
     // Daily Special Reward 퀘스트 UI를 업데이트하는 함수
@@ -722,7 +722,7 @@ public class QuestManager : MonoBehaviour
         dailySpecialRewardCountText.text = $"{currentCount} / {dailySpecialRewardTargetCount}";
         if (isDailySpecialRewardQuestComplete)
         {
-            dailySpecialRewardText.text = "Complete";
+            dailySpecialRewardText.text = "수령 완료";
         }
 
         bool isComplete = AllDailyQuestsCompleted() && !isDailySpecialRewardQuestComplete;
@@ -779,7 +779,7 @@ public class QuestManager : MonoBehaviour
         weeklySpecialRewardButton.interactable = false;
         weeklySpecialRewardDisabledBG.SetActive(true);
         weeklySpecialRewardPlusCashText.text = $"x {weeklySpecialRewardQuestRewardCash}";
-        weeklySpecialRewardText.text = "Accept";
+        weeklySpecialRewardText.text = "받기";
     }
 
     // Weekly Special Reward 퀘스트 UI를 업데이트하는 함수
@@ -795,7 +795,7 @@ public class QuestManager : MonoBehaviour
         weeklySpecialRewardCountText.text = $"{currentCount} / {weeklySpecialRewardTargetCount}";
         if (isWeeklySpecialRewardQuestComplete)
         {
-            weeklySpecialRewardText.text = "Complete";
+            weeklySpecialRewardText.text = "수령 완료";
         }
 
         bool isComplete = AllWeeklyQuestsCompleted() && !isWeeklySpecialRewardQuestComplete;

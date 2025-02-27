@@ -34,8 +34,6 @@ public class OptionManager : MonoBehaviour
 
     private const float onX = 65f, offX = -65f;                 // 핸들 버튼 x좌표
     private const float moveDuration = 0.2f;                    // 토글 애니메이션 지속 시간
-    private const string toggleOnColorCode = "#D9F2D0";         // 토글 On Color
-    private const string toggleOffColorCode = "#FFFFFF";        // 토글 Off Color
 
     // ======================================================================================================================
     // [Sound]
@@ -93,8 +91,10 @@ public class OptionManager : MonoBehaviour
     [SerializeField] private SoundSettings sfxSettings = new SoundSettings();
 
     [Header("---[Common]")]
-    private Sprite soundOnImage;                                // 사운드 On 이미지
-    private Sprite soundOffImage;                               // 사운드 Off 이미지
+    private Sprite bgmOnImage;                                  // BGM On 이미지
+    private Sprite bgmOffImage;                                 // BGM Off 이미지
+    private Sprite sfxOnImage;                                  // SFX On 이미지
+    private Sprite sfxOffImage;                                 // SFX Off 이미지
 
     // ======================================================================================================================
     // [Display]
@@ -278,16 +278,18 @@ public class OptionManager : MonoBehaviour
         bgmSettings.controller.Play();
 
         // Image 초기화
-        soundOnImage = Resources.Load<Sprite>("Sprites/Cats/1");
-        soundOffImage = Resources.Load<Sprite>("Sprites/Cats/2");
-        bgmSettings.onOffImage.sprite = soundOnImage;
-        sfxSettings.onOffImage.sprite = soundOnImage;
+        bgmOnImage = Resources.Load<Sprite>("Sprites/UI/I_UI_Option/I_UI_BGM_v1.9");
+        bgmOffImage = Resources.Load<Sprite>("Sprites/UI/I_UI_Option/I_UI_BGM_v2.9");
+        sfxOnImage = Resources.Load<Sprite>("Sprites/UI/I_UI_Option/I_UI_SFX_v1.9");
+        sfxOffImage = Resources.Load<Sprite>("Sprites/UI/I_UI_Option/I_UI_SFX_v2.9");
+        bgmSettings.onOffImage.sprite = bgmOnImage;
+        sfxSettings.onOffImage.sprite = sfxOnImage;
 
         // 토글 버튼 이미지 초기화
         bgmSettings.toggleButtonImage = bgmSettings.toggleButton.GetComponent<Image>();
         sfxSettings.toggleButtonImage = sfxSettings.toggleButton.GetComponent<Image>();
-        UpdateToggleButtonColor(bgmSettings.toggleButtonImage, bgmSettings.isOn);
-        UpdateToggleButtonColor(sfxSettings.toggleButtonImage, sfxSettings.isOn);
+        UpdateToggleButtonImage(bgmSettings.toggleButtonImage, bgmSettings.isOn);
+        UpdateToggleButtonImage(sfxSettings.toggleButtonImage, sfxSettings.isOn);
 
         // 토글 버튼 이벤트 설정
         bgmSettings.toggleButton.onClick.AddListener(() => ToggleSound(true));
@@ -304,23 +306,28 @@ public class OptionManager : MonoBehaviour
         settings.isOn = !settings.isOn;
         SetSoundToggleImage(isBgm);
         UpdateToggleUI(settings.isOn, isBgm);
-        UpdateToggleButtonColor(settings.toggleButtonImage, settings.isOn);
+        UpdateToggleButtonImage(settings.toggleButtonImage, settings.isOn);
     }
 
-    // 토글 버튼 색상 업데이트 함수
-    private void UpdateToggleButtonColor(Image buttonImage, bool isOn)
+    // 토글 버튼 이미지 업데이트 함수
+    private void UpdateToggleButtonImage(Image buttonImage, bool isOn)
     {
-        if (ColorUtility.TryParseHtmlString(isOn ? toggleOnColorCode : toggleOffColorCode, out Color color))
-        {
-            buttonImage.color = color;
-        }
+        string imagePath = isOn ? "Sprites/UI/I_UI_Option/I_UI_option_on_Frame.9" : "Sprites/UI/I_UI_Option/I_UI_option_off_Frame.9";
+        buttonImage.sprite = Resources.Load<Sprite>(imagePath);
     }
 
     // 사운드 On/Off 이미지 변경 함수
     private void SetSoundToggleImage(bool isBgm)
     {
         SoundSettings settings = isBgm ? bgmSettings : sfxSettings;
-        settings.onOffImage.sprite = (!settings.isOn || settings.slider.value == 0) ? soundOffImage : soundOnImage;
+        if (isBgm)
+        {
+            settings.onOffImage.sprite = (!settings.isOn || settings.slider.value == 0) ? bgmOffImage : bgmOnImage;
+        }
+        else
+        {
+            settings.onOffImage.sprite = (!settings.isOn || settings.slider.value == 0) ? sfxOffImage : sfxOnImage;
+        }
     }
 
     // 사운드 토글 UI 업데이트 함수
@@ -374,7 +381,7 @@ public class OptionManager : MonoBehaviour
     {
         settings.toggleButton.onClick.AddListener(() => toggleAction());
         settings.toggleButtonImage = settings.toggleButton.GetComponent<Image>();
-        UpdateToggleButtonColor(settings.toggleButtonImage, settings.isOn);
+        UpdateToggleButtonImage(settings.toggleButtonImage, settings.isOn);
         UpdateToggleUI(settings.handle, settings.isOn, true);
     }
 
@@ -401,7 +408,7 @@ public class OptionManager : MonoBehaviour
     {
         settings.isOn = !settings.isOn;
         UpdateToggleUI(settings.handle, settings.isOn);
-        UpdateToggleButtonColor(settings.toggleButtonImage, settings.isOn);
+        UpdateToggleButtonImage(settings.toggleButtonImage, settings.isOn);
     }
 
     // 토글 UI 업데이트 함수

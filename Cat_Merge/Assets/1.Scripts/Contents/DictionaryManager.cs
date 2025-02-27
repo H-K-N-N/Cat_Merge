@@ -349,7 +349,7 @@ public class DictionaryManager : MonoBehaviour
         informationCatIcon.sprite = null;
 
         // 텍스트 설정
-        informationCatDetails.text = $"Select Cat\n";
+        informationCatDetails.text = $"고양이를 선택하세요\n";
 
         // 스크롤 비활성화
         catInformationPanel.GetComponent<ScrollRect>().enabled = false;
@@ -368,11 +368,11 @@ public class DictionaryManager : MonoBehaviour
         informationCatIcon.sprite = catData.CatImage;
 
         // 텍스트 설정
-        string catInfo = $"Name: {catData.CatName}\n" +
-                         $"Grade: {catData.CatGrade}\n" +
-                         $"Damage: {catData.CatDamage}\n" +
-                         $"HP: {catData.CatHp}\n" +
-                         $"GetCoin: {catData.CatGetCoin}";
+        string catInfo = $"이름: {catData.CatName}\n" +
+                         $"등급: {catData.CatGrade}\n" +
+                         $"공격력 증가량: {catData.CatDamage}%\n" +
+                         $"체력: {catData.CatHp}\n" +
+                         $"재화수급량: {catData.CatGetCoin}";
         informationCatDetails.text = catInfo;
 
         // 스크롤 활성화, 스크롤 중이었다면 멈춤

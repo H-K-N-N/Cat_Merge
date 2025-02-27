@@ -15,12 +15,13 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Transform bossUIParent;            // 보스를 배치할 부모 Transform (UI Panel 등)
     [SerializeField] private Slider respawnSlider;              // 보스 소환까지 남은 시간을 표시할 Slider UI
 
-    private const float DEFAULT_SPAWN_INTERVAL = 10f;           // 보스 등장 주기 (나중에 유저가 변경할 수 있게 수정할 계획도 있음)
+    private const float DEFAULT_SPAWN_INTERVAL = 60f;           // 보스 등장 주기 (나중에 유저가 변경할 수 있게 수정할 계획도 있음)
     private float spawnInterval;                                // 보스 등장 주기
     private Coroutine respawnSliderCoroutine;                   // Slider 코루틴
     private float bossSpawnTimer = 0f;                          // 보스 스폰 타이머
     private float sliderDuration;                               // Slider 유지 시간
-    private float bossDuration;                                 // 보스 유지 시간 (sliderDuration + warningDuration)
+    private const float DEFAULT_BOSS_DURATION = 20f;            // 보스 유지 시간
+    private float bossDuration;                                 // 보스 유지 시간
     private int bossStage = 1;                                  // 보스 스테이지
     public int BossStage => bossStage;
 
@@ -112,8 +113,8 @@ public class BattleManager : MonoBehaviour
     private void InitializeTimers()
     {
         spawnInterval = DEFAULT_SPAWN_INTERVAL - warningDuration;
-        sliderDuration = spawnInterval;
-        bossDuration = sliderDuration + warningDuration;
+        bossDuration = DEFAULT_BOSS_DURATION;
+        sliderDuration = bossDuration - warningDuration;
     }
 
     // Sliders UI 초기화 함수
@@ -352,6 +353,7 @@ public class BattleManager : MonoBehaviour
 
         // Slider관련 코루틴 시작
         StartCoroutine(ExecuteBattleSliders(warningDuration, sliderDuration));
+        //StartCoroutine(ExecuteBattleSliders(warningDuration, bossDuration));
         StartCoroutine(BossBattleRoutine(bossDuration));
         isBattleActive = true;
 

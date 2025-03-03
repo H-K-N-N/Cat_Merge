@@ -25,8 +25,8 @@ public class BuyCatManager : MonoBehaviour
 
     private ActivePanelManager activePanelManager;                                      // ActivePanelManager
 
-    private int[] buyCatCoinCounts;                                                     // 고양이 구매 횟수(코인)
-    private int[] buyCatCashCounts;                                                     // 고양이 구매 횟수(크리스탈)
+    private int[] buyCatCoinCounts;                                                     // 고양이 구매 횟수 (코인)
+    private int[] buyCatCashCounts;                                                     // 고양이 구매 횟수 (크리스탈)
     private int[] buyCatCoinFee;                                                        // 고양이 구매 비용 (코인)
     private int[] buyCatCashFee;                                                        // 고양이 구매 비용 (크리스탈)
 
@@ -42,8 +42,8 @@ public class BuyCatManager : MonoBehaviour
         }
         InitializeItemMenuManager();
 
-        buyCatCoinCounts = new int[GameManager.Instance.AllCatData.Length];   // 고양이 구매 횟수(코인)
-        buyCatCashCounts = new int[GameManager.Instance.AllCatData.Length];   // 고양이 구매 횟수(크리스탈)
+        buyCatCoinCounts = new int[GameManager.Instance.AllCatData.Length];   // 고양이 구매 횟수 (코인)
+        buyCatCashCounts = new int[GameManager.Instance.AllCatData.Length];   // 고양이 구매 횟수 (크리스탈)
         buyCatCoinFee = new int[GameManager.Instance.AllCatData.Length];      // 고양이 구매 비용 (코인)
         buyCatCashFee = new int[GameManager.Instance.AllCatData.Length];      // 고양이 구매 비용 (크리스탈)
 
@@ -113,7 +113,7 @@ public class BuyCatManager : MonoBehaviour
         {
             if (b == buyCatCoinButtons[0])
             {
-                Debug.Log("첫번째 고양이 구매 버튼 클릭(코인으로)");
+                //Debug.Log("첫번째 고양이 구매 버튼 클릭(코인으로)");
 
                 GameManager.Instance.Coin -= buyCatCoinFee[0];
                 buyCatCoinCounts[0]++;
@@ -130,7 +130,7 @@ public class BuyCatManager : MonoBehaviour
             }
             else if (b == buyCatCoinButtons[1])
             {
-                Debug.Log("두번쩨 고양이 구매 버튼 클릭(코인으로)");
+                //Debug.Log("두번쩨 고양이 구매 버튼 클릭(코인으로)");
 
                 GameManager.Instance.Coin -= buyCatCoinFee[1];
                 buyCatCoinCounts[1]++;
@@ -147,7 +147,7 @@ public class BuyCatManager : MonoBehaviour
             }
             else if (b == buyCatCoinButtons[2])
             {
-                Debug.Log("세번째 고양이 구매 버튼 클릭(코인으로)");
+                //Debug.Log("세번째 고양이 구매 버튼 클릭(코인으로)");
 
                 GameManager.Instance.Coin -= buyCatCoinFee[2];
                 buyCatCoinCounts[2]++;
@@ -163,6 +163,10 @@ public class BuyCatManager : MonoBehaviour
                 buyCatCoinFeeTexts[2].text = $"{buyCatCoinFee[2]}";
             }
         }
+        else
+        {
+            NotificationManager.Instance.ShowNotification("고양이 보유수가 최대입니다!!");
+        }
     }
 
     // 고양이 구매 버튼 함수(크리스탈로 구매)
@@ -173,7 +177,7 @@ public class BuyCatManager : MonoBehaviour
         {
             if (b == buyCatCashButtons[0])
             {
-                Debug.Log("첫번째 고양이 구매 버튼 클릭(캐쉬로)");
+                //Debug.Log("첫번째 고양이 구매 버튼 클릭(캐쉬로)");
 
                 GameManager.Instance.Cash -= buyCatCashFee[0];
                 buyCatCashCounts[0]++;
@@ -189,7 +193,7 @@ public class BuyCatManager : MonoBehaviour
             }
             else if (b == buyCatCashButtons[1])
             {
-                Debug.Log("두번째 고양이 구매 버튼 클릭(캐쉬로)");
+                //Debug.Log("두번째 고양이 구매 버튼 클릭(캐쉬로)");
 
                 GameManager.Instance.Cash -= buyCatCashFee[1];
                 buyCatCashCounts[1]++;
@@ -205,7 +209,7 @@ public class BuyCatManager : MonoBehaviour
             }
             else if (b == buyCatCashButtons[2])
             {
-                Debug.Log("세번째 고양이 구매 버튼 클릭(캐쉬로)");
+                //Debug.Log("세번째 고양이 구매 버튼 클릭(캐쉬로)");
 
                 GameManager.Instance.Cash -= buyCatCashFee[2];
                 buyCatCashCounts[2]++;
@@ -219,6 +223,10 @@ public class BuyCatManager : MonoBehaviour
                 buyCatCountExplainTexts[2].text = $"구매 횟수 : {buyCatCoinCounts[2]}회 + {buyCatCashCounts[2]}회";
                 buyCatCashFeeTexts[2].text = $"{buyCatCashFee[2]}";
             }
+        }
+        else
+        {
+            NotificationManager.Instance.ShowNotification("고양이 보유수가 최대입니다!!");
         }
     }
 

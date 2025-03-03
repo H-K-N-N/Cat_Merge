@@ -10,14 +10,14 @@ public class SpawnManager : MonoBehaviour
 
     [SerializeField] private Button spawnButton;                    // 스폰 버튼
 
-    [SerializeField] private GameObject catPrefab;      // 고양이 UI 프리팹
-    [SerializeField] private Transform catUIParent;     // 고양이를 배치할 부모 Transform (UI Panel 등)
-    private RectTransform panelRectTransform;           // Panel의 크기 정보 (배치할 범위)
-    private GameManager gameManager;                    // GameManager
+    [SerializeField] private GameObject catPrefab;                  // 고양이 UI 프리팹
+    [SerializeField] private Transform catUIParent;                 // 고양이를 배치할 부모 Transform (UI Panel 등)
+    private RectTransform panelRectTransform;                       // Panel의 크기 정보 (배치할 범위)
+    private GameManager gameManager;                                // GameManager
 
     [SerializeField] private TextMeshProUGUI nowAndMaxFoodText;     // 스폰버튼 밑에 현재 먹이 갯수와 최대 먹이 갯수
     private int nowFood = 5;                                        // 현재 먹이 갯수
-    private bool isStoppedReduceCoroutine = false;                        // 코루틴 종료 판별
+    private bool isStoppedReduceCoroutine = false;                  // 코루틴 종료 판별
     private bool isStoppedAutoCoroutine = false;
 
     [SerializeField] private Image foodFillAmountImg;

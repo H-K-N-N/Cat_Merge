@@ -15,13 +15,13 @@ public class SpawnManager : MonoBehaviour
     private RectTransform panelRectTransform;                       // Panel의 크기 정보 (배치할 범위)
     private GameManager gameManager;                                // GameManager
 
-    [SerializeField] private TextMeshProUGUI nowAndMaxFoodText;     // 스폰버튼 밑에 현재 먹이 갯수와 최대 먹이 갯수
+    [SerializeField] private TextMeshProUGUI nowAndMaxFoodText;     // 스폰버튼 밑에 현재 먹이 갯수와 최대 먹이 갯수 (?/?)
     private int nowFood = 5;                                        // 현재 먹이 갯수
     private bool isStoppedReduceCoroutine = false;                  // 코루틴 종료 판별
     private bool isStoppedAutoCoroutine = false;
 
-    [SerializeField] private Image foodFillAmountImg;
-    [SerializeField] public Image autoFillAmountImg;
+    [SerializeField] private Image foodFillAmountImg;               // 소환 이미지
+    [SerializeField] public Image autoFillAmountImg;                // 자동소환 이미지
 
     // ======================================================================================================================
 
@@ -101,6 +101,13 @@ public class SpawnManager : MonoBehaviour
                 gameManager.AddCatCount();
                 FriendshipManager.Instance.nowExp += 1;
                 FriendshipManager.Instance.expGauge.value += 0.05f;
+
+                // 수동 소환 후 먹이 생성 코루틴 재시작
+                if (isStoppedReduceCoroutine)
+                {
+                    StartCoroutine(CreateFoodTime());
+                    isStoppedReduceCoroutine = false;
+                }
             }
             else
             {
@@ -133,6 +140,13 @@ public class SpawnManager : MonoBehaviour
         gameManager.AddCatCount();
         FriendshipManager.Instance.nowExp += 1;
         FriendshipManager.Instance.expGauge.value += 0.05f;
+
+        // 자동 소환 후 먹이 생성 코루틴 재시작
+        if (isStoppedReduceCoroutine)
+        {
+            StartCoroutine(CreateFoodTime());
+            isStoppedReduceCoroutine = false;
+        }
     }
 
     // 상점에서 이용될 등급에 따른 구매 후 스폰 (12/26 새로 작성)
@@ -274,9 +288,20 @@ public class SpawnManager : MonoBehaviour
                 // 완료되면 먹이 줄이고 고양이 생성
                 if (!BattleManager.Instance.IsBattleActive && elapsed >= ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value)
                 {
-                    nowFood--;
-                    SpawnCat();
+                    if (gameManager.CanSpawnCat())
+                    {
+                        nowFood--;
+                        SpawnCat();
+
+                        // 자동 수집 후 먹이 생성 코루틴 재시작
+                        if (isStoppedReduceCoroutine)
+                        {
+                            StartCoroutine(CreateFoodTime());
+                            isStoppedReduceCoroutine = false;
+                        }
+                    }
                     elapsed = 0f; // 진행 상태 초기화
+
                 }
             }
 
@@ -289,29 +314,19 @@ public class SpawnManager : MonoBehaviour
 
             yield return null;
         }
-
-        //float elapsed = 0f;
-        //// 현재 먹이가 1개 이상일때만 코루틴 진행
-        //while(nowFood >= 1)
-        //{
-        //    autoFillAmountImg.fillAmount = 0f;
-        //    while (elapsed < ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value)
-        //    {
-        //        elapsed += Time.deltaTime;
-        //        autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value); // 0 ~ 1 사이로 비율 계산
-        //        yield return null; // 다음 프레임까지 대기
-        //    }
-        //    nowFood--;
-        //    SpawnCat();
-        //    elapsed = 0f;
-        //}
-
-        //if(nowFood == 0)
-        //{
-        //    StopCoroutine(AutoCollectingTime());
-        //    isStoppedAutoCoroutine = true;
-        //}
     }
 
+    // 최대 먹이 수량이 증가했을 때 호출되는 함수
+    public void OnMaxFoodIncreased()
+    {
+        if (nowFood == ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value - 1)
+        {
+            if (isStoppedReduceCoroutine)
+            {
+                StartCoroutine(CreateFoodTime());
+                isStoppedReduceCoroutine = false;
+            }
+        }
+    }
 
 }

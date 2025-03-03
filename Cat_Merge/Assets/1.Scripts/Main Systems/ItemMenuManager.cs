@@ -364,6 +364,7 @@ public class ItemMenuManager : MonoBehaviour
             itemMenuesLvText[2].text = $"Lv.{ ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv].step}";
             itemMenuesValueText[2].text = $"{ ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv].value}->{ ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv + 1].value}"; // 3.0->2.9
             itemMenuesFeeText[2].text = $"{ ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv].fee}";
+            SpawnManager.Instance.OnMaxFoodIncreased();
         }
     }
 

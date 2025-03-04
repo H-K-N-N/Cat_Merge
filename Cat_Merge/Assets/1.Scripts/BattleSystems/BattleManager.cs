@@ -468,7 +468,7 @@ public class BattleManager : MonoBehaviour
             // 고양이가 히트박스 경계 내에 있는지 확인 후 히트박스 외곽으로 밀어내기
             if (bossHitbox.IsInHitbox(catPosition))
             {
-                cat.MoveOppositeBoss(bossHitbox.Position, bossHitbox.Size);
+                cat.MoveOppositeBoss();
             }
         }
     }
@@ -490,7 +490,7 @@ public class BattleManager : MonoBehaviour
             // 고양이가 히트박스 경계 밖에 있는지 확인 후 히트박스 외곽으로 모으기
             if (!bossHitbox.IsInHitbox(catPosition))
             {
-                cat.MoveTowardBossBoundary(bossHitbox.Position, bossHitbox.Size);
+                cat.MoveTowardBossBoundary();
             }
         }
     }

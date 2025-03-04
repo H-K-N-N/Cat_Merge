@@ -212,14 +212,14 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
         {
             //Debug.Log("히트박스 내부 감지");
 
-            catData.MoveOppositeBoss(currentBossHitBox.Position, currentBossHitBox.Size);
+            catData.MoveOppositeBoss();
         }
         // 히트박스 외부라면
         else if (!currentBossHitBox.IsInHitbox(this.rectTransform.anchoredPosition))
         {
             //Debug.Log("히트박스 외부 감지");
 
-            catData.MoveTowardBossBoundary(currentBossHitBox.Position, currentBossHitBox.Size);
+            catData.MoveTowardBossBoundary();
         }
     }
 

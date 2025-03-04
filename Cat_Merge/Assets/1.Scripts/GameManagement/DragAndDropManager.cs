@@ -101,13 +101,14 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
         }
         else
         {
+            // 가장자리 드랍 체크는 머지 상태와 관계없이 항상 실행
+            CheckEdgeDrop();
+
             // 머지 상태가 OFF일 경우 머지 X
             if (!MergeManager.Instance.IsMergeEnabled())
             {
                 return;
             }
-
-            CheckEdgeDrop();
 
             DragAndDropManager nearbyCat = FindNearbyCat();
             if (nearbyCat != null && nearbyCat != this)

@@ -101,13 +101,14 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
         }
         else
         {
+            // 가장자리 드랍 체크는 머지 상태와 관계없이 항상 실행
+            CheckEdgeDrop();
+
             // 머지 상태가 OFF일 경우 머지 X
             if (!MergeManager.Instance.IsMergeEnabled())
             {
                 return;
             }
-
-            CheckEdgeDrop();
 
             DragAndDropManager nearbyCat = FindNearbyCat();
             if (nearbyCat != null && nearbyCat != this)
@@ -212,14 +213,14 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
         {
             //Debug.Log("히트박스 내부 감지");
 
-            catData.MoveOppositeBoss(currentBossHitBox.Position, currentBossHitBox.Size);
+            catData.MoveOppositeBoss();
         }
         // 히트박스 외부라면
         else if (!currentBossHitBox.IsInHitbox(this.rectTransform.anchoredPosition))
         {
             //Debug.Log("히트박스 외부 감지");
 
-            catData.MoveTowardBossBoundary(currentBossHitBox.Position, currentBossHitBox.Size);
+            catData.MoveTowardBossBoundary();
         }
     }
 

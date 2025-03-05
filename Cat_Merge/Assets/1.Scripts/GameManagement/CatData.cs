@@ -10,7 +10,7 @@ public class CatData : MonoBehaviour
     [Header("Cat Data")]
     public Cat catData;                             // 고양이 기본 데이터
     private Image catImage;                         // 고양이 이미지 컴포넌트
-    public double catHp;                               // 현재 고양이 체력
+    public double catHp;                            // 현재 고양이 체력
     public bool isStuned = false;                   // 기절 상태 여부
     private float stunTime = 10f;                   // 기절 시간
 
@@ -125,50 +125,33 @@ public class CatData : MonoBehaviour
 
     #region Battle System
     // 보스 히트박스 경계로 고양이 밀어내기
-    public void MoveOppositeBoss(Vector3 bossPosition, Vector2 bossSize)
+    public void MoveOppositeBoss()
     {
         Vector3 catPosition = rectTransform.anchoredPosition;
-        Vector3 offset = catPosition - bossPosition;
-        Vector3 targetPosition = CalculateBoundaryPosition(bossPosition, bossSize, offset, true);
-        StartCoroutine(SmoothMoveToPosition(targetPosition));
+        BossHitbox bossHitbox = BattleManager.Instance.bossHitbox;
+
+        // 고양이가 히트박스 내부에 있는 경우
+        if (bossHitbox.IsInHitbox(catPosition))
+        {
+            // 히트박스 경계에 위치하도록 이동
+            Vector3 targetPosition = bossHitbox.GetClosestBoundaryPoint(catPosition);
+            StartCoroutine(SmoothMoveToPosition(targetPosition));
+        }
     }
 
     // 보스 히트박스 경계로 고양이 이동
-    public void MoveTowardBossBoundary(Vector3 bossPosition, Vector2 bossSize)
+    public void MoveTowardBossBoundary()
     {
         Vector3 catPosition = rectTransform.anchoredPosition;
-        Vector3 offset = bossPosition - catPosition;
-        Vector3 targetPosition = CalculateBoundaryPosition(bossPosition, bossSize, offset, false);
-        StartCoroutine(SmoothMoveToPosition(targetPosition));
-    }
-
-    // 히트박스 경계 위치 계산
-    private Vector3 CalculateBoundaryPosition(Vector3 bossPosition, Vector2 bossSize, Vector3 offset, bool isOpposite)
-    {
-        float halfWidth = bossSize.x / 2f;
-        float halfHeight = bossSize.y / 2f;
-        Vector3 catPosition = rectTransform.anchoredPosition;
-
-        float closestX = Mathf.Clamp(catPosition.x, bossPosition.x - halfWidth, bossPosition.x + halfWidth);
-        float closestY = Mathf.Clamp(catPosition.y, bossPosition.y - halfHeight, bossPosition.y + halfHeight);
-
-        float distanceToVerticalEdge = Mathf.Min(Mathf.Abs(catPosition.x - (bossPosition.x - halfWidth)), Mathf.Abs(catPosition.x - (bossPosition.x + halfWidth)));
-        float distanceToHorizontalEdge = Mathf.Min(Mathf.Abs(catPosition.y - (bossPosition.y - halfHeight)), Mathf.Abs(catPosition.y - (bossPosition.y + halfHeight)));
-
-        if (distanceToVerticalEdge < distanceToHorizontalEdge)
+        BossHitbox bossHitbox = BattleManager.Instance.bossHitbox;
+        
+        // 고양이가 히트박스 외부에 있는 경우
+        if (!bossHitbox.IsInHitbox(catPosition))
         {
-            closestX = isOpposite ?
-                (offset.x < 0 ? bossPosition.x - halfWidth : bossPosition.x + halfWidth) :
-                (offset.x > 0 ? bossPosition.x - halfWidth : bossPosition.x + halfWidth);
+            // 히트박스 경계에 위치하도록 이동
+            Vector3 targetPosition = bossHitbox.GetClosestBoundaryPoint(catPosition);
+            StartCoroutine(SmoothMoveToPosition(targetPosition));
         }
-        else
-        {
-            closestY = isOpposite ?
-                (offset.y < 0 ? bossPosition.y - halfHeight : bossPosition.y + halfHeight) :
-                (offset.y > 0 ? bossPosition.y - halfHeight : bossPosition.y + halfHeight);
-        }
-
-        return new Vector3(closestX, closestY, catPosition.z);
     }
 
     // 데미지 처리
@@ -209,7 +192,7 @@ public class CatData : MonoBehaviour
         }
     }
 
-    // 레이캐스트 타겟 설정
+    // Raycast Target 설정
     private void SetRaycastTarget(bool isActive)
     {
         catImage.raycastTarget = isActive;

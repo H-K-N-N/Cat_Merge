@@ -13,10 +13,10 @@ public class Mouse
     private int mouseGrade;             // 쥐 등급 (스테이지)
     public int MouseGrade { get => mouseGrade; set => mouseGrade = value; }
 
-    private double mouseDamage;            // 쥐 전투력
+    private double mouseDamage;         // 쥐 전투력
     public double MouseDamage { get => mouseDamage; set => mouseDamage = value; }
 
-    private double mouseHp;              // 쥐 체력
+    private double mouseHp;             // 쥐 체력
     public double MouseHp { get => mouseHp; set => mouseHp = value; }
 
     private Sprite mouseImage;          // 쥐 이미지

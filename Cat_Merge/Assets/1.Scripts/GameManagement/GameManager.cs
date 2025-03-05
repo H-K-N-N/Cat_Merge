@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using System.Collections;
 
 // GameManager Script
 [DefaultExecutionOrder(-1)]     // 스크립트 실행 순서 조정(3번째)
@@ -47,8 +48,8 @@ public class GameManager : MonoBehaviour
     }
 
     [SerializeField] private TextMeshProUGUI coinText;                      // 기본재화 텍스트
-    private int coin = 1000000;                                             // 기본재화
-    public int Coin
+    private decimal coin = 1000000;                                         // 기본재화
+    public decimal Coin
     {
         get => coin;
         set
@@ -59,8 +60,8 @@ public class GameManager : MonoBehaviour
     }
 
     [SerializeField] private TextMeshProUGUI cashText;                      // 캐쉬재화 텍스트
-    private int cash = 1000;                                                // 캐쉬재화
-    public int Cash
+    private decimal cash = 1000;                                            // 캐쉬재화
+    public decimal Cash
     {
         get => cash;
         set
@@ -74,6 +75,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject exitPanel;                          // 종료 확인 패널
     [SerializeField] private Button closeButton;                            // 종료 패널 닫기 버튼
     [SerializeField] private Button okButton;                               // 종료 확인 버튼
+    private bool isBackButtonPressed = false;                               // 뒤로가기 버튼이 눌렸는지 여부
 
     // ======================================================================================================================
 
@@ -259,8 +261,9 @@ public class GameManager : MonoBehaviour
     // 종료 입력 처리
     public void HandleExitInput()
     {
-        if (exitPanel != null)
+        if (exitPanel != null && !isBackButtonPressed)
         {
+            isBackButtonPressed = true;
             if (exitPanel.activeSelf)
             {
                 CancelQuit();
@@ -269,7 +272,15 @@ public class GameManager : MonoBehaviour
             {
                 ShowExitPanel();
             }
+            StartCoroutine(ResetBackButtonPress());
         }
+    }
+
+    // 뒤로가기버튼 입력 딜레이 설정
+    private IEnumerator ResetBackButtonPress()
+    {
+        yield return new WaitForSeconds(0.2f);
+        isBackButtonPressed = false;
     }
 
     // 종료 패널 표시
@@ -287,7 +298,7 @@ public class GameManager : MonoBehaviour
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
-            Application.Quit();
+        Application.Quit();
 #endif
     }
 

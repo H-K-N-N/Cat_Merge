@@ -12,7 +12,7 @@ public class AutoMoveManager : MonoBehaviour
     [SerializeField] private GameObject autoMovePanel;              // 자동 이동 On/Off 패널
     [SerializeField] private Button closeAutoMovePanelButton;       // 자동 이동 패널 닫기 버튼
     [SerializeField] private Button autoMoveStateButton;            // 자동 이동 상태 버튼
-    private float autoMoveTime = 3f;                                // 자동 이동 시간
+    private float autoMoveTime = 10f;                               // 자동 이동 시간
     private bool isAutoMoveEnabled;                                 // 자동 이동 활성화 상태
     private bool previousAutoMoveState;                             // 이전 상태 저장
 

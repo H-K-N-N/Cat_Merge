@@ -17,6 +17,15 @@ public class SpawnManager : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI nowAndMaxFoodText;     // 스폰버튼 밑에 현재 먹이 갯수와 최대 먹이 갯수 (?/?)
     private int nowFood = 5;                                        // 현재 먹이 갯수
+    public int NowFood
+    {
+        get => nowFood;
+        set
+        {
+            nowFood = value;
+            UpdateFoodText();
+        }
+    }
     private bool isStoppedReduceCoroutine = false;                  // 코루틴 종료 판별
     private bool isStoppedAutoCoroutine = false;
 
@@ -47,14 +56,9 @@ public class SpawnManager : MonoBehaviour
             return;
         }
 
+        UpdateFoodText();
         StartCoroutine(CreateFoodTime());
         StartCoroutine(AutoCollectingTime());
-    }
-
-    private void Update()
-    {
-        // 현재 먹이 갯수와 최대치 갯수 표시(나중에 함수로 빼둘 것)
-        nowAndMaxFoodText.text = $"({nowFood} / {ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value})";
     }
 
     // ======================================================================================================================
@@ -79,10 +83,10 @@ public class SpawnManager : MonoBehaviour
         if (gameManager.CanSpawnCat())
         {
             // 먹이가 1개 이상이거나 최대치 이하일 때 스폰
-            if (nowFood > 0 && nowFood <= ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
+            if (NowFood > 0 && NowFood <= ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
             {
                 // 먹이가 줄고 코루틴이 종료되어있다면 다시 시작(현재 먹이가 최대치일때 코루틴 종료되어있음)
-                nowFood--;
+                NowFood--;
                 if (isStoppedReduceCoroutine)
                 {
                     StartCoroutine(CreateFoodTime());
@@ -221,16 +225,15 @@ public class SpawnManager : MonoBehaviour
         return respawnPos;
     }
 
-
-
     // ======================================================================================================================
 
     // 먹이 생성 시간
     private IEnumerator CreateFoodTime()
     {
         float elapsed = 0f; // 경과 시간
+
         // 현재 먹이가 최대치 이하일 때 코루틴 시작
-        while (nowFood < ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
+        while (NowFood < ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
         {
             foodFillAmountImg.fillAmount = 0f; // 정확히 1로 설정
             while (elapsed < ItemFunctionManager.Instance.reduceProducingFoodTimeList[ItemMenuManager.Instance.ReduceProducingFoodTimeLv].value)
@@ -239,13 +242,13 @@ public class SpawnManager : MonoBehaviour
                 foodFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / ItemFunctionManager.Instance.reduceProducingFoodTimeList[ItemMenuManager.Instance.ReduceProducingFoodTimeLv].value); // 0 ~ 1 사이로 비율 계산
                 yield return null; // 다음 프레임까지 대기
             }
-            nowFood++;
+            NowFood++;
             foodFillAmountImg.fillAmount = 1f; // 정확히 1로 설정
             elapsed = 0f;
         }
 
         // 현재 먹이갯수가 최대치이면 코루틴을 종료시킨다.
-        if (nowFood == ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
+        if (NowFood == ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
         {
             StopCoroutine(CreateFoodTime());
             isStoppedReduceCoroutine = true;
@@ -267,9 +270,9 @@ public class SpawnManager : MonoBehaviour
             }
 
             // 먹이가 1 이상일경우 자동 수집 시작 (흐으음..)
-            if (nowFood >= 1)
+            if (NowFood >= 1)
             {
-                autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value);
+                autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / (float)ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value);
 
                 // 수집 시간 완료될때까지 대기
                 while (elapsed < ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value)
@@ -281,7 +284,7 @@ public class SpawnManager : MonoBehaviour
                     }
 
                     elapsed += Time.deltaTime;
-                    autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value);
+                    autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / (float)ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value);
                     yield return null;
                 }
 
@@ -290,7 +293,7 @@ public class SpawnManager : MonoBehaviour
                 {
                     if (gameManager.CanSpawnCat())
                     {
-                        nowFood--;
+                        NowFood--;
                         SpawnCat();
 
                         // 자동 수집 후 먹이 생성 코루틴 재시작
@@ -306,7 +309,7 @@ public class SpawnManager : MonoBehaviour
             }
 
             // 먹이가 0개면 종료
-            if (nowFood == 0)
+            if (NowFood == 0)
             {
                 isStoppedAutoCoroutine = true;
                 yield break;
@@ -319,13 +322,37 @@ public class SpawnManager : MonoBehaviour
     // 최대 먹이 수량이 증가했을 때 호출되는 함수
     public void OnMaxFoodIncreased()
     {
-        if (nowFood == ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value - 1)
+        // 최대 레벨에 도달했는지 확인
+        if (ItemMenuManager.Instance.MaxFoodsLv >= ItemFunctionManager.Instance.maxFoodsList.Count)
+        {
+            return;
+        }
+
+        // 현재 먹이 수가 최대치보다 작으면 먹이 생성 코루틴 시작
+        int currentMaxFood = ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value;
+        if (NowFood < currentMaxFood)
         {
             if (isStoppedReduceCoroutine)
             {
                 StartCoroutine(CreateFoodTime());
                 isStoppedReduceCoroutine = false;
             }
+        }
+    }
+
+    public void UpdateFoodText()
+    {
+        if (ItemMenuManager.Instance.MaxFoodsLv >= ItemFunctionManager.Instance.maxFoodsList.Count)
+        {
+            // 최대 레벨일 경우 마지막 값 사용
+            int lastMaxFood = ItemFunctionManager.Instance.maxFoodsList[ItemFunctionManager.Instance.maxFoodsList.Count - 1].value;
+            nowAndMaxFoodText.text = $"({nowFood} / {lastMaxFood})";
+        }
+        else
+        {
+            // 현재 레벨의 값 사용
+            int currentMaxFood = ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value;
+            nowAndMaxFoodText.text = $"({nowFood} / {currentMaxFood})";
         }
     }
 

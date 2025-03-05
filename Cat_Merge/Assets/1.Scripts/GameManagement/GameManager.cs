@@ -48,8 +48,8 @@ public class GameManager : MonoBehaviour
     }
 
     [SerializeField] private TextMeshProUGUI coinText;                      // 기본재화 텍스트
-    private int coin = 1000000;                                             // 기본재화
-    public int Coin
+    private decimal coin = 100000;                                          // 기본재화
+    public decimal Coin
     {
         get => coin;
         set
@@ -60,8 +60,8 @@ public class GameManager : MonoBehaviour
     }
 
     [SerializeField] private TextMeshProUGUI cashText;                      // 캐쉬재화 텍스트
-    private int cash = 1000;                                                // 캐쉬재화
-    public int Cash
+    private decimal cash = 1000;                                            // 캐쉬재화
+    public decimal Cash
     {
         get => cash;
         set

@@ -99,8 +99,10 @@ public class SpawnManager : MonoBehaviour
                 LoadAndDisplayCats(catData);
                 QuestManager.Instance.AddSpawnCount();
                 gameManager.AddCatCount();
-                FriendshipManager.Instance.nowExp += 1;
-                FriendshipManager.Instance.expGauge.value += 0.05f;
+
+                // 1등급 고양이의 경험치 증가
+                FriendshipManager.Instance.AddExperience(1, 1);
+                FriendshipManager.Instance.UpdateFriendshipUI(1);
             }
             else
             {
@@ -131,8 +133,10 @@ public class SpawnManager : MonoBehaviour
         }
 
         gameManager.AddCatCount();
-        FriendshipManager.Instance.nowExp += 1;
-        FriendshipManager.Instance.expGauge.value += 0.05f;
+
+        // 1등급 고양이의 경험치 증가
+        FriendshipManager.Instance.AddExperience(1, 1);
+        FriendshipManager.Instance.UpdateFriendshipUI(1);
     }
 
     // 상점에서 이용될 등급에 따른 구매 후 스폰 (12/26 새로 작성)
@@ -151,8 +155,10 @@ public class SpawnManager : MonoBehaviour
         }
 
         gameManager.AddCatCount();
-        FriendshipManager.Instance.nowExp += 1;
-        FriendshipManager.Instance.expGauge.value += 0.05f;
+
+        // 해당 등급 고양이의 경험치 증가
+        FriendshipManager.Instance.AddExperience(grade + 1, 1);
+        FriendshipManager.Instance.UpdateFriendshipUI(grade + 1);
     }
 
     // 고양이 스폰 데이터를 선택하는 함수 (업그레이드 시스템 대비)

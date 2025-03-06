@@ -3,6 +3,15 @@ using TMPro;
 using UnityEngine.UI;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+
+[System.Serializable]
+public class CatFriendshipUI
+{
+    public List<Button> buttons = new List<Button>(); // 고양이별 버튼 (5개)
+    public List<Image> images = new List<Image>(); // 각 버튼에 해당하는 이미지
+}
 
 // 고양이 도감 Script
 public class DictionaryManager : MonoBehaviour
@@ -76,12 +85,120 @@ public class DictionaryManager : MonoBehaviour
     // ======================================================================================================================
 
     [Header("---[Friendship UnLock Buttons]")]
-    [SerializeField] public Button[] friendshipUnlockButtons;      // 
-    [SerializeField] public GameObject[] friendshipGetCrystalImg;   // 
-    [SerializeField] public GameObject[] friendshipLockImg;         // 
-    [SerializeField] public GameObject[] friendshipStarImg;         // 배경 scrollRectContents
+    //[SerializeField] public List<CatFriendshipUI> catFriendshipUIs = new List<CatFriendshipUI>();
+    //[SerializeField] public Button[] friendshipUnlockButtons;      // 
+    //[SerializeField] public GameObject[] friendshipGetCrystalImg;   // 
+    //[SerializeField] public GameObject[] friendshipLockImg;         // 
+    //[SerializeField] public GameObject[] friendshipStarImg;         // 배경 scrollRectContents
 
+    [Header("---[Test]")]
+    [SerializeField] private Transform buttonParent; // 버튼이 배치될 부모 오브젝트
+    [SerializeField] private Button[] buttonPrefabs; // 레벨 1~5 버튼 프리팹 배열 (5개)
+
+    //[SerializeField] public List<Button> friendshipUnlockButtonss = new List<Button>(); // 개별 버튼 리스트
+    //[SerializeField] public Image[][] img;
+
+    public Dictionary<int, List<Button>> characterButtons = new Dictionary<int, List<Button>>();
+    private Dictionary<int, Image[][]> characterImages = new Dictionary<int, Image[][]>(); // 캐릭터별 버튼의 이미지 배열
+    public void Initialize(int characterId)
+    {
+        //img = new Image[buttonPrefabs.Length][];
+
+        //// 기존 버튼 삭제 (이전 캐릭터 버튼 제거)
+        //foreach (var btn in friendshipUnlockButtonss)
+        //{
+        //    Destroy(btn.gameObject);
+        //}
+        //friendshipUnlockButtonss.Clear();
+
+        //// 5개의 버튼을 각 캐릭터마다 개별적으로 생성
+        //for (int i = 0; i < buttonPrefabs.Length; i++)
+        //{
+        //    Button newButton = Instantiate(buttonPrefabs[i], buttonParent); // 해당 레벨 버튼 생성
+        //    friendshipUnlockButtonss.Add(newButton);
+        //    int level = i + 1; // 버튼 레벨 (1~5)
+        //    newButton.onClick.AddListener(() => UnlockFriendship(level));
+
+        //    img[i] = newButton.GetComponentsInChildren<Image>(true);
+        //}
+
+        ////  부모 오브젝트에 남아 있는 버튼을 전부 제거
+        //foreach (Transform child in buttonParent)
+        //{
+        //    Destroy(child.gameObject);
+        //}
+
+        //  기존 버튼 삭제
+        if (characterButtons.ContainsKey(characterId))
+        {
+            characterButtons[characterId].Clear();
+        }
+        else
+        {
+            characterButtons[characterId] = new List<Button>();
+            characterImages[characterId] = new Image[buttonPrefabs.Length][];
+        }
+
+        //  새로운 버튼 생성
+        for (int i = 0; i < buttonPrefabs.Length; i++)
+        {
+            Button newButton = Instantiate(buttonPrefabs[i], buttonParent);
+            characterButtons[characterId].Add(newButton); //  캐릭터 ID별 버튼 저장
+
+            int level = i + 1; // 레벨 1~5
+            newButton.onClick.AddListener(() => UnlockFriendship( level));
+
+            // 버튼 내부의 이미지 저장
+            characterImages[characterId][i] = newButton.GetComponentsInChildren<Image>(true);
+        }
+    }
+
+    private void UnlockFriendship(int level)
+    {
+        Debug.Log($"{currentSelectedCatGrade}등급의 레벨 {level} 우정 해금!");
+
+        // 해당 캐릭터의 우정 해금 로직 추가
+
+        //if(level == 1)
+        //{
+        //    // Debug로 img 배열 확인
+        //    for (int i = 0; i < img.Length; i++)
+        //    {
+        //        for (int j = 0; j < img[i].Length; j++)
+        //        {
+        //            if (img[level - 1][j].name == "FirstOpenBG")
+        //            {
+        //                img[level - 1][j].gameObject.SetActive(false);
+        //            }
+        //        }
+        //    }
+        //}    
+
+        if (characterImages.ContainsKey(currentSelectedCatGrade))
+        {
+            foreach (var img in characterImages[currentSelectedCatGrade][level - 1])
+            {
+                if (img.name == "FirstOpenBG")
+                {
+                    img.gameObject.SetActive(false);
+                }
+            }
+        }
+    }
+
+    public List<Button> GetCharacterButtons(int characterId)
+    {
+        return characterButtons.ContainsKey(characterId) ? characterButtons[characterId] : null;
+    }
+
+    public Image[][] GetCharacterImages(int characterId)
+    {
+        return characterImages.ContainsKey(characterId) ? characterImages[characterId] : null;
+    }
     // ======================================================================================================================
+
+    // 현재 선택된 고양이 등급 추적
+    public int currentSelectedCatGrade = -1;
 
     private void Awake()
     {
@@ -98,7 +215,15 @@ public class DictionaryManager : MonoBehaviour
         activeMenuType = DictionaryMenuType.Normal;
 
         InitializeDictionaryManager();
-        InitializeFriendshipButton();
+        //InitializeFriendshipButton();
+     
+        for(int i = 0; i < 3; i++)
+        {
+            Initialize(i);
+        }
+
+        int totalButtonCount = characterButtons.Sum(pair => pair.Value.Count);
+        Debug.Log($"총 버튼 개수: {totalButtonCount}");
     }
 
     private void Start()
@@ -351,6 +476,8 @@ public class DictionaryManager : MonoBehaviour
     // 도감이 활성화 되거나 서브 메뉴를 누르면 InformationPanel을 기본 정보로 업데이트 해주는 함수
     private void UpdateInformationPanel()
     {
+        currentSelectedCatGrade = -1;
+
         // 이미지 설정
         informationCatIcon.sprite = informationCatDefaultImage;
 
@@ -370,11 +497,17 @@ public class DictionaryManager : MonoBehaviour
     // 고양이 정보를 Information Panel에 표시하는 함수
     private void ShowInformationPanel(int catGrade)
     {
+        currentSelectedCatGrade = catGrade + 1; // 실제 등급으로 저장 (0-based to 1-based)
+
         // 고양이 정보 불러오기
         var catData = GameManager.Instance.AllCatData[catGrade];
 
         // 이미지 설정
         informationCatIcon.sprite = catData.CatImage;
+
+        // 보상 수령 가능 여부 확인
+        bool canClaimReward = FriendshipManager.Instance.CanClaimReward(currentSelectedCatGrade);
+
 
         // 텍스트 설정
         string catInfo = $"이름: {catData.CatName}\n" +
@@ -390,6 +523,14 @@ public class DictionaryManager : MonoBehaviour
 
         // fullInformationPanel의 Y좌표를 -312.5f로 고정
         fullInformationPanel.anchoredPosition = new Vector2(0, -312.5f);
+
+        // ==================================================================================
+        // 호감도 정보
+
+       
+
+        // 호감도 게이지 업데이트
+        FriendshipManager.Instance.UpdateFriendshipUI(currentSelectedCatGrade);
     }
 
     // 새로운 고양이 해금 효과 함수
@@ -518,64 +659,87 @@ public class DictionaryManager : MonoBehaviour
 
 
     // ============================================================================================================
-    private void InitializeFriendshipButton()
-    {
-        friendshipUnlockButtons[0].onClick.AddListener(UnLockLevel1Friendship);
-        friendshipUnlockButtons[1].onClick.AddListener(UnLockLevel2Friendship);
-        friendshipUnlockButtons[2].onClick.AddListener(UnLockLevel3Friendship);
-        friendshipUnlockButtons[3].onClick.AddListener(UnLockLevel4Friendship);
-        friendshipUnlockButtons[4].onClick.AddListener(UnLockLevel5Friendship);
+    // 버튼관련 기존 함수들
 
-        for (int i = 0; i < friendshipUnlockButtons.Length; i++)
-        {
-            friendshipUnlockButtons[i].interactable = false;
-        }
-    }
-    private void UnLockLevel1Friendship()
-    {
-
-        friendshipGetCrystalImg[0].SetActive(false);
-        GameManager.Instance.Cash += FriendshipDataLoader.Instance.GetDataByGrade(1)[0].reward;
-        friendshipUnlockButtons[0].interactable = false;
-
-        FriendshipManager.Instance.nowExp = 0;
-        FriendshipManager.Instance.expGauge.value = 0;
-        FriendshipManager.Instance.expRequirementText.text = ($"{FriendshipManager.Instance.nowExp} / {FriendshipDataLoader.Instance.GetDataByGrade(2)[0].exp}");
-
-    }
-    private void UnLockLevel2Friendship()
-    {
-        friendshipGetCrystalImg[1].SetActive(false);
-    }
-    private void UnLockLevel3Friendship()
-    {
-        friendshipGetCrystalImg[2].SetActive(false);
-    }
-    private void UnLockLevel4Friendship()
-    {
-        friendshipGetCrystalImg[3].SetActive(false);
-    }
-    private void UnLockLevel5Friendship()
-    {
-        friendshipGetCrystalImg[4].SetActive(false);
-    }
-    //private void ShowFriendshipInfoPanel(int catGrade)
+    //private void InitializeFriendshipButton()
     //{
-    //    // 고양이 정보 불러오기
-    //    var catData = GameManager.Instance.AllCatData[catGrade];
-    //    // 이미지 설정
-    //    informationCatIcon.sprite = catData.CatImage;
-    //    // 텍스트 설정
-    //    string catInfo = $"Name: {catData.CatName}\n" +
-    //                     $"Grade: {catData.CatGrade}\n" +
-    //                     $"Damage: {catData.CatDamage}\n" +
-    //                     $"HP: {catData.CatHp}\n" +
-    //                     $"GetCoin: {catData.CatGetCoin}";
-    //    informationCatDetails.text = catInfo;
-    //    // 스크롤 활성화, 스크롤 중이었다면 멈춤
-    //    catInformationPanel.GetComponent<ScrollRect>().enabled = true;
-    //    catInformationPanel.GetComponent<ScrollRect>().velocity = Vector2.zero;
-    //    //fullInformationPanel의 Y좌표를 -312.5f로 고정
-    //    fullInformationPanel.anchoredPosition = new Vector2(0, -312.5f);
+    //    friendshipUnlockButtons[0].onClick.AddListener(UnLockLevel1Friendship);
+    //    friendshipUnlockButtons[1].onClick.AddListener(UnLockLevel2Friendship);
+    //    friendshipUnlockButtons[2].onClick.AddListener(UnLockLevel3Friendship);
+    //    friendshipUnlockButtons[3].onClick.AddListener(UnLockLevel4Friendship);
+    //    friendshipUnlockButtons[4].onClick.AddListener(UnLockLevel5Friendship);
+
+    //    for (int i = 0; i < friendshipUnlockButtons.Length; i++)
+    //    {
+    //        friendshipUnlockButtons[i].interactable = false;
+    //    }
     //}
+    //private void UnLockLevel1Friendship()
+    //{
+    //    friendshipGetCrystalImg[0].SetActive(false);    
+    //    GameManager.Instance.Cash += FriendshipDataLoader.Instance.GetDataByGrade(1)[0].reward;
+    //    friendshipUnlockButtons[0].interactable = false;
+
+    //    var info = FriendshipManager.Instance.GetFriendshipInfo(1);
+    //    info.currentExp -= info.nextLevelExp;  
+    //    info.nextLevelExp = FriendshipDataLoader.Instance.GetDataByGrade(1)[1].exp;
+    //    // 보상 수령 처리
+    //    FriendshipManager.Instance.ClaimReward(1);
+
+    //    // UI 업데이트
+    //    FriendshipManager.Instance.UpdateFriendshipUI(1);
+
+    //}
+    //private void UnLockLevel2Friendship()
+    //{
+    //    friendshipGetCrystalImg[1].SetActive(false);
+    //    GameManager.Instance.Cash += FriendshipDataLoader.Instance.GetDataByGrade(1)[1].reward;
+    //    friendshipUnlockButtons[1].interactable = false;
+
+    //    // 보상 수령 처리
+    //    FriendshipManager.Instance.ClaimReward(1);
+
+    //    // UI 업데이트
+    //    FriendshipManager.Instance.UpdateFriendshipUI(1);
+    //}
+    //private void UnLockLevel3Friendship()
+    //{
+    //    friendshipGetCrystalImg[2].SetActive(false);
+    //    GameManager.Instance.Cash += FriendshipDataLoader.Instance.GetDataByGrade(1)[2].reward;
+    //    friendshipUnlockButtons[2].interactable = false;
+
+    //    // 보상 수령 처리
+    //    FriendshipManager.Instance.ClaimReward(1);
+
+    //    // UI 업데이트
+    //    FriendshipManager.Instance.UpdateFriendshipUI(1);
+    //}
+    //private void UnLockLevel4Friendship()
+    //{
+    //    friendshipGetCrystalImg[3].SetActive(false);
+    //    GameManager.Instance.Cash += FriendshipDataLoader.Instance.GetDataByGrade(1)[3].reward;
+    //    friendshipUnlockButtons[3].interactable = false;
+
+    //    // 보상 수령 처리
+    //    FriendshipManager.Instance.ClaimReward(1);
+
+    //    // UI 업데이트
+    //    FriendshipManager.Instance.UpdateFriendshipUI(1);
+    //}
+    //private void UnLockLevel5Friendship()
+    //{
+    //    friendshipGetCrystalImg[4].SetActive(false);
+    //    GameManager.Instance.Cash += FriendshipDataLoader.Instance.GetDataByGrade(1)[4].reward;
+    //    friendshipUnlockButtons[4].interactable = false;
+    //}
+
+    // ======================================================================================================================
+
+    // 현재 선택된 고양이 등급 반환 함수 추가
+    public int GetCurrentSelectedCatGrade()
+    {
+        return currentSelectedCatGrade;
+    }
+
+
 }

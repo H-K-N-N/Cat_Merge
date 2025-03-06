@@ -1,6 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+    [System.Serializable]
+    public class LevelData
+    {
+        public int grade; // 등급 (int)
+        public int[] expRequirements = new int[5]; // 1~5단계 경험치 요구량
+        public int[] rewards = new int[5]; // 1~5단계 보상 (int로 변경)
+        public int[] passiveEffects = new int[5]; // 1~5단계 패시브 효과 수치
+    }
+
 [DefaultExecutionOrder(-2)]
 public class FriendshipDataLoader : MonoBehaviour
 {
@@ -22,18 +31,9 @@ public class FriendshipDataLoader : MonoBehaviour
         }
 
         LoadCSV("FriendshipDB");
-    }
 
-    [System.Serializable]
-    public class LevelData
-    {
-        public int grade; // 등급 (int)
-        public int[] expRequirements = new int[5]; // 1~5단계 경험치 요구량
-        public int[] rewards = new int[5]; // 1~5단계 보상 (int로 변경)
-        public int[] passiveEffects = new int[5]; // 1~5단계 패시브 효과 수치
+        //PrintLevelData();
     }
-
-    //public List<LevelData> levelDataList = new List<LevelData>();
 
     void LoadCSV(string fileName)
     {
@@ -102,9 +102,10 @@ public class FriendshipDataLoader : MonoBehaviour
             }
             for(int k = 0; k < 5; k++)
             {
-                dataByGrade[data.grade].Add((data.grade, data.expRequirements[k], data.rewards[k], data.passiveEffects[k]));
+                dataByGrade[data.grade].Add((data.grade, data.expRequirements[k], data.rewards[k], data.passiveEffects[k]));             
             }
-            
+
+           
         }
     }
 
@@ -121,15 +122,17 @@ public class FriendshipDataLoader : MonoBehaviour
         }
     }
 
-    // 디버깅용
+    //// 디버깅용
     //void PrintLevelData()
     //{
-    //    foreach (var data in levelDataList)
+    //    foreach (var data in dataByGrade)
     //    {
-    //        Debug.Log($"{data.grade} 등급");
-    //        for (int i = 0; i < 5; i++)
+    //        Debug.Log($"{data.Key} 등급"); // Key = grade
+
+    //        for (int i = 0; i < data.Value.Count; i++) // List 순회
     //        {
-    //            Debug.Log($"{i + 1}단계 - 경험치 요구량: {data.expRequirements[i]}, 보상: {data.rewards[i]}, 패시브 효과: {data.passiveEffects[i]}");
+    //            var levelInfo = data.Value[i]; // 튜플 데이터 추출
+    //            Debug.Log($"{i + 1}단계 - 경험치 요구량: {levelInfo.exp}, 보상: {levelInfo.reward}, 패시브 효과: {levelInfo.passive}");
     //        }
     //    }
     //}

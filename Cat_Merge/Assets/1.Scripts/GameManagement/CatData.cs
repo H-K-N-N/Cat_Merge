@@ -4,9 +4,11 @@ using UnityEngine.UI;
 using TMPro;
 
 // 고양이의 정보와 행동을 관리하는 스크립트
-public class CatData : MonoBehaviour
+public class CatData : MonoBehaviour, ICanvasRaycastFilter
 {
     #region Variables
+    private const float CLICK_AREA_SCALE = 0.8f;    // 클릭 영역 스케일
+
     [Header("Cat Data")]
     public Cat catData;                             // 고양이 기본 데이터
     private Image catImage;                         // 고양이 이미지 컴포넌트
@@ -423,6 +425,27 @@ public class CatData : MonoBehaviour
     #endregion
 
     // ======================================================================================================================
+
+    // 레이캐스트 필터링 함수 구현
+    public bool IsRaycastLocationValid(Vector2 screenPoint, Camera eventCamera)
+    {
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, screenPoint, eventCamera, out Vector2 localPoint))
+        {
+            // 중심에서의 정규화된 거리를 계산
+            Vector2 normalizedPoint = new Vector2(
+                //localPoint.x / (rectTransform.rect.width * 0.5f),
+                (localPoint.x + 40f) / (rectTransform.rect.width * 0.5f),       // 이미지가 왼쪽으로 좀 치우쳐져있어서 살짝 왼쪽으로
+                localPoint.y / (rectTransform.rect.height * 0.5f)
+            );
+
+            // 원하는 크기의 원형 영역 내부에 있는지 확인
+            return (normalizedPoint.x * normalizedPoint.x + normalizedPoint.y * normalizedPoint.y) <= (CLICK_AREA_SCALE * CLICK_AREA_SCALE);
+        }
+        return false;
+    }
+
+    // ======================================================================================================================
+
 
 
 }

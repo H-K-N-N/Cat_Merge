@@ -8,13 +8,14 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 {
     #region Variables
     private const float CLICK_AREA_SCALE = 0.8f;    // 클릭 영역 스케일
+    private WaitForSeconds COLLECT_ANIMATION_DELAY = new WaitForSeconds(0.5f);
 
     [Header("Cat Data")]
     public Cat catData;                             // 고양이 기본 데이터
     private Image catImage;                         // 고양이 이미지 컴포넌트
     public double catHp;                            // 현재 고양이 체력
     public bool isStuned = false;                   // 기절 상태 여부
-    private float stunTime = 10f;                   // 기절 시간
+    private const float STUN_TIME = 10f;            // 기절 시간
 
     [Header("HP UI")]
     [SerializeField] private GameObject hpImage;    // HP 이미지 오브젝트
@@ -24,6 +25,9 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     private RectTransform rectTransform;            // 현재 오브젝트의 RectTransform
     private RectTransform parentPanel;              // 부모 패널의 RectTransform
     private DragAndDropManager catDragAndDrop;      // 드래그 앤 드롭 매니저
+    private Vector2 rectSize;
+    private float rectHalfWidth;
+    private float rectHalfHeight;
 
     [Header("Movement")]
     private bool isAnimating = false;               // 이동 애니메이션 진행 여부
@@ -45,6 +49,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     private void Awake()
     {
         InitializeComponents();
+        CacheRectTransformData();
     }
 
     private void Start()
@@ -75,15 +80,24 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         parentPanel = rectTransform.parent.GetComponent<RectTransform>();
         catDragAndDrop = GetComponentInParent<DragAndDropManager>();
 
-        collectCoinText = transform.Find("CollectCoinText").GetComponent<TextMeshProUGUI>();
-        collectCoinImage = transform.Find("CollectCoinImage").GetComponent<Image>();
+        Transform coinTextTransform = transform.Find("CollectCoinText");
+        Transform coinImageTransform = transform.Find("CollectCoinImage");
+        if (coinTextTransform != null) collectCoinText = coinTextTransform.GetComponent<TextMeshProUGUI>();
+        if (coinImageTransform != null) collectCoinImage = coinImageTransform.GetComponent<Image>();
 
         hpImage = transform.Find("HP Image").gameObject;
         hpFillImage = hpImage.transform.Find("Fill Image").GetComponent<Image>();
         hpImage.SetActive(false);
 
-        collectCoinText.gameObject.SetActive(false);
-        collectCoinImage.gameObject.SetActive(false);
+        if (collectCoinText != null) collectCoinText.gameObject.SetActive(false);
+        if (collectCoinImage != null) collectCoinImage.gameObject.SetActive(false);
+    }
+
+    private void CacheRectTransformData()
+    {
+        rectSize = rectTransform.rect.size;
+        rectHalfWidth = rectSize.x * 0.5f;
+        rectHalfHeight = rectSize.y * 0.5f;
     }
 
     // UI 업데이트
@@ -146,7 +160,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     {
         Vector3 catPosition = rectTransform.anchoredPosition;
         BossHitbox bossHitbox = BattleManager.Instance.bossHitbox;
-        
+
         // 고양이가 히트박스 외부에 있는 경우
         if (!bossHitbox.IsInHitbox(catPosition))
         {
@@ -165,7 +179,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
         if (catHp <= 0)
         {
-            StartCoroutine(StunAndRecover(stunTime));
+            StartCoroutine(StunAndRecover(STUN_TIME));
         }
     }
 
@@ -374,10 +388,21 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     // 자동 재화 수집 실행
     private IEnumerator AutoCollectCoins()
     {
+        float currentDelayTime = 0f;
+        WaitForSeconds delay = null;
+
         while (isCollectingCoins)
         {
             collectingTime = ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value;
-            yield return new WaitForSeconds(collectingTime);
+
+            // 딜레이 시간이 변경되었는지 확인
+            if (delay == null || !Mathf.Approximately(currentDelayTime, collectingTime))
+            {
+                currentDelayTime = collectingTime;
+                delay = new WaitForSeconds(currentDelayTime);
+            }
+
+            yield return delay;
 
             if (catData != null && GameManager.Instance != null)
             {
@@ -391,14 +416,20 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     // 재화 수집 애니메이션 실행
     private IEnumerator PlayCollectingAnimation(int collectedCoins)
     {
-        collectCoinText.text = $"+{collectedCoins}";
-        collectCoinText.gameObject.SetActive(true);
-        collectCoinImage.gameObject.SetActive(true);
+        if (collectCoinText != null)
+        {
+            collectCoinText.text = $"+{collectedCoins}";
+            collectCoinText.gameObject.SetActive(true);
+        }
+        if (collectCoinImage != null)
+        {
+            collectCoinImage.gameObject.SetActive(true);
+        }
 
-        yield return new WaitForSeconds(0.5f);
+        yield return COLLECT_ANIMATION_DELAY;
 
-        collectCoinText.gameObject.SetActive(false);
-        collectCoinImage.gameObject.SetActive(false);
+        if (collectCoinText != null) collectCoinText.gameObject.SetActive(false);
+        if (collectCoinImage != null) collectCoinImage.gameObject.SetActive(false);
     }
     #endregion
 
@@ -429,23 +460,18 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     // 레이캐스트 필터링 함수 구현
     public bool IsRaycastLocationValid(Vector2 screenPoint, Camera eventCamera)
     {
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, screenPoint, eventCamera, out Vector2 localPoint))
-        {
-            // 중심에서의 정규화된 거리를 계산
-            Vector2 normalizedPoint = new Vector2(
-                //localPoint.x / (rectTransform.rect.width * 0.5f),
-                (localPoint.x + 40f) / (rectTransform.rect.width * 0.5f),       // 이미지가 왼쪽으로 좀 치우쳐져있어서 살짝 왼쪽으로
-                localPoint.y / (rectTransform.rect.height * 0.5f)
-            );
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, screenPoint, eventCamera, out Vector2 localPoint)) 
+            return false;
 
-            // 원하는 크기의 원형 영역 내부에 있는지 확인
-            return (normalizedPoint.x * normalizedPoint.x + normalizedPoint.y * normalizedPoint.y) <= (CLICK_AREA_SCALE * CLICK_AREA_SCALE);
-        }
-        return false;
+        Vector2 normalizedPoint = new Vector2(
+            //localPoint.x / rectHalfWidth,
+            (localPoint.x + 40f) / rectHalfWidth,
+            localPoint.y / rectHalfHeight
+        );
+
+        return (normalizedPoint.x * normalizedPoint.x + normalizedPoint.y * normalizedPoint.y) <= (CLICK_AREA_SCALE * CLICK_AREA_SCALE);
     }
 
     // ======================================================================================================================
-
-
 
 }

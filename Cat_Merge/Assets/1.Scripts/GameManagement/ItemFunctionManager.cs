@@ -5,11 +5,11 @@ public class ItemFunctionManager : MonoBehaviour
     // Singleton Instance
     public static ItemFunctionManager Instance { get; private set; }
 
-    public List<(int step, int value, decimal fee)> maxCatsList = new List<(int step, int value, decimal fee)>();
-    public List<(int step, int value, decimal fee)> reduceCollectingTimeList = new List<(int step, int value, decimal fee)>();
-    public List<(int step, int value, decimal fee)> maxFoodsList = new List<(int step, int value, decimal fee)>();
-    public List<(int step, int value, decimal fee)> reduceProducingFoodTimeList = new List<(int step, int value, decimal fee)>();
-    public List<(int step, int value, decimal fee)> autoCollectingList = new List<(int step, int value, decimal fee)>();
+    public List<(int step, float value, decimal fee)> maxCatsList = new List<(int step, float value, decimal fee)>();
+    public List<(int step, float value, decimal fee)> reduceCollectingTimeList = new List<(int step, float value, decimal fee)>();
+    public List<(int step, float value, decimal fee)> maxFoodsList = new List<(int step, float value, decimal fee)>();
+    public List<(int step, float value, decimal fee)> reduceProducingFoodTimeList = new List<(int step, float value, decimal fee)>();
+    public List<(int step, float value, decimal fee)> autoCollectingList = new List<(int step, float value, decimal fee)>();
 
     private void Awake()
     {

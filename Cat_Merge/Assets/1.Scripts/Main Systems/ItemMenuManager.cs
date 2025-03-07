@@ -139,7 +139,7 @@ public class ItemMenuManager : MonoBehaviour
                     break;
                 case 1:
                     itemMenuesLvText[i].text = $"Lv.{ItemFunctionManager.Instance.reduceCollectingTimeList[0].step}";
-                    itemMenuesValueText[i].text = $"{ItemFunctionManager.Instance.reduceCollectingTimeList[0].value} ¡æ {ItemFunctionManager.Instance.reduceCollectingTimeList[1].value}"; // 3.0 ¡æ 2.9
+                    itemMenuesValueText[i].text = $"{ItemFunctionManager.Instance.reduceCollectingTimeList[0].value.ToString("0.0")} ¡æ {ItemFunctionManager.Instance.reduceCollectingTimeList[1].value.ToString("0.0")}"; // 3.0 ¡æ 2.9
                     itemMenuesFeeText[i].text = $"{ItemFunctionManager.Instance.reduceCollectingTimeList[0].fee}";
                     break;
                 case 2:
@@ -149,7 +149,7 @@ public class ItemMenuManager : MonoBehaviour
                     break;
                 case 3:
                     itemMenuesLvText[i].text = $"Lv.{ItemFunctionManager.Instance.reduceProducingFoodTimeList[0].step}";
-                    itemMenuesValueText[i].text = $"{ItemFunctionManager.Instance.reduceProducingFoodTimeList[0].value} ¡æ {ItemFunctionManager.Instance.reduceProducingFoodTimeList[1].value}"; // 7.0 ¡æ 6.8
+                    itemMenuesValueText[i].text = $"{ItemFunctionManager.Instance.reduceProducingFoodTimeList[0].value.ToString("0.0")} ¡æ {ItemFunctionManager.Instance.reduceProducingFoodTimeList[1].value.ToString("0.0")}"; // 7.0 ¡æ 6.8
                     itemMenuesFeeText[i].text = $"{ItemFunctionManager.Instance.reduceProducingFoodTimeList[0].fee}";
                     break;
                 case 4:
@@ -318,7 +318,7 @@ public class ItemMenuManager : MonoBehaviour
             }
             else
             {
-                itemMenuesValueText[1].text = $"{ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv].value} ¡æ {ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv + 1].value}";
+                itemMenuesValueText[1].text = $"{ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv].value.ToString("0.0")} ¡æ {ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv + 1].value.ToString("0.0")}";
                 itemMenuesFeeText[1].text = $"{ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv + 1].fee:N0}";
             }
         }
@@ -403,7 +403,7 @@ public class ItemMenuManager : MonoBehaviour
             }
             else
             {
-                itemMenuesValueText[3].text = $"{ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].value} ¡æ {ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv + 1].value}";
+                itemMenuesValueText[3].text = $"{ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].value.ToString("0.0")} ¡æ {ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv + 1].value.ToString("0.0")}";
                 itemMenuesFeeText[3].text = $"{ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv + 1].fee:N0}";
             }
         }

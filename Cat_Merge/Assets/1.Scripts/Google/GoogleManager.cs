@@ -11,7 +11,7 @@ public class GoogleManager : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI logText;
 
-    private void Start()
+    public void Start()
     {
         PlayGamesPlatform.DebugLogEnabled = true;
         PlayGamesPlatform.Activate();

@@ -4,15 +4,18 @@ using UnityEngine.UI;
 using TMPro;
 
 // 고양이의 정보와 행동을 관리하는 스크립트
-public class CatData : MonoBehaviour
+public class CatData : MonoBehaviour, ICanvasRaycastFilter
 {
     #region Variables
+    private const float CLICK_AREA_SCALE = 0.8f;    // 클릭 영역 스케일
+    private WaitForSeconds COLLECT_ANIMATION_DELAY = new WaitForSeconds(0.5f);
+
     [Header("Cat Data")]
     public Cat catData;                             // 고양이 기본 데이터
     private Image catImage;                         // 고양이 이미지 컴포넌트
-    public double catHp;                               // 현재 고양이 체력
+    public double catHp;                            // 현재 고양이 체력
     public bool isStuned = false;                   // 기절 상태 여부
-    private float stunTime = 10f;                   // 기절 시간
+    private const float STUN_TIME = 10f;            // 기절 시간
 
     [Header("HP UI")]
     [SerializeField] private GameObject hpImage;    // HP 이미지 오브젝트
@@ -22,6 +25,9 @@ public class CatData : MonoBehaviour
     private RectTransform rectTransform;            // 현재 오브젝트의 RectTransform
     private RectTransform parentPanel;              // 부모 패널의 RectTransform
     private DragAndDropManager catDragAndDrop;      // 드래그 앤 드롭 매니저
+    private Vector2 rectSize;
+    private float rectHalfWidth;
+    private float rectHalfHeight;
 
     [Header("Movement")]
     private bool isAnimating = false;               // 이동 애니메이션 진행 여부
@@ -43,6 +49,7 @@ public class CatData : MonoBehaviour
     private void Awake()
     {
         InitializeComponents();
+        CacheRectTransformData();
     }
 
     private void Start()
@@ -73,15 +80,24 @@ public class CatData : MonoBehaviour
         parentPanel = rectTransform.parent.GetComponent<RectTransform>();
         catDragAndDrop = GetComponentInParent<DragAndDropManager>();
 
-        collectCoinText = transform.Find("CollectCoinText").GetComponent<TextMeshProUGUI>();
-        collectCoinImage = transform.Find("CollectCoinImage").GetComponent<Image>();
+        Transform coinTextTransform = transform.Find("CollectCoinText");
+        Transform coinImageTransform = transform.Find("CollectCoinImage");
+        if (coinTextTransform != null) collectCoinText = coinTextTransform.GetComponent<TextMeshProUGUI>();
+        if (coinImageTransform != null) collectCoinImage = coinImageTransform.GetComponent<Image>();
 
         hpImage = transform.Find("HP Image").gameObject;
         hpFillImage = hpImage.transform.Find("Fill Image").GetComponent<Image>();
         hpImage.SetActive(false);
 
-        collectCoinText.gameObject.SetActive(false);
-        collectCoinImage.gameObject.SetActive(false);
+        if (collectCoinText != null) collectCoinText.gameObject.SetActive(false);
+        if (collectCoinImage != null) collectCoinImage.gameObject.SetActive(false);
+    }
+
+    private void CacheRectTransformData()
+    {
+        rectSize = rectTransform.rect.size;
+        rectHalfWidth = rectSize.x * 0.5f;
+        rectHalfHeight = rectSize.y * 0.5f;
     }
 
     // UI 업데이트
@@ -125,50 +141,33 @@ public class CatData : MonoBehaviour
 
     #region Battle System
     // 보스 히트박스 경계로 고양이 밀어내기
-    public void MoveOppositeBoss(Vector3 bossPosition, Vector2 bossSize)
+    public void MoveOppositeBoss()
     {
         Vector3 catPosition = rectTransform.anchoredPosition;
-        Vector3 offset = catPosition - bossPosition;
-        Vector3 targetPosition = CalculateBoundaryPosition(bossPosition, bossSize, offset, true);
-        StartCoroutine(SmoothMoveToPosition(targetPosition));
+        BossHitbox bossHitbox = BattleManager.Instance.bossHitbox;
+
+        // 고양이가 히트박스 내부에 있는 경우
+        if (bossHitbox.IsInHitbox(catPosition))
+        {
+            // 히트박스 경계에 위치하도록 이동
+            Vector3 targetPosition = bossHitbox.GetClosestBoundaryPoint(catPosition);
+            StartCoroutine(SmoothMoveToPosition(targetPosition));
+        }
     }
 
     // 보스 히트박스 경계로 고양이 이동
-    public void MoveTowardBossBoundary(Vector3 bossPosition, Vector2 bossSize)
+    public void MoveTowardBossBoundary()
     {
         Vector3 catPosition = rectTransform.anchoredPosition;
-        Vector3 offset = bossPosition - catPosition;
-        Vector3 targetPosition = CalculateBoundaryPosition(bossPosition, bossSize, offset, false);
-        StartCoroutine(SmoothMoveToPosition(targetPosition));
-    }
+        BossHitbox bossHitbox = BattleManager.Instance.bossHitbox;
 
-    // 히트박스 경계 위치 계산
-    private Vector3 CalculateBoundaryPosition(Vector3 bossPosition, Vector2 bossSize, Vector3 offset, bool isOpposite)
-    {
-        float halfWidth = bossSize.x / 2f;
-        float halfHeight = bossSize.y / 2f;
-        Vector3 catPosition = rectTransform.anchoredPosition;
-
-        float closestX = Mathf.Clamp(catPosition.x, bossPosition.x - halfWidth, bossPosition.x + halfWidth);
-        float closestY = Mathf.Clamp(catPosition.y, bossPosition.y - halfHeight, bossPosition.y + halfHeight);
-
-        float distanceToVerticalEdge = Mathf.Min(Mathf.Abs(catPosition.x - (bossPosition.x - halfWidth)), Mathf.Abs(catPosition.x - (bossPosition.x + halfWidth)));
-        float distanceToHorizontalEdge = Mathf.Min(Mathf.Abs(catPosition.y - (bossPosition.y - halfHeight)), Mathf.Abs(catPosition.y - (bossPosition.y + halfHeight)));
-
-        if (distanceToVerticalEdge < distanceToHorizontalEdge)
+        // 고양이가 히트박스 외부에 있는 경우
+        if (!bossHitbox.IsInHitbox(catPosition))
         {
-            closestX = isOpposite ?
-                (offset.x < 0 ? bossPosition.x - halfWidth : bossPosition.x + halfWidth) :
-                (offset.x > 0 ? bossPosition.x - halfWidth : bossPosition.x + halfWidth);
+            // 히트박스 경계에 위치하도록 이동
+            Vector3 targetPosition = bossHitbox.GetClosestBoundaryPoint(catPosition);
+            StartCoroutine(SmoothMoveToPosition(targetPosition));
         }
-        else
-        {
-            closestY = isOpposite ?
-                (offset.y < 0 ? bossPosition.y - halfHeight : bossPosition.y + halfHeight) :
-                (offset.y > 0 ? bossPosition.y - halfHeight : bossPosition.y + halfHeight);
-        }
-
-        return new Vector3(closestX, closestY, catPosition.z);
     }
 
     // 데미지 처리
@@ -180,7 +179,7 @@ public class CatData : MonoBehaviour
 
         if (catHp <= 0)
         {
-            StartCoroutine(StunAndRecover(stunTime));
+            StartCoroutine(StunAndRecover(STUN_TIME));
         }
     }
 
@@ -209,7 +208,7 @@ public class CatData : MonoBehaviour
         }
     }
 
-    // 레이캐스트 타겟 설정
+    // Raycast Target 설정
     private void SetRaycastTarget(bool isActive)
     {
         catImage.raycastTarget = isActive;
@@ -389,10 +388,21 @@ public class CatData : MonoBehaviour
     // 자동 재화 수집 실행
     private IEnumerator AutoCollectCoins()
     {
+        float currentDelayTime = 0f;
+        WaitForSeconds delay = null;
+
         while (isCollectingCoins)
         {
             collectingTime = ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value;
-            yield return new WaitForSeconds(collectingTime);
+
+            // 딜레이 시간이 변경되었는지 확인
+            if (delay == null || !Mathf.Approximately(currentDelayTime, collectingTime))
+            {
+                currentDelayTime = collectingTime;
+                delay = new WaitForSeconds(currentDelayTime);
+            }
+
+            yield return delay;
 
             if (catData != null && GameManager.Instance != null)
             {
@@ -406,14 +416,20 @@ public class CatData : MonoBehaviour
     // 재화 수집 애니메이션 실행
     private IEnumerator PlayCollectingAnimation(int collectedCoins)
     {
-        collectCoinText.text = $"+{collectedCoins}";
-        collectCoinText.gameObject.SetActive(true);
-        collectCoinImage.gameObject.SetActive(true);
+        if (collectCoinText != null)
+        {
+            collectCoinText.text = $"+{collectedCoins}";
+            collectCoinText.gameObject.SetActive(true);
+        }
+        if (collectCoinImage != null)
+        {
+            collectCoinImage.gameObject.SetActive(true);
+        }
 
-        yield return new WaitForSeconds(0.5f);
+        yield return COLLECT_ANIMATION_DELAY;
 
-        collectCoinText.gameObject.SetActive(false);
-        collectCoinImage.gameObject.SetActive(false);
+        if (collectCoinText != null) collectCoinText.gameObject.SetActive(false);
+        if (collectCoinImage != null) collectCoinImage.gameObject.SetActive(false);
     }
     #endregion
 
@@ -441,5 +457,21 @@ public class CatData : MonoBehaviour
 
     // ======================================================================================================================
 
+    // 레이캐스트 필터링 함수 구현
+    public bool IsRaycastLocationValid(Vector2 screenPoint, Camera eventCamera)
+    {
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, screenPoint, eventCamera, out Vector2 localPoint)) 
+            return false;
+
+        Vector2 normalizedPoint = new Vector2(
+            //localPoint.x / rectHalfWidth,
+            (localPoint.x + 40f) / rectHalfWidth,
+            localPoint.y / rectHalfHeight
+        );
+
+        return (normalizedPoint.x * normalizedPoint.x + normalizedPoint.y * normalizedPoint.y) <= (CLICK_AREA_SCALE * CLICK_AREA_SCALE);
+    }
+
+    // ======================================================================================================================
 
 }

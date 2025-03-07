@@ -138,13 +138,13 @@ public class ContentManager : MonoBehaviour
             int nextStage = currentTrainingStage + 1;
             if (trainingLoader.trainingDictionary.TryGetValue(nextStage, out TrainingData trainingData))
             {
-                double requiredCoin = double.Parse(levelUpCoinText.text);
+                decimal requiredCoin = decimal.Parse(levelUpCoinText.text);
                 if (GameManager.Instance.Coin < requiredCoin)
                 {
                     NotificationManager.Instance.ShowNotification("재화가 부족합니다!");
                     return;
                 }
-                GameManager.Instance.Coin -= (int)requiredCoin;
+                GameManager.Instance.Coin -= requiredCoin;
 
                 Cat[] allCats = GameManager.Instance.AllCatData;
                 foreach (Cat cat in allCats)
@@ -175,13 +175,13 @@ public class ContentManager : MonoBehaviour
         TrainingDataLoader trainingLoader = FindObjectOfType<TrainingDataLoader>();
         if (trainingLoader != null && trainingLoader.trainingDictionary.TryGetValue(currentTrainingStage, out TrainingData trainingData))
         {
-            double requiredCoin = double.Parse(trainingCoinText.text);
+            decimal requiredCoin = decimal.Parse(trainingCoinText.text);
             if (GameManager.Instance.Coin < requiredCoin)
             {
                 NotificationManager.Instance.ShowNotification("재화가 부족합니다!");
                 return;
             }
-            GameManager.Instance.Coin -= (int)requiredCoin;
+            GameManager.Instance.Coin -= requiredCoin;
 
             isTrainingCompleted = true;
 

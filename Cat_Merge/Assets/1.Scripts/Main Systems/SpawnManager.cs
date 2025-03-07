@@ -3,25 +3,34 @@ using TMPro;
 using System.Collections;
 using UnityEngine.UI;
 
-// °í¾çÀÌ ½ºÆù Script
+// ê³ ì–‘ì´ ìŠ¤í° Script
 public class SpawnManager : MonoBehaviour
 {
     public static SpawnManager Instance { get; private set; }
 
-    [SerializeField] private Button spawnButton;                    // ½ºÆù ¹öÆ°
+    [SerializeField] private Button spawnButton;                    // ìŠ¤í° ë²„íŠ¼
 
-    [SerializeField] private GameObject catPrefab;      // °í¾çÀÌ UI ÇÁ¸®ÆÕ
-    [SerializeField] private Transform catUIParent;     // °í¾çÀÌ¸¦ ¹èÄ¡ÇÒ ºÎ¸ğ Transform (UI Panel µî)
-    private RectTransform panelRectTransform;           // PanelÀÇ Å©±â Á¤º¸ (¹èÄ¡ÇÒ ¹üÀ§)
-    private GameManager gameManager;                    // GameManager
+    [SerializeField] private GameObject catPrefab;                  // ê³ ì–‘ì´ UI í”„ë¦¬íŒ¹
+    [SerializeField] private Transform catUIParent;                 // ê³ ì–‘ì´ë¥¼ ë°°ì¹˜í•  ë¶€ëª¨ Transform (UI Panel ë“±)
+    private RectTransform panelRectTransform;                       // Panelì˜ í¬ê¸° ì •ë³´ (ë°°ì¹˜í•  ë²”ìœ„)
+    private GameManager gameManager;                                // GameManager
 
-    [SerializeField] private TextMeshProUGUI nowAndMaxFoodText;     // ½ºÆù¹öÆ° ¹Ø¿¡ ÇöÀç ¸ÔÀÌ °¹¼ö¿Í ÃÖ´ë ¸ÔÀÌ °¹¼ö
-    private int nowFood = 5;                                        // ÇöÀç ¸ÔÀÌ °¹¼ö
-    private bool isStoppedReduceCoroutine = false;                        // ÄÚ·çÆ¾ Á¾·á ÆÇº°
+    [SerializeField] private TextMeshProUGUI nowAndMaxFoodText;     // ìŠ¤í°ë²„íŠ¼ ë°‘ì— í˜„ì¬ ë¨¹ì´ ê°¯ìˆ˜ì™€ ìµœëŒ€ ë¨¹ì´ ê°¯ìˆ˜ (?/?)
+    private int nowFood = 5;                                        // í˜„ì¬ ë¨¹ì´ ê°¯ìˆ˜
+    public int NowFood
+    {
+        get => nowFood;
+        set
+        {
+            nowFood = value;
+            UpdateFoodText();
+        }
+    }
+    private bool isStoppedReduceCoroutine = false;                  // ì½”ë£¨í‹´ ì¢…ë£Œ íŒë³„
     private bool isStoppedAutoCoroutine = false;
 
-    [SerializeField] private Image foodFillAmountImg;
-    [SerializeField] public Image autoFillAmountImg;
+    [SerializeField] private Image foodFillAmountImg;               // ì†Œí™˜ ì´ë¯¸ì§€
+    [SerializeField] public Image autoFillAmountImg;                // ìë™ì†Œí™˜ ì´ë¯¸ì§€
 
     // ======================================================================================================================
 
@@ -43,29 +52,24 @@ public class SpawnManager : MonoBehaviour
         panelRectTransform = catUIParent.GetComponent<RectTransform>();
         if (panelRectTransform == null)
         {
-            Debug.LogError("catUIParent°¡ RectTransformÀ» °¡Áö°í ÀÖÁö ¾Ê½À´Ï´Ù.");
+            Debug.LogError("catUIParentê°€ RectTransformì„ ê°€ì§€ê³  ìˆì§€ ì•ŠìŠµë‹ˆë‹¤.");
             return;
         }
 
+        UpdateFoodText();
         StartCoroutine(CreateFoodTime());
         StartCoroutine(AutoCollectingTime());
     }
 
-    private void Update()
-    {
-        // ÇöÀç ¸ÔÀÌ °¹¼ö¿Í ÃÖ´ëÄ¡ °¹¼ö Ç¥½Ã(³ªÁß¿¡ ÇÔ¼ö·Î »©µÑ °Í)
-        nowAndMaxFoodText.text = $"({nowFood} / {ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value})";
-    }
-
     // ======================================================================================================================
 
-    // ÀüÅõ ½ÃÀÛ½Ã ¹öÆ° ¹× ±â´É ºñÈ°¼ºÈ­½ÃÅ°´Â ÇÔ¼ö
+    // ì „íˆ¬ ì‹œì‘ì‹œ ë²„íŠ¼ ë° ê¸°ëŠ¥ ë¹„í™œì„±í™”ì‹œí‚¤ëŠ” í•¨ìˆ˜
     public void StartBattleSpawnState()
     {
         spawnButton.interactable = false;
     }
 
-    // ÀüÅõ Á¾·á½Ã ¹öÆ° ¹× ±â´É ±âÁ¸ »óÅÂ·Î µÇµ¹·Á³õ´Â ÇÔ¼ö
+    // ì „íˆ¬ ì¢…ë£Œì‹œ ë²„íŠ¼ ë° ê¸°ëŠ¥ ê¸°ì¡´ ìƒíƒœë¡œ ë˜ëŒë ¤ë†“ëŠ” í•¨ìˆ˜
     public void EndBattleSpawnState()
     {
         spawnButton.interactable = true;
@@ -73,16 +77,16 @@ public class SpawnManager : MonoBehaviour
 
     // ======================================================================================================================
 
-    // °í¾çÀÌ ½ºÆù ¹öÆ° Å¬¸¯
+    // ê³ ì–‘ì´ ìŠ¤í° ë²„íŠ¼ í´ë¦­
     public void OnClickedSpawn()
     {
         if (gameManager.CanSpawnCat())
         {
-            // ¸ÔÀÌ°¡ 1°³ ÀÌ»óÀÌ°Å³ª ÃÖ´ëÄ¡ ÀÌÇÏÀÏ ¶§ ½ºÆù
-            if (nowFood > 0 && nowFood <= ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
+            // ë¨¹ì´ê°€ 1ê°œ ì´ìƒì´ê±°ë‚˜ ìµœëŒ€ì¹˜ ì´í•˜ì¼ ë•Œ ìŠ¤í°
+            if (NowFood > 0 && NowFood <= ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
             {
-                // ¸ÔÀÌ°¡ ÁÙ°í ÄÚ·çÆ¾ÀÌ Á¾·áµÇ¾îÀÖ´Ù¸é ´Ù½Ã ½ÃÀÛ(ÇöÀç ¸ÔÀÌ°¡ ÃÖ´ëÄ¡ÀÏ¶§ ÄÚ·çÆ¾ Á¾·áµÇ¾îÀÖÀ½)
-                nowFood--;
+                // ë¨¹ì´ê°€ ì¤„ê³  ì½”ë£¨í‹´ì´ ì¢…ë£Œë˜ì–´ìˆë‹¤ë©´ ë‹¤ì‹œ ì‹œì‘(í˜„ì¬ ë¨¹ì´ê°€ ìµœëŒ€ì¹˜ì¼ë•Œ ì½”ë£¨í‹´ ì¢…ë£Œë˜ì–´ìˆìŒ)
+                NowFood--;
                 if (isStoppedReduceCoroutine)
                 {
                     StartCoroutine(CreateFoodTime());
@@ -94,34 +98,46 @@ public class SpawnManager : MonoBehaviour
                     isStoppedAutoCoroutine = false;
                 }
 
-                // ¾÷±×·¹ÀÌµå ½Ã½ºÅÛ È®Àå¼ºÀ» À§ÇØ º¯°æÇÑ °í¾çÀÌ »ı¼º ÄÚµå
+                // ì—…ê·¸ë ˆì´ë“œ ì‹œìŠ¤í…œ í™•ì¥ì„±ì„ ìœ„í•´ ë³€ê²½í•œ ê³ ì–‘ì´ ìƒì„± ì½”ë“œ
                 Cat catData = GetCatDataForSpawn();
                 LoadAndDisplayCats(catData);
                 QuestManager.Instance.AddSpawnCount();
                 gameManager.AddCatCount();
 
-                // 1µî±Ş °í¾çÀÌÀÇ °æÇèÄ¡ Áõ°¡
-                FriendshipManager.Instance.AddExperience(1, 1);
-                FriendshipManager.Instance.UpdateFriendshipUI(1);
+
+                // 1ë“±ê¸‰ ê³ ì–‘ì´ì˜ ê²½í—˜ì¹˜ ì¦ê°€
+                //FriendshipManager.Instance.AddExperience(1, 1);
+               // FriendshipManager.Instance.UpdateFriendshipUI(1);
+
+                FriendshipManager.Instance.nowExp += 1;
+                FriendshipManager.Instance.expGauge.value += 0.05f;
+
+                // ìˆ˜ë™ ì†Œí™˜ í›„ ë¨¹ì´ ìƒì„± ì½”ë£¨í‹´ ì¬ì‹œì‘
+                if (isStoppedReduceCoroutine)
+                {
+                    StartCoroutine(CreateFoodTime());
+                    isStoppedReduceCoroutine = false;
+                }
+
             }
             else
             {
-                NotificationManager.Instance.ShowNotification("¸ÔÀÌ°¡ ºÎÁ·ÇÕ´Ï´Ù!!");
+                NotificationManager.Instance.ShowNotification("ë¨¹ì´ê°€ ë¶€ì¡±í•©ë‹ˆë‹¤!!");
             }
 
         }
         else
         {
-            NotificationManager.Instance.ShowNotification("°í¾çÀÌ º¸À¯¼ö°¡ ÃÖ´ëÀÔ´Ï´Ù!!");
+            NotificationManager.Instance.ShowNotification("ê³ ì–‘ì´ ë³´ìœ ìˆ˜ê°€ ìµœëŒ€ì…ë‹ˆë‹¤!!");
         }
     }
 
-    // ÀÚµ¿¸ÓÁö½Ã °í¾çÀÌ ½ºÆù ÇÔ¼ö
+    // ìë™ë¨¸ì§€ì‹œ ê³ ì–‘ì´ ìŠ¤í° í•¨ìˆ˜
     public void SpawnCat()
     {
         if (!gameManager.CanSpawnCat()) return;
 
-        // ¾÷±×·¹ÀÌµå ½Ã½ºÅÛ È®Àå¼ºÀ» À§ÇØ º¯°æÇÑ °í¾çÀÌ »ı¼º ÄÚµå
+        // ì—…ê·¸ë ˆì´ë“œ ì‹œìŠ¤í…œ í™•ì¥ì„±ì„ ìœ„í•´ ë³€ê²½í•œ ê³ ì–‘ì´ ìƒì„± ì½”ë“œ
         Cat catData = GetCatDataForSpawn();
         GameObject newCat = LoadAndDisplayCats(catData);
 
@@ -134,12 +150,24 @@ public class SpawnManager : MonoBehaviour
 
         gameManager.AddCatCount();
 
-        // 1µî±Ş °í¾çÀÌÀÇ °æÇèÄ¡ Áõ°¡
-        FriendshipManager.Instance.AddExperience(1, 1);
-        FriendshipManager.Instance.UpdateFriendshipUI(1);
+
+        // 1ë“±ê¸‰ ê³ ì–‘ì´ì˜ ê²½í—˜ì¹˜ ì¦ê°€
+        //FriendshipManager.Instance.AddExperience(1, 1);
+        //FriendshipManager.Instance.UpdateFriendshipUI(1);
+
+        FriendshipManager.Instance.nowExp += 1;
+        FriendshipManager.Instance.expGauge.value += 0.05f;
+
+        // ìë™ ì†Œí™˜ í›„ ë¨¹ì´ ìƒì„± ì½”ë£¨í‹´ ì¬ì‹œì‘
+        if (isStoppedReduceCoroutine)
+        {
+            StartCoroutine(CreateFoodTime());
+            isStoppedReduceCoroutine = false;
+        }
+
     }
 
-    // »óÁ¡¿¡¼­ ÀÌ¿ëµÉ µî±Ş¿¡ µû¸¥ ±¸¸Å ÈÄ ½ºÆù (12/26 »õ·Î ÀÛ¼º)
+    // ìƒì ì—ì„œ ì´ìš©ë  ë“±ê¸‰ì— ë”°ë¥¸ êµ¬ë§¤ í›„ ìŠ¤í° (12/26 ìƒˆë¡œ ì‘ì„±)
     public void SpawnGradeCat(int grade)
     {
         if (!gameManager.CanSpawnCat()) return;
@@ -156,40 +184,40 @@ public class SpawnManager : MonoBehaviour
 
         gameManager.AddCatCount();
 
-        // ÇØ´ç µî±Ş °í¾çÀÌÀÇ °æÇèÄ¡ Áõ°¡
+        // í•´ë‹¹ ë“±ê¸‰ ê³ ì–‘ì´ì˜ ê²½í—˜ì¹˜ ì¦ê°€
         FriendshipManager.Instance.AddExperience(grade + 1, 1);
         FriendshipManager.Instance.UpdateFriendshipUI(grade + 1);
     }
 
-    // °í¾çÀÌ ½ºÆù µ¥ÀÌÅÍ¸¦ ¼±ÅÃÇÏ´Â ÇÔ¼ö (¾÷±×·¹ÀÌµå ½Ã½ºÅÛ ´ëºñ)
+    // ê³ ì–‘ì´ ìŠ¤í° ë°ì´í„°ë¥¼ ì„ íƒí•˜ëŠ” í•¨ìˆ˜ (ì—…ê·¸ë ˆì´ë“œ ì‹œìŠ¤í…œ ëŒ€ë¹„)
     private Cat GetCatDataForSpawn()
     {
-        // ¿¹½Ã: ·£´ıÀ¸·Î °í¾çÀÌ µî±ŞÀ» ¼±ÅÃÇÏ°Å³ª »óÁ¡ ¾÷±×·¹ÀÌµå¸¦ °í·ÁÇÏ¿© ¼±ÅÃ
-        // return gameManager.GetRandomCatForSpawn();  // ÀÌ ºÎºĞÀº ³ªÁß¿¡ ¾÷±×·¹ÀÌµå ½Ã½ºÅÛ¿¡ ¸Â°Ô ¼öÁ¤
+        // ì˜ˆì‹œ: ëœë¤ìœ¼ë¡œ ê³ ì–‘ì´ ë“±ê¸‰ì„ ì„ íƒí•˜ê±°ë‚˜ ìƒì  ì—…ê·¸ë ˆì´ë“œë¥¼ ê³ ë ¤í•˜ì—¬ ì„ íƒ
+        // return gameManager.GetRandomCatForSpawn();  // ì´ ë¶€ë¶„ì€ ë‚˜ì¤‘ì— ì—…ê·¸ë ˆì´ë“œ ì‹œìŠ¤í…œì— ë§ê²Œ ìˆ˜ì •
         int catGrade = 0;
         DictionaryManager.Instance.UnlockCat(catGrade);
         return gameManager.AllCatData[catGrade];
     }
 
-    // Panel³» ·£´ı À§Ä¡¿¡ °í¾çÀÌ ¹èÄ¡ÇÏ´Â ÇÔ¼ö
+    // Panelë‚´ ëœë¤ ìœ„ì¹˜ì— ê³ ì–‘ì´ ë°°ì¹˜í•˜ëŠ” í•¨ìˆ˜
     private GameObject LoadAndDisplayCats(Cat catData)
     {
         GameObject catUIObject = Instantiate(catPrefab, catUIParent);
 
-        // CatData ¼³Á¤
+        // CatData ì„¤ì •
         CatData catUIData = catUIObject.GetComponent<CatData>();
         if (catUIData != null)
         {
             catUIData.SetCatData(catData);
 
-            // ÀÚµ¿ ÀÌµ¿ »óÅÂ¸¦ µ¿±âÈ­
+            // ìë™ ì´ë™ ìƒíƒœë¥¼ ë™ê¸°í™”
             if (gameManager != null)
             {
                 catUIData.SetAutoMoveState(AutoMoveManager.Instance.IsAutoMoveEnabled());
             }
         }
 
-        // ·£´ı À§Ä¡ ¼³Á¤
+        // ëœë¤ ìœ„ì¹˜ ì„¤ì •
         Vector2 randomPos = GetRandomPosition(panelRectTransform);
         RectTransform catRectTransform = catUIObject.GetComponent<RectTransform>();
         if (catRectTransform != null)
@@ -200,7 +228,7 @@ public class SpawnManager : MonoBehaviour
         return catUIObject;
     }
 
-    // Panel³» ·£´ı À§Ä¡ °è»êÇÏ´Â ÇÔ¼ö
+    // Panelë‚´ ëœë¤ ìœ„ì¹˜ ê³„ì‚°í•˜ëŠ” í•¨ìˆ˜
     Vector3 GetRandomPosition(RectTransform panelRectTransform)
     {
         float panelWidth = panelRectTransform.rect.width;
@@ -213,31 +241,30 @@ public class SpawnManager : MonoBehaviour
         return respawnPos;
     }
 
-
-
     // ======================================================================================================================
 
-    // ¸ÔÀÌ »ı¼º ½Ã°£
+    // ë¨¹ì´ ìƒì„± ì‹œê°„
     private IEnumerator CreateFoodTime()
     {
-        float elapsed = 0f; // °æ°ú ½Ã°£
-        // ÇöÀç ¸ÔÀÌ°¡ ÃÖ´ëÄ¡ ÀÌÇÏÀÏ ¶§ ÄÚ·çÆ¾ ½ÃÀÛ
-        while (nowFood < ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
+        float elapsed = 0f; // ê²½ê³¼ ì‹œê°„
+
+        // í˜„ì¬ ë¨¹ì´ê°€ ìµœëŒ€ì¹˜ ì´í•˜ì¼ ë•Œ ì½”ë£¨í‹´ ì‹œì‘
+        while (NowFood < ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
         {
-            foodFillAmountImg.fillAmount = 0f; // Á¤È®È÷ 1·Î ¼³Á¤
+            foodFillAmountImg.fillAmount = 0f; // ì •í™•íˆ 1ë¡œ ì„¤ì •
             while (elapsed < ItemFunctionManager.Instance.reduceProducingFoodTimeList[ItemMenuManager.Instance.ReduceProducingFoodTimeLv].value)
             {
-                elapsed += Time.deltaTime; // ¸Å ÇÁ·¹ÀÓ¸¶´Ù °æ°ú ½Ã°£ Áõ°¡
-                foodFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / ItemFunctionManager.Instance.reduceProducingFoodTimeList[ItemMenuManager.Instance.ReduceProducingFoodTimeLv].value); // 0 ~ 1 »çÀÌ·Î ºñÀ² °è»ê
-                yield return null; // ´ÙÀ½ ÇÁ·¹ÀÓ±îÁö ´ë±â
+                elapsed += Time.deltaTime; // ë§¤ í”„ë ˆì„ë§ˆë‹¤ ê²½ê³¼ ì‹œê°„ ì¦ê°€
+                foodFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / ItemFunctionManager.Instance.reduceProducingFoodTimeList[ItemMenuManager.Instance.ReduceProducingFoodTimeLv].value); // 0 ~ 1 ì‚¬ì´ë¡œ ë¹„ìœ¨ ê³„ì‚°
+                yield return null; // ë‹¤ìŒ í”„ë ˆì„ê¹Œì§€ ëŒ€ê¸°
             }
-            nowFood++;
-            foodFillAmountImg.fillAmount = 1f; // Á¤È®È÷ 1·Î ¼³Á¤
+            NowFood++;
+            foodFillAmountImg.fillAmount = 1f; // ì •í™•íˆ 1ë¡œ ì„¤ì •
             elapsed = 0f;
         }
 
-        // ÇöÀç ¸ÔÀÌ°¹¼ö°¡ ÃÖ´ëÄ¡ÀÌ¸é ÄÚ·çÆ¾À» Á¾·á½ÃÅ²´Ù.
-        if (nowFood == ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
+        // í˜„ì¬ ë¨¹ì´ê°¯ìˆ˜ê°€ ìµœëŒ€ì¹˜ì´ë©´ ì½”ë£¨í‹´ì„ ì¢…ë£Œì‹œí‚¨ë‹¤.
+        if (NowFood == ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
         {
             StopCoroutine(CreateFoodTime());
             isStoppedReduceCoroutine = true;
@@ -248,22 +275,22 @@ public class SpawnManager : MonoBehaviour
     {
         float elapsed = 0f;
 
-        // ÀüÅõ ÁßÀÎÁö È®ÀÎÇÏ¸ç ÁøÇà
+        // ì „íˆ¬ ì¤‘ì¸ì§€ í™•ì¸í•˜ë©° ì§„í–‰
         while (true)
         {
-            // ÀüÅõ ÁßÀÏ ¶§ ´ë±â
+            // ì „íˆ¬ ì¤‘ì¼ ë•Œ ëŒ€ê¸°
             if (BattleManager.Instance.IsBattleActive)
             {
                 yield return null;
                 continue;
             }
 
-            // ¸ÔÀÌ°¡ 1 ÀÌ»óÀÏ°æ¿ì ÀÚµ¿ ¼öÁı ½ÃÀÛ (ÈåÀ¸À½..)
-            if (nowFood >= 1)
+            // ë¨¹ì´ê°€ 1 ì´ìƒì¼ê²½ìš° ìë™ ìˆ˜ì§‘ ì‹œì‘ (íìœ¼ìŒ..)
+            if (NowFood >= 1)
             {
-                autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value);
+                autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / (float)ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value);
 
-                // ¼öÁı ½Ã°£ ¿Ï·áµÉ¶§±îÁö ´ë±â
+                // ìˆ˜ì§‘ ì‹œê°„ ì™„ë£Œë ë•Œê¹Œì§€ ëŒ€ê¸°
                 while (elapsed < ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value)
                 {
                     if (BattleManager.Instance.IsBattleActive)
@@ -273,21 +300,32 @@ public class SpawnManager : MonoBehaviour
                     }
 
                     elapsed += Time.deltaTime;
-                    autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value);
+                    autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / (float)ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value);
                     yield return null;
                 }
 
-                // ¿Ï·áµÇ¸é ¸ÔÀÌ ÁÙÀÌ°í °í¾çÀÌ »ı¼º
+                // ì™„ë£Œë˜ë©´ ë¨¹ì´ ì¤„ì´ê³  ê³ ì–‘ì´ ìƒì„±
                 if (!BattleManager.Instance.IsBattleActive && elapsed >= ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value)
                 {
-                    nowFood--;
-                    SpawnCat();
-                    elapsed = 0f; // ÁøÇà »óÅÂ ÃÊ±âÈ­
+                    if (gameManager.CanSpawnCat())
+                    {
+                        NowFood--;
+                        SpawnCat();
+
+                        // ìë™ ìˆ˜ì§‘ í›„ ë¨¹ì´ ìƒì„± ì½”ë£¨í‹´ ì¬ì‹œì‘
+                        if (isStoppedReduceCoroutine)
+                        {
+                            StartCoroutine(CreateFoodTime());
+                            isStoppedReduceCoroutine = false;
+                        }
+                    }
+                    elapsed = 0f; // ì§„í–‰ ìƒíƒœ ì´ˆê¸°í™”
+
                 }
             }
 
-            // ¸ÔÀÌ°¡ 0°³¸é Á¾·á
-            if (nowFood == 0)
+            // ë¨¹ì´ê°€ 0ê°œë©´ ì¢…ë£Œ
+            if (NowFood == 0)
             {
                 isStoppedAutoCoroutine = true;
                 yield break;
@@ -295,29 +333,43 @@ public class SpawnManager : MonoBehaviour
 
             yield return null;
         }
-
-        //float elapsed = 0f;
-        //// ÇöÀç ¸ÔÀÌ°¡ 1°³ ÀÌ»óÀÏ¶§¸¸ ÄÚ·çÆ¾ ÁøÇà
-        //while(nowFood >= 1)
-        //{
-        //    autoFillAmountImg.fillAmount = 0f;
-        //    while (elapsed < ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value)
-        //    {
-        //        elapsed += Time.deltaTime;
-        //        autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value); // 0 ~ 1 »çÀÌ·Î ºñÀ² °è»ê
-        //        yield return null; // ´ÙÀ½ ÇÁ·¹ÀÓ±îÁö ´ë±â
-        //    }
-        //    nowFood--;
-        //    SpawnCat();
-        //    elapsed = 0f;
-        //}
-
-        //if(nowFood == 0)
-        //{
-        //    StopCoroutine(AutoCollectingTime());
-        //    isStoppedAutoCoroutine = true;
-        //}
     }
 
+    // ìµœëŒ€ ë¨¹ì´ ìˆ˜ëŸ‰ì´ ì¦ê°€í–ˆì„ ë•Œ í˜¸ì¶œë˜ëŠ” í•¨ìˆ˜
+    public void OnMaxFoodIncreased()
+    {
+        // ìµœëŒ€ ë ˆë²¨ì— ë„ë‹¬í–ˆëŠ”ì§€ í™•ì¸
+        if (ItemMenuManager.Instance.MaxFoodsLv >= ItemFunctionManager.Instance.maxFoodsList.Count)
+        {
+            return;
+        }
+
+        // í˜„ì¬ ë¨¹ì´ ìˆ˜ê°€ ìµœëŒ€ì¹˜ë³´ë‹¤ ì‘ìœ¼ë©´ ë¨¹ì´ ìƒì„± ì½”ë£¨í‹´ ì‹œì‘
+        int currentMaxFood = ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value;
+        if (NowFood < currentMaxFood)
+        {
+            if (isStoppedReduceCoroutine)
+            {
+                StartCoroutine(CreateFoodTime());
+                isStoppedReduceCoroutine = false;
+            }
+        }
+    }
+
+    public void UpdateFoodText()
+    {
+        if (ItemMenuManager.Instance.MaxFoodsLv >= ItemFunctionManager.Instance.maxFoodsList.Count)
+        {
+            // ìµœëŒ€ ë ˆë²¨ì¼ ê²½ìš° ë§ˆì§€ë§‰ ê°’ ì‚¬ìš©
+            int lastMaxFood = ItemFunctionManager.Instance.maxFoodsList[ItemFunctionManager.Instance.maxFoodsList.Count - 1].value;
+            nowAndMaxFoodText.text = $"({nowFood} / {lastMaxFood})";
+        }
+        else
+        {
+            // í˜„ì¬ ë ˆë²¨ì˜ ê°’ ì‚¬ìš©
+            int currentMaxFood = ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value;
+            nowAndMaxFoodText.text = $"({nowFood} / {currentMaxFood})";
+        }
+    }
 
 }

@@ -5,11 +5,19 @@ using UnityEngine.EventSystems;
 // 고양이 드래그 앤 드랍 Script
 public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
-    public Cat catData;                             // 드래그하는 고양이의 데이터
-    public RectTransform rectTransform;             // RectTransform 참조
-    private Canvas parentCanvas;                    // 부모 Canvas 참조
+    public Cat catData;                                 // 드래그하는 고양이의 데이터
+    public RectTransform rectTransform;                 // RectTransform 참조
+    private Canvas parentCanvas;                        // 부모 Canvas 참조
+    private RectTransform parentRect;                   // 캐싱용 부모 RectTransform
+    private Vector2 panelBoundsMin;                     // 패널 경계 최소값 캐싱
+    private Vector2 panelBoundsMax;                     // 패널 경계 최대값 캐싱
+    private Vector2 dragOffset;                         // 드래그 시작 위치 오프셋
 
-    public bool isDragging { get; private set; }    // 드래그 상태 확인 플래그
+    public bool isDragging { get; private set; }        // 드래그 상태 확인 플래그
+
+    private const float EDGE_THRESHOLD = 10f;           // 가장자리 감지 임계값
+    private const float EDGE_PUSH = 30f;                // 가장자리에서 밀어내는 거리
+    private const float MERGE_DETECTION_SCALE = 0.1f;   // 합성 감지 범위 스케일
 
     // ======================================================================================================================
 
@@ -17,6 +25,12 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
     {
         rectTransform = GetComponent<RectTransform>();
         parentCanvas = GetComponentInParent<Canvas>();
+        parentRect = rectTransform.parent.GetComponent<RectTransform>();
+
+        // 패널 경계 미리 계산
+        Vector2 panelSize = parentRect.rect.size * 0.5f;
+        panelBoundsMin = -panelSize;
+        panelBoundsMax = panelSize;
     }
 
     // ======================================================================================================================
@@ -25,6 +39,14 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
     public void OnBeginDrag(PointerEventData eventData)
     {
         isDragging = true;
+
+        // 드래그 시작 위치 오프셋 계산
+        Vector2 localPointerPosition;
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            parentRect, eventData.position, parentCanvas.worldCamera, out localPointerPosition))
+        {
+            dragOffset = rectTransform.localPosition - (Vector3)localPointerPosition;
+        }
 
         // 드래그된 고양이를 mergingCats에서 제거
         AutoMergeManager autoMerge = FindObjectOfType<AutoMergeManager>();
@@ -37,57 +59,47 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
     // 드래그 진행중 함수
     public void OnDrag(PointerEventData eventData)
     {
-        // 화면 좌표를 UI 좌표로 변환
         Vector2 localPointerPosition;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            rectTransform.parent.GetComponent<RectTransform>(),
-            eventData.position,
-            parentCanvas.worldCamera,
-            out localPointerPosition
-        );
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            parentRect, eventData.position, parentCanvas.worldCamera, out localPointerPosition))
+        {
+            return;
+        }
 
-        // GamePanel RectTransform 가져오기
-        RectTransform parentRect = rectTransform.parent.GetComponent<RectTransform>();
-        Rect panelRect = new Rect(
-            -parentRect.rect.width / 2,
-            -parentRect.rect.height / 2,
-            parentRect.rect.width,
-            parentRect.rect.height
-        );
+        // 드래그 오프셋 적용 및 위치 제한
+        Vector2 targetPosition = localPointerPosition + dragOffset;
+        targetPosition.x = Mathf.Clamp(targetPosition.x, panelBoundsMin.x, panelBoundsMax.x);
+        targetPosition.y = Mathf.Clamp(targetPosition.y, panelBoundsMin.y, panelBoundsMax.y);
 
-        // 드래그 위치를 패널 범위 내로 제한
-        localPointerPosition.x = Mathf.Clamp(localPointerPosition.x, panelRect.xMin, panelRect.xMax);
-        localPointerPosition.y = Mathf.Clamp(localPointerPosition.y, panelRect.yMin, panelRect.yMax);
+        rectTransform.localPosition = targetPosition;
 
-        // 드래그 위치 업데이트 (UI의 localPosition 사용)
-        rectTransform.localPosition = localPointerPosition;
-
-        // 부모의 자식 객체들 정렬
-        UpdateSiblingIndexBasedOnY();
+        // Y축 기준 정렬 (60fps 기준 3프레임마다 실행)
+        if (Time.frameCount % 3 == 0)
+        {
+            UpdateSiblingIndexBasedOnY();
+        }
     }
 
     // Y축 값을 기준으로 드래그 객체의 정렬을 업데이트하는 함수
     private void UpdateSiblingIndexBasedOnY()
     {
-        Transform parent = rectTransform.parent;
+        int childCount = parentRect.childCount;
+        float currentY = rectTransform.localPosition.y;
         int newIndex = 0;
 
-        for (int i = 0; i < parent.childCount; i++)
+        for (int i = 0; i < childCount; i++)
         {
-            RectTransform sibling = parent.GetChild(i).GetComponent<RectTransform>();
-
-            if (sibling != null && sibling != rectTransform)
+            RectTransform sibling = parentRect.GetChild(i).GetComponent<RectTransform>();
+            if (sibling != null && sibling != rectTransform && currentY < sibling.localPosition.y)
             {
-                // 드래그 객체의 Y값이 현재 sibling의 Y값보다 작으면 새로운 인덱스를 증가
-                if (rectTransform.localPosition.y < sibling.localPosition.y)
-                {
-                    newIndex = i + 1;
-                }
+                newIndex = i + 1;
             }
         }
 
-        // 새로운 인덱스 설정
-        rectTransform.SetSiblingIndex(newIndex);
+        if (rectTransform.GetSiblingIndex() != newIndex)
+        {
+            rectTransform.SetSiblingIndex(newIndex);
+        }
     }
 
     // 드래그 종료 함수
@@ -101,13 +113,14 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
         }
         else
         {
+            // 가장자리 드랍 체크는 머지 상태와 관계없이 항상 실행
+            CheckEdgeDrop();
+
             // 머지 상태가 OFF일 경우 머지 X
             if (!MergeManager.Instance.IsMergeEnabled())
             {
                 return;
             }
-
-            CheckEdgeDrop();
 
             DragAndDropManager nearbyCat = FindNearbyCat();
             if (nearbyCat != null && nearbyCat != this)
@@ -150,33 +163,20 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
     // 가장자리 드랍여부 확인 함수
     private void CheckEdgeDrop()
     {
-        // GamePanel RectTransform 가져오기
-        RectTransform parentRect = rectTransform.parent.GetComponent<RectTransform>();
-        Rect panelRect = new Rect(
-            -parentRect.rect.width / 2,
-            -parentRect.rect.height / 2,
-            parentRect.rect.width,
-            parentRect.rect.height
-        );
-
         Vector2 currentPos = rectTransform.localPosition;
+        Vector2 targetPos = currentPos;
+        bool needsAdjustment = false;
 
-        // 가장자리에 맞닿아 있는지 확인
-        bool isNearLeft = Mathf.Abs(currentPos.x - panelRect.xMin) < 10;
-        bool isNearRight = Mathf.Abs(currentPos.x - panelRect.xMax) < 10;
-        bool isNearTop = Mathf.Abs(currentPos.y - panelRect.yMax) < 10;
-        bool isNearBottom = Mathf.Abs(currentPos.y - panelRect.yMin) < 10;
+        // 가장자리 체크 및 보정
+        if (Mathf.Abs(currentPos.x - panelBoundsMin.x) < EDGE_THRESHOLD) { targetPos.x += EDGE_PUSH; needsAdjustment = true; }
+        if (Mathf.Abs(currentPos.x - panelBoundsMax.x) < EDGE_THRESHOLD) { targetPos.x -= EDGE_PUSH; needsAdjustment = true; }
+        if (Mathf.Abs(currentPos.y - panelBoundsMax.y) < EDGE_THRESHOLD) { targetPos.y -= EDGE_PUSH; needsAdjustment = true; }
+        if (Mathf.Abs(currentPos.y - panelBoundsMin.y) < EDGE_THRESHOLD) { targetPos.y += EDGE_PUSH; needsAdjustment = true; }
 
-        Vector3 targetPos = currentPos;
-
-        // 가장자리에 가까우면 중심 방향으로 이동
-        if (isNearLeft) targetPos.x += 30;
-        if (isNearRight) targetPos.x -= 30;
-        if (isNearTop) targetPos.y -= 30;
-        if (isNearBottom) targetPos.y += 30;
-
-        // 위치 보정 애니메이션 실행
-        StartCoroutine(SmoothMoveToPosition(targetPos));
+        if (needsAdjustment)
+        {
+            StartCoroutine(SmoothMoveToPosition(targetPos));
+        }
     }
 
     // 가장자리에서 안쪽으로 부드럽게 이동하는 애니메이션 코루틴
@@ -211,15 +211,13 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
         if (currentBossHitBox.IsInHitbox(this.rectTransform.anchoredPosition))
         {
             //Debug.Log("히트박스 내부 감지");
-
-            catData.MoveOppositeBoss(currentBossHitBox.Position, currentBossHitBox.Size);
+            catData.MoveOppositeBoss();
         }
         // 히트박스 외부라면
         else if (!currentBossHitBox.IsInHitbox(this.rectTransform.anchoredPosition))
         {
             //Debug.Log("히트박스 외부 감지");
-
-            catData.MoveTowardBossBoundary(currentBossHitBox.Position, currentBossHitBox.Size);
+            catData.MoveTowardBossBoundary();
         }
     }
 
@@ -249,7 +247,6 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
         }
 
         // 끌려온 후 합성 처리
-        //Cat mergedCat = FindObjectOfType<MergeManager>().MergeCats(this.catData, nearbyCat.catData);
         Cat mergedCat = MergeManager.Instance.MergeCats(this.catData, nearbyCat.catData);
         if (mergedCat != null)
         {
@@ -267,26 +264,21 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
     // 범위 내에서 가장 가까운 CatPrefab을 찾는 함수
     private DragAndDropManager FindNearbyCat()
     {
-        RectTransform parentRect = rectTransform.parent.GetComponent<RectTransform>();
-        Rect thisRect = GetWorldRect(rectTransform);
-
         // 현재 Rect 크기를 줄여서 감지 범위 조정 (감지 범위 조정 비율)
-        thisRect = ShrinkRect(thisRect, 0.2f);
+        Rect thisRect = GetWorldRect(rectTransform);
+        thisRect = ShrinkRect(thisRect, MERGE_DETECTION_SCALE);
 
-        foreach (Transform child in parentRect)
+        int childCount = parentRect.childCount;
+        for (int i = 0; i < childCount; i++)
         {
-            if (child == this.transform) continue;
+            Transform child = parentRect.GetChild(i);
+            if (child == transform) continue;
 
+            // 충돌 확인
             DragAndDropManager otherCat = child.GetComponent<DragAndDropManager>();
-            if (otherCat != null)
+            if (otherCat != null && thisRect.Overlaps(GetWorldRect(otherCat.rectTransform)))
             {
-                Rect otherRect = GetWorldRect(otherCat.rectTransform);
-
-                // Rect 간 충돌 확인
-                if (thisRect.Overlaps(otherRect))
-                {
-                    return otherCat;
-                }
+                return otherCat;
             }
         }
         return null;
@@ -303,8 +295,8 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
     // Rect 크기를 줄이는 함수 (고양이 드랍시 합성 범위)
     private Rect ShrinkRect(Rect rect, float scale)
     {
-        float widthReduction = rect.width * (1 - scale) / 2;
-        float heightReduction = rect.height * (1 - scale) / 2;
+        float widthReduction = rect.width * (1 - scale) * 0.5f;
+        float heightReduction = rect.height * (1 - scale) * 0.5f;
 
         return new Rect(
             rect.x + widthReduction,

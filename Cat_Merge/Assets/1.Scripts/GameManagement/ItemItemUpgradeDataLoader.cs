@@ -9,7 +9,8 @@ public class ItemItemUpgradeDataLoader : MonoBehaviour
     public static ItemItemUpgradeDataLoader Instance { get; private set; }
 
     // 고양이 데이터를 관리할 Dictionary
-    public Dictionary<int, List<(string title, int type, int step, float value, float fee)>> dataByNumber = new Dictionary<int, List<(string title, int type, int step, float value, float fee)>>();
+    public Dictionary<int, List<(string title, int type, int step, int value, decimal fee)>> dataByNumber 
+        = new Dictionary<int, List<(string title, int type, int step, int value, decimal fee)>>();
 
     private void Awake()
     {
@@ -50,18 +51,18 @@ public class ItemItemUpgradeDataLoader : MonoBehaviour
             string title = values[0];
             int type = int.Parse(values[1]);
             int step = int.Parse(values[2]);
-            float value = float.Parse(values[3]);
-            float fee = float.Parse(values[4]);
+            int value = int.Parse(values[3]);
+            decimal fee = decimal.Parse(values[4]);
 
             // 번호별로 데이터 추가
             if (!dataByNumber.ContainsKey(type))
             {
-                dataByNumber[type] = new List<(string title, int type, int step, float value, float fee)>();
+                dataByNumber[type] = new List<(string title, int type, int step, int value, decimal fee)>();
             }
             dataByNumber[type].Add((title, type, step, value, fee));
         }
 
-        // 데이터 확인 (디버깅용)
+        //// 데이터 확인 (디버깅용)
         //foreach (var entry in dataByNumber)
         //{
         //    Debug.Log($"Number: {entry.Key}");
@@ -73,7 +74,7 @@ public class ItemItemUpgradeDataLoader : MonoBehaviour
     }
 
     // 특정 번호에 해당하는 데이터 반환
-    public List<(string title, int type, int step, float value, float fee)> GetDataByNumber(int typeNum)
+    public List<(string title, int type, int step, int value, decimal fee)> GetDataByNumber(int typeNum)
     {
         if (dataByNumber.ContainsKey(typeNum))
         {

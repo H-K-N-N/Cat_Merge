@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7601376621847509447}
   - component: {fileID: 4320008604458038825}
   m_Layer: 5
-  m_Name: "\uACE0\uC591\uC774 \uCD5C\uB300\uCE58 \uC99D\uAC00(Text)"
+  m_Name: TItle Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Increased cat maximum
+  m_text: Title
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c7f9e1d048d0987499eff167c931517f, type: 2}
   m_sharedMaterial: {fileID: -8525234839207697280, guid: c7f9e1d048d0987499eff167c931517f, type: 2}
@@ -149,7 +149,7 @@ GameObject:
   - component: {fileID: 8479324808523765653}
   - component: {fileID: 5621624538296397760}
   m_Layer: 5
-  m_Name: IncreaseMaximumButton
+  m_Name: Paid Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -291,10 +291,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 4524042274610683932}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 100}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3692604724262758203
 CanvasRenderer:
@@ -368,7 +368,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -55, y: 0}
+  m_AnchoredPosition: {x: -45, y: 0}
   m_SizeDelta: {x: 80, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &714101073815062584
@@ -614,7 +614,7 @@ GameObject:
   - component: {fileID: 7170351812544373592}
   - component: {fileID: 6596196858308126953}
   m_Layer: 5
-  m_Name: IncreaseMaximumLv(Text)
+  m_Name: lv Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -634,10 +634,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 766442890740725183}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: -35}
-  m_SizeDelta: {x: 100, y: 50}
+  m_SizeDelta: {x: -10, y: -60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7170351812544373592
 CanvasRenderer:
@@ -667,7 +667,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Lv.1
+  m_text: Lv.?
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c7f9e1d048d0987499eff167c931517f, type: 2}
   m_sharedMaterial: {fileID: -8525234839207697280, guid: c7f9e1d048d0987499eff167c931517f, type: 2}
@@ -750,7 +750,7 @@ GameObject:
   - component: {fileID: 5730461715265907078}
   - component: {fileID: 2220898706944302977}
   m_Layer: 5
-  m_Name: IncreaseMaximumFee(Text)
+  m_Name: Fee Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -772,8 +772,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 30, y: 0}
-  m_SizeDelta: {x: 110, y: 60}
+  m_AnchoredPosition: {x: 28, y: 0}
+  m_SizeDelta: {x: 95, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5730461715265907078
 CanvasRenderer:
@@ -961,7 +961,7 @@ GameObject:
   - component: {fileID: 9183365552782263252}
   - component: {fileID: 1940756298929892631}
   m_Layer: 5
-  m_Name: "\uCD5C\uB300 \uAC1C\uCCB4 \uC218\uAC00 \uC99D\uAC00\uD55C\uB2E4(Text)"
+  m_Name: Explain Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1014,7 +1014,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: The maximum number of objects increases.
+  m_text: Explain
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c7f9e1d048d0987499eff167c931517f, type: 2}
   m_sharedMaterial: {fileID: -8525234839207697280, guid: c7f9e1d048d0987499eff167c931517f, type: 2}
@@ -1041,7 +1041,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 25.6
+  m_fontSize: 28
   m_fontSizeBase: 28
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1097,7 +1097,7 @@ GameObject:
   - component: {fileID: 1118452496774327425}
   - component: {fileID: 2342418216039579580}
   m_Layer: 5
-  m_Name: 1->2(Text)
+  m_Name: 1->2 Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

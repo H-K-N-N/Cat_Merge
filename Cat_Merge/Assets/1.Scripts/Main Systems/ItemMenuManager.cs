@@ -133,29 +133,29 @@ public class ItemMenuManager : MonoBehaviour
             switch (i)
             {
                 case 0:
-                    itemMenuesLvText[i].text = $"Lv.{ ItemFunctionManager.Instance.maxCatsList[0].step}";
-                    itemMenuesValueText[i].text = $"{ ItemFunctionManager.Instance.maxCatsList[0].value}->{ ItemFunctionManager.Instance.maxCatsList[1].value}"; // 1->2 2->3 3->4
-                    itemMenuesFeeText[i].text = $"{ ItemFunctionManager.Instance.maxCatsList[0].fee}";
+                    itemMenuesLvText[i].text = $"Lv.{ItemFunctionManager.Instance.maxCatsList[0].step}";
+                    itemMenuesValueText[i].text = $"{ItemFunctionManager.Instance.maxCatsList[0].value} → {ItemFunctionManager.Instance.maxCatsList[1].value}"; // 8 → 9
+                    itemMenuesFeeText[i].text = $"{ItemFunctionManager.Instance.maxCatsList[0].fee}";
                     break;
                 case 1:
-                    itemMenuesLvText[i].text = $"Lv.{ ItemFunctionManager.Instance.reduceCollectingTimeList[0].step}";
-                    itemMenuesValueText[i].text = $"{ ItemFunctionManager.Instance.reduceCollectingTimeList[0].value}->{ ItemFunctionManager.Instance.reduceCollectingTimeList[1].value}"; // 1->2 2->3 3->4
-                    itemMenuesFeeText[i].text = $"{ ItemFunctionManager.Instance.reduceCollectingTimeList[0].fee}";
+                    itemMenuesLvText[i].text = $"Lv.{ItemFunctionManager.Instance.reduceCollectingTimeList[0].step}";
+                    itemMenuesValueText[i].text = $"{ItemFunctionManager.Instance.reduceCollectingTimeList[0].value} → {ItemFunctionManager.Instance.reduceCollectingTimeList[1].value}"; // 3.0 → 2.9
+                    itemMenuesFeeText[i].text = $"{ItemFunctionManager.Instance.reduceCollectingTimeList[0].fee}";
                     break;
                 case 2:
-                    itemMenuesLvText[i].text = $"Lv.{ ItemFunctionManager.Instance.maxFoodsList[0].step}";
-                    itemMenuesValueText[i].text = $"{ ItemFunctionManager.Instance.maxFoodsList[0].value}->{ ItemFunctionManager.Instance.maxFoodsList[1].value}"; // 1->2 2->3 3->4
-                    itemMenuesFeeText[i].text = $"{ ItemFunctionManager.Instance.maxFoodsList[0].fee}";
+                    itemMenuesLvText[i].text = $"Lv.{ItemFunctionManager.Instance.maxFoodsList[0].step}";
+                    itemMenuesValueText[i].text = $"{ItemFunctionManager.Instance.maxFoodsList[0].value} → {ItemFunctionManager.Instance.maxFoodsList[1].value}"; // 5 → 6
+                    itemMenuesFeeText[i].text = $"{ItemFunctionManager.Instance.maxFoodsList[0].fee}";
                     break;
                 case 3:
-                    itemMenuesLvText[i].text = $"Lv.{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[0].step}";
-                    itemMenuesValueText[i].text = $"{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[0].value}->{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[1].value}"; // 1->2 2->3 3->4
-                    itemMenuesFeeText[i].text = $"{ ItemFunctionManager.Instance.reduceProducingFoodTimeList[0].fee}";
+                    itemMenuesLvText[i].text = $"Lv.{ItemFunctionManager.Instance.reduceProducingFoodTimeList[0].step}";
+                    itemMenuesValueText[i].text = $"{ItemFunctionManager.Instance.reduceProducingFoodTimeList[0].value} → {ItemFunctionManager.Instance.reduceProducingFoodTimeList[1].value}"; // 7.0 → 6.8
+                    itemMenuesFeeText[i].text = $"{ItemFunctionManager.Instance.reduceProducingFoodTimeList[0].fee}";
                     break;
                 case 4:
-                    itemMenuesLvText[i].text = $"Lv.{ ItemFunctionManager.Instance.autoCollectingList[0].step}";
-                    itemMenuesValueText[i].text = $"{ ItemFunctionManager.Instance.autoCollectingList[0].value}sec"; // 1->2 2->3 3->4
-                    itemMenuesFeeText[i].text = $"{ ItemFunctionManager.Instance.autoCollectingList[0].fee}";
+                    itemMenuesLvText[i].text = $"Lv.{ItemFunctionManager.Instance.autoCollectingList[0].step}";
+                    itemMenuesValueText[i].text = $"{ItemFunctionManager.Instance.autoCollectingList[0].value} → {ItemFunctionManager.Instance.autoCollectingList[1].value}"; // 30 → 29
+                    itemMenuesFeeText[i].text = $"{ItemFunctionManager.Instance.autoCollectingList[0].fee}";
                     break;
                 default:
                     break;
@@ -250,7 +250,7 @@ public class ItemMenuManager : MonoBehaviour
         {
             increaseCatMaximumButton.interactable = false;
             disabledBg[0].SetActive(true);
-            itemMenuesFeeText[0].text = "구매 완료";
+            itemMenuesFeeText[0].text = "구매완료";
         }
         else
         {
@@ -270,17 +270,17 @@ public class ItemMenuManager : MonoBehaviour
             {
                 increaseCatMaximumButton.interactable = false;
                 disabledBg[0].SetActive(true);
-                itemMenuesFeeText[0].text = "구매 완료";
+                itemMenuesFeeText[0].text = "구매완료";
                 itemMenuesValueText[0].text = $"{ItemFunctionManager.Instance.maxCatsList[maxCatsLv].value}";
             }
             else
             {
-                itemMenuesValueText[0].text = $"{ItemFunctionManager.Instance.maxCatsList[maxCatsLv].value} -> {ItemFunctionManager.Instance.maxCatsList[maxCatsLv + 1].value}";
+                itemMenuesValueText[0].text = $"{ItemFunctionManager.Instance.maxCatsList[maxCatsLv].value} → {ItemFunctionManager.Instance.maxCatsList[maxCatsLv + 1].value}";
                 itemMenuesFeeText[0].text = $"{ItemFunctionManager.Instance.maxCatsList[maxCatsLv + 1].fee:N0}";
             }
         }
 
-        GameManager.Instance.MaxCats = ItemFunctionManager.Instance.maxCatsList[maxCatsLv].value;
+        GameManager.Instance.MaxCats = (int)ItemFunctionManager.Instance.maxCatsList[maxCatsLv].value;
     }
 
     // 재화 획득 시간 감소
@@ -293,7 +293,7 @@ public class ItemMenuManager : MonoBehaviour
         {
             reduceCollectingTimeButton.interactable = false;
             disabledBg[1].SetActive(true);
-            itemMenuesFeeText[1].text = "구매 완료";
+            itemMenuesFeeText[1].text = "구매완료";
         }
         else
         {
@@ -313,12 +313,12 @@ public class ItemMenuManager : MonoBehaviour
             {
                 reduceCollectingTimeButton.interactable = false;
                 disabledBg[1].SetActive(true);
-                itemMenuesFeeText[1].text = "구매 완료";
+                itemMenuesFeeText[1].text = "구매완료";
                 itemMenuesValueText[1].text = $"{ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv].value}";
             }
             else
             {
-                itemMenuesValueText[1].text = $"{ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv].value} -> {ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv + 1].value}";
+                itemMenuesValueText[1].text = $"{ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv].value} → {ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv + 1].value}";
                 itemMenuesFeeText[1].text = $"{ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv + 1].fee:N0}";
             }
         }
@@ -334,7 +334,7 @@ public class ItemMenuManager : MonoBehaviour
         {
             increaseFoodMaximumButton.interactable = false;
             disabledBg[2].SetActive(true);
-            itemMenuesFeeText[2].text = "구매 완료";
+            itemMenuesFeeText[2].text = "구매완료";
         }
         else
         {
@@ -354,12 +354,12 @@ public class ItemMenuManager : MonoBehaviour
             {
                 increaseFoodMaximumButton.interactable = false;
                 disabledBg[2].SetActive(true);
-                itemMenuesFeeText[2].text = "구매 완료";
+                itemMenuesFeeText[2].text = "구매완료";
                 itemMenuesValueText[2].text = $"{ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv].value}";
             }
             else
             {
-                itemMenuesValueText[2].text = $"{ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv].value} -> {ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv + 1].value}";
+                itemMenuesValueText[2].text = $"{ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv].value} → {ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv + 1].value}";
                 itemMenuesFeeText[2].text = $"{ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv + 1].fee:N0}";
             }
         }
@@ -378,7 +378,7 @@ public class ItemMenuManager : MonoBehaviour
         {
             reduceProducingFoodTimeButton.interactable = false;
             disabledBg[3].SetActive(true);
-            itemMenuesFeeText[3].text = "구매 완료";
+            itemMenuesFeeText[3].text = "구매완료";
         }
         else
         {
@@ -398,12 +398,12 @@ public class ItemMenuManager : MonoBehaviour
             {
                 reduceProducingFoodTimeButton.interactable = false;
                 disabledBg[3].SetActive(true);
-                itemMenuesFeeText[3].text = "구매 완료";
+                itemMenuesFeeText[3].text = "구매완료";
                 itemMenuesValueText[3].text = $"{ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].value}";
             }
             else
             {
-                itemMenuesValueText[3].text = $"{ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].value} -> {ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv + 1].value}";
+                itemMenuesValueText[3].text = $"{ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].value} → {ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv + 1].value}";
                 itemMenuesFeeText[3].text = $"{ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv + 1].fee:N0}";
             }
         }
@@ -419,7 +419,7 @@ public class ItemMenuManager : MonoBehaviour
         {
             autoCollectingButton.interactable = false;
             disabledBg[4].SetActive(true);
-            itemMenuesFeeText[4].text = "구매 완료";
+            itemMenuesFeeText[4].text = "구매완료";
         }
         else
         {
@@ -439,12 +439,12 @@ public class ItemMenuManager : MonoBehaviour
             {
                 autoCollectingButton.interactable = false;
                 disabledBg[4].SetActive(true);
-                itemMenuesFeeText[4].text = "구매 완료";
-                itemMenuesValueText[4].text = $"{ItemFunctionManager.Instance.autoCollectingList[autoCollectingLv].value}sec";
+                itemMenuesFeeText[4].text = "구매완료";
+                itemMenuesValueText[4].text = $"{ItemFunctionManager.Instance.autoCollectingList[autoCollectingLv].value}";
             }
             else
             {
-                itemMenuesValueText[4].text = $"{ItemFunctionManager.Instance.autoCollectingList[autoCollectingLv].value}sec -> {ItemFunctionManager.Instance.autoCollectingList[autoCollectingLv + 1].value}sec";
+                itemMenuesValueText[4].text = $"{ItemFunctionManager.Instance.autoCollectingList[autoCollectingLv].value} → {ItemFunctionManager.Instance.autoCollectingList[autoCollectingLv + 1].value}";
                 itemMenuesFeeText[4].text = $"{ItemFunctionManager.Instance.autoCollectingList[autoCollectingLv + 1].fee:N0}";
             }
         }

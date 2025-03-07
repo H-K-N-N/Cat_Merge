@@ -104,13 +104,7 @@ public class SpawnManager : MonoBehaviour
                 QuestManager.Instance.AddSpawnCount();
                 gameManager.AddCatCount();
 
-
-                // 1등급 고양이의 경험치 증가
-                //FriendshipManager.Instance.AddExperience(1, 1);
-               // FriendshipManager.Instance.UpdateFriendshipUI(1);
-
-                FriendshipManager.Instance.nowExp += 1;
-                FriendshipManager.Instance.expGauge.value += 0.05f;
+                FriendshipManager.Instance.AddExperience(1, 1);
 
                 // 수동 소환 후 먹이 생성 코루틴 재시작
                 if (isStoppedReduceCoroutine)
@@ -118,13 +112,11 @@ public class SpawnManager : MonoBehaviour
                     StartCoroutine(CreateFoodTime());
                     isStoppedReduceCoroutine = false;
                 }
-
             }
             else
             {
                 NotificationManager.Instance.ShowNotification("먹이가 부족합니다!!");
             }
-
         }
         else
         {
@@ -150,13 +142,7 @@ public class SpawnManager : MonoBehaviour
 
         gameManager.AddCatCount();
 
-
-        // 1등급 고양이의 경험치 증가
-        //FriendshipManager.Instance.AddExperience(1, 1);
-        //FriendshipManager.Instance.UpdateFriendshipUI(1);
-
-        FriendshipManager.Instance.nowExp += 1;
-        FriendshipManager.Instance.expGauge.value += 0.05f;
+        FriendshipManager.Instance.AddExperience(1, 1);
 
         // 자동 소환 후 먹이 생성 코루틴 재시작
         if (isStoppedReduceCoroutine)
@@ -164,7 +150,6 @@ public class SpawnManager : MonoBehaviour
             StartCoroutine(CreateFoodTime());
             isStoppedReduceCoroutine = false;
         }
-
     }
 
     // 상점에서 이용될 등급에 따른 구매 후 스폰 (12/26 새로 작성)
@@ -345,7 +330,7 @@ public class SpawnManager : MonoBehaviour
         }
 
         // 현재 먹이 수가 최대치보다 작으면 먹이 생성 코루틴 시작
-        int currentMaxFood = ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value;
+        int currentMaxFood = (int)ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value;
         if (NowFood < currentMaxFood)
         {
             if (isStoppedReduceCoroutine)
@@ -361,13 +346,13 @@ public class SpawnManager : MonoBehaviour
         if (ItemMenuManager.Instance.MaxFoodsLv >= ItemFunctionManager.Instance.maxFoodsList.Count)
         {
             // 최대 레벨일 경우 마지막 값 사용
-            int lastMaxFood = ItemFunctionManager.Instance.maxFoodsList[ItemFunctionManager.Instance.maxFoodsList.Count - 1].value;
+            int lastMaxFood = (int)ItemFunctionManager.Instance.maxFoodsList[ItemFunctionManager.Instance.maxFoodsList.Count - 1].value;
             nowAndMaxFoodText.text = $"({nowFood} / {lastMaxFood})";
         }
         else
         {
             // 현재 레벨의 값 사용
-            int currentMaxFood = ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value;
+            int currentMaxFood = (int)ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value;
             nowAndMaxFoodText.text = $"({nowFood} / {currentMaxFood})";
         }
     }

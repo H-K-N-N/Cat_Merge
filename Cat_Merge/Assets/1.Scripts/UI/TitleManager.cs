@@ -6,7 +6,7 @@ public class TitleManager : MonoBehaviour
     
     public void GameStart()
     {
-        SceneManager.LoadScene("GameScene-Han");
+        SceneManager.LoadScene("GameScene");
     }
 
 }

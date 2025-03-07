@@ -5,27 +5,27 @@ using UnityEngine.UI;
 using System.Collections;
 
 // GameManager Script
-[DefaultExecutionOrder(-1)]     // ½ºÅ©¸³Æ® ½ÇÇà ¼ø¼­ Á¶Á¤(3¹øÂ°)
+[DefaultExecutionOrder(-1)]     // ìŠ¤í¬ë¦½íŠ¸ ì‹¤í–‰ ìˆœì„œ ì¡°ì •(3ë²ˆì§¸)
 public class GameManager : MonoBehaviour
 {
     // Singleton instance
     public static GameManager Instance { get; private set; }
 
     // Main Cat Data
-    private Cat[] allCatData;                                               // ¸ğµç °í¾çÀÌ µ¥ÀÌÅÍ
+    private Cat[] allCatData;                                               // ëª¨ë“  ê³ ì–‘ì´ ë°ì´í„°
     public Cat[] AllCatData => allCatData;
 
     // Main Mouse Data
-    private Mouse[] allMouseData;                                           // ¸ğµç Áã µ¥ÀÌÅÍ
+    private Mouse[] allMouseData;                                           // ëª¨ë“  ì¥ ë°ì´í„°
     public Mouse[] AllMouseData => allMouseData;
 
-    [SerializeField] private Transform gamePanel;                           // °í¾çÀÌ Á¤º¸¸¦ °¡Á®¿Ã ºÎ¸ğ Panel
-    private List<RectTransform> catUIObjects = new List<RectTransform>();   // °í¾çÀÌ UI °´Ã¼ ¸®½ºÆ®
+    [SerializeField] private Transform gamePanel;                           // ê³ ì–‘ì´ ì •ë³´ë¥¼ ê°€ì ¸ì˜¬ ë¶€ëª¨ Panel
+    private List<RectTransform> catUIObjects = new List<RectTransform>();   // ê³ ì–‘ì´ UI ê°ì²´ ë¦¬ìŠ¤íŠ¸
 
     // Main UI Text
     [Header("---[Main UI Text]")]
-    [SerializeField] private TextMeshProUGUI catCountText;                  // °í¾çÀÌ ¼ö ÅØ½ºÆ®
-    private int currentCatCount = 0;                                        // È­¸é ³» °í¾çÀÌ ¼ö
+    [SerializeField] private TextMeshProUGUI catCountText;                  // ê³ ì–‘ì´ ìˆ˜ í…ìŠ¤íŠ¸
+    private int currentCatCount = 0;                                        // í™”ë©´ ë‚´ ê³ ì–‘ì´ ìˆ˜
     public int CurrentCatCount
     {
         get => currentCatCount;
@@ -36,7 +36,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private int maxCats = 8;                                                // ÃÖ´ë °í¾çÀÌ ¼ö
+    private int maxCats = 8;                                                // ìµœëŒ€ ê³ ì–‘ì´ ìˆ˜
     public int MaxCats
     {
         get => maxCats;
@@ -47,8 +47,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    [SerializeField] private TextMeshProUGUI coinText;                      // ±âº»ÀçÈ­ ÅØ½ºÆ®
-    private decimal coin = 1000000;                                         // ±âº»ÀçÈ­
+    [SerializeField] private TextMeshProUGUI coinText;                      // ê¸°ë³¸ì¬í™” í…ìŠ¤íŠ¸
+    private decimal coin = 1000000;                                         // ê¸°ë³¸ì¬í™”
     public decimal Coin
     {
         get => coin;
@@ -59,8 +59,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    [SerializeField] private TextMeshProUGUI cashText;                      // Ä³½¬ÀçÈ­ ÅØ½ºÆ®
-    private decimal cash = 1000;                                            // Ä³½¬ÀçÈ­
+    [SerializeField] private TextMeshProUGUI cashText;                      // ìºì‰¬ì¬í™” í…ìŠ¤íŠ¸
+    private decimal cash = 1000;                                            // ìºì‰¬ì¬í™”
     public decimal Cash
     {
         get => cash;
@@ -72,10 +72,10 @@ public class GameManager : MonoBehaviour
     }
 
     [Header("---[Exit Panel]")]
-    [SerializeField] private GameObject exitPanel;                          // Á¾·á È®ÀÎ ÆĞ³Î
-    [SerializeField] private Button closeButton;                            // Á¾·á ÆĞ³Î ´İ±â ¹öÆ°
-    [SerializeField] private Button okButton;                               // Á¾·á È®ÀÎ ¹öÆ°
-    private bool isBackButtonPressed = false;                               // µÚ·Î°¡±â ¹öÆ°ÀÌ ´­·È´ÂÁö ¿©ºÎ
+    [SerializeField] private GameObject exitPanel;                          // ì¢…ë£Œ í™•ì¸ íŒ¨ë„
+    [SerializeField] private Button closeButton;                            // ì¢…ë£Œ íŒ¨ë„ ë‹«ê¸° ë²„íŠ¼
+    [SerializeField] private Button okButton;                               // ì¢…ë£Œ í™•ì¸ ë²„íŠ¼
+    private bool isBackButtonPressed = false;                               // ë’¤ë¡œê°€ê¸° ë²„íŠ¼ì´ ëˆŒë ¸ëŠ”ì§€ ì—¬ë¶€
 
     // ======================================================================================================================
 
@@ -92,7 +92,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // ±âº» ¼¼ÆÃ
+        // ê¸°ë³¸ ì„¸íŒ…
         LoadAllCats();
         LoadAllMouses();
         UpdateCatCountText();
@@ -110,14 +110,14 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
-    // °í¾çÀÌ Á¤º¸ Load ÇÔ¼ö
+    // ê³ ì–‘ì´ ì •ë³´ Load í•¨ìˆ˜
     private void LoadAllCats()
     {
         CatDataLoader catDataLoader = FindObjectOfType<CatDataLoader>();
 
         if (catDataLoader == null || catDataLoader.catDictionary == null)
         {
-            Debug.LogError("CatDataLoader°¡ ¾ø°Å³ª °í¾çÀÌ µ¥ÀÌÅÍ°¡ ·ÎµåµÇÁö ¾Ê¾Ò½À´Ï´Ù.");
+            Debug.LogError("CatDataLoaderê°€ ì—†ê±°ë‚˜ ê³ ì–‘ì´ ë°ì´í„°ê°€ ë¡œë“œë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.");
             return;
         }
 
@@ -125,31 +125,31 @@ public class GameManager : MonoBehaviour
         catDataLoader.catDictionary.Values.CopyTo(allCatData, 0);
     }
 
-    // Áã Á¤º¸ Load ÇÔ¼ö
+    // ì¥ ì •ë³´ Load í•¨ìˆ˜
     private void LoadAllMouses()
     {
-        // MouseDataLoader mouseDictionary °¡Á®¿À±â
+        // MouseDataLoader mouseDictionary ê°€ì ¸ì˜¤ê¸°
         MouseDataLoader mouseDataLoader = FindObjectOfType<MouseDataLoader>();
         if (mouseDataLoader == null || mouseDataLoader.mouseDictionary == null)
         {
-            Debug.LogError("MouseDataLoader°¡ ¾ø°Å³ª Áã µ¥ÀÌÅÍ°¡ ·ÎµåµÇÁö ¾Ê¾Ò½À´Ï´Ù.");
+            Debug.LogError("MouseDataLoaderê°€ ì—†ê±°ë‚˜ ì¥ ë°ì´í„°ê°€ ë¡œë“œë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.");
             return;
         }
 
-        // DictionaryÀÇ ¸ğµç °ªÀ» ¹è¿­·Î º¯È¯
+        // Dictionaryì˜ ëª¨ë“  ê°’ì„ ë°°ì—´ë¡œ ë³€í™˜
         allMouseData = new Mouse[mouseDataLoader.mouseDictionary.Count];
         mouseDataLoader.mouseDictionary.Values.CopyTo(allMouseData, 0);
     }
 
     // ======================================================================================================================
 
-    // °í¾çÀÌ ¼ö ÆÇº° ÇÔ¼ö
+    // ê³ ì–‘ì´ ìˆ˜ íŒë³„ í•¨ìˆ˜
     public bool CanSpawnCat()
     {
         return CurrentCatCount < MaxCats;
     }
 
-    // ÇöÀç °í¾çÀÌ ¼ö Áõ°¡½ÃÅ°´Â ÇÔ¼ö
+    // í˜„ì¬ ê³ ì–‘ì´ ìˆ˜ ì¦ê°€ì‹œí‚¤ëŠ” í•¨ìˆ˜
     public void AddCatCount()
     {
         if (CurrentCatCount < MaxCats)
@@ -158,7 +158,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // ÇöÀç °í¾çÀÌ ¼ö °¨¼Ò½ÃÅ°´Â ÇÔ¼ö
+    // í˜„ì¬ ê³ ì–‘ì´ ìˆ˜ ê°ì†Œì‹œí‚¤ëŠ” í•¨ìˆ˜
     public void DeleteCatCount()
     {
         if (CurrentCatCount > 0)
@@ -167,7 +167,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // °í¾çÀÌ ¼ö ÅØ½ºÆ® UI ¾÷µ¥ÀÌÆ®ÇÏ´Â ÇÔ¼ö
+    // ê³ ì–‘ì´ ìˆ˜ í…ìŠ¤íŠ¸ UI ì—…ë°ì´íŠ¸í•˜ëŠ” í•¨ìˆ˜
     private void UpdateCatCountText()
     {
         if (catCountText != null)
@@ -176,29 +176,29 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // ±âº»ÀçÈ­ ÅØ½ºÆ® UI ¾÷µ¥ÀÌÆ®ÇÏ´Â ÇÔ¼ö
+    // ê¸°ë³¸ì¬í™” í…ìŠ¤íŠ¸ UI ì—…ë°ì´íŠ¸í•˜ëŠ” í•¨ìˆ˜
     public void UpdateCoinText()
     {
         if (coinText != null)
         {
-            // ¼ıÀÚ¸¦ 3ÀÚ¸®¸¶´Ù ÄŞ¸¶¸¦ Ãß°¡ÇÏ¿© Ç¥½Ã
+            // ìˆ«ìë¥¼ 3ìë¦¬ë§ˆë‹¤ ì½¤ë§ˆë¥¼ ì¶”ê°€í•˜ì—¬ í‘œì‹œ
             coinText.text = coin.ToString("N0");
         }
     }
 
-    // Ä³½¬ÀçÈ­ ÅØ½ºÆ® UI ¾÷µ¥ÀÌÆ®ÇÏ´Â ÇÔ¼ö
+    // ìºì‰¬ì¬í™” í…ìŠ¤íŠ¸ UI ì—…ë°ì´íŠ¸í•˜ëŠ” í•¨ìˆ˜
     public void UpdateCashText()
     {
         if (cashText != null)
         {
-            // ¼ıÀÚ¸¦ 3ÀÚ¸®¸¶´Ù ÄŞ¸¶¸¦ Ãß°¡ÇÏ¿© Ç¥½Ã
+            // ìˆ«ìë¥¼ 3ìë¦¬ë§ˆë‹¤ ì½¤ë§ˆë¥¼ ì¶”ê°€í•˜ì—¬ í‘œì‹œ
             cashText.text = cash.ToString("N0");
         }
     }
 
     // ======================================================================================================================
 
-    // GamePanel¿¡¼­ ¸ğµç RectTransform ÀÚ½Ä °´Ã¼ °¡Á®¿À´Â ÇÔ¼ö
+    // GamePanelì—ì„œ ëª¨ë“  RectTransform ìì‹ ê°ì²´ ê°€ì ¸ì˜¤ëŠ” í•¨ìˆ˜
     private void UpdateCatUIObjects()
     {
         catUIObjects.Clear();
@@ -213,15 +213,15 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // YÃà À§Ä¡¸¦ ±âÁØÀ¸·Î °í¾çÀÌ UI Á¤·Ä
+    // Yì¶• ìœ„ì¹˜ë¥¼ ê¸°ì¤€ìœ¼ë¡œ ê³ ì–‘ì´ UI ì •ë ¬
     private void SortCatUIObjectsByYPosition()
     {
         UpdateCatUIObjects();
 
-        // YÃàÀ» ±âÁØÀ¸·Î Á¤·Ä (³ôÀº Y°ªÀÌ µÚ·Î °¡°Ô ¼³Á¤)
+        // Yì¶•ì„ ê¸°ì¤€ìœ¼ë¡œ ì •ë ¬ (ë†’ì€ Yê°’ì´ ë’¤ë¡œ ê°€ê²Œ ì„¤ì •)
         catUIObjects.Sort((a, b) => b.anchoredPosition.y.CompareTo(a.anchoredPosition.y));
 
-        // Á¤·ÄµÈ ¼ø¼­´ë·Î UI °èÃş ±¸Á¶ ¾÷µ¥ÀÌÆ®
+        // ì •ë ¬ëœ ìˆœì„œëŒ€ë¡œ UI ê³„ì¸µ êµ¬ì¡° ì—…ë°ì´íŠ¸
         for (int i = 0; i < catUIObjects.Count; i++)
         {
             catUIObjects[i].SetSiblingIndex(i);
@@ -230,7 +230,7 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
-    // °ÔÀÓ Á¾·á ¹öÆ° ÃÊ±âÈ­
+    // ê²Œì„ ì¢…ë£Œ ë²„íŠ¼ ì´ˆê¸°í™”
     private void InitializeExitSystem()
     {
         if (exitPanel != null)
@@ -247,10 +247,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // Á¾·á ÀÔ·Â Ã¼Å©
+    // ì¢…ë£Œ ì…ë ¥ ì²´í¬
     private void CheckExitInput()
     {
-        // À¯´ÏÆ¼ ¿¡µğÅÍ ¹× ¾Èµå·ÎÀÌµå¿¡¼­ µÚ·Î°¡±â ¹öÆ°
+        // ìœ ë‹ˆí‹° ì—ë””í„° ë° ì•ˆë“œë¡œì´ë“œì—ì„œ ë’¤ë¡œê°€ê¸° ë²„íŠ¼
         if ((Application.platform == RuntimePlatform.Android && Input.GetKey(KeyCode.Escape)) ||
             (Application.platform == RuntimePlatform.WindowsEditor && Input.GetKeyDown(KeyCode.Escape)))
         {
@@ -258,7 +258,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // Á¾·á ÀÔ·Â Ã³¸®
+    // ì¢…ë£Œ ì…ë ¥ ì²˜ë¦¬
     public void HandleExitInput()
     {
         if (exitPanel != null && !isBackButtonPressed)
@@ -276,14 +276,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // µÚ·Î°¡±â¹öÆ° ÀÔ·Â µô·¹ÀÌ ¼³Á¤
+    // ë’¤ë¡œê°€ê¸°ë²„íŠ¼ ì…ë ¥ ë”œë ˆì´ ì„¤ì •
     private IEnumerator ResetBackButtonPress()
     {
         yield return new WaitForSeconds(0.2f);
         isBackButtonPressed = false;
     }
 
-    // Á¾·á ÆĞ³Î Ç¥½Ã
+    // ì¢…ë£Œ íŒ¨ë„ í‘œì‹œ
     private void ShowExitPanel()
     {
         if (exitPanel != null)
@@ -292,7 +292,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // °ÔÀÓ Á¾·á
+    // ê²Œì„ ì¢…ë£Œ
     public void QuitGame()
     {
 #if UNITY_EDITOR
@@ -302,7 +302,7 @@ public class GameManager : MonoBehaviour
 #endif
     }
 
-    // Á¾·á Ãë¼Ò
+    // ì¢…ë£Œ ì·¨ì†Œ
     public void CancelQuit()
     {
         if (exitPanel != null)
@@ -313,11 +313,11 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
-    // ÇÊµåÀÇ ¸ğµç °í¾çÀÌ Á¤º¸ ¾÷µ¥ÀÌÆ®
+    // í•„ë“œì˜ ëª¨ë“  ê³ ì–‘ì´ ì •ë³´ ì—…ë°ì´íŠ¸
     public void UpdateAllCatsInField()
     {
-        // ÀÌ¹Ì »ı¼ºµÈ °í¾çÀÌÀÇ µ¥ÀÌÅÍ ¼öÄ¡¸¦ »õ·Î ¾÷µ¥ÀÌÆ®µÈ ¼öÄ¡·Î Àû¿ë
-        // ±âÁ¸ Cat ¼öÄ¡·Î »ı¼ºµÈ °í¾çÀÌµéÀ» ¼ºÀåÀ¸·Î Ãß°¡µÈ ¼öÄ¡°¡ Àû¿ëµÈ CatÀ¸·Î ¾÷µ¥ÀÌÆ®ÇÏ±â À§ÇÔ
+        // ì´ë¯¸ ìƒì„±ëœ ê³ ì–‘ì´ì˜ ë°ì´í„° ìˆ˜ì¹˜ë¥¼ ìƒˆë¡œ ì—…ë°ì´íŠ¸ëœ ìˆ˜ì¹˜ë¡œ ì ìš©
+        // ê¸°ì¡´ Cat ìˆ˜ì¹˜ë¡œ ìƒì„±ëœ ê³ ì–‘ì´ë“¤ì„ ì„±ì¥ìœ¼ë¡œ ì¶”ê°€ëœ ìˆ˜ì¹˜ê°€ ì ìš©ëœ Catìœ¼ë¡œ ì—…ë°ì´íŠ¸í•˜ê¸° ìœ„í•¨
         foreach (Transform child in gamePanel)
         {
             CatData catData = child.GetComponent<CatData>();
@@ -336,11 +336,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // ¸ğµç °í¾çÀÌÀÇ ÈÆ·Ã µ¥ÀÌÅÍ¸¦ ÀúÀåÇÏ´Â ¸Ş¼­µå
+    // ëª¨ë“  ê³ ì–‘ì´ì˜ í›ˆë ¨ ë°ì´í„°ë¥¼ ì €ì¥í•˜ëŠ” ë©”ì„œë“œ
     public void SaveTrainingData(Cat[] cats)
     {
-        // ¿©±â¿¡ ½ÇÁ¦ ÀúÀå ·ÎÁ÷ ±¸Çö
-        // ¿¹: PlayerPrefs³ª ÆÄÀÏ ½Ã½ºÅÛÀ» »ç¿ëÇÏ¿© °¢ °í¾çÀÌÀÇ ¼ºÀå ½ºÅÈ ÀúÀå
+        // ì—¬ê¸°ì— ì‹¤ì œ ì €ì¥ ë¡œì§ êµ¬í˜„
+        // ì˜ˆ: PlayerPrefsë‚˜ íŒŒì¼ ì‹œìŠ¤í…œì„ ì‚¬ìš©í•˜ì—¬ ê° ê³ ì–‘ì´ì˜ ì„±ì¥ ìŠ¤íƒ¯ ì €ì¥
     }
 
 

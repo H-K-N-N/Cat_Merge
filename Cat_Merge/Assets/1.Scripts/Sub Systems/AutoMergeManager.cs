@@ -11,29 +11,31 @@ public class AutoMergeManager : MonoBehaviour
     #region Variables
     public static AutoMergeManager Instance { get; private set; }
 
-    [Header("---[AutoMerge System]")]
+    [Header("---[UI]")]
     [SerializeField] private Button openAutoMergePanelButton;       // 자동 머지 패널 열기 버튼
     [SerializeField] private GameObject autoMergePanel;             // 자동 머지 패널
     [SerializeField] private Button closeAutoMergePanelButton;      // 자동 머지 패널 닫기 버튼
     [SerializeField] private Button autoMergeStateButton;           // 자동 머지 상태 버튼
-    [SerializeField] private TextMeshProUGUI autoMergeCostText;     // 자동 머지 상태 버튼
+    [SerializeField] private TextMeshProUGUI autoMergeCostText;     // 자동 머지 비용 텍스트
     [SerializeField] private TextMeshProUGUI autoMergeTimerText;    // 자동 머지 타이머 텍스트
-    private int autoMergeCost = 30;
+    [SerializeField] private TextMeshProUGUI explainText;           // 자동 머지 설명 텍스트
 
-    [Header("---[???]")]
-    private float startTime;                                // 자동 머지 시작 시간
-    private float autoMergeDuration = 10.0f;                // 자동 머지 기본 지속 시간
-    private float currentAutoMergeDuration;                 // 현재 자동 머지 지속 시간
-    private float plusAutoMergeDuration;                    // 자동 머지 추가 시간
-    private float autoMergeInterval = 0.5f;                 // 자동 머지 간격
-    private float moveDuration = 0.2f;                      // 고양이가 이동하는 데 걸리는 시간 (이동 속도)
-    private bool isAutoMergeActive = false;                 // 자동 머지 활성화 상태
+    [Header("---[AutoMerge System]")]
+    private float startTime;                                        // 자동 머지 시작 시간
+    private float autoMergeDuration = 10.0f;                        // 자동 머지 기본 지속 시간
+    private float currentAutoMergeDuration;                         // 현재 자동 머지 지속 시간
+    private float plusAutoMergeDuration;                            // 자동 머지 추가 시간
+    private float autoMergeInterval = 0.5f;                         // 자동 머지 간격
+    private float moveDuration = 0.2f;                              // 고양이가 이동하는 데 걸리는 시간 (이동 속도)
+    private bool isAutoMergeActive = false;                         // 자동 머지 활성화 상태
+    private int autoMergeCost = 30;                                 // 자동 머지 비용
+    private const float maxAutoMergeDuration = 86400f;              // 최대 자동 머지 시간 (24시간)
 
-    private HashSet<DragAndDropManager> mergingCats;        // 머지 중인 고양이 추적
+    private HashSet<DragAndDropManager> mergingCats;                // 머지 중인 고양이 추적
 
     [Header("---[Battle System]")]
-    private bool isPaused = false;                          // 일시정지 상태
-    private float pausedTimeRemaining = 0f;                 // 일시정지 시점의 남은 시간
+    private bool isPaused = false;                                  // 일시정지 상태
+    private float pausedTimeRemaining = 0f;                         // 일시정지 시점의 남은 시간
     #endregion
 
     // ======================================================================================================================
@@ -68,6 +70,7 @@ public class AutoMergeManager : MonoBehaviour
 
             // 타이머 업데이트
             UpdateAutoMergeTimerText((int)remainingTime);
+            UpdateExplainText((int)remainingTime);
 
             // 자동 머지 종료 처리
             if (remainingTime <= 0)
@@ -82,6 +85,7 @@ public class AutoMergeManager : MonoBehaviour
         {
             // 일시정지 상태일 때는 남은 시간을 고정된 값으로 표시
             UpdateAutoMergeTimerText((int)pausedTimeRemaining);
+            UpdateExplainText((int)pausedTimeRemaining);
         }
     }
     #endregion
@@ -93,10 +97,11 @@ public class AutoMergeManager : MonoBehaviour
     private void InitializeAutoMergeManager()
     {
         plusAutoMergeDuration = autoMergeDuration;
-        currentAutoMergeDuration = autoMergeDuration;
+        currentAutoMergeDuration = 0f;
 
-        UpdateAutoMergeCostText();
         UpdateAutoMergeTimerVisibility(false);
+        UpdateAutoMergeCostText();
+        UpdateExplainText((int)currentAutoMergeDuration);
 
         openAutoMergePanelButton.onClick.AddListener(OpenAutoMergePanel);
         closeAutoMergePanelButton.onClick.AddListener(CloseAutoMergePanel);
@@ -139,6 +144,12 @@ public class AutoMergeManager : MonoBehaviour
     {
         if (GameManager.Instance.Cash >= autoMergeCost)
         {
+            if (currentAutoMergeDuration + plusAutoMergeDuration > maxAutoMergeDuration)
+            {
+                NotificationManager.Instance.ShowNotification("자동머지는 최대 24시간까지 가능합니다!!");
+                return;
+            }
+
             GameManager.Instance.Cash -= autoMergeCost;
 
             AutoMergeManager autoMergeScript = FindObjectOfType<AutoMergeManager>();
@@ -149,7 +160,7 @@ public class AutoMergeManager : MonoBehaviour
         }
         else
         {
-            //Debug.Log("Not enough coins");
+            NotificationManager.Instance.ShowNotification("재화가 부족합니다!!");
         }
     }
 
@@ -167,7 +178,19 @@ public class AutoMergeManager : MonoBehaviour
     {
         if (autoMergeTimerText != null)
         {
-            autoMergeTimerText.text = $"{remainingTime}";
+            autoMergeTimerText.text = $"{remainingTime}초";
+        }
+    }
+
+    // 자동머지 설명 텍스트 업데이트 함수
+    private void UpdateExplainText(int remainingTime)
+    {
+        if (explainText != null)
+        {
+            int hours = remainingTime / 3600;
+            int minutes = (remainingTime % 3600) / 60;
+            int seconds = remainingTime % 60;
+            explainText.text = $"자동머지 {autoMergeDuration}초 증가\n (타이머 {hours:D2}:{minutes:D2}:{seconds:D2})";
         }
     }
     #endregion
@@ -180,16 +203,15 @@ public class AutoMergeManager : MonoBehaviour
     {
         if (!isAutoMergeActive)
         {
-            Debug.Log("자동 머지 시작");
             startTime = Time.time;
             isAutoMergeActive = true;
             currentAutoMergeDuration = autoMergeDuration;
+            
             UpdateAutoMergeTimerVisibility(true);
             StartCoroutine(AutoMergeCoroutine());
         }
         else
         {
-            Debug.Log($"{plusAutoMergeDuration}초 추가");
             currentAutoMergeDuration += plusAutoMergeDuration;
         }
     }

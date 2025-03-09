@@ -48,11 +48,10 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
             dragOffset = rectTransform.localPosition - (Vector3)localPointerPosition;
         }
 
-        // 드래그된 고양이를 mergingCats에서 제거
-        AutoMergeManager autoMerge = FindObjectOfType<AutoMergeManager>();
-        if (autoMerge != null && autoMerge.IsMerging(this))
+        // 자동 머지 중인 고양이 처리
+        if (AutoMergeManager.Instance != null && AutoMergeManager.Instance.IsMerging(this))
         {
-            autoMerge.StopMerging(this);
+            AutoMergeManager.Instance.StopMerging(this);
         }
     }
 
@@ -125,22 +124,12 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
             DragAndDropManager nearbyCat = FindNearbyCat();
             if (nearbyCat != null && nearbyCat != this)
             {
-                // 자동 머지 중인지 확인
-                if (IsAutoMerging(nearbyCat))
-                {
-                    Debug.Log("자동 머지 중인 고양이와 합성할 수 없습니다.");
-                    return;
-                }
-
                 // 동일한 등급 확인 후 합성 처리
                 if (nearbyCat.catData.CatGrade == this.catData.CatGrade)
                 {
-                    // 합성할 고양이의 다음 등급이 존재하는지 확인
-                    //Cat nextCat = FindObjectOfType<MergeManager>().GetCatByGrade(this.catData.CatGrade + 1);
                     Cat nextCat = MergeManager.Instance.GetCatByGrade(this.catData.CatGrade + 1);
                     if (nextCat != null)
                     {
-                        // nextCat이 존재할 경우에만 애니메이션 시작
                         StartCoroutine(PullNearbyCat(nearbyCat));
                     }
                     else
@@ -210,54 +199,49 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
         // 히트박스 내부라면
         if (currentBossHitBox.IsInHitbox(this.rectTransform.anchoredPosition))
         {
-            //Debug.Log("히트박스 내부 감지");
             catData.MoveOppositeBoss();
         }
         // 히트박스 외부라면
         else if (!currentBossHitBox.IsInHitbox(this.rectTransform.anchoredPosition))
         {
-            //Debug.Log("히트박스 외부 감지");
             catData.MoveTowardBossBoundary();
         }
     }
 
     // ======================================================================================================================
 
-    // 자동 머지 중인지 확인하는 함수
-    private bool IsAutoMerging(DragAndDropManager nearbyCat)
-    {
-        AutoMergeManager autoMerge = FindObjectOfType<AutoMergeManager>();
-        return autoMerge != null && autoMerge.IsMerging(nearbyCat);
-    }
-
     // 합성시 고양이가 끌려오는 애니메이션 코루틴
     private IEnumerator PullNearbyCat(DragAndDropManager nearbyCat)
     {
+        // 자동 머지 중인 경우 해당 고양이들을 자동 머지에서 제외
+        if (AutoMergeManager.Instance != null)
+        {
+            AutoMergeManager.Instance.StopMerging(this);
+            AutoMergeManager.Instance.StopMerging(nearbyCat);
+        }
+
         Vector3 startPosition = nearbyCat.rectTransform.localPosition;
         Vector3 targetPosition = rectTransform.localPosition;
         float elapsed = 0f;
         float duration = 0.1f;
 
-        // nearbyCat을 드래그된 객체로 끌려오게 설정
         while (elapsed < duration)
         {
+            if (nearbyCat == null) yield break;
             elapsed += Time.deltaTime;
             nearbyCat.rectTransform.localPosition = Vector3.Lerp(startPosition, targetPosition, elapsed / duration);
             yield return null;
         }
 
-        // 끌려온 후 합성 처리
-        Cat mergedCat = MergeManager.Instance.MergeCats(this.catData, nearbyCat.catData);
-        if (mergedCat != null)
+        if (nearbyCat != null)
         {
-            //Debug.Log($"합성 성공: {mergedCat.CatName}");
-            this.catData = mergedCat;
-            UpdateCatUI();
-            Destroy(nearbyCat.gameObject);
-        }
-        else
-        {
-            //Debug.LogWarning("합성 실패");
+            Cat mergedCat = MergeManager.Instance.MergeCats(this.catData, nearbyCat.catData);
+            if (mergedCat != null)
+            {
+                this.catData = mergedCat;
+                UpdateCatUI();
+                Destroy(nearbyCat.gameObject);
+            }
         }
     }
 

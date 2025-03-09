@@ -113,7 +113,13 @@ public class SortManager : MonoBehaviour
         List<GameObject> sortedCats = new List<GameObject>();
         foreach (Transform child in gamePanel)
         {
-            sortedCats.Add(child.gameObject);
+            // 자동 머지 중인 고양이는 제외
+            DragAndDropManager dragManager = child.GetComponent<DragAndDropManager>();
+            if (dragManager != null && AutoMergeManager.Instance != null &&
+                !AutoMergeManager.Instance.IsMerging(dragManager))
+            {
+                sortedCats.Add(child.gameObject);
+            }
         }
 
         sortedCats.Sort((cat1, cat2) =>
@@ -137,16 +143,6 @@ public class SortManager : MonoBehaviour
                 catData.SetAutoMoveState(isEnabled);
             }
         }
-
-        /*
-        foreach (Transform child in gamePanel)
-        {
-            if (child.TryGetComponent<CatData>(out var catData))
-            {
-                catData.SetAutoMoveState(isEnabled);
-            }
-        }
-        */
     }
     #endregion
 
@@ -171,14 +167,6 @@ public class SortManager : MonoBehaviour
                 catData.StopAllMovement();
                 catData.SetAutoMoveState(false);
             }
-
-            /*
-            if (child.TryGetComponent<CatData>(out var catData))
-            {
-                catData.StopAllMovement();
-                catData.SetAutoMoveState(false);
-            }
-            */
         }
     }
 

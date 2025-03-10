@@ -4,7 +4,6 @@ using UnityEngine.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 [System.Serializable]
 public class CatFriendshipUI
@@ -314,6 +313,12 @@ public class DictionaryManager : MonoBehaviour
 
             firstOpenBG.gameObject.SetActive(false);
         }
+
+        //// 버튼이 인스턴스화된 후 SFX 등록
+        //if (button != null && OptionManager.Instance != null)
+        //{
+        //    button.onClick.AddListener(OptionManager.Instance.PlayButtonClickSound);
+        //}
     }
 
     // 새로운 고양이를 해금하면 도감을 업데이트하는 함수
@@ -363,6 +368,12 @@ public class DictionaryManager : MonoBehaviour
                 ShowInformationPanel(catGrade);
             }
         });
+
+        // 버튼 업데이트 후 SFX 등록
+        if (OptionManager.Instance != null)
+        {
+            button.onClick.AddListener(OptionManager.Instance.PlayButtonClickSound);
+        }
     }
 
     private void InitializeInformationCatDefaultImage()
@@ -442,7 +453,7 @@ public class DictionaryManager : MonoBehaviour
         StartCoroutine(RotateHighlightImage());
 
         // 확인 버튼을 누르면 패널을 비활성화
-        submitButton.onClick.RemoveAllListeners();
+        //submitButton.onClick.RemoveAllListeners();            // 이걸 지워야 sfx소리가 해당 버튼에 잘 들어감
         submitButton.onClick.AddListener(CloseNewCatPanel);
     }
 

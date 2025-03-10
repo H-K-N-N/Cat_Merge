@@ -236,7 +236,7 @@ public class SpawnManager : MonoBehaviour
         // 현재 먹이가 최대치 이하일 때 코루틴 시작
         while (NowFood < ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
         {
-            foodFillAmountImg.fillAmount = 0f; // 정확히 1로 설정
+            foodFillAmountImg.fillAmount = 0f;
             while (elapsed < ItemFunctionManager.Instance.reduceProducingFoodTimeList[ItemMenuManager.Instance.ReduceProducingFoodTimeLv].value)
             {
                 elapsed += Time.deltaTime; // 매 프레임마다 경과 시간 증가
@@ -244,18 +244,19 @@ public class SpawnManager : MonoBehaviour
                 yield return null; // 다음 프레임까지 대기
             }
             NowFood++;
-            foodFillAmountImg.fillAmount = 1f; // 정확히 1로 설정
+            foodFillAmountImg.fillAmount = 1f; 
             elapsed = 0f;
         }
 
         // 현재 먹이갯수가 최대치이면 코루틴을 종료시킨다.
-        if (NowFood == ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
+        if (NowFood >= ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
         {
             StopCoroutine(CreateFoodTime());
             isStoppedReduceCoroutine = true;
         }
     }
 
+    // 자동 소환
     private IEnumerator AutoCollectingTime()
     {
         float elapsed = 0f;
@@ -271,7 +272,7 @@ public class SpawnManager : MonoBehaviour
             }
 
             // 먹이가 1 이상일경우 자동 수집 시작 (흐으음..)
-            if (NowFood >= 1)
+            //if (NowFood >= 1)
             {
                 autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / (float)ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value);
 
@@ -290,7 +291,7 @@ public class SpawnManager : MonoBehaviour
                 }
 
                 // 완료되면 먹이 줄이고 고양이 생성
-                if (!BattleManager.Instance.IsBattleActive && elapsed >= ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value)
+                if (NowFood > 0 && !BattleManager.Instance.IsBattleActive && elapsed >= ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value)
                 {
                     if (gameManager.CanSpawnCat())
                     {
@@ -333,11 +334,8 @@ public class SpawnManager : MonoBehaviour
         int currentMaxFood = (int)ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value;
         if (NowFood < currentMaxFood)
         {
-            if (isStoppedReduceCoroutine)
-            {
-                StartCoroutine(CreateFoodTime());
-                isStoppedReduceCoroutine = false;
-            }
+            StartCoroutine(CreateFoodTime());
+            isStoppedReduceCoroutine = false;
         }
     }
 

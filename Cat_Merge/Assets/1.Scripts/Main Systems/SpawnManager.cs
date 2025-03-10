@@ -143,13 +143,6 @@ public class SpawnManager : MonoBehaviour
         gameManager.AddCatCount();
 
         FriendshipManager.Instance.AddExperience(1, 1);
-
-        // 자동 소환 후 먹이 생성 코루틴 재시작
-        if (isStoppedReduceCoroutine)
-        {
-            StartCoroutine(CreateFoodTime());
-            isStoppedReduceCoroutine = false;
-        }
     }
 
     // 상점에서 이용될 등급에 따른 구매 후 스폰 (12/26 새로 작성)
@@ -334,8 +327,11 @@ public class SpawnManager : MonoBehaviour
         int currentMaxFood = (int)ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value;
         if (NowFood < currentMaxFood)
         {
-            StartCoroutine(CreateFoodTime());
-            isStoppedReduceCoroutine = false;
+            if (isStoppedReduceCoroutine)
+            {
+                StartCoroutine(CreateFoodTime());
+                isStoppedReduceCoroutine = false;
+            }
         }
     }
 

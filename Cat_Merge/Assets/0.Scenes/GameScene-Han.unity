@@ -9478,12 +9478,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e86346600c1117488acdbfb68f79d2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  openAutoMergePanelButton: {fileID: 1736587142}
   autoMergePanel: {fileID: 355143274}
+  openAutoMergePanelButton: {fileID: 1736587142}
   closeAutoMergePanelButton: {fileID: 461313990}
   autoMergeStateButton: {fileID: 909696355}
   autoMergeCostText: {fileID: 521732957}
   autoMergeTimerText: {fileID: 1767247614}
+  explainText: {fileID: 1286327341}
 --- !u!114 &331588644
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9545,6 +9546,13 @@ MonoBehaviour:
   scrollRectContents: {fileID: 6771215}
   buttonParent: {fileID: 1842498429}
   buttonPrefabs:
+  - {fileID: 6417560261492239897, guid: 4c953f4d7dbc1804d8ff8fd233b006ab, type: 3}
+  - {fileID: 3002102629705992229, guid: 9130c5ea26954f64484b665a4e91cf89, type: 3}
+  - {fileID: 6143572057613834663, guid: 2dcd594c11c7e72458514c098779c087, type: 3}
+  - {fileID: 1229656381234184344, guid: e0f5081b426d7394aaf1c21597083734, type: 3}
+  - {fileID: 6996001473353342274, guid: fb471b18870076a4ab77e79f38ed387f, type: 3}
+  friendshipButtonParent: {fileID: 1842498429}
+  friendshipButtonPrefabs:
   - {fileID: 6417560261492239897, guid: 4c953f4d7dbc1804d8ff8fd233b006ab, type: 3}
   - {fileID: 3002102629705992229, guid: 9130c5ea26954f64484b665a4e91cf89, type: 3}
   - {fileID: 6143572057613834663, guid: 2dcd594c11c7e72458514c098779c087, type: 3}
@@ -26793,7 +26801,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 1
+  m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &1015599885
@@ -35306,7 +35314,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 1
+  m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &1286327342
@@ -42567,7 +42575,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 1
+  m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &1594013997
@@ -45599,7 +45607,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1717079814
 RectTransform:
   m_ObjectHideFlags: 0
@@ -47065,8 +47073,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 60}
-  m_SizeDelta: {x: 80, y: 40}
+  m_AnchoredPosition: {x: 0, y: 70}
+  m_SizeDelta: {x: 150, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1767247614
 MonoBehaviour:

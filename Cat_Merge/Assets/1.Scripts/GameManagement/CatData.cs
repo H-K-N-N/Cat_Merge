@@ -7,7 +7,7 @@ using TMPro;
 public class CatData : MonoBehaviour, ICanvasRaycastFilter
 {
     #region Variables
-    private const float CLICK_AREA_SCALE = 0.8f;    // 클릭 영역 스케일
+    private const float CLICK_AREA_SCALE = 0.9f;    // 클릭 영역 스케일
     private WaitForSeconds COLLECT_ANIMATION_DELAY = new WaitForSeconds(0.5f);
 
     [Header("Cat Data")]
@@ -465,7 +465,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
         Vector2 normalizedPoint = new Vector2(
             //localPoint.x / rectHalfWidth,
-            (localPoint.x + 40f) / rectHalfWidth,
+            (localPoint.x + 20f) / rectHalfWidth,
             localPoint.y / rectHalfHeight
         );
 

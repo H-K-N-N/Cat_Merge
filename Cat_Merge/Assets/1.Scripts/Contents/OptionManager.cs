@@ -67,6 +67,13 @@ public class OptionManager : MonoBehaviour
         }
 
         public void Play() => audioSource.Play();
+        public void PlayOneShot()
+        {
+            if (audioSource != null && audioSource.clip != null && Instance.sfxSettings.isOn)
+            {
+                audioSource.PlayOneShot(audioSource.clip, Instance.sfxSettings.slider.value);
+            }
+        }
         public void Stop() => audioSource.Stop();
         public AudioSource GetAudioSource() => audioSource;
     }
@@ -95,6 +102,11 @@ public class OptionManager : MonoBehaviour
     private Sprite bgmOffImage;                                 // BGM Off 이미지
     private Sprite sfxOnImage;                                  // SFX On 이미지
     private Sprite sfxOffImage;                                 // SFX Off 이미지
+
+    private const string BGM_ON_IMAGE_PATH = "Sprites/UI/I_UI_Option/I_UI_BGM_v1.9";
+    private const string BGM_OFF_IMAGE_PATH = "Sprites/UI/I_UI_Option/I_UI_BGM_v2.9";
+    private const string SFX_ON_IMAGE_PATH = "Sprites/UI/I_UI_Option/I_UI_SFX_v1.9";
+    private const string SFX_OFF_IMAGE_PATH = "Sprites/UI/I_UI_Option/I_UI_SFX_v2.9";
 
     // ======================================================================================================================
     // [Display]
@@ -154,10 +166,12 @@ public class OptionManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            //DontDestroyOnLoad(gameObject);  // 씬 전환시에도 유지
         }
         else
         {
             Destroy(gameObject);
+            //return;
         }
         optionMenuPanel.SetActive(false);
         InitializeOptionManager();
@@ -177,7 +191,6 @@ public class OptionManager : MonoBehaviour
     {
         InitializeOptionButton();
         InitializeSubMenuButtons();
-
         InitializeSoundControllers();
         InitializeDisplayControllers();
         InitializeSystemSettings();
@@ -278,10 +291,10 @@ public class OptionManager : MonoBehaviour
         bgmSettings.controller.Play();
 
         // Image 초기화
-        bgmOnImage = Resources.Load<Sprite>("Sprites/UI/I_UI_Option/I_UI_BGM_v1.9");
-        bgmOffImage = Resources.Load<Sprite>("Sprites/UI/I_UI_Option/I_UI_BGM_v2.9");
-        sfxOnImage = Resources.Load<Sprite>("Sprites/UI/I_UI_Option/I_UI_SFX_v1.9");
-        sfxOffImage = Resources.Load<Sprite>("Sprites/UI/I_UI_Option/I_UI_SFX_v2.9");
+        bgmOnImage = Resources.Load<Sprite>(BGM_ON_IMAGE_PATH);
+        bgmOffImage = Resources.Load<Sprite>(BGM_OFF_IMAGE_PATH);
+        sfxOnImage = Resources.Load<Sprite>(SFX_ON_IMAGE_PATH);
+        sfxOffImage = Resources.Load<Sprite>(SFX_OFF_IMAGE_PATH);
         bgmSettings.onOffImage.sprite = bgmOnImage;
         sfxSettings.onOffImage.sprite = sfxOnImage;
 
@@ -304,6 +317,18 @@ public class OptionManager : MonoBehaviour
     {
         SoundSettings settings = isBgm ? bgmSettings : sfxSettings;
         settings.isOn = !settings.isOn;
+
+        // SFX 토글이고 Off에서 On으로 변경될 때만 소리 재생
+        if (!isBgm && settings.isOn)
+        {
+            if (sfxSettings.controller != null && sfxSettings.controller.GetAudioSource() != null)
+            {
+                AudioSource audioSource = sfxSettings.controller.GetAudioSource();
+                audioSource.volume = sfxSettings.slider.value * 0.5f;
+                audioSource.PlayOneShot(audioSource.clip);
+            }
+        }
+
         SetSoundToggleImage(isBgm);
         UpdateToggleUI(settings.isOn, isBgm);
         UpdateToggleButtonImage(settings.toggleButtonImage, settings.isOn);
@@ -759,6 +784,71 @@ public class OptionManager : MonoBehaviour
     }
 
     // ======================================================================================================================
+
+    // 씬 로드 이벤트에 리스너 추가
+    private void OnEnable()
+    {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    // 씬 로드 이벤트에서 리스너 제거
+    private void OnDisable()
+    {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    // 씬이 로드될 때마다 호출되는 함수
+    private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
+    {
+        StartCoroutine(AddSFXToAllButtonsDelayed());
+    }
+
+    // 지연된 버튼 SFX 추가를 위한 코루틴
+    private IEnumerator AddSFXToAllButtonsDelayed()
+    {
+        // 한 프레임 대기하여 모든 오브젝트가 초기화되도록 기다림
+        yield return null;
+        AddSFXToAllButtons();
+    }
+
+    // 모든 버튼에 SFX 추가하는 함수
+    private void AddSFXToAllButtons()
+    {
+        // 현재 씬의 모든 버튼 찾기 (비활성화된 것 포함)
+        Button[] allButtons = Resources.FindObjectsOfTypeAll<Button>();
+
+        foreach (Button button in allButtons)
+        {
+            // 씬에 있는 실제 게임오브젝트인 경우에만 SFX 등록
+            if (button.gameObject.scene.isLoaded)
+            {
+                RegisterDynamicButton(button);
+            }
+        }
+    }
+
+    // 동적으로 생성된 버튼에 SFX 추가하는 함수
+    public void RegisterDynamicButton(Button button)
+    {
+        if (button != null)
+        {
+            // 기존 리스너 제거 (중복 방지)
+            button.onClick.RemoveListener(PlayButtonClickSound);
+            button.onClick.AddListener(PlayButtonClickSound);
+        }
+    }
+
+    // 버튼 클릭 시 SFX 재생하는 함수
+    public void PlayButtonClickSound()
+    {
+        if (sfxSettings.controller != null && sfxSettings.isOn)
+        {
+            sfxSettings.controller.PlayOneShot();
+        }
+    }
+
+    // ======================================================================================================================
+
 
 
 }

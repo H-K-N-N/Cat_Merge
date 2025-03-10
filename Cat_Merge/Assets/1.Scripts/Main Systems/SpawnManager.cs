@@ -22,7 +22,7 @@ public class SpawnManager : MonoBehaviour
         get => nowFood;
         set
         {
-            nowFood = value;
+            nowFood = Mathf.Max(0, value);                          // 먹이 갯수가 0 미만이 되지 않도록 보호
             UpdateFoodText();
         }
     }

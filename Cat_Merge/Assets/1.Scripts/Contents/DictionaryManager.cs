@@ -5,12 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-[System.Serializable]
-public class CatFriendshipUI
-{
-    public List<Button> buttons = new List<Button>(); // 고양이별 버튼 (5개)
-    public List<Image> images = new List<Image>(); // 각 버튼에 해당하는 이미지
-}
 
 // 고양이 도감 Script
 public class DictionaryManager : MonoBehaviour
@@ -87,9 +81,6 @@ public class DictionaryManager : MonoBehaviour
     [Header("---[Test]")]
     [SerializeField] private Transform buttonParent; // 버튼이 배치될 부모 오브젝트
     [SerializeField] private Button[] buttonPrefabs; // 레벨 1~5 버튼 프리팹 배열 (5개)
-
-    public Dictionary<int, List<Button>> characterButtons = new Dictionary<int, List<Button>>();
-    private Dictionary<int, Image[][]> characterImages = new Dictionary<int, Image[][]>(); // 캐릭터별 버튼의 이미지 배열
 
     [Header("---[Friendship System]")]
     [SerializeField] private Transform friendshipButtonParent;  // 우정도 버튼들의 부모 Transform
@@ -619,9 +610,49 @@ public class DictionaryManager : MonoBehaviour
                 Transform firstOpenBG = button.transform.Find("FirstOpenBG");
                 if (firstOpenBG != null)
                 {
-                    firstOpenBG.gameObject.SetActive(
-                        friendshipInfo.isUnlocked[i] && !friendshipInfo.isClaimed[i]
-                    );
+                    firstOpenBG.gameObject.SetActive(friendshipInfo.isUnlocked[i] && !friendshipInfo.isClaimed[i]);
+                }
+
+                // Star 상태 업데이트
+                Transform star = button.transform.FindDeepChild("Star");
+                if (star != null)
+                {
+                    star.gameObject.SetActive(friendshipInfo.isUnlocked[i]);
+                    if(friendshipInfo.isUnlocked[i])
+                    {
+                        GameObject fullStarObj = GameObject.Find("fullStar");
+                        if(fullStarObj != null)
+                        {
+                            RectTransform fullStar = fullStarObj.GetComponent<RectTransform>(); // RectTransform 가져오기
+                            if (fullStar != null)
+                            {
+                                Vector2 newOffsetMax = fullStar.offsetMax;
+                                switch (i)
+                                {
+                                    case 0:
+                                        newOffsetMax.x = -168; // right 값을 168로 변경
+                                        fullStar.offsetMax = newOffsetMax;
+                                        break;
+                                    case 1:
+                                        newOffsetMax.x = -126; // right 값을 168로 변경
+                                        fullStar.offsetMax = newOffsetMax;
+                                        break;
+                                    case 2:
+                                        newOffsetMax.x = -84; // right 값을 168로 변경
+                                        fullStar.offsetMax = newOffsetMax;
+                                        break;
+                                    case 3:
+                                        newOffsetMax.x = -42; // right 값을 168로 변경
+                                        fullStar.offsetMax = newOffsetMax;
+                                        break;
+                                    case 4:
+                                        newOffsetMax.x = 0; // right 값을 168로 변경
+                                        fullStar.offsetMax = newOffsetMax;
+                                        break;
+                                }
+                            }
+                        }                   
+                    }
                 }
 
                 // 버튼 상호작용 상태 설정
@@ -666,6 +697,7 @@ public class DictionaryManager : MonoBehaviour
         UpdateFriendshipButtonStates(catGrade);
     }
 
+
     // 우정도 버튼 클릭 처리
     private void OnFriendshipButtonClick(int catGrade, int level)
     {
@@ -676,4 +708,21 @@ public class DictionaryManager : MonoBehaviour
         }
     }
 
+}
+
+public static class TransformExtensions
+{
+    public static Transform FindDeepChild(this Transform parent, string name)
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.name == name)
+                return child;
+
+            Transform found = child.FindDeepChild(name);
+            if (found != null)
+                return found;
+        }
+        return null;
+    }
 }

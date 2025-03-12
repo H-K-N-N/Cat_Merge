@@ -45,6 +45,8 @@ public class FriendshipManager : MonoBehaviour
     // 레벨별 필요 경험치 데이터
     private List<(int exp, int reward)> levelRequirements;
 
+    private Dictionary<int, List<(int exp, int reward)>> levelByGrade = new Dictionary<int, List<(int exp, int reward)>>();
+
     // ======================================================================================================================
 
     private void Awake()
@@ -64,10 +66,18 @@ public class FriendshipManager : MonoBehaviour
 
     private void Start()
     {
-        // 레벨별 필요 경험치 데이터 초기화
-        levelRequirements = FriendshipDataLoader.Instance.GetDataByGrade(1)
-            .Select(data => (data.exp, data.reward))
-            .ToList();
+        //// 레벨별 필요 경험치 데이터 초기화
+        //levelRequirements = FriendshipDataLoader.Instance.GetDataByGrade(1)
+        //    .Select(data => (data.exp, data.reward))
+        //    .ToList();
+
+        // 모든 등급의 경험치 데이터를 초기화
+        for (int i = 0; i < 3; i++)
+        {
+            levelByGrade[i] = FriendshipDataLoader.Instance.GetDataByGrade(i + 1)
+                .Select(data => (data.exp, data.reward))
+                .ToList();        
+        }
 
         expGauge.value = 0f;
     }
@@ -75,13 +85,24 @@ public class FriendshipManager : MonoBehaviour
 
     private void Update()
     {
+        //// 각 고양이의 최대 경험치 제한 체크
+        //foreach (var friendship in catFriendships.Values)
+        //{
+        //    if (friendship.currentExp >= levelRequirements[4].exp)
+        //    {
+        //        friendship.currentExp = levelRequirements[4].exp;
+        //        UpdateFriendshipUI(friendship.catGrade);
+        //    }
+        //}
+
         // 각 고양이의 최대 경험치 제한 체크
         foreach (var friendship in catFriendships.Values)
         {
-            if (friendship.currentExp >= levelRequirements[4].exp)
+            int grade = friendship.catGrade;
+            if (levelByGrade.ContainsKey(grade) && friendship.currentExp >= levelByGrade[grade - 1][4].exp)
             {
-                friendship.currentExp = levelRequirements[4].exp;
-                UpdateFriendshipUI(friendship.catGrade);
+                friendship.currentExp = levelByGrade[grade - 1][4].exp;
+                UpdateFriendshipUI(grade);
             }
         }
     }
@@ -104,16 +125,31 @@ public class FriendshipManager : MonoBehaviour
         var friendship = catFriendships[catGrade];
         friendship.currentExp += expAmount;
 
+        //// 최대 경험치 제한
+        //if (friendship.currentExp >= levelRequirements[4].exp)
+        //{
+        //    friendship.currentExp = levelRequirements[4].exp;
+        //}
+
         // 최대 경험치 제한
-        if (friendship.currentExp >= levelRequirements[4].exp)
+        if (friendship.currentExp >= levelByGrade[catGrade - 1][4].exp)
         {
-            friendship.currentExp = levelRequirements[4].exp;
+            friendship.currentExp = levelByGrade[catGrade - 1][4].exp;
         }
+
+        //// 각 레벨 해금 상태 체크
+        //for (int i = 0; i < 5; i++)
+        //{
+        //    if (friendship.currentExp >= levelRequirements[i].exp)
+        //    {
+        //        friendship.isLevelUnlocked[i] = true;
+        //    }
+        //}
 
         // 각 레벨 해금 상태 체크
         for (int i = 0; i < 5; i++)
         {
-            if (friendship.currentExp >= levelRequirements[i].exp)
+            if (friendship.currentExp >= levelByGrade[catGrade - 1][i].exp)
             {
                 friendship.isLevelUnlocked[i] = true;
             }
@@ -140,15 +176,26 @@ public class FriendshipManager : MonoBehaviour
         }
 
         // 현재 레벨과 다음 레벨 경험치 계산
-        int currentLevel = 0;
-        int nextLevelExp = levelRequirements[0].exp;
+        //int nextLevelExp = levelRequirements[0].exp;
+        int nextLevelExp = levelByGrade[catGrade - 1][0].exp;
 
+        //for (int i = 4; i >= 0; i--)
+        //{
+        //    if (friendship.currentExp >= levelRequirements[i].exp)
+        //    {
+        //        currentLevel = i;
+        //        nextLevelExp = i < 4 ? levelRequirements[i + 1].exp : levelRequirements[i].exp;
+        //        break;
+        //    }
+        //}
+
+        // 이게 현재 경험치가 경험치 요구량이 됐을 때인데 여기서 말고 버튼 누를때 함수에 적어야함
         for (int i = 4; i >= 0; i--)
         {
-            if (friendship.currentExp >= levelRequirements[i].exp)
+            if (friendship.currentExp >= levelByGrade[catGrade - 1][i].exp)
             {
-                currentLevel = i;
-                nextLevelExp = i < 4 ? levelRequirements[i + 1].exp : levelRequirements[i].exp;
+
+                nextLevelExp = i < 4 ? levelByGrade[catGrade - 1][i + 1].exp : levelByGrade[catGrade - 1][i].exp;
                 break;
             }
         }
@@ -169,6 +216,7 @@ public class FriendshipManager : MonoBehaviour
         // 버튼 상태 업데이트
         DictionaryManager.Instance.UpdateFriendshipButtonStates(catGrade);
     }
+
 
     // 특정 고양이의 우정도 정보 가져오기
     public (int currentExp, bool[] isUnlocked, bool[] isClaimed) GetFriendshipInfo(int catGrade)

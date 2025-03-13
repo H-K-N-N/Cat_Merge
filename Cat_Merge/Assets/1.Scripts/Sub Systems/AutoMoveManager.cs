@@ -1,8 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 // 고양이 자동 이동 관련 스크립트
-public class AutoMoveManager : MonoBehaviour
+public class AutoMoveManager : MonoBehaviour, ISaveable
 {
     #region Variables
     public static AutoMoveManager Instance { get; private set; }
@@ -12,7 +13,7 @@ public class AutoMoveManager : MonoBehaviour
     [SerializeField] private GameObject autoMovePanel;              // 자동 이동 On/Off 패널
     [SerializeField] private Button closeAutoMovePanelButton;       // 자동 이동 패널 닫기 버튼
     [SerializeField] private Button autoMoveStateButton;            // 자동 이동 상태 버튼
-    private float autoMoveTime = 10f;                               // 자동 이동 시간
+    private const float autoMoveTime = 10f;                         // 자동 이동 시간
     private bool isAutoMoveEnabled;                                 // 자동 이동 활성화 상태
     private bool previousAutoMoveState;                             // 이전 상태 저장
 
@@ -197,5 +198,38 @@ public class AutoMoveManager : MonoBehaviour
 
     // ======================================================================================================================
 
+    #region Save System
+    [Serializable]
+    private class SaveData
+    {
+        public bool isAutoMoveEnabled;          // 자동 이동 활성화 상태
+        public bool previousAutoMoveState;      // 이전 상태
+    }
+
+    public string GetSaveData()
+    {
+        SaveData data = new SaveData
+        {
+            isAutoMoveEnabled = this.isAutoMoveEnabled,
+            previousAutoMoveState = this.previousAutoMoveState,
+        };
+        return JsonUtility.ToJson(data);
+    }
+
+    public void LoadFromData(string data)
+    {
+        if (string.IsNullOrEmpty(data)) return;
+
+        SaveData savedData = JsonUtility.FromJson<SaveData>(data);
+        this.isAutoMoveEnabled = savedData.isAutoMoveEnabled;
+        this.previousAutoMoveState = savedData.previousAutoMoveState;
+
+        // UI 상태 업데이트
+        UpdateAutoMoveButtonColor();
+
+        // 모든 고양이에게 자동이동 상태 적용
+        ApplyAutoMoveStateToAllCats();
+    }
+    #endregion
 
 }

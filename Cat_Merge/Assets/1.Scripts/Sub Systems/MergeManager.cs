@@ -188,8 +188,8 @@ public class MergeManager : MonoBehaviour, ISaveable
     [Serializable]
     private class SaveData
     {
-        public bool isMergeEnabled;
-        public bool previousMergeState;
+        public bool isMergeEnabled;         // 머지 활성화 상태
+        public bool previousMergeState;     // 이전 상태
     }
 
     public string GetSaveData()
@@ -214,4 +214,5 @@ public class MergeManager : MonoBehaviour, ISaveable
         UpdateMergeButtonColor();
     }
     #endregion
+
 }

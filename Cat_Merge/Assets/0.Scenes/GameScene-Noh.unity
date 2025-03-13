@@ -9478,12 +9478,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e86346600c1117488acdbfb68f79d2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  openAutoMergePanelButton: {fileID: 1736587142}
   autoMergePanel: {fileID: 355143274}
+  openAutoMergePanelButton: {fileID: 1736587142}
   closeAutoMergePanelButton: {fileID: 461313990}
   autoMergeStateButton: {fileID: 909696355}
   autoMergeCostText: {fileID: 521732957}
   autoMergeTimerText: {fileID: 1767247614}
+  explainText: {fileID: 1286327341}
 --- !u!114 &331588644
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9866,17 +9867,17 @@ MonoBehaviour:
     toggleButton: {fileID: 33242983}
     handle: {fileID: 1429066293}
     toggleButtonImage: {fileID: 0}
-    isOn: 1
+    isOn: 0
   shakingSettings:
     toggleButton: {fileID: 1945470828}
     handle: {fileID: 1452810566}
     toggleButtonImage: {fileID: 0}
-    isOn: 1
+    isOn: 0
   savingSettings:
     toggleButton: {fileID: 1625863178}
     handle: {fileID: 449944912}
     toggleButtonImage: {fileID: 0}
-    isOn: 1
+    isOn: 0
   slotPanel: {fileID: 270211957}
   slotButtons:
   - {fileID: 1281227372}
@@ -47072,8 +47073,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 60}
-  m_SizeDelta: {x: 80, y: 40}
+  m_AnchoredPosition: {x: 0, y: 70}
+  m_SizeDelta: {x: 150, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1767247614
 MonoBehaviour:

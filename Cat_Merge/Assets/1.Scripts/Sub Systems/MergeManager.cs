@@ -1,8 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 // 고양이 머지 Script
-public class MergeManager : MonoBehaviour
+public class MergeManager : MonoBehaviour, ISaveable
 {
     #region Variables
     public static MergeManager Instance { get; private set; }
@@ -181,4 +182,36 @@ public class MergeManager : MonoBehaviour
     }
     #endregion
 
+    // ======================================================================================================================
+
+    #region Save System
+    [Serializable]
+    private class SaveData
+    {
+        public bool isMergeEnabled;
+        public bool previousMergeState;
+    }
+
+    public string GetSaveData()
+    {
+        SaveData data = new SaveData
+        {
+            isMergeEnabled = this.isMergeEnabled,
+            previousMergeState = this.previousMergeState
+        };
+        return JsonUtility.ToJson(data);
+    }
+
+    public void LoadFromData(string data)
+    {
+        if (string.IsNullOrEmpty(data)) return;
+
+        SaveData savedData = JsonUtility.FromJson<SaveData>(data);
+        this.isMergeEnabled = savedData.isMergeEnabled;
+        this.previousMergeState = savedData.previousMergeState;
+
+        // UI 상태 업데이트
+        UpdateMergeButtonColor();
+    }
+    #endregion
 }

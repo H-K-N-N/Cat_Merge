@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Text;
 using GooglePlayGames;
@@ -59,14 +60,24 @@ public class GoogleManager : MonoBehaviour
     // 상수 및 변수
     private const string fileName = "GameCompleteState";
     private const string gameScene = "GameScene-Han";
+
     private TextMeshProUGUI logText;
+
     private GameObject loadingScreen;
+
     private bool isLoggedIn = false;
     private bool isDataLoaded = false;
     private CompleteGameState loadedGameState;
     private Dictionary<Type, string> cachedData = new Dictionary<Type, string>();
+
     private float autoSaveInterval = 30f;
     private float autoSaveTimer = 0f;
+
+    // 추가된 변수
+    private bool isSaving = false;
+
+    // 추가된 델리게이트: 저장 완료 콜백
+    public delegate void SaveCompletedCallback(bool success);
 
     #endregion
 
@@ -117,7 +128,7 @@ public class GoogleManager : MonoBehaviour
         }
     }
 
-    // 씬 로드 완료 시 호출되는 메서드
+    // 씬 로드 완료시 데이터를 적용하는 함수
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         // 게임 씬이 로드되면 데이터 적용
@@ -128,25 +139,11 @@ public class GoogleManager : MonoBehaviour
         }
     }
 
-    private System.Collections.IEnumerator ApplyDataAndShowScreenCoroutine()
+    // 데이터 적용 및 화면 표시를 지연시키는 코루틴
+    private IEnumerator ApplyDataAndShowScreenCoroutine()
     {
         yield return new WaitForSecondsRealtime(1.0f);
         ApplyDataAndShowScreen();
-    }
-
-    // 게임 종료 시 자동 저장
-    private void OnApplicationQuit()
-    {
-        SaveGameState();
-    }
-
-    // 앱이 백그라운드로 가면 자동 저장
-    private void OnApplicationPause(bool pause)
-    {
-        if (pause)
-        {
-            SaveGameState();
-        }
     }
 
     #endregion
@@ -159,12 +156,13 @@ public class GoogleManager : MonoBehaviour
         logText = GameObject.Find("Canvas/Title UI/Log Text")?.GetComponent<TextMeshProUGUI>();
     }
 
+    // 구글 플레이 로그인을 시도하는 함수
     public void GPGS_LogIn()
     {
         PlayGamesPlatform.Instance.Authenticate(ProcessAuthentication);
     }
 
-    // 구글 로그인
+    // 구글 로그인 결과를 처리하는 함수
     internal void ProcessAuthentication(SignInStatus status)
     {
         if (status == SignInStatus.Success)
@@ -195,10 +193,13 @@ public class GoogleManager : MonoBehaviour
 
     #region 데이터 저장 및 로드
 
-    // 전체 게임 상태 저장
+    // 전체 게임 상태를 저장하는 함수
     public void SaveGameState()
     {
         if (!isLoggedIn) return;
+
+        // 이미 저장 중이면 중복 저장 방지
+        if (isSaving) return;
 
         CompleteGameState gameState = new CompleteGameState();
         ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
@@ -218,9 +219,35 @@ public class GoogleManager : MonoBehaviour
         SaveToCloud(jsonData);
     }
 
-    // 클라우드에 데이터 저장
-    private void SaveToCloud(string jsonData)
+    // 동기식 저장 함수 (종료 시 사용)
+    public void SaveGameStateSync(SaveCompletedCallback callback = null)
     {
+        if (!isLoggedIn)
+        {
+            if (callback != null) callback(false);
+            return;
+        }
+
+        Debug.Log("동기식 저장 시작...");
+        CompleteGameState gameState = new CompleteGameState();
+        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
+
+        foreach (ISaveable saveable in saveables)
+        {
+            MonoBehaviour mb = (MonoBehaviour)saveable;
+            Type componentType = mb.GetType();
+            string typeName = componentType.FullName;
+            string data = saveable.GetSaveData();
+
+            cachedData[componentType] = data;
+            gameState.AddComponentData(typeName, data);
+        }
+
+        string jsonData = JsonUtility.ToJson(gameState);
+
+        // 저장 완료 플래그
+        bool saveCompleted = false;
+
         ISavedGameClient saveGameClient = PlayGamesPlatform.Instance.SavedGame;
         saveGameClient.OpenWithAutomaticConflictResolution(
             fileName,
@@ -235,12 +262,84 @@ public class GoogleManager : MonoBehaviour
                         .WithUpdatedDescription("Last saved: " + DateTime.Now.ToString())
                         .Build();
 
-                    saveGameClient.CommitUpdate(game, update, data, (saveStatus, savedGame) => { });
+                    saveGameClient.CommitUpdate(game, update, data, (saveStatus, savedGame) => {
+                        saveCompleted = true;
+                        bool success = saveStatus == SavedGameRequestStatus.Success;
+                        if (success)
+                        {
+                            Debug.Log("동기식 클라우드 저장 성공: " + DateTime.Now.ToString());
+                        }
+                        else
+                        {
+                            Debug.LogWarning("동기식 클라우드 저장 실패: " + saveStatus);
+                        }
+
+                        if (callback != null) callback(success);
+                    });
+                }
+                else
+                {
+                    Debug.LogError("동기식 저장 게임 열기 실패: " + status);
+                    saveCompleted = true;
+                    if (callback != null) callback(false);
+                }
+            });
+
+        // 저장이 너무 오래 걸리는 경우를 대비한 타임아웃 처리
+        StartCoroutine(SaveTimeout(callback));
+    }
+
+    // 저장 타임아웃을 처리하는 코루틴
+    private IEnumerator SaveTimeout(SaveCompletedCallback callback)
+    {
+        // 최대 3초 대기
+        yield return new WaitForSeconds(2.0f);
+
+        // 아직 콜백이 호출되지 않았다면 호출
+        if (callback != null) callback(true);
+    }
+
+    // 클라우드에 데이터를 저장하는 함수
+    private void SaveToCloud(string jsonData)
+    {
+        isSaving = true;
+        Debug.Log("클라우드 저장 시작...");
+
+        ISavedGameClient saveGameClient = PlayGamesPlatform.Instance.SavedGame;
+        saveGameClient.OpenWithAutomaticConflictResolution(
+            fileName,
+            DataSource.ReadCacheOrNetwork,
+            ConflictResolutionStrategy.UseLongestPlaytime,
+            (status, game) =>
+            {
+                if (status == SavedGameRequestStatus.Success)
+                {
+                    byte[] data = Encoding.UTF8.GetBytes(jsonData);
+                    SavedGameMetadataUpdate update = new SavedGameMetadataUpdate.Builder()
+                        .WithUpdatedDescription("Last saved: " + DateTime.Now.ToString())
+                        .Build();
+
+                    saveGameClient.CommitUpdate(game, update, data, (saveStatus, savedGame) => {
+                        isSaving = false;
+                        if (saveStatus == SavedGameRequestStatus.Success)
+                        {
+                            Debug.Log("클라우드 저장 성공: " + DateTime.Now.ToString());
+                        }
+                        else
+                        {
+                            Debug.LogWarning("클라우드 저장 실패: " + saveStatus);
+                        }
+                    });
+                }
+                else
+                {
+                    isSaving = false;
+                    Debug.LogError("저장 게임 열기 실패: " + status);
                 }
             });
     }
 
-    // 전체 게임 상태 로드
+    // 전체 게임 상태를 로드하는 함수
     public void LoadGameState()
     {
         if (!isLoggedIn) return;
@@ -273,7 +372,7 @@ public class GoogleManager : MonoBehaviour
             });
     }
 
-    // 로드된 데이터를 캐시에 저장
+    // 로드된 데이터를 캐시에 저장하는 함수
     private void CacheLoadedData()
     {
         if (!isDataLoaded || loadedGameState == null) return;
@@ -294,7 +393,7 @@ public class GoogleManager : MonoBehaviour
         }
     }
 
-    // 로드된 게임 상태 적용
+    // 로드된 게임 상태를 적용하는 함수
     public void ApplyLoadedGameState()
     {
         if (!isDataLoaded) return;
@@ -317,7 +416,7 @@ public class GoogleManager : MonoBehaviour
 
     #region 로딩 화면 관리
 
-    // 로딩 화면 표시/숨김 처리
+    // 로딩 화면을 표시하거나 숨기는 함수
     public void ShowLoadingScreen(bool show)
     {
         if (loadingScreen != null)
@@ -334,19 +433,125 @@ public class GoogleManager : MonoBehaviour
         }
     }
 
-    // 데이터 적용 후 화면 표시
+    // 데이터를 적용하고 화면을 표시하는 함수
     private void ApplyDataAndShowScreen()
     {
         ApplyLoadedGameState();
         StartCoroutine(HideLoadingScreenCoroutine());
     }
 
-    private System.Collections.IEnumerator HideLoadingScreenCoroutine()
+    // 로딩 화면을 숨기는 코루틴
+    private IEnumerator HideLoadingScreenCoroutine()
     {
         yield return new WaitForSecondsRealtime(0.5f);
         ShowLoadingScreen(false);
     }
 
+    #endregion
+
+    #region OnApplication
+
+    // 현재 저장에 문제가 있는 경우들 (Android)
+    // 게임종료버튼으로 나가기 = 저장 O
+    // 홈으로 나갔다가 다시 들어와서 게임종료버튼으로 나가기 = 저장 O
+    // 홈으로 나갔다가 다시 들어와서 여러탭버튼 누르고 앱 지우기 = 저장 O
+    // 홈으로 나갔다가 여러탭버튼 누르고 앱 지우기 = 저장 X
+    // 실행중 여러탭버튼 누르고 앱 지우기 = 저장 X
+
+    // 앱 종료시 동기식 저장을 실행하는 함수
+    private void OnApplicationQuit()
+    {
+        // 동기식 저장 시도
+        SaveGameStateSyncImmediate();
+    }
+
+    // 홈 버튼으로 나가면 자동 저장 (백그라운드로 전환)
+    private void OnApplicationPause(bool pause)
+    {
+        if (pause)
+        {
+            // 백그라운드로 전환 시 즉시 동기식 저장
+            SaveGameStateSyncImmediate();
+        }
+    }
+
+    // 다른 앱으로 전환시 자동 저장
+    private void OnApplicationFocus(bool focus)
+    {
+        if (!focus)
+        {
+            // 포커스 상실 시 즉시 동기식 저장
+            SaveGameStateSyncImmediate();
+        }
+    }
+
+    // 즉시 동기식 저장 함수 (비정상 종료 대비)
+    private void SaveGameStateSyncImmediate()
+    {
+        if (!isLoggedIn) return;
+
+        CompleteGameState gameState = new CompleteGameState();
+        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
+
+        foreach (ISaveable saveable in saveables)
+        {
+            try
+            {
+                MonoBehaviour mb = (MonoBehaviour)saveable;
+                Type componentType = mb.GetType();
+                string typeName = componentType.FullName;
+                string data = saveable.GetSaveData();
+
+                cachedData[componentType] = data;
+                gameState.AddComponentData(typeName, data);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"저장 중 오류 발생: {e.Message}");
+            }
+        }
+
+        string jsonData = JsonUtility.ToJson(gameState);
+
+        // 즉시 저장을 위한 동기 방식 시도
+        try
+        {
+            ISavedGameClient saveGameClient = PlayGamesPlatform.Instance.SavedGame;
+            saveGameClient.OpenWithAutomaticConflictResolution(
+                fileName,
+                DataSource.ReadCacheOrNetwork,
+                ConflictResolutionStrategy.UseLongestPlaytime,
+                (status, game) =>
+                {
+                    if (status == SavedGameRequestStatus.Success)
+                    {
+                        byte[] data = Encoding.UTF8.GetBytes(jsonData);
+                        SavedGameMetadataUpdate update = new SavedGameMetadataUpdate.Builder()
+                            .WithUpdatedDescription("Emergency save: " + DateTime.Now.ToString())
+                            .Build();
+
+                        saveGameClient.CommitUpdate(game, update, data, (saveStatus, savedGame) => {
+                            if (saveStatus == SavedGameRequestStatus.Success)
+                            {
+                                Debug.Log("즉시 저장 성공: " + DateTime.Now.ToString());
+                            }
+                            else
+                            {
+                                Debug.LogWarning("즉시 저장 실패: " + saveStatus);
+                            }
+                        });
+                    }
+                    else
+                    {
+                        Debug.LogError("즉시 저장 게임 열기 실패: " + status);
+                    }
+                });
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"즉시 저장 중 예외 발생: {e.Message}");
+        }
+    }
     #endregion
 
 }

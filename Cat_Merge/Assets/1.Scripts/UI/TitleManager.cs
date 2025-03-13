@@ -3,14 +3,17 @@ using UnityEngine.SceneManagement;
 
 public class TitleManager : MonoBehaviour
 {
+    private void Start()
+    {
+        //// 60프레임 고정
+        //Application.targetFrameRate = 60;
+    }
+
     // 게임 시작
     public void GameStart()
     {
-        // 게임 시작 전 데이터 저장 (혹시 모를 경우를 대비)
         if (GoogleManager.Instance != null)
         {
-            GoogleManager.Instance.SaveGameState();
-
             // 로딩 화면 표시 요청
             GoogleManager.Instance.ShowLoadingScreen(true);
         }

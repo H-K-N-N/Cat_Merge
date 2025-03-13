@@ -1,13 +1,14 @@
-using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using UnityEngine;
+using UnityEngine.UI;
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
 using GooglePlayGames.BasicApi.SavedGame;
 using TMPro;
-using UnityEngine;
-using UnityEngine.SceneManagement;
+using System.Text;
+using System;
+using System.Linq;
 
 // 저장/로드가 필요한 컴포넌트에 적용할 인터페이스
 public interface ISaveable
@@ -17,60 +18,19 @@ public interface ISaveable
 }
 
 [System.Serializable]
-public class ComponentData
-{
-    public string path;
-    public string data;
-}
-
-[System.Serializable]
 public class CompleteGameState
 {
-    public List<ComponentData> components = new List<ComponentData>();
-
-    // Dictionary를 List로 변환하는 메서드
-    public void AddComponentData(string path, string data)
-    {
-        components.Add(new ComponentData { path = path, data = data });
-    }
-
-    // List에서 Dictionary처럼 데이터 조회
-    public bool TryGetValue(string path, out string data)
-    {
-        foreach (var component in components)
-        {
-            if (component.path == path)
-            {
-                data = component.data;
-                return true;
-            }
-        }
-        data = null;
-        return false;
-    }
+    public Dictionary<string, string> componentData = new Dictionary<string, string>();
 }
 
 public class GoogleManager : MonoBehaviour
 {
-    #region 변수들
-
     public static GoogleManager Instance { get; private set; }
 
-    // 상수 및 변수
-    private const string fileName = "GameCompleteState";
-    private const string gameScene = "GameScene-Han";
-    private TextMeshProUGUI logText;
-    private GameObject loadingScreen;
-    private bool isLoggedIn = false;
-    private bool isDataLoaded = false;
-    private CompleteGameState loadedGameState;
-    private Dictionary<Type, string> cachedData = new Dictionary<Type, string>();
-    private float autoSaveInterval = 30f;
-    private float autoSaveTimer = 0f;
+    private TextMeshProUGUI logText;                        // 임시 로그인 로그 텍스트 (나중에는 삭제할 예정)
 
-    #endregion
-
-    #region 초기화 및 이벤트 처리
+    private const string fileName = "GameCompleteState";    // 저장할 파일명
+    private bool isLoggedIn = false;                        // 로그인 여부 확인
 
     private void Awake()
     {
@@ -78,7 +38,6 @@ public class GoogleManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else
         {
@@ -86,74 +45,15 @@ public class GoogleManager : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
-    {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
-
     public void Start()
     {
         PlayGamesPlatform.DebugLogEnabled = true;
         PlayGamesPlatform.Activate();
-        UpdateLogText();
+        UpdateLogText();  // logText 찾기
         GPGS_LogIn();
-
-        loadingScreen = GameObject.Find("LoadingScreen");
-        if (loadingScreen != null)
-        {
-            loadingScreen.SetActive(false);
-            DontDestroyOnLoad(loadingScreen);
-        }
     }
 
-    private void Update()
-    {
-        // 주기적 자동 저장 처리
-        autoSaveTimer += Time.deltaTime;
-        if (autoSaveTimer >= autoSaveInterval)
-        {
-            SaveGameState();
-            autoSaveTimer = 0f;
-        }
-    }
-
-    // 씬 로드 완료 시 호출되는 메서드
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        // 게임 씬이 로드되면 데이터 적용
-        if (scene.name == gameScene)
-        {
-            ShowLoadingScreen(true);
-            StartCoroutine(ApplyDataAndShowScreenCoroutine());
-        }
-    }
-
-    private System.Collections.IEnumerator ApplyDataAndShowScreenCoroutine()
-    {
-        yield return new WaitForSecondsRealtime(1.0f);
-        ApplyDataAndShowScreen();
-    }
-
-    // 게임 종료 시 자동 저장
-    private void OnApplicationQuit()
-    {
-        SaveGameState();
-    }
-
-    // 앱이 백그라운드로 가면 자동 저장
-    private void OnApplicationPause(bool pause)
-    {
-        if (pause)
-        {
-            SaveGameState();
-        }
-    }
-
-    #endregion
-
-    #region 구글 로그인 및 UI
-
-    // logText 찾아서 설정하는 함수
+    // 임시 logText 찾아서 설정하는 함수
     private void UpdateLogText()
     {
         logText = GameObject.Find("Canvas/Title UI/Log Text")?.GetComponent<TextMeshProUGUI>();
@@ -183,17 +83,15 @@ public class GoogleManager : MonoBehaviour
         }
         else
         {
-            isLoggedIn = false;
             if (logText != null)
             {
                 logText.text = "로그인 실패";
             }
+            isLoggedIn = false;
         }
     }
 
-    #endregion
-
-    #region 데이터 저장 및 로드
+    // ======================================================================================================================
 
     // 전체 게임 상태 저장
     public void SaveGameState()
@@ -201,26 +99,20 @@ public class GoogleManager : MonoBehaviour
         if (!isLoggedIn) return;
 
         CompleteGameState gameState = new CompleteGameState();
-        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
+
+        // Scene에서 ISaveable 인터페이스를 구현한 모든 컴포넌트 찾기
+        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>().OfType<ISaveable>().ToArray();
 
         foreach (ISaveable saveable in saveables)
         {
+            // 각 컴포넌트의 고유 식별자로 MonoBehaviour의 전체 경로 사용
             MonoBehaviour mb = (MonoBehaviour)saveable;
-            Type componentType = mb.GetType();
-            string typeName = componentType.FullName;
-            string data = saveable.GetSaveData();
-
-            cachedData[componentType] = data;
-            gameState.AddComponentData(typeName, data);
+            string path = GetGameObjectPath(mb.gameObject);
+            gameState.componentData[path] = saveable.GetSaveData();
         }
 
         string jsonData = JsonUtility.ToJson(gameState);
-        SaveToCloud(jsonData);
-    }
 
-    // 클라우드에 데이터 저장
-    private void SaveToCloud(string jsonData)
-    {
         ISavedGameClient saveGameClient = PlayGamesPlatform.Instance.SavedGame;
         saveGameClient.OpenWithAutomaticConflictResolution(
             fileName,
@@ -235,7 +127,14 @@ public class GoogleManager : MonoBehaviour
                         .WithUpdatedDescription("Last saved: " + DateTime.Now.ToString())
                         .Build();
 
-                    saveGameClient.CommitUpdate(game, update, data, (saveStatus, savedGame) => { });
+                    saveGameClient.CommitUpdate(game, update, data, (saveStatus, savedGame) =>
+                    {
+                        Debug.Log(saveStatus == SavedGameRequestStatus.Success ? "게임 상태 저장 성공" : "게임 상태 저장 실패");
+                    });
+                }
+                else
+                {
+                    Debug.Log("파일을 열 수 없음 (저장 실패)");
                 }
             });
     }
@@ -259,94 +158,64 @@ public class GoogleManager : MonoBehaviour
                         if (readStatus == SavedGameRequestStatus.Success)
                         {
                             string jsonData = Encoding.UTF8.GetString(data);
-                            loadedGameState = JsonUtility.FromJson<CompleteGameState>(jsonData);
-                            isDataLoaded = true;
-                            CacheLoadedData();
+                            CompleteGameState gameState = JsonUtility.FromJson<CompleteGameState>(jsonData);
 
-                            if (SceneManager.GetActiveScene().name == gameScene)
+                            if (gameState != null)
                             {
-                                ApplyLoadedGameState();
+                                // Scene의 모든 ISaveable 컴포넌트 찾기
+                                ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>().OfType<ISaveable>().ToArray();
+
+                                foreach (ISaveable saveable in saveables)
+                                {
+                                    MonoBehaviour mb = (MonoBehaviour)saveable;
+                                    string path = GetGameObjectPath(mb.gameObject);
+
+                                    if (gameState.componentData.TryGetValue(path, out string componentData))
+                                    {
+                                        saveable.LoadFromData(componentData);
+                                    }
+                                }
+                                Debug.Log("게임 상태 로드 성공");
                             }
                         }
+                        else
+                        {
+                            Debug.Log("데이터 읽기 실패");
+                        }
                     });
+                }
+                else
+                {
+                    Debug.Log("파일을 열 수 없음 (로드 실패)");
                 }
             });
     }
 
-    // 로드된 데이터를 캐시에 저장
-    private void CacheLoadedData()
+    // GameObject의 전체 경로를 얻는 헬퍼 함수
+    private string GetGameObjectPath(GameObject obj)
     {
-        if (!isDataLoaded || loadedGameState == null) return;
-
-        cachedData.Clear();
-
-        foreach (var component in loadedGameState.components)
+        string path = obj.name;
+        while (obj.transform.parent != null)
         {
-            try
-            {
-                Type componentType = Type.GetType(component.path);
-                if (componentType != null)
-                {
-                    cachedData[componentType] = component.data;
-                }
-            }
-            catch (Exception) { }
+            obj = obj.transform.parent.gameObject;
+            path = obj.name + "/" + path;
         }
+        return path;
     }
 
-    // 로드된 게임 상태 적용
-    public void ApplyLoadedGameState()
+    // 게임 종료 시 자동 저장
+    private void OnApplicationQuit()
     {
-        if (!isDataLoaded) return;
-
-        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
-
-        foreach (ISaveable saveable in saveables)
-        {
-            MonoBehaviour mb = (MonoBehaviour)saveable;
-            Type componentType = mb.GetType();
-
-            if (cachedData.TryGetValue(componentType, out string componentData))
-            {
-                saveable.LoadFromData(componentData);
-            }
-        }
+        SaveGameState();
     }
 
-    #endregion
-
-    #region 로딩 화면 관리
-
-    // 로딩 화면 표시/숨김 처리
-    public void ShowLoadingScreen(bool show)
+    // 앱이 백그라운드로 가면 자동 저장
+    private void OnApplicationPause(bool pause)
     {
-        if (loadingScreen != null)
-        {
-            loadingScreen.SetActive(show);
-
-            // 로딩 화면 표시 중에는 게임 시간 정지
-            Time.timeScale = show ? 0f : 1f;
-
-            if (show)
-            {
-                DontDestroyOnLoad(loadingScreen);
-            }
-        }
+        if (pause) SaveGameState();
     }
 
-    // 데이터 적용 후 화면 표시
-    private void ApplyDataAndShowScreen()
-    {
-        ApplyLoadedGameState();
-        StartCoroutine(HideLoadingScreenCoroutine());
-    }
+    // ======================================================================================================================
 
-    private System.Collections.IEnumerator HideLoadingScreenCoroutine()
-    {
-        yield return new WaitForSecondsRealtime(0.5f);
-        ShowLoadingScreen(false);
-    }
-
-    #endregion
 
 }

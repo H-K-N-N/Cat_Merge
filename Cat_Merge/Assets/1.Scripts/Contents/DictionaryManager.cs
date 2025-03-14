@@ -369,7 +369,7 @@ public class DictionaryManager : MonoBehaviour
 
     private void InitializeInformationCatDefaultImage()
     {
-        informationCatDefaultImage = Resources.Load<Sprite>("Sprites/UI/I_UI_Book_mission/I_UI_Book_CatBG.9");
+        //informationCatDefaultImage = Resources.Load<Sprite>("Sprites/UI/I_UI_Book_mission/I_UI_Book_CatBG.9");
     }
 
     // 도감이 활성화 되거나 서브 메뉴를 누르면 InformationPanel을 기본 정보로 업데이트 해주는 함수
@@ -378,7 +378,8 @@ public class DictionaryManager : MonoBehaviour
         currentSelectedCatGrade = -1;
 
         // 이미지 설정
-        informationCatIcon.sprite = informationCatDefaultImage;
+        //informationCatIcon.sprite = informationCatDefaultImage;
+        informationCatIcon.gameObject.SetActive(false);
 
         // 텍스트 설정
         informationCatDetails.text = $"고양이를 선택하세요\n";
@@ -410,7 +411,9 @@ public class DictionaryManager : MonoBehaviour
         var catData = GameManager.Instance.AllCatData[catGrade];
 
         // 기존 정보 표시 코드...
+        informationCatIcon.gameObject.SetActive(true);
         informationCatIcon.sprite = catData.CatImage;
+
         string catInfo = $"이름: {catData.CatName}\n" +
                          $"등급: {catData.CatGrade}\n" +
                          $"공격력 증가량: {catData.CatDamage}%\n" +

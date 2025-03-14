@@ -2367,8 +2367,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 20}
-  m_SizeDelta: {x: -40, y: -420}
+  m_AnchoredPosition: {x: 0, y: 60}
+  m_SizeDelta: {x: -240, y: -450}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &65192551
 MonoBehaviour:
@@ -2420,9 +2420,9 @@ MonoBehaviour:
   m_fontSize: 42
   m_fontSizeBase: 42
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_fontSizeMax: 42
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
@@ -4309,8 +4309,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 424937719, guid: 3337e296e790e4a419851be3ad186d0d, type: 3}
-  m_Type: 1
+  m_Sprite: {fileID: 746541667, guid: 7a3642a3507b6c146b6ef3c45ce6bb83, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -9445,7 +9445,7 @@ MonoBehaviour:
   catCountText: {fileID: 1154106647}
   coinText: {fileID: 2118068271}
   cashText: {fileID: 1170366662}
-  exitPanel: {fileID: 1439232308}
+  quitPanel: {fileID: 1439232308}
   closeButton: {fileID: 590934428}
   okButton: {fileID: 1418207437}
 --- !u!114 &331588642
@@ -9885,7 +9885,7 @@ MonoBehaviour:
   - {fileID: 1737706394}
   - {fileID: 2136917526}
   - {fileID: 936900541}
-  exitButton: {fileID: 966167176}
+  quitButton: {fileID: 966167176}
   informationPanel: {fileID: 720113555}
   informationPanels:
   - {fileID: 2087267467}
@@ -17909,7 +17909,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &671949964
 RectTransform:
   m_ObjectHideFlags: 0
@@ -21258,7 +21258,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1011983284, guid: 327eb775c31bbe6498e5721973bf6e41, type: 3}
+  m_Sprite: {fileID: -1376067069, guid: 34fc94e199e0fa347b54f74e039482c4, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -21311,7 +21311,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: -25}
-  m_SizeDelta: {x: -40, y: -250}
+  m_SizeDelta: {x: -120, y: -310}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &775198912
 MonoBehaviour:
@@ -21363,9 +21363,9 @@ MonoBehaviour:
   m_fontSize: 54
   m_fontSizeBase: 54
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_fontSizeMax: 54
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
@@ -24594,7 +24594,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &942229726
 RectTransform:
   m_ObjectHideFlags: 0
@@ -25344,7 +25344,7 @@ GameObject:
   - component: {fileID: 966167177}
   - component: {fileID: 966167176}
   m_Layer: 5
-  m_Name: Exit Button
+  m_Name: Quit Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -27684,8 +27684,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -20}
-  m_SizeDelta: {x: -40, y: -370}
+  m_AnchoredPosition: {x: 6, y: -80}
+  m_SizeDelta: {x: -240, y: -420}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1046855099
 MonoBehaviour:
@@ -27737,9 +27737,9 @@ MonoBehaviour:
   m_fontSize: 66
   m_fontSizeBase: 66
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_fontSizeMax: 66
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
@@ -27900,7 +27900,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -250}
-  m_SizeDelta: {x: 800, y: 500}
+  m_SizeDelta: {x: 820, y: 520}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1068006905
 MonoBehaviour:
@@ -27922,8 +27922,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 1334844973, guid: bf0fd587b83409641aeab4d262b40ffd, type: 3}
-  m_Type: 1
+  m_Sprite: {fileID: 1191949916, guid: 629dbc1f29517f54993691d7db2b7fa0, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -37845,7 +37845,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1001672827, guid: e70c63f541cb30747a3c506360b9de67, type: 3}
+  m_Sprite: {fileID: 1695622955, guid: e70c63f541cb30747a3c506360b9de67, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -39220,7 +39220,7 @@ GameObject:
   - component: {fileID: 1439232311}
   - component: {fileID: 1439232310}
   m_Layer: 5
-  m_Name: Exit Panel
+  m_Name: Quit Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -43766,8 +43766,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 424937719, guid: 3337e296e790e4a419851be3ad186d0d, type: 3}
-  m_Type: 1
+  m_Sprite: {fileID: 1646711409, guid: 2d71b236315413947b259d06cb21df07, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -46144,7 +46144,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1555719473, guid: ab1d7dd86803df241b3f6cfd36c29eca, type: 3}
+  m_Sprite: {fileID: 1530143051, guid: d64711364c2341f429dc70281c39cd14, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -53770,8 +53770,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 424937719, guid: 3337e296e790e4a419851be3ad186d0d, type: 3}
-  m_Type: 1
+  m_Sprite: {fileID: -1557275608, guid: 8bb3950c5925a7a43b686e01d91455be, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4

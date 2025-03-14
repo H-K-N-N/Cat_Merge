@@ -1,8 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 // 고양이 머지 Script
-public class MergeManager : MonoBehaviour
+public class MergeManager : MonoBehaviour, ISaveable
 {
     #region Variables
     public static MergeManager Instance { get; private set; }
@@ -79,6 +80,8 @@ public class MergeManager : MonoBehaviour
         isMergeEnabled = !isMergeEnabled;
         UpdateMergeButtonColor();
         CloseMergePanel();
+
+        GoogleManager.Instance.SaveGameState();
     }
     #endregion
 
@@ -96,6 +99,8 @@ public class MergeManager : MonoBehaviour
         {
             mergePanel.SetActive(false);
         }
+
+        GoogleManager.Instance.SaveGameState();
     }
 
     // 전투 종료시 버튼 및 기능 기존 상태로 되돌려놓는 함수
@@ -104,6 +109,8 @@ public class MergeManager : MonoBehaviour
         isMergeEnabled = previousMergeState;
 
         openMergePanelButton.interactable = true;
+
+        GoogleManager.Instance.SaveGameState();
     }
     #endregion
 
@@ -178,6 +185,39 @@ public class MergeManager : MonoBehaviour
             }
         }
         return null;
+    }
+    #endregion
+
+    // ======================================================================================================================
+
+    #region Save System
+    [Serializable]
+    private class SaveData
+    {
+        public bool isMergeEnabled;         // 머지 활성화 상태
+        public bool previousMergeState;     // 이전 상태
+    }
+
+    public string GetSaveData()
+    {
+        SaveData data = new SaveData
+        {
+            isMergeEnabled = this.isMergeEnabled,
+            previousMergeState = this.previousMergeState
+        };
+        return JsonUtility.ToJson(data);
+    }
+
+    public void LoadFromData(string data)
+    {
+        if (string.IsNullOrEmpty(data)) return;
+
+        SaveData savedData = JsonUtility.FromJson<SaveData>(data);
+        this.isMergeEnabled = savedData.isMergeEnabled;
+        this.previousMergeState = savedData.previousMergeState;
+
+        // UI 상태 업데이트
+        UpdateMergeButtonColor();
     }
     #endregion
 

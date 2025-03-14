@@ -136,7 +136,7 @@ public class OptionManager : MonoBehaviour
     [Header("---[System]")]
     [SerializeField] private Transform slotPanel;                   // 슬롯 버튼들의 부모 패널
     [SerializeField] private Button[] slotButtons;                  // 슬롯 버튼 배열
-    [SerializeField] private Button exitButton;                     // 나가기 버튼
+    [SerializeField] private Button quitButton;                     // 나가기 버튼
     [SerializeField] private GameObject informationPanel;           // 정보 패널들의 부모 패널
     [SerializeField] private GameObject[] informationPanels;        // 정보 패널 배열
     [SerializeField] private Button informationPanelBackButton;     // 정보 패널 뒤로가기 버튼
@@ -521,11 +521,11 @@ public class OptionManager : MonoBehaviour
             }
         });
 
-        // exitButton에 CanvasGroup 추가
-        CanvasGroup exitButtonGroup = exitButton.gameObject.GetComponent<CanvasGroup>();
+        // quitButton에 CanvasGroup 추가
+        CanvasGroup exitButtonGroup = quitButton.gameObject.GetComponent<CanvasGroup>();
         if (exitButtonGroup == null)
         {
-            exitButtonGroup = exitButton.gameObject.AddComponent<CanvasGroup>();
+            exitButtonGroup = quitButton.gameObject.AddComponent<CanvasGroup>();
         }
 
         // informationPanelBackButton에 CanvasGroup 추가
@@ -543,8 +543,8 @@ public class OptionManager : MonoBehaviour
             ResetSystemMenu();
         });
 
-        // Exit 버튼 클릭 이벤트 추가
-        exitButton.onClick.AddListener(() => { GameManager.Instance.HandleExitInput(); });
+        // Quit 버튼 클릭 이벤트 추가
+        quitButton.onClick.AddListener(() => { GameManager.Instance.HandleQuitInput(); });
     }
 
     // 시스템 메뉴 초기화 함수
@@ -572,9 +572,9 @@ public class OptionManager : MonoBehaviour
             buttonGroup.alpha = 1f;
         }
 
-        // exit 버튼 초기화
-        exitButton.gameObject.SetActive(true);
-        exitButton.GetComponent<CanvasGroup>().alpha = 1f;
+        // Quit 버튼 초기화
+        quitButton.gameObject.SetActive(true);
+        quitButton.GetComponent<CanvasGroup>().alpha = 1f;
 
         // back 버튼 초기화
         informationPanelBackButton.GetComponent<CanvasGroup>().alpha = 0f;
@@ -606,7 +606,7 @@ public class OptionManager : MonoBehaviour
                 animations.Add(FadeButton(slotButtons[i].GetComponent<CanvasGroup>(), 1f, 0f));
             }
         }
-        animations.Add(FadeButton(exitButton.GetComponent<CanvasGroup>(), 1f, 0f));
+        animations.Add(FadeButton(quitButton.GetComponent<CanvasGroup>(), 1f, 0f));
 
         foreach (var anim in animations)
         {
@@ -623,7 +623,7 @@ public class OptionManager : MonoBehaviour
                 slotButtons[i].gameObject.SetActive(false);
             }
         }
-        exitButton.gameObject.SetActive(false);
+        quitButton.gameObject.SetActive(false);
 
         // 정보 패널 활성화 및 펼치기 애니메이션
         informationPanel.SetActive(true);
@@ -727,7 +727,7 @@ public class OptionManager : MonoBehaviour
         {
             slotButtons[i].gameObject.SetActive(true);
         }
-        exitButton.gameObject.SetActive(true);
+        quitButton.gameObject.SetActive(true);
 
         // 버튼 이동 및 페이드 인 동시 실행
         List<IEnumerator> animations = new List<IEnumerator>();
@@ -739,7 +739,7 @@ public class OptionManager : MonoBehaviour
                 animations.Add(FadeButton(slotButtons[i].GetComponent<CanvasGroup>(), 0f, 1f));
             }
         }
-        animations.Add(FadeButton(exitButton.GetComponent<CanvasGroup>(), 0f, 1f));
+        animations.Add(FadeButton(quitButton.GetComponent<CanvasGroup>(), 0f, 1f));
 
         foreach (var anim in animations)
         {

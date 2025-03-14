@@ -9445,7 +9445,7 @@ MonoBehaviour:
   catCountText: {fileID: 1154106647}
   coinText: {fileID: 2118068271}
   cashText: {fileID: 1170366662}
-  exitPanel: {fileID: 1439232308}
+  quitPanel: {fileID: 1439232308}
   closeButton: {fileID: 590934428}
   okButton: {fileID: 1418207437}
 --- !u!114 &331588642
@@ -9885,7 +9885,7 @@ MonoBehaviour:
   - {fileID: 1737706394}
   - {fileID: 2136917526}
   - {fileID: 936900541}
-  exitButton: {fileID: 966167176}
+  quitButton: {fileID: 966167176}
   informationPanel: {fileID: 720113555}
   informationPanels:
   - {fileID: 2087267467}
@@ -25344,7 +25344,7 @@ GameObject:
   - component: {fileID: 966167177}
   - component: {fileID: 966167176}
   m_Layer: 5
-  m_Name: Exit Button
+  m_Name: Quit Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -39220,7 +39220,7 @@ GameObject:
   - component: {fileID: 1439232311}
   - component: {fileID: 1439232310}
   m_Layer: 5
-  m_Name: Exit Panel
+  m_Name: Quit Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

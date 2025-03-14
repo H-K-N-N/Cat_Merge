@@ -71,8 +71,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    [Header("---[Exit Panel]")]
-    [SerializeField] private GameObject exitPanel;                          // 종료 확인 패널
+    [Header("---[Quit Panel]")]
+    [SerializeField] private GameObject quitPanel;                          // 종료 확인 패널
     [SerializeField] private Button closeButton;                            // 종료 패널 닫기 버튼
     [SerializeField] private Button okButton;                               // 종료 확인 버튼
     private bool isBackButtonPressed = false;                               // 뒤로가기 버튼이 눌렸는지 여부
@@ -105,7 +105,7 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         SortCatUIObjectsByYPosition();
-        CheckExitInput();
+        CheckQuitInput();
     }
 
     // ======================================================================================================================
@@ -213,7 +213,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // Y축 위치를 기준으로 고양이 UI 정렬
+    // Y축 위치를 기준으로 고양이 UI 정렬하는 함수
     private void SortCatUIObjectsByYPosition()
     {
         UpdateCatUIObjects();
@@ -230,12 +230,12 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
-    // 게임 종료 버튼 초기화
+    // 게임 종료 버튼 초기화 함수
     private void InitializeExitSystem()
     {
-        if (exitPanel != null)
+        if (quitPanel != null)
         {
-            exitPanel.SetActive(false);
+            quitPanel.SetActive(false);
         }
         if (closeButton != null)
         {
@@ -247,53 +247,82 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // 종료 입력 체크
-    private void CheckExitInput()
+    // 종료 입력 체크 함수
+    private void CheckQuitInput()
     {
         // 유니티 에디터 및 안드로이드에서 뒤로가기 버튼
         if ((Application.platform == RuntimePlatform.Android && Input.GetKey(KeyCode.Escape)) ||
             (Application.platform == RuntimePlatform.WindowsEditor && Input.GetKeyDown(KeyCode.Escape)))
         {
-            HandleExitInput();
+            HandleQuitInput();
         }
     }
 
-    // 종료 입력 처리
-    public void HandleExitInput()
+    // 종료 입력 처리 함수
+    public void HandleQuitInput()
     {
-        if (exitPanel != null && !isBackButtonPressed)
+        if (quitPanel != null && !isBackButtonPressed)
         {
             isBackButtonPressed = true;
-            if (exitPanel.activeSelf)
+            if (quitPanel.activeSelf)
             {
                 CancelQuit();
             }
             else
             {
-                ShowExitPanel();
+                ShowQuitPanel();
             }
             StartCoroutine(ResetBackButtonPress());
         }
     }
 
-    // 뒤로가기버튼 입력 딜레이 설정
+    // 뒤로가기버튼 입력 딜레이 설정 함수
     private IEnumerator ResetBackButtonPress()
     {
         yield return new WaitForSeconds(0.2f);
         isBackButtonPressed = false;
     }
 
-    // 종료 패널 표시
-    private void ShowExitPanel()
+    // 종료 패널 표시 함수
+    private void ShowQuitPanel()
     {
-        if (exitPanel != null)
+        if (quitPanel != null)
         {
-            exitPanel.SetActive(true);
+            quitPanel.SetActive(true);
         }
     }
 
-    // 게임 종료
+    // 종료 취소 함수
+    public void CancelQuit()
+    {
+        if (quitPanel != null)
+        {
+            quitPanel.SetActive(false);
+        }
+    }
+
+    // 게임 종료 함수
     public void QuitGame()
+    {
+        if (GoogleManager.Instance != null)
+        {
+            // 저장 완료 콜백을 받아 종료하도록 수정
+            GoogleManager.Instance.SaveGameStateSync(OnSaveCompleted);
+        }
+        else
+        {
+            QuitApplication();
+        }
+    }
+
+    // 저장 완료 후 호출될 콜백 함수 추가 함수
+    private void OnSaveCompleted(bool success)
+    {
+        QuitApplication();
+    }
+
+    // 실제 종료 처리 함수
+    private void QuitApplication()
     {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
@@ -302,18 +331,10 @@ public class GameManager : MonoBehaviour
 #endif
     }
 
-    // 종료 취소
-    public void CancelQuit()
-    {
-        if (exitPanel != null)
-        {
-            exitPanel.SetActive(false);
-        }
-    }
-
     // ======================================================================================================================
+    // [Content]
 
-    // 필드의 모든 고양이 정보 업데이트
+    // 필드의 모든 고양이 정보 업데이트 함수
     public void UpdateAllCatsInField()
     {
         // 이미 생성된 고양이의 데이터 수치를 새로 업데이트된 수치로 적용
@@ -328,7 +349,6 @@ public class GameManager : MonoBehaviour
                     if (cat.CatId == catData.catData.CatId)
                     {
                         catData.SetCatData(cat);
-                        //Debug.Log($"{catData.catData.CatDamage}, {catData.catData.CatHp}");
                         break;
                     }
                 }
@@ -336,12 +356,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // 모든 고양이의 훈련 데이터를 저장하는 메서드
+    // 모든 고양이의 훈련 데이터를 저장하는 함수
     public void SaveTrainingData(Cat[] cats)
     {
         // 여기에 실제 저장 로직 구현
-        // 예: PlayerPrefs나 파일 시스템을 사용하여 각 고양이의 성장 스탯 저장
     }
+
+    // ======================================================================================================================
+
 
 
 }

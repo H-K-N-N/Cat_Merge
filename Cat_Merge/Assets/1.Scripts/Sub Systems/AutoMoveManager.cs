@@ -86,6 +86,8 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
         ApplyAutoMoveStateToAllCats();
         UpdateAutoMoveButtonColor();
         CloseAutoMovePanel();
+
+        GoogleManager.Instance.SaveGameState();
     }
 
     // 모든 고양이에게 자동이동 상태 적용
@@ -138,6 +140,8 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     {
         SaveAndDisableAutoMoveState();
         DisableAutoMoveUI();
+
+        GoogleManager.Instance.SaveGameState();
     }
 
     // 자동이동 상태 저장 및 비활성화 함수
@@ -163,6 +167,8 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     {
         RestoreAutoMoveState();
         EnableAutoMoveUI();
+
+        GoogleManager.Instance.SaveGameState();
     }
 
     // 자동이동 상태 복구 함수

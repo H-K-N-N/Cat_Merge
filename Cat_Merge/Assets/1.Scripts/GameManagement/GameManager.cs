@@ -105,7 +105,7 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         SortCatUIObjectsByYPosition();
-        CheckExitInput();
+        CheckQuitInput();
     }
 
     // ======================================================================================================================
@@ -248,18 +248,18 @@ public class GameManager : MonoBehaviour
     }
 
     // 종료 입력 체크 함수
-    private void CheckExitInput()
+    private void CheckQuitInput()
     {
         // 유니티 에디터 및 안드로이드에서 뒤로가기 버튼
         if ((Application.platform == RuntimePlatform.Android && Input.GetKey(KeyCode.Escape)) ||
             (Application.platform == RuntimePlatform.WindowsEditor && Input.GetKeyDown(KeyCode.Escape)))
         {
-            HandleExitInput();
+            HandleQuitInput();
         }
     }
 
     // 종료 입력 처리 함수
-    public void HandleExitInput()
+    public void HandleQuitInput()
     {
         if (quitPanel != null && !isBackButtonPressed)
         {

@@ -360,17 +360,36 @@ public class GoogleManager : MonoBehaviour
                     {
                         if (readStatus == SavedGameRequestStatus.Success)
                         {
-                            string jsonData = Encoding.UTF8.GetString(data);
-                            loadedGameState = JsonUtility.FromJson<CompleteGameState>(jsonData);
-                            isDataLoaded = true;
-                            CacheLoadedData();
+                            if (data == null || data.Length == 0)
+                            {
+                                // 데이터가 없거나 빈 경우 초기 상태로 설정
+                                Debug.Log("저장된 데이터가 없거나 비어 있습니다. 초기 상태로 설정합니다.");
+                                loadedGameState = new CompleteGameState();
+                                isDataLoaded = true;
+                                cachedData.Clear();
+                            }
+                            else
+                            {
+                                string jsonData = Encoding.UTF8.GetString(data);
+                                loadedGameState = JsonUtility.FromJson<CompleteGameState>(jsonData);
+                                isDataLoaded = true;
+                                CacheLoadedData();
+                            }
 
                             if (SceneManager.GetActiveScene().name == gameScene)
                             {
                                 ApplyLoadedGameState();
                             }
                         }
+                        else
+                        {
+                            Debug.LogError($"데이터 읽기 실패: {readStatus}");
+                        }
                     });
+                }
+                else
+                {
+                    Debug.LogError($"저장 게임 열기 실패: {status}");
                 }
             });
     }
@@ -418,8 +437,11 @@ public class GoogleManager : MonoBehaviour
     // 저장된 게임 데이터를 삭제하는 함수
     public void DeleteGameData(Action<bool> onComplete = null)
     {
+        Debug.Log("DeleteGameData 함수 시작...");
+
         if (!isLoggedIn)
         {
+            Debug.LogError("로그인되어 있지 않아 데이터 삭제 불가");
             onComplete?.Invoke(false);
             return;
         }
@@ -431,6 +453,8 @@ public class GoogleManager : MonoBehaviour
             ConflictResolutionStrategy.UseLongestPlaytime,
             (status, game) =>
             {
+                Debug.Log($"파일 열기 상태: {status}");
+
                 if (status == SavedGameRequestStatus.Success)
                 {
                     // 빈 데이터로 덮어쓰기
@@ -442,8 +466,10 @@ public class GoogleManager : MonoBehaviour
                         .WithUpdatedDescription("Data deleted: " + DateTime.Now.ToString())
                         .Build();
 
+                    Debug.Log("빈 데이터로 덮어쓰기 시도...");
                     saveGameClient.CommitUpdate(game, update, emptyData, (saveStatus, savedGame) =>
                     {
+                        Debug.Log($"데이터 삭제 저장 상태: {saveStatus}");
                         bool success = saveStatus == SavedGameRequestStatus.Success;
                         if (success)
                         {
@@ -505,33 +531,170 @@ public class GoogleManager : MonoBehaviour
     // 게임 데이터 삭제 후 앱 종료하는 함수 (버튼에 연결할 함수)
     public void DeleteGameDataAndQuit()
     {
-        // 먼저 현재 씬의 모든 컴포넌트 초기화
-        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
-        foreach (ISaveable saveable in saveables)
+        Debug.Log("데이터 삭제 및 종료 시작...");
+
+        // 로그인 상태 확인
+        if (!isLoggedIn)
         {
-            saveable.LoadFromData(null); // 모든 컴포넌트 초기화
+            Debug.LogError("데이터 삭제 실패: 로그인되어 있지 않습니다.");
+            return;
         }
 
-        // 클라우드 데이터 삭제
-        DeleteGameData((success) =>
+        // 먼저 현재 씬의 모든 컴포넌트 초기화
+        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
+        Debug.Log($"초기화할 컴포넌트 수: {saveables.Length}");
+
+        foreach (ISaveable saveable in saveables)
         {
-            if (success)
+            try
             {
-                Debug.Log("게임 데이터 삭제 성공. 앱을 종료합니다.");
-
-                // 캐시된 데이터도 초기화
-                loadedGameState = null;
-                isDataLoaded = false;
-                cachedData.Clear();
-
-                // 1초 후에 앱 종료
-                StartCoroutine(QuitGameAfterDelay());
+                saveable.LoadFromData(null); // 모든 컴포넌트 초기화
             }
-            else
+            catch (Exception e)
             {
-                Debug.LogError("게임 데이터 삭제 실패");
+                Debug.LogError($"컴포넌트 초기화 중 오류: {e.Message}");
             }
+        }
+
+        // 클라우드 데이터 삭제 - 더 긴 대기 시간 적용
+        StartCoroutine(DeleteDataWithConfirmation());
+    }
+
+    // 데이터 삭제 확인 코루틴 추가
+    private IEnumerator DeleteDataWithConfirmation()
+    {
+        bool deleteCompleted = false;
+        bool deleteSuccess = false;
+
+        // 첫 번째 삭제 시도
+        DeleteGameData((success) => {
+            deleteCompleted = true;
+            deleteSuccess = success;
+            Debug.Log($"첫 번째 데이터 삭제 결과: {success}");
         });
+
+        // 삭제 완료 대기 (최대 3초)
+        float waitTime = 0;
+        while (!deleteCompleted && waitTime < 3.0f)
+        {
+            waitTime += 0.1f;
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        // 첫 번째 시도가 실패했거나 시간 초과된 경우 두 번째 시도
+        if (!deleteSuccess)
+        {
+            Debug.Log("첫 번째 삭제 시도 실패, 두 번째 시도 중...");
+            deleteCompleted = false;
+
+            // 두 번째 삭제 시도 - 다른 방식 사용
+            DeleteGameDataAlternative((success) => {
+                deleteCompleted = true;
+                deleteSuccess = success;
+                Debug.Log($"두 번째 데이터 삭제 결과: {success}");
+            });
+
+            // 두 번째 삭제 완료 대기 (최대 3초)
+            waitTime = 0;
+            while (!deleteCompleted && waitTime < 3.0f)
+            {
+                waitTime += 0.1f;
+                yield return new WaitForSeconds(0.1f);
+            }
+        }
+
+        // 삭제 후 로컬 데이터 초기화 확인
+        loadedGameState = null;
+        isDataLoaded = false;
+        cachedData.Clear();
+
+        // 삭제 확인을 위한 추가 저장 (빈 데이터)
+        CompleteGameState emptyState = new CompleteGameState();
+        string emptyJson = JsonUtility.ToJson(emptyState);
+        SaveToCloud(emptyJson);
+
+        // 저장 완료 대기
+        yield return new WaitForSeconds(2.0f);
+
+        Debug.Log("데이터 삭제 프로세스 완료, 게임 종료 중...");
+
+        // 게임 종료
+        StartCoroutine(QuitGameAfterDelay());
+    }
+
+    // 대체 데이터 삭제 방법 추가
+    private void DeleteGameDataAlternative(Action<bool> onComplete)
+    {
+        if (!isLoggedIn)
+        {
+            onComplete?.Invoke(false);
+            return;
+        }
+
+        try
+        {
+            // 빈 데이터 생성
+            CompleteGameState emptyState = new CompleteGameState();
+            string emptyJson = JsonUtility.ToJson(emptyState);
+            byte[] emptyData = Encoding.UTF8.GetBytes(emptyJson);
+
+            // 직접 저장 시도
+            ISavedGameClient saveGameClient = PlayGamesPlatform.Instance.SavedGame;
+            saveGameClient.OpenWithManualConflictResolution(
+                fileName,
+                DataSource.ReadNetworkOnly, // 네트워크에서만 읽기 시도
+                true, // 새 게임 생성 허용
+                ConflictCallback,
+                (status, game) =>
+                {
+                    if (status == SavedGameRequestStatus.Success)
+                    {
+                        SavedGameMetadataUpdate update = new SavedGameMetadataUpdate.Builder()
+                            .WithUpdatedDescription("Data reset: " + DateTime.Now.ToString())
+                            .Build();
+
+                        saveGameClient.CommitUpdate(game, update, emptyData, (saveStatus, savedGame) =>
+                        {
+                            bool success = saveStatus == SavedGameRequestStatus.Success;
+                            if (success)
+                            {
+                                // 캐시 초기화 시도
+                                PlayerPrefs.DeleteAll();
+                                PlayerPrefs.Save();
+
+                                Debug.Log("대체 방식으로 데이터 삭제 성공");
+                            }
+                            else
+                            {
+                                Debug.LogError("대체 방식으로 데이터 삭제 실패: " + saveStatus);
+                            }
+                            onComplete?.Invoke(success);
+                        });
+                    }
+                    else
+                    {
+                        Debug.LogError("대체 방식으로 게임 열기 실패: " + status);
+                        onComplete?.Invoke(false);
+                    }
+                });
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"대체 삭제 중 예외 발생: {e.Message}");
+            onComplete?.Invoke(false);
+        }
+    }
+
+    // 수동 충돌 해결 콜백
+    private void ConflictCallback(IConflictResolver resolver, ISavedGameMetadata original, byte[] originalData, ISavedGameMetadata unmerged, byte[] unmergedData)
+    {
+        // 항상 빈 데이터로 해결
+        CompleteGameState emptyState = new CompleteGameState();
+        string emptyJson = JsonUtility.ToJson(emptyState);
+        byte[] emptyData = Encoding.UTF8.GetBytes(emptyJson);
+
+        // 빈 데이터로 충돌 해결
+        resolver.ChooseMetadata(unmerged);
     }
 
     // 지연 후 앱 종료하는 코루틴
@@ -688,7 +851,5 @@ public class GoogleManager : MonoBehaviour
         }
     }
     #endregion
-
-    
 
 }

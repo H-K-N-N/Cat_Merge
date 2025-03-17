@@ -3,10 +3,12 @@ using TMPro;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using System.Collections;
+using System;
+using System.Linq;
 
 // GameManager Script
 [DefaultExecutionOrder(-1)]     // 스크립트 실행 순서 조정(3번째)
-public class GameManager : MonoBehaviour
+public class GameManager : MonoBehaviour, ISaveable
 {
     // Singleton instance
     public static GameManager Instance { get; private set; }
@@ -19,6 +21,8 @@ public class GameManager : MonoBehaviour
     private Mouse[] allMouseData;                                           // 모든 쥐 데이터
     public Mouse[] AllMouseData => allMouseData;
 
+    //
+    public GameObject catPrefab;                                            // 고양이 UI 프리팹
     [SerializeField] private Transform gamePanel;                           // 고양이 정보를 가져올 부모 Panel
     private List<RectTransform> catUIObjects = new List<RectTransform>();   // 고양이 UI 객체 리스트
 
@@ -33,6 +37,12 @@ public class GameManager : MonoBehaviour
         {
             currentCatCount = value;
             UpdateCatCountText();
+
+            if (GoogleManager.Instance != null)
+            {
+                Debug.Log("구글 저장");
+                GoogleManager.Instance.SaveGameState();
+            }
         }
     }
 
@@ -44,6 +54,12 @@ public class GameManager : MonoBehaviour
         {
             maxCats = value;
             UpdateCatCountText();
+
+            if (GoogleManager.Instance != null)
+            {
+                Debug.Log("구글 저장");
+                GoogleManager.Instance.SaveGameState();
+            }
         }
     }
 
@@ -56,6 +72,12 @@ public class GameManager : MonoBehaviour
         {
             coin = value;
             UpdateCoinText();
+
+            if (GoogleManager.Instance != null)
+            {
+                Debug.Log("구글 저장");
+                GoogleManager.Instance.SaveGameState();
+            }
         }
     }
 
@@ -68,6 +90,12 @@ public class GameManager : MonoBehaviour
         {
             cash = value;
             UpdateCashText();
+
+            if (GoogleManager.Instance != null)
+            {
+                Debug.Log("구글 저장");
+                GoogleManager.Instance.SaveGameState();
+            }
         }
     }
 
@@ -364,6 +392,103 @@ public class GameManager : MonoBehaviour
 
     // ======================================================================================================================
 
+    #region Save System
+    [Serializable]
+    private class CatInstanceData
+    {
+        public int catId;              // 고양이 ID
+        public float posX;             // X 위치
+        public float posY;             // Y 위치
+    }
 
+    [Serializable]
+    private class SaveData
+    {
+        public int currentCatCount;     // 현재 고양이 수
+        public int maxCats;             // 최대 고양이 수
+        public decimal coin;            // 기본 재화
+        public decimal cash;            // 캐시 재화
+        public List<CatInstanceData> fieldCats = new List<CatInstanceData>();  // 필드에 있는 고양이들 정보
+    }
+
+    public string GetSaveData()
+    {
+        // 현재 필드에 있는 모든 고양이 정보 수집
+        List<CatInstanceData> fieldCats = new List<CatInstanceData>();
+        foreach (Transform child in gamePanel)
+        {
+            CatData catData = child.GetComponent<CatData>();
+            if (catData != null)
+            {
+                CatInstanceData instanceData = new CatInstanceData
+                {
+                    catId = catData.catData.CatId,
+                    posX = child.GetComponent<RectTransform>().anchoredPosition.x,
+                    posY = child.GetComponent<RectTransform>().anchoredPosition.y
+                };
+                fieldCats.Add(instanceData);
+            }
+        }
+
+        SaveData data = new SaveData
+        {
+            currentCatCount = this.currentCatCount,
+            maxCats = this.maxCats,
+            coin = this.coin,
+            cash = this.cash,
+            fieldCats = fieldCats
+        };
+        return JsonUtility.ToJson(data);
+    }
+
+    public void LoadFromData(string data)
+    {
+        if (string.IsNullOrEmpty(data)) return;
+
+        SaveData savedData = JsonUtility.FromJson<SaveData>(data);
+
+        // 기본 데이터 복원
+        this.currentCatCount = savedData.currentCatCount;
+        this.maxCats = savedData.maxCats;
+        this.coin = savedData.coin;
+        this.cash = savedData.cash;
+
+        // UI 업데이트
+        UpdateCatCountText();
+        UpdateCoinText();
+        UpdateCashText();
+
+        // 기존 필드의 고양이들 제거
+        foreach (Transform child in gamePanel)
+        {
+            if (child.GetComponent<CatData>() != null)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+        // 저장된 고양이들 재생성
+        foreach (var catInstance in savedData.fieldCats)
+        {
+            // 해당 등급의 고양이 데이터 찾기
+            Cat catData = allCatData.FirstOrDefault(c => c.CatId == catInstance.catId);
+            if (catData != null)
+            {
+                // 고양이 생성 및 위치 설정
+                GameObject catUIObject = Instantiate(catPrefab, gamePanel);
+                RectTransform rectTransform = catUIObject.GetComponent<RectTransform>();
+                rectTransform.anchoredPosition = new Vector2(catInstance.posX, catInstance.posY);
+
+                // 고양이 데이터 설정
+                CatData catComponent = catUIObject.GetComponent<CatData>();
+                if (catComponent != null)
+                {
+                    catComponent.SetCatData(catData);
+                    catComponent.SetAutoMoveState(AutoMoveManager.Instance.IsAutoMoveEnabled());
+                }
+            }
+        }
+    }
+    #endregion
 
 }

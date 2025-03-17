@@ -11,7 +11,8 @@ public class SpawnManager : MonoBehaviour, ISaveable
 
     [SerializeField] private Button spawnButton;                    // 스폰 버튼
 
-    [SerializeField] private GameObject catPrefab;                  // 고양이 UI 프리팹
+    // GameManager에 다 있는거라 나중에 여기변수 없애고 수정하는게 좋을지도 (함 생각해 봐야함)
+    //[SerializeField] private GameObject catPrefab;                  // 고양이 UI 프리팹
     [SerializeField] private Transform catUIParent;                 // 고양이를 배치할 부모 Transform (UI Panel 등)
     private RectTransform panelRectTransform;                       // Panel의 크기 정보 (배치할 범위)
     private GameManager gameManager;                                // GameManager
@@ -193,7 +194,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
     // Panel내 랜덤 위치에 고양이 배치하는 함수
     private GameObject LoadAndDisplayCats(Cat catData)
     {
-        GameObject catUIObject = Instantiate(catPrefab, catUIParent);
+        GameObject catUIObject = Instantiate(gameManager.catPrefab, catUIParent);
 
         // CatData 설정
         CatData catUIData = catUIObject.GetComponent<CatData>();

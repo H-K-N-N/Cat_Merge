@@ -1,8 +1,10 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
+using System.Collections.Generic;
 
-public class ItemMenuManager : MonoBehaviour
+public class ItemMenuManager : MonoBehaviour, ISaveable
 {
     // Singleton Instance
     public static ItemMenuManager Instance { get; private set; }
@@ -281,6 +283,12 @@ public class ItemMenuManager : MonoBehaviour
         }
 
         GameManager.Instance.MaxCats = (int)ItemFunctionManager.Instance.maxCatsList[maxCatsLv].value;
+
+        if (GoogleManager.Instance != null)
+        {
+            Debug.Log("구글 저장");
+            GoogleManager.Instance.SaveGameState();
+        }
     }
 
     // 재화 획득 시간 감소
@@ -321,6 +329,12 @@ public class ItemMenuManager : MonoBehaviour
                 itemMenuesValueText[1].text = $"{ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv].value.ToString("0.0")} → {ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv + 1].value.ToString("0.0")}";
                 itemMenuesFeeText[1].text = $"{ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv + 1].fee:N0}";
             }
+        }
+
+        if (GoogleManager.Instance != null)
+        {
+            Debug.Log("구글 저장");
+            GoogleManager.Instance.SaveGameState();
         }
     }
 
@@ -366,6 +380,12 @@ public class ItemMenuManager : MonoBehaviour
 
         SpawnManager.Instance.UpdateFoodText();
         SpawnManager.Instance.OnMaxFoodIncreased();
+
+        if (GoogleManager.Instance != null)
+        {
+            Debug.Log("구글 저장");
+            GoogleManager.Instance.SaveGameState();
+        }
     }
 
     // 먹이 생성 시간 감소
@@ -406,6 +426,12 @@ public class ItemMenuManager : MonoBehaviour
                 itemMenuesValueText[3].text = $"{ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].value.ToString("0.0")} → {ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv + 1].value.ToString("0.0")}";
                 itemMenuesFeeText[3].text = $"{ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv + 1].fee:N0}";
             }
+        }
+
+        if (GoogleManager.Instance != null)
+        {
+            Debug.Log("구글 저장");
+            GoogleManager.Instance.SaveGameState();
         }
     }
 
@@ -448,10 +474,90 @@ public class ItemMenuManager : MonoBehaviour
                 itemMenuesFeeText[4].text = $"{ItemFunctionManager.Instance.autoCollectingList[autoCollectingLv + 1].fee:N0}";
             }
         }
+
+        if (GoogleManager.Instance != null)
+        {
+            Debug.Log("구글 저장");
+            GoogleManager.Instance.SaveGameState();
+        }
     }
 
     // ======================================================================================================================
 
+    #region Save System
+    [Serializable]
+    private class SaveData
+    {
+        public int maxCatsLv;                   // 고양이 최대치 레벨
+        public int reduceCollectingTimeLv;      // 재화 획득 시간 레벨
+        public int maxFoodsLv;                  // 먹이 최대치 레벨
+        public int reduceProducingFoodTimeLv;   // 먹이 생성 시간 레벨
+        public int autoCollectingLv;            // 자동 먹이주기 레벨
+    }
 
+    public string GetSaveData()
+    {
+        SaveData data = new SaveData
+        {
+            maxCatsLv = this.maxCatsLv,
+            reduceCollectingTimeLv = this.reduceCollectingTimeLv,
+            maxFoodsLv = this.maxFoodsLv,
+            reduceProducingFoodTimeLv = this.reduceProducingFoodTimeLv,
+            autoCollectingLv = this.autoCollectingLv
+        };
+        return JsonUtility.ToJson(data);
+    }
+
+    public void LoadFromData(string data)
+    {
+        if (string.IsNullOrEmpty(data)) return;
+
+        SaveData savedData = JsonUtility.FromJson<SaveData>(data);
+
+        // 레벨 데이터 복원
+        this.maxCatsLv = savedData.maxCatsLv;
+        this.reduceCollectingTimeLv = savedData.reduceCollectingTimeLv;
+        this.maxFoodsLv = savedData.maxFoodsLv;
+        this.reduceProducingFoodTimeLv = savedData.reduceProducingFoodTimeLv;
+        this.autoCollectingLv = savedData.autoCollectingLv;
+
+        // UI 상태 업데이트
+        UpdateAllItemStates();
+    }
+
+    // 모든 아이템 상태 업데이트
+    private void UpdateAllItemStates()
+    {
+        UpdateItemState(maxCatsLv, 0, increaseCatMaximumButton, ItemFunctionManager.Instance.maxCatsList);
+        UpdateItemState(reduceCollectingTimeLv, 1, reduceCollectingTimeButton, ItemFunctionManager.Instance.reduceCollectingTimeList);
+        UpdateItemState(maxFoodsLv, 2, increaseFoodMaximumButton, ItemFunctionManager.Instance.maxFoodsList);
+        UpdateItemState(reduceProducingFoodTimeLv, 3, reduceProducingFoodTimeButton, ItemFunctionManager.Instance.reduceProducingFoodTimeList);
+        UpdateItemState(autoCollectingLv, 4, autoCollectingButton, ItemFunctionManager.Instance.autoCollectingList);
+
+        // 관련 시스템 업데이트
+        GameManager.Instance.MaxCats = (int)ItemFunctionManager.Instance.maxCatsList[maxCatsLv].value;
+        SpawnManager.Instance.UpdateFoodText();
+    }
+
+    private void UpdateItemState(int level, int index, Button button, List<(int step, float value, decimal fee)> itemList)
+    {
+        if (itemMenuesFeeText[index] == null) return;
+
+        bool isMaxLevel = level >= itemList.Count - 1;
+        if (isMaxLevel)
+        {
+            button.interactable = false;
+            disabledBg[index].SetActive(true);
+            itemMenuesFeeText[index].text = "구매완료";
+            itemMenuesValueText[index].text = $"{itemList[level].value}";
+        }
+        else
+        {
+            itemMenuesLvText[index].text = $"Lv.{itemList[level].step}";
+            itemMenuesValueText[index].text = $"{itemList[level].value} → {itemList[level + 1].value}";
+            itemMenuesFeeText[index].text = $"{itemList[level + 1].fee:N0}";
+        }
+    }
+    #endregion
 
 }

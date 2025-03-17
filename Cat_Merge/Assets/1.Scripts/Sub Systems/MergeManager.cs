@@ -81,7 +81,11 @@ public class MergeManager : MonoBehaviour, ISaveable
         UpdateMergeButtonColor();
         CloseMergePanel();
 
-        GoogleManager.Instance.SaveGameState();
+        if (GoogleManager.Instance != null)
+        {
+            Debug.Log("구글 저장");
+            GoogleManager.Instance.SaveGameState();
+        }
     }
     #endregion
 
@@ -100,17 +104,24 @@ public class MergeManager : MonoBehaviour, ISaveable
             mergePanel.SetActive(false);
         }
 
-        GoogleManager.Instance.SaveGameState();
+        if (GoogleManager.Instance != null)
+        {
+            Debug.Log("구글 저장");
+            GoogleManager.Instance.SaveGameState();
+        }
     }
 
     // 전투 종료시 버튼 및 기능 기존 상태로 되돌려놓는 함수
     public void EndBattleMergeState()
     {
         isMergeEnabled = previousMergeState;
-
         openMergePanelButton.interactable = true;
 
-        GoogleManager.Instance.SaveGameState();
+        if (GoogleManager.Instance != null)
+        {
+            Debug.Log("구글 저장");
+            GoogleManager.Instance.SaveGameState();
+        }
     }
     #endregion
 

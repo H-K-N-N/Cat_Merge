@@ -466,7 +466,6 @@ public class GoogleManager : MonoBehaviour
     // 앱 종료시 동기식 저장을 실행하는 함수
     private void OnApplicationQuit()
     {
-        // 동기식 저장 시도
         SaveGameStateSyncImmediate();
     }
 
@@ -475,7 +474,6 @@ public class GoogleManager : MonoBehaviour
     {
         if (pause)
         {
-            // 백그라운드로 전환 시 즉시 동기식 저장
             SaveGameStateSyncImmediate();
         }
     }
@@ -485,7 +483,6 @@ public class GoogleManager : MonoBehaviour
     {
         if (!focus)
         {
-            // 포커스 상실 시 즉시 동기식 저장
             SaveGameStateSyncImmediate();
         }
     }

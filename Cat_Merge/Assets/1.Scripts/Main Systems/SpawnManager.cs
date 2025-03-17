@@ -2,9 +2,10 @@ using UnityEngine;
 using TMPro;
 using System.Collections;
 using UnityEngine.UI;
+using System;
 
 // 고양이 스폰 Script
-public class SpawnManager : MonoBehaviour
+public class SpawnManager : MonoBehaviour, ISaveable
 {
     public static SpawnManager Instance { get; private set; }
 
@@ -112,6 +113,12 @@ public class SpawnManager : MonoBehaviour
                     StartCoroutine(CreateFoodTime());
                     isStoppedReduceCoroutine = false;
                 }
+
+                if (GoogleManager.Instance != null)
+                {
+                    Debug.Log("구글 저장");
+                    GoogleManager.Instance.SaveGameState();
+                }
             }
             else
             {
@@ -143,6 +150,12 @@ public class SpawnManager : MonoBehaviour
         gameManager.AddCatCount();
 
         FriendshipManager.Instance.AddExperience(1, 1);
+
+        if (GoogleManager.Instance != null)
+        {
+            Debug.Log("구글 저장");
+            GoogleManager.Instance.SaveGameState();
+        }
     }
 
     // 상점에서 이용될 등급에 따른 구매 후 스폰 (12/26 새로 작성)
@@ -212,8 +225,8 @@ public class SpawnManager : MonoBehaviour
         float panelWidth = panelRectTransform.rect.width;
         float panelHeight = panelRectTransform.rect.height;
 
-        float randomX = Random.Range(-panelWidth / 2, panelWidth / 2);
-        float randomY = Random.Range(-panelHeight / 2, panelHeight / 2);
+        float randomX = UnityEngine.Random.Range(-panelWidth / 2, panelWidth / 2);
+        float randomY = UnityEngine.Random.Range(-panelHeight / 2, panelHeight / 2);
 
         Vector3 respawnPos = new Vector3(randomX, randomY, 0f);
         return respawnPos;
@@ -237,8 +250,13 @@ public class SpawnManager : MonoBehaviour
                 yield return null; // 다음 프레임까지 대기
             }
             NowFood++;
-            foodFillAmountImg.fillAmount = 1f; 
+            foodFillAmountImg.fillAmount = 1f;
             elapsed = 0f;
+            if (GoogleManager.Instance != null)
+            {
+                Debug.Log("구글 저장");
+                GoogleManager.Instance.SaveGameState();
+            }
         }
 
         // 현재 먹이갯수가 최대치이면 코루틴을 종료시킨다.
@@ -300,6 +318,11 @@ public class SpawnManager : MonoBehaviour
                     }
                     elapsed = 0f; // 진행 상태 초기화
 
+                    if (GoogleManager.Instance != null)
+                    {
+                        Debug.Log("구글 저장");
+                        GoogleManager.Instance.SaveGameState();
+                    }
                 }
             }
 
@@ -351,4 +374,43 @@ public class SpawnManager : MonoBehaviour
         }
     }
 
+    #region Save System
+    [Serializable]
+    private class SaveData
+    {
+        public int nowFood;
+    }
+
+    public string GetSaveData()
+    {
+        SaveData data = new SaveData
+        {
+            nowFood = this.nowFood
+        };
+        return JsonUtility.ToJson(data);
+    }
+
+    public void LoadFromData(string data)
+    {
+        if (string.IsNullOrEmpty(data)) return;
+
+        SaveData savedData = JsonUtility.FromJson<SaveData>(data);
+        this.NowFood = savedData.nowFood;
+
+        if (NowFood < ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
+        {
+            if (isStoppedReduceCoroutine)
+            {
+                StartCoroutine(CreateFoodTime());
+                isStoppedReduceCoroutine = false;
+            }
+        }
+
+        if (NowFood > 0 && isStoppedAutoCoroutine)
+        {
+            StartCoroutine(AutoCollectingTime());
+            isStoppedAutoCoroutine = false;
+        }
+    }
+    #endregion
 }

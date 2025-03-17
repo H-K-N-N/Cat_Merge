@@ -9,6 +9,7 @@ using GooglePlayGames.BasicApi.SavedGame;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 // 저장/로드가 필요한 컴포넌트에 적용할 인터페이스
 public interface ISaveable
@@ -57,7 +58,6 @@ public class GoogleManager : MonoBehaviour
 
     public static GoogleManager Instance { get; private set; }
 
-    // 상수 및 변수
     private const string fileName = "GameCompleteState";
     private const string gameScene = "GameScene-Han";
 
@@ -73,11 +73,11 @@ public class GoogleManager : MonoBehaviour
     private float autoSaveInterval = 30f;
     private float autoSaveTimer = 0f;
 
-    // 추가된 변수
     private bool isSaving = false;
 
-    // 추가된 델리게이트: 저장 완료 콜백
     public delegate void SaveCompletedCallback(bool success);
+
+    private Button deleteDataButton;        // 게임 데이터 삭제 버튼
 
     #endregion
 
@@ -131,6 +131,9 @@ public class GoogleManager : MonoBehaviour
     // 씬 로드 완료시 데이터를 적용하는 함수
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        // 씬이 로드될 때마다 삭제 버튼 찾기
+        FindAndSetupDeleteButton();
+
         // 게임 씬이 로드되면 데이터 적용
         if (scene.name == gameScene)
         {
@@ -412,6 +415,136 @@ public class GoogleManager : MonoBehaviour
         }
     }
 
+    // 저장된 게임 데이터를 삭제하는 함수
+    public void DeleteGameData(Action<bool> onComplete = null)
+    {
+        if (!isLoggedIn)
+        {
+            onComplete?.Invoke(false);
+            return;
+        }
+
+        ISavedGameClient saveGameClient = PlayGamesPlatform.Instance.SavedGame;
+        saveGameClient.OpenWithAutomaticConflictResolution(
+            fileName,
+            DataSource.ReadCacheOrNetwork,
+            ConflictResolutionStrategy.UseLongestPlaytime,
+            (status, game) =>
+            {
+                if (status == SavedGameRequestStatus.Success)
+                {
+                    // 빈 데이터로 덮어쓰기
+                    CompleteGameState emptyState = new CompleteGameState();
+                    string emptyJson = JsonUtility.ToJson(emptyState);
+                    byte[] emptyData = Encoding.UTF8.GetBytes(emptyJson);
+
+                    SavedGameMetadataUpdate update = new SavedGameMetadataUpdate.Builder()
+                        .WithUpdatedDescription("Data deleted: " + DateTime.Now.ToString())
+                        .Build();
+
+                    saveGameClient.CommitUpdate(game, update, emptyData, (saveStatus, savedGame) =>
+                    {
+                        bool success = saveStatus == SavedGameRequestStatus.Success;
+                        if (success)
+                        {
+                            // 캐시된 데이터도 초기화
+                            loadedGameState = null;
+                            isDataLoaded = false;
+                            cachedData.Clear();
+                            Debug.Log("게임 데이터 삭제 성공");
+                        }
+                        else
+                        {
+                            Debug.LogError("게임 데이터 삭제 실패: " + saveStatus);
+                        }
+                        onComplete?.Invoke(success);
+                    });
+                }
+                else
+                {
+                    Debug.LogError("게임 데이터 삭제를 위한 파일 열기 실패: " + status);
+                    onComplete?.Invoke(false);
+                }
+            });
+    }
+
+    // 삭제 버튼 찾아서 설정하는 함수
+    private void FindAndSetupDeleteButton()
+    {
+        try
+        {
+            GameObject buttonObj = GameObject.Find("Canvas/Main UI Panel/Top Simple Button Panel/Delete Data Button");
+            if (buttonObj != null)
+            {
+                deleteDataButton = buttonObj.GetComponent<Button>();
+                if (deleteDataButton != null)
+                {
+                    // 기존 리스너 제거 후 새로 추가
+                    deleteDataButton.onClick.RemoveAllListeners();
+                    deleteDataButton.onClick.AddListener(DeleteGameDataAndQuit);
+                    Debug.Log("데이터 삭제 버튼 연동 성공");
+                }
+                else
+                {
+                    Debug.LogWarning("데이터 삭제 버튼 컴포넌트를 찾을 수 없습니다.");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("데이터 삭제 버튼 오브젝트를 찾을 수 없습니다.");
+                deleteDataButton = null;
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"데이터 삭제 버튼 설정 중 오류 발생: {e.Message}");
+            deleteDataButton = null;
+        }
+    }
+
+    // 게임 데이터 삭제 후 앱 종료하는 함수 (버튼에 연결할 함수)
+    public void DeleteGameDataAndQuit()
+    {
+        // 먼저 현재 씬의 모든 컴포넌트 초기화
+        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
+        foreach (ISaveable saveable in saveables)
+        {
+            saveable.LoadFromData(null); // 모든 컴포넌트 초기화
+        }
+
+        // 클라우드 데이터 삭제
+        DeleteGameData((success) =>
+        {
+            if (success)
+            {
+                Debug.Log("게임 데이터 삭제 성공. 앱을 종료합니다.");
+
+                // 캐시된 데이터도 초기화
+                loadedGameState = null;
+                isDataLoaded = false;
+                cachedData.Clear();
+
+                // 1초 후에 앱 종료
+                StartCoroutine(QuitGameAfterDelay());
+            }
+            else
+            {
+                Debug.LogError("게임 데이터 삭제 실패");
+            }
+        });
+    }
+
+    // 지연 후 앱 종료하는 코루틴
+    private IEnumerator QuitGameAfterDelay()
+    {
+        yield return new WaitForSeconds(1f);
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+    }
+
     #endregion
 
     #region 로딩 화면 관리
@@ -555,5 +688,7 @@ public class GoogleManager : MonoBehaviour
         }
     }
     #endregion
+
+    
 
 }

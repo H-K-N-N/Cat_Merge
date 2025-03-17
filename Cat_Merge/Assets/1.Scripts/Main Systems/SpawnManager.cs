@@ -318,11 +318,11 @@ public class SpawnManager : MonoBehaviour, ISaveable
                     }
                     elapsed = 0f; // 진행 상태 초기화
 
-                    if (GoogleManager.Instance != null)
-                    {
-                        Debug.Log("구글 저장");
-                        GoogleManager.Instance.SaveGameState();
-                    }
+                    //if (GoogleManager.Instance != null)
+                    //{
+                    //    Debug.Log("구글 저장");
+                    //    GoogleManager.Instance.SaveGameState();
+                    //}
                 }
             }
 

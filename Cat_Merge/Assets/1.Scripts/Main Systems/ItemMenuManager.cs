@@ -488,7 +488,7 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
     [Serializable]
     private class SaveData
     {
-        public int maxCatsLv;                   // 고양이 최대치 레벨
+        public int maxCatsLv;                   // 고양이 최대 보유수 레벨
         public int reduceCollectingTimeLv;      // 재화 획득 시간 레벨
         public int maxFoodsLv;                  // 먹이 최대치 레벨
         public int reduceProducingFoodTimeLv;   // 먹이 생성 시간 레벨

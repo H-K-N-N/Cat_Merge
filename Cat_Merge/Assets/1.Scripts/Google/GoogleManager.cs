@@ -120,7 +120,8 @@ public class GoogleManager : MonoBehaviour
 
     private void Update()
     {
-        if (isDeletingData) return; // 데이터 삭제 중에는 업데이트 중지
+        // 데이터 삭제 중이거나 게임 종료 중일 때는 자동 저장 중지
+        if (isDeletingData || (GameManager.Instance != null && GameManager.Instance.isQuiting)) return;
 
         // 주기적 자동 저장 처리
         autoSaveTimer += Time.deltaTime;
@@ -202,9 +203,9 @@ public class GoogleManager : MonoBehaviour
     // 전체 게임 상태를 저장하는 함수
     public void SaveGameState()
     {
-        if (!isLoggedIn || isDeletingData) return;
-
-        // 이미 저장 중이면 중복 저장 방지
+        // 데이터 삭제 중이거나 게임 종료 중일 때는 저장 중지
+        if (!isLoggedIn || isDeletingData ||
+            (GameManager.Instance != null && GameManager.Instance.isQuiting)) return;
         if (isSaving) return;
 
         CompleteGameState gameState = new CompleteGameState();
@@ -760,7 +761,9 @@ public class GoogleManager : MonoBehaviour
     // 앱 종료시 동기식 저장을 실행하는 함수
     private void OnApplicationQuit()
     {
-        if (!isDeletingData) // 데이터 삭제 중이 아닐 때만 저장
+        // 데이터 삭제 중이거나 게임 종료 중일 때는 저장 중지
+        if (!isDeletingData &&
+            (GameManager.Instance == null || !GameManager.Instance.isQuiting))
         {
             SaveGameStateSyncImmediate();
         }
@@ -769,7 +772,8 @@ public class GoogleManager : MonoBehaviour
     // 홈 버튼으로 나가면 자동 저장 (백그라운드로 전환)
     private void OnApplicationPause(bool pause)
     {
-        if (pause && !isDeletingData) // 데이터 삭제 중이 아닐 때만 저장
+        if (pause && !isDeletingData &&
+            (GameManager.Instance == null || !GameManager.Instance.isQuiting))
         {
             SaveGameStateSyncImmediate();
         }
@@ -778,7 +782,8 @@ public class GoogleManager : MonoBehaviour
     // 다른 앱으로 전환시 자동 저장
     private void OnApplicationFocus(bool focus)
     {
-        if (!focus && !isDeletingData) // 데이터 삭제 중이 아닐 때만 저장
+        if (!focus && !isDeletingData &&
+            (GameManager.Instance == null || !GameManager.Instance.isQuiting))
         {
             SaveGameStateSyncImmediate();
         }

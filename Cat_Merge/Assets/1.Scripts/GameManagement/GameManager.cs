@@ -107,6 +107,8 @@ public class GameManager : MonoBehaviour, ISaveable
 
     private bool isDataLoaded = false;
 
+    public bool isQuiting = false;  // GoogleManager에서 접근할 수 있도록 public으로 설정
+
     // ======================================================================================================================
 
     private void Awake()
@@ -145,8 +147,11 @@ public class GameManager : MonoBehaviour, ISaveable
 
     private void Update()
     {
-        SortCatUIObjectsByYPosition();
-        CheckQuitInput();
+        if (!isQuiting)  // 종료 중이 아닐 때만 실행
+        {
+            SortCatUIObjectsByYPosition();
+            CheckQuitInput();
+        }
     }
 
     // ======================================================================================================================
@@ -345,10 +350,15 @@ public class GameManager : MonoBehaviour, ISaveable
     // 게임 종료 함수
     public void QuitGame()
     {
+        if (isQuiting) return;  // 이미 종료 중이면 무시
+
+        Debug.Log("게임 종료 프로세스 시작...");
+        isQuiting = true;
+        Time.timeScale = 0f;  // 게임 일시 정지
+
         if (GoogleManager.Instance != null)
         {
-            // 저장 완료 콜백을 받아 종료하도록 수정
-            GoogleManager.Instance.SaveGameStateSync(OnSaveCompleted);
+            StartCoroutine(SaveAndQuitCoroutine());
         }
         else
         {
@@ -356,9 +366,44 @@ public class GameManager : MonoBehaviour, ISaveable
         }
     }
 
-    // 저장 완료 후 호출될 콜백 함수 추가 함수
-    private void OnSaveCompleted(bool success)
+    // 저장 후 종료하는 코루틴 추가
+    private IEnumerator SaveAndQuitCoroutine()
     {
+        bool saveCompleted = false;
+        GoogleManager.Instance.SaveGameStateSync((success) => {
+            saveCompleted = true;
+            Debug.Log($"종료 전 저장 결과: {success}");
+        });
+
+        // 저장 완료 또는 타임아웃 대기 (최대 3초)
+        float waitTime = 0f;
+        while (!saveCompleted && waitTime < 3.0f)
+        {
+            waitTime += 0.1f;
+            yield return new WaitForSecondsRealtime(0.1f);
+        }
+
+        // 두 번째 저장 시도 (첫 번째가 실패했을 경우를 대비)
+        if (!saveCompleted)
+        {
+            Debug.Log("첫 번째 저장 시도 실패, 두 번째 시도 중...");
+            saveCompleted = false;
+
+            GoogleManager.Instance.SaveGameStateSync((success) => {
+                saveCompleted = true;
+                Debug.Log($"두 번째 저장 시도 결과: {success}");
+            });
+
+            // 두 번째 저장 완료 대기
+            waitTime = 0f;
+            while (!saveCompleted && waitTime < 3.0f)
+            {
+                waitTime += 0.1f;
+                yield return new WaitForSecondsRealtime(0.1f);
+            }
+        }
+
+        Debug.Log("저장 프로세스 완료, 게임 종료 중...");
         QuitApplication();
     }
 
@@ -547,5 +592,14 @@ public class GameManager : MonoBehaviour, ISaveable
     }
 
     #endregion
+
+    // OnApplicationQuit 수정 - 이미 종료 처리 중이면 추가 저장하지 않음
+    private void OnApplicationQuit()
+    {
+        if (!isQuiting)
+        {
+            QuitGame();
+        }
+    }
 
 }

@@ -74,6 +74,7 @@ public class GoogleManager : MonoBehaviour
     private float autoSaveTimer = 0f;
 
     private bool isSaving = false;
+    private bool isDeletingData = false;
 
     public delegate void SaveCompletedCallback(bool success);
 
@@ -119,6 +120,8 @@ public class GoogleManager : MonoBehaviour
 
     private void Update()
     {
+        if (isDeletingData) return; // 데이터 삭제 중에는 업데이트 중지
+
         // 주기적 자동 저장 처리
         autoSaveTimer += Time.deltaTime;
         if (autoSaveTimer >= autoSaveInterval)
@@ -199,7 +202,7 @@ public class GoogleManager : MonoBehaviour
     // 전체 게임 상태를 저장하는 함수
     public void SaveGameState()
     {
-        if (!isLoggedIn) return;
+        if (!isLoggedIn || isDeletingData) return;
 
         // 이미 저장 중이면 중복 저장 방지
         if (isSaving) return;
@@ -225,7 +228,7 @@ public class GoogleManager : MonoBehaviour
     // 동기식 저장 함수 (종료 시 사용)
     public void SaveGameStateSync(SaveCompletedCallback callback = null)
     {
-        if (!isLoggedIn)
+        if (!isLoggedIn || isDeletingData)
         {
             if (callback != null) callback(false);
             return;
@@ -345,7 +348,7 @@ public class GoogleManager : MonoBehaviour
     // 전체 게임 상태를 로드하는 함수
     public void LoadGameState()
     {
-        if (!isLoggedIn) return;
+        if (!isLoggedIn || isDeletingData) return;
 
         ISavedGameClient saveGameClient = PlayGamesPlatform.Instance.SavedGame;
         saveGameClient.OpenWithAutomaticConflictResolution(
@@ -540,6 +543,10 @@ public class GoogleManager : MonoBehaviour
             return;
         }
 
+        // 게임 일시 정지 및 삭제 모드 활성화
+        isDeletingData = true;
+        Time.timeScale = 0f;
+
         // 먼저 현재 씬의 모든 컴포넌트 초기화
         ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
         Debug.Log($"초기화할 컴포넌트 수: {saveables.Length}");
@@ -578,7 +585,7 @@ public class GoogleManager : MonoBehaviour
         while (!deleteCompleted && waitTime < 3.0f)
         {
             waitTime += 0.1f;
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSecondsRealtime(0.1f);
         }
 
         // 첫 번째 시도가 실패했거나 시간 초과된 경우 두 번째 시도
@@ -587,7 +594,7 @@ public class GoogleManager : MonoBehaviour
             Debug.Log("첫 번째 삭제 시도 실패, 두 번째 시도 중...");
             deleteCompleted = false;
 
-            // 두 번째 삭제 시도 - 다른 방식 사용
+            // 두 번째 삭제 시도
             DeleteGameDataAlternative((success) => {
                 deleteCompleted = true;
                 deleteSuccess = success;
@@ -599,7 +606,7 @@ public class GoogleManager : MonoBehaviour
             while (!deleteCompleted && waitTime < 3.0f)
             {
                 waitTime += 0.1f;
-                yield return new WaitForSeconds(0.1f);
+                yield return new WaitForSecondsRealtime(0.1f);
             }
         }
 
@@ -614,7 +621,7 @@ public class GoogleManager : MonoBehaviour
         SaveToCloud(emptyJson);
 
         // 저장 완료 대기
-        yield return new WaitForSeconds(2.0f);
+        yield return new WaitForSecondsRealtime(2.0f);
 
         Debug.Log("데이터 삭제 프로세스 완료, 게임 종료 중...");
 
@@ -700,7 +707,7 @@ public class GoogleManager : MonoBehaviour
     // 지연 후 앱 종료하는 코루틴
     private IEnumerator QuitGameAfterDelay()
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSecondsRealtime(1f);
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
@@ -720,7 +727,10 @@ public class GoogleManager : MonoBehaviour
             loadingScreen.SetActive(show);
 
             // 로딩 화면 표시 중에는 게임 시간 정지
-            Time.timeScale = show ? 0f : 1f;
+            if (!isDeletingData) // 데이터 삭제 중이 아닐 때만 타임스케일 조정
+            {
+                Time.timeScale = show ? 0f : 1f;
+            }
 
             if (show)
             {
@@ -747,28 +757,19 @@ public class GoogleManager : MonoBehaviour
 
     #region OnApplication
 
-    // 현재 저장에 문제가 있는 경우들 (Android)
-    // 게임종료버튼으로 나가기 = 저장 O
-    // 홈으로 나갔다가 다시 들어와서 게임종료버튼으로 나가기 = 저장 O
-    // 홈으로 나갔다가 다시 들어와서 여러탭버튼 누르고 앱 지우기 = 저장 O
-    // 홈으로 나갔다가 여러탭버튼 누르고 앱 지우기 = 저장 X
-    // 실행중 여러탭버튼 누르고 앱 지우기 = 저장 X
-
-    // 저장할 데이터들이 변경될때 저장을하는 로직을 추가하니까 안되던것들이 되지만 조건이 있음
-    // 값을 변경하자마자 바로 여러탭버튼 누르고 앱 지우면 저장 X
-    // 값을 변경하자마자 바로 홈으로 나가싸가 여러탭버튼 누르고 앱 지우면 저장 X
-    // 값을 변경하고 2~3초는 게임에 머무르면 어떤식으로 나가든 저장 O
-
     // 앱 종료시 동기식 저장을 실행하는 함수
     private void OnApplicationQuit()
     {
-        SaveGameStateSyncImmediate();
+        if (!isDeletingData) // 데이터 삭제 중이 아닐 때만 저장
+        {
+            SaveGameStateSyncImmediate();
+        }
     }
 
     // 홈 버튼으로 나가면 자동 저장 (백그라운드로 전환)
     private void OnApplicationPause(bool pause)
     {
-        if (pause)
+        if (pause && !isDeletingData) // 데이터 삭제 중이 아닐 때만 저장
         {
             SaveGameStateSyncImmediate();
         }
@@ -777,7 +778,7 @@ public class GoogleManager : MonoBehaviour
     // 다른 앱으로 전환시 자동 저장
     private void OnApplicationFocus(bool focus)
     {
-        if (!focus)
+        if (!focus && !isDeletingData) // 데이터 삭제 중이 아닐 때만 저장
         {
             SaveGameStateSyncImmediate();
         }

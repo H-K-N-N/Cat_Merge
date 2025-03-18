@@ -34,6 +34,8 @@ public class SpawnManager : MonoBehaviour, ISaveable
     [SerializeField] private Image foodFillAmountImg;               // 소환 이미지
     [SerializeField] public Image autoFillAmountImg;                // 자동소환 이미지
 
+    private bool isInitialized = false;
+
     // ======================================================================================================================
 
     private void Awake()
@@ -59,8 +61,13 @@ public class SpawnManager : MonoBehaviour, ISaveable
         }
 
         UpdateFoodText();
-        StartCoroutine(CreateFoodTime());
-        StartCoroutine(AutoCollectingTime());
+
+        // 초기 시작 시에만 코루틴 시작 (로드되지 않은 경우)
+        if (!isInitialized)
+        {
+            StartCoroutine(CreateFoodTime());
+            StartCoroutine(AutoCollectingTime());
+        }
     }
 
     // ======================================================================================================================
@@ -398,20 +405,24 @@ public class SpawnManager : MonoBehaviour, ISaveable
         SaveData savedData = JsonUtility.FromJson<SaveData>(data);
         this.NowFood = savedData.nowFood;
 
+        // 기존 코루틴들 중지
+        StopAllCoroutines();
+
+        // 먹이가 최대치보다 적을 경우에만 먹이 생성 코루틴 시작
         if (NowFood < ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value)
         {
-            if (isStoppedReduceCoroutine)
-            {
-                StartCoroutine(CreateFoodTime());
-                isStoppedReduceCoroutine = false;
-            }
+            StartCoroutine(CreateFoodTime());
+            isStoppedReduceCoroutine = false;
         }
 
-        if (NowFood > 0 && isStoppedAutoCoroutine)
-        {
-            StartCoroutine(AutoCollectingTime());
-            isStoppedAutoCoroutine = false;
-        }
+        // 자동 소환 코루틴 시작
+        StartCoroutine(AutoCollectingTime());
+        isStoppedAutoCoroutine = false;
+
+        // UI 업데이트
+        UpdateFoodText();
     }
+
     #endregion
+
 }

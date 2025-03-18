@@ -10,7 +10,7 @@ using UnityEngine;
         public int[] passiveEffects = new int[5]; // 1~5단계 패시브 효과 수치
     }
 
-[DefaultExecutionOrder(-2)]
+[DefaultExecutionOrder(-6)]
 public class FriendshipDataLoader : MonoBehaviour
 {
 

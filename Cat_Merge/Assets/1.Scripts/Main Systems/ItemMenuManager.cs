@@ -4,16 +4,19 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 
+// 아이템 메뉴 스크립트
+[DefaultExecutionOrder(-4)]
 public class ItemMenuManager : MonoBehaviour, ISaveable
 {
-    // Singleton Instance
+
+
+    #region Variables
+
     public static ItemMenuManager Instance { get; private set; }
 
-    private ActivePanelManager activePanelManager;                  // ActivePanelManager
     [Header("---[ItemMenu]")]
     [SerializeField] private Button bottomItemButton;               // 아이템 버튼
     [SerializeField] private Image bottomItemButtonImg;             // 아이템 버튼 이미지
-
     [SerializeField] private GameObject itemMenuPanel;              // 아이템 메뉴 판넬
     [SerializeField] private Button itemBackButton;                 // 아이템 뒤로가기 버튼
 
@@ -52,9 +55,16 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
 
     [SerializeField] private GameObject[] disabledBg;                   // 버튼 클릭 못할 때의 배경
 
+    [Header("---[UI Text]")]
     [SerializeField] private TextMeshProUGUI[] itemMenuesLvText;
     [SerializeField] private TextMeshProUGUI[] itemMenuesValueText;
     [SerializeField] private TextMeshProUGUI[] itemMenuesFeeText;
+
+    [Header("---[Sub Menu UI Color]")]
+    private const string activeColorCode = "#FFCC74";                   // 활성화상태 Color
+    private const string inactiveColorCode = "#FFFFFF";                 // 비활성화상태 Color
+
+    private ActivePanelManager activePanelManager;                      // ActivePanelManager
 
     // 고양이 최대치
     private int maxCatsLv = 0;
@@ -76,11 +86,13 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
     private int autoCollectingLv = 0;
     public int AutoCollectingLv { get => autoCollectingLv; set => autoCollectingLv = value; }
 
-    [Header("---[Sub Menu UI Color]")]
-    private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
-    private const string inactiveColorCode = "#FFFFFF";             // 비활성화상태 Color
 
-    // ======================================================================================================================
+    private bool isDataLoaded = false;              // 데이터 로드 확인
+
+    #endregion
+
+
+    #region Unity Methods
 
     private void Awake()
     {
@@ -92,91 +104,182 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         {
             Destroy(gameObject);
         }
-
-        itemMenues[(int)EitemMenues.itemMenues].SetActive(true);
-        if (ColorUtility.TryParseHtmlString(activeColorCode, out Color parsedColor))
-        {
-            itemMenuButtons[(int)EitemMenuButton.itemMenuButton].GetComponent<Image>().color = parsedColor;
-        }
-
-        itemMenuButtons[(int)EitemMenuButton.itemMenuButton].onClick.AddListener(() => OnButtonClicked(itemMenues[(int)EitemMenues.itemMenues]));
-        itemMenuButtons[(int)EitemMenuButton.colleagueMenuButton].onClick.AddListener(() => OnButtonClicked(itemMenues[(int)EitemMenues.colleagueMenues]));
-        itemMenuButtons[(int)EitemMenuButton.backgroundMenuButton].onClick.AddListener(() => OnButtonClicked(itemMenues[(int)EitemMenues.backgroundMenues]));
-        itemMenuButtons[(int)EitemMenuButton.goldenSomethingMenuButton].onClick.AddListener(() => OnButtonClicked(itemMenues[(int)EitemMenues.goldenMenues]));
-
-        for (int i = 1; i < 4; i++)
-        {
-            isItemMenuButtonsOn[i] = false;
-        }
-
-        increaseCatMaximumButton.onClick.AddListener(IncreaseCatMaximum);
-        reduceCollectingTimeButton.onClick.AddListener(ReduceCollectingTime);
-        increaseFoodMaximumButton.onClick.AddListener(IncreaseFoodMaximum);
-        reduceProducingFoodTimeButton.onClick.AddListener(ReduceProducingFoodTime);
-        autoCollectingButton.onClick.AddListener(AutoCollecting);
-        OpenCloseBottomItemMenuPanel();
     }
 
     private void Start()
     {
-        // 판넬 토글
+        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
+        if (!isDataLoaded)
+        {
+            InitializeDefaultValues();
+        }
+
+        InitializeItemMenuManager();
+        UpdateAllUI();
+    }
+
+    #endregion
+
+
+    #region Initialize
+
+    // 기본값 초기화 함수
+    private void InitializeDefaultValues()
+    {
+        maxCatsLv = 0;
+        reduceCollectingTimeLv = 0;
+        maxFoodsLv = 0;
+        reduceProducingFoodTimeLv = 0;
+        autoCollectingLv = 0;
+    }
+
+    // 기본 ItemMenuManager 초기화 함수
+    private void InitializeItemMenuManager()
+    {
+        InitializeActivePanel();
+        InitializeMenuButtons();
+        InitializeItemButtons();
+        SetupInitialMenuState();
+    }
+
+    // ActivePanel 초기화 함수
+    private void InitializeActivePanel()
+    {
         activePanelManager = FindObjectOfType<ActivePanelManager>();
         activePanelManager.RegisterPanel("BottomItemMenu", itemMenuPanel, bottomItemButtonImg);
 
-        InitItemMenuText();
-    }
-
-    // ======================================================================================================================
-
-    private void InitItemMenuText()
-    {
-        for (int i = 0; i <= 3; i++)
-        {
-            switch (i)
-            {
-                case 0:
-                    itemMenuesLvText[i].text = $"Lv.{ItemFunctionManager.Instance.maxCatsList[0].step}";
-                    itemMenuesValueText[i].text = $"{ItemFunctionManager.Instance.maxCatsList[0].value} → {ItemFunctionManager.Instance.maxCatsList[1].value}"; // 8 → 9
-                    itemMenuesFeeText[i].text = $"{ItemFunctionManager.Instance.maxCatsList[0].fee}";
-                    break;
-                case 1:
-                    itemMenuesLvText[i].text = $"Lv.{ItemFunctionManager.Instance.reduceCollectingTimeList[0].step}";
-                    itemMenuesValueText[i].text = $"{ItemFunctionManager.Instance.reduceCollectingTimeList[0].value.ToString("0.0")} → {ItemFunctionManager.Instance.reduceCollectingTimeList[1].value.ToString("0.0")}"; // 3.0 → 2.9
-                    itemMenuesFeeText[i].text = $"{ItemFunctionManager.Instance.reduceCollectingTimeList[0].fee}";
-                    break;
-                case 2:
-                    itemMenuesLvText[i].text = $"Lv.{ItemFunctionManager.Instance.maxFoodsList[0].step}";
-                    itemMenuesValueText[i].text = $"{ItemFunctionManager.Instance.maxFoodsList[0].value} → {ItemFunctionManager.Instance.maxFoodsList[1].value}"; // 5 → 6
-                    itemMenuesFeeText[i].text = $"{ItemFunctionManager.Instance.maxFoodsList[0].fee}";
-                    break;
-                case 3:
-                    itemMenuesLvText[i].text = $"Lv.{ItemFunctionManager.Instance.reduceProducingFoodTimeList[0].step}";
-                    itemMenuesValueText[i].text = $"{ItemFunctionManager.Instance.reduceProducingFoodTimeList[0].value.ToString("0.0")} → {ItemFunctionManager.Instance.reduceProducingFoodTimeList[1].value.ToString("0.0")}"; // 7.0 → 6.8
-                    itemMenuesFeeText[i].text = $"{ItemFunctionManager.Instance.reduceProducingFoodTimeList[0].fee}";
-                    break;
-                case 4:
-                    itemMenuesLvText[i].text = $"Lv.{ItemFunctionManager.Instance.autoCollectingList[0].step}";
-                    itemMenuesValueText[i].text = $"{ItemFunctionManager.Instance.autoCollectingList[0].value} → {ItemFunctionManager.Instance.autoCollectingList[1].value}"; // 30 → 29
-                    itemMenuesFeeText[i].text = $"{ItemFunctionManager.Instance.autoCollectingList[0].fee}";
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
-    // 아이템 메뉴 판넬 여는 함수
-    private void OpenCloseBottomItemMenuPanel()
-    {
         bottomItemButton.onClick.AddListener(() => activePanelManager.TogglePanel("BottomItemMenu"));
         itemBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("BottomItemMenu"));
     }
 
-    // 버튼 클릭 이벤트
+    // 메뉴 버튼 초기화 함수
+    private void InitializeMenuButtons()
+    {
+        for (int i = 0; i < itemMenuButtons.Length; i++)
+        {
+            int index = i;
+            itemMenuButtons[i].onClick.RemoveAllListeners();
+            itemMenuButtons[i].onClick.AddListener(() => OnButtonClicked(itemMenues[index]));
+        }
+    }
+
+    // 아이템 버튼 초기화 함수
+    private void InitializeItemButtons()
+    {
+        increaseCatMaximumButton.onClick.RemoveAllListeners();
+        increaseCatMaximumButton.onClick.AddListener(IncreaseCatMaximum);
+
+        reduceCollectingTimeButton.onClick.RemoveAllListeners();
+        reduceCollectingTimeButton.onClick.AddListener(ReduceCollectingTime);
+
+        increaseFoodMaximumButton.onClick.RemoveAllListeners();
+        increaseFoodMaximumButton.onClick.AddListener(IncreaseFoodMaximum);
+
+        reduceProducingFoodTimeButton.onClick.RemoveAllListeners();
+        reduceProducingFoodTimeButton.onClick.AddListener(ReduceProducingFoodTime);
+
+        autoCollectingButton.onClick.RemoveAllListeners();
+        autoCollectingButton.onClick.AddListener(AutoCollecting);
+    }
+
+    // 초기 메뉴 상태 설정 함수
+    private void SetupInitialMenuState()
+    {
+        itemMenues[0].SetActive(true);
+        for (int i = 1; i < itemMenues.Length; i++)
+        {
+            itemMenues[i].SetActive(false);
+            isItemMenuButtonsOn[i] = false;
+        }
+
+        if (ColorUtility.TryParseHtmlString(activeColorCode, out Color parsedColor))
+        {
+            itemMenuButtons[0].GetComponent<Image>().color = parsedColor;
+        }
+        isItemMenuButtonsOn[0] = true;
+    }
+
+    #endregion
+
+
+    #region UI Updates
+
+    // 모든 UI 업데이트 함수
+    private void UpdateAllUI()
+    {
+        bool shouldSave = isDataLoaded;
+        isDataLoaded = false;
+
+        UpdateItemUI(maxCatsLv, 0, increaseCatMaximumButton, ItemFunctionManager.Instance.maxCatsList);
+        UpdateItemUI(reduceCollectingTimeLv, 1, reduceCollectingTimeButton, ItemFunctionManager.Instance.reduceCollectingTimeList);
+        UpdateItemUI(maxFoodsLv, 2, increaseFoodMaximumButton, ItemFunctionManager.Instance.maxFoodsList);
+        UpdateItemUI(reduceProducingFoodTimeLv, 3, reduceProducingFoodTimeButton, ItemFunctionManager.Instance.reduceProducingFoodTimeList);
+        UpdateItemUI(autoCollectingLv, 4, autoCollectingButton, ItemFunctionManager.Instance.autoCollectingList);
+
+        UpdateRelatedSystems();
+
+        isDataLoaded = shouldSave;
+    }
+
+    // 아이템 UI 업데이트 함수
+    private void UpdateItemUI(int level, int index, Button button, List<(int step, float value, decimal fee)> itemList)
+    {
+        if (itemMenuesFeeText[index] == null) return;
+
+        bool isMaxLevel = level >= itemList.Count - 1;
+        if (isMaxLevel)
+        {
+            SetMaxLevelUI(index, level, button, itemList[level].value);
+        }
+        else
+        {
+            SetNormalLevelUI(index, level, itemList);
+        }
+    }
+
+    // 최대 레벨 UI 설정 함수
+    private void SetMaxLevelUI(int index, int level, Button button, float value)
+    {
+        button.interactable = false;
+        disabledBg[index].SetActive(true);
+
+        itemMenuesLvText[index].text = $"Lv.{level + 1}";
+        itemMenuesFeeText[index].text = "구매완료";
+        itemMenuesValueText[index].text = $"{value}";
+    }
+
+    // 일반 레벨 UI 설정 함수
+    private void SetNormalLevelUI(int index, int level, List<(int step, float value, decimal fee)> itemList)
+    {
+        itemMenuesLvText[index].text = $"Lv.{itemList[level].step}";
+        itemMenuesValueText[index].text = $"{itemList[level].value} → {itemList[level + 1].value}";
+        itemMenuesFeeText[index].text = $"{itemList[level].fee:N0}";
+    }
+
+    // 시스템 업데이트 함수
+    private void UpdateRelatedSystems()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.MaxCats = (int)ItemFunctionManager.Instance.maxCatsList[maxCatsLv].value;
+        }
+
+        if (SpawnManager.Instance != null)
+        {
+            SpawnManager.Instance.UpdateFoodText();
+        }
+    }
+
+    #endregion
+
+
+    #region Button System
+
+    // 버튼 클릭 처리 함수
     private void OnButtonClicked(GameObject activePanel)
     {
         // 모든 UI 패널 비활성화
-        for (int i = 0; i < (int)EitemMenues.end; i++)
+        for (int i = 0; i < itemMenues.Length; i++)
         {
             itemMenues[i].SetActive(false);
             isItemMenuButtonsOn[i] = false;
@@ -185,43 +288,132 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         // 클릭된 버튼의 UI만 활성화
         activePanel.SetActive(true);
 
-        for (int i = 0; i < (int)EitemMenues.end; i++)
+        for (int i = 0; i < itemMenues.Length; i++)
         {
-            if (itemMenues[i].activeSelf)
-            {
-                isItemMenuButtonsOn[i] = true;
-            }
+            isItemMenuButtonsOn[i] = itemMenues[i].activeSelf;
         }
-        ChangeSelectedButtonColor(activePanel);
+        UpdateMenuButtonColors();
     }
 
-    // 아이템 메뉴의 아이템, 동료, 배경, 황금깃털 버튼 색상 변경
-    private void ChangeSelectedButtonColor(GameObject menues)
+    // 메뉴 버튼 색상 업데이트 함수
+    private void UpdateMenuButtonColors()
     {
-        if (menues.gameObject.activeSelf)
+        if (ColorUtility.TryParseHtmlString(activeColorCode, out Color activeColor) &&
+            ColorUtility.TryParseHtmlString(inactiveColorCode, out Color inactiveColor))
         {
-            if (ColorUtility.TryParseHtmlString(activeColorCode, out Color parsedColorT))
+            for (int i = 0; i < itemMenuButtons.Length; i++)
             {
-                for (int i = 0; i < (int)EitemMenues.end; i++)
-                {
-                    if (isItemMenuButtonsOn[i])
-                    {
-                        itemMenuButtons[i].GetComponent<Image>().color = parsedColorT;
-                    }
-                    else
-                    {
-                        if (ColorUtility.TryParseHtmlString(inactiveColorCode, out Color parsedColorF))
-                        {
-                            itemMenuButtons[i].GetComponent<Image>().color = parsedColorF;
-                        }
-                    }
-                }
+                itemMenuButtons[i].GetComponent<Image>().color = isItemMenuButtonsOn[i] ? activeColor : inactiveColor;
             }
         }
     }
 
-    // ======================================================================================================================
-    // [Battle]
+    #endregion
+
+
+    #region ItemMenu System
+
+    // 아이템 업그레이드 처리 함수
+    private void ProcessUpgrade(int index, ref int level, List<(int step, float value, decimal fee)> itemList, Button button, Action onSuccess = null)
+    {
+        if (itemMenuesFeeText[index] == null) return;
+
+        if (level >= itemList.Count - 1)
+        {
+            SetMaxLevelUI(index, level, button, itemList[level].value);
+            return;
+        }
+
+        decimal fee = itemList[level].fee;
+        if (GameManager.Instance.Coin < fee)
+        {
+            NotificationManager.Instance.ShowNotification("재화가 부족합니다!!");
+            return;
+        }
+
+        GameManager.Instance.Coin -= fee;
+        level++;
+
+        if (level >= itemList.Count - 1)
+        {
+            SetMaxLevelUI(index, level, button, itemList[level].value);
+        }
+        else
+        {
+            UpdateItemUI(level, index, button, itemList);
+        }
+
+        onSuccess?.Invoke();
+        GoogleSave();
+    }
+
+    // 고양이 최대치 증가 함수
+    private void IncreaseCatMaximum()
+    {
+        ProcessUpgrade(
+            0, 
+            ref maxCatsLv, 
+            ItemFunctionManager.Instance.maxCatsList,
+            increaseCatMaximumButton,
+            () =>
+            {
+                GameManager.Instance.MaxCats = (int)ItemFunctionManager.Instance.maxCatsList[maxCatsLv].value;
+            });
+
+    }
+
+    // 재화 획득 시간 감소 함수
+    private void ReduceCollectingTime()
+    {
+        ProcessUpgrade(
+            1, 
+            ref reduceCollectingTimeLv,
+            ItemFunctionManager.Instance.reduceCollectingTimeList,
+            reduceCollectingTimeButton
+            );
+    }
+
+    // 먹이 최대치 증가 함수
+    private void IncreaseFoodMaximum()
+    {
+        ProcessUpgrade(
+            2, 
+            ref maxFoodsLv, 
+            ItemFunctionManager.Instance.maxFoodsList,
+            increaseFoodMaximumButton,
+            () => 
+            {
+                SpawnManager.Instance.UpdateFoodText();
+                SpawnManager.Instance.OnMaxFoodIncreased();
+            });
+    }
+
+    // 먹이 생성 시간 감소 함수
+    private void ReduceProducingFoodTime()
+    {
+        ProcessUpgrade(
+            3, 
+            ref reduceProducingFoodTimeLv,
+            ItemFunctionManager.Instance.reduceProducingFoodTimeList,
+            reduceProducingFoodTimeButton
+            );
+    }
+
+    // 자동 먹이주기 시간 감소 함수
+    private void AutoCollecting()
+    {
+        ProcessUpgrade(
+            4, 
+            ref autoCollectingLv,
+            ItemFunctionManager.Instance.autoCollectingList,
+            autoCollectingButton
+            );
+    }
+
+    #endregion
+
+
+    #region Battle System
 
     // 전투 시작시 버튼 및 기능 비활성화시키는 함수
     public void StartBattleItemMenuState()
@@ -240,259 +432,19 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         bottomItemButton.interactable = true;
     }
 
-    // ======================================================================================================================
+    #endregion
 
-    // 고양이 최대치 증가
-    private void IncreaseCatMaximum()
-    {
-        if (itemMenuesFeeText[0] == null) return;
-
-        bool isMaxLevel = maxCatsLv >= ItemFunctionManager.Instance.maxCatsList.Count - 1;
-        if (isMaxLevel)
-        {
-            increaseCatMaximumButton.interactable = false;
-            disabledBg[0].SetActive(true);
-            itemMenuesFeeText[0].text = "구매완료";
-        }
-        else
-        {
-            decimal fee = ItemFunctionManager.Instance.maxCatsList[maxCatsLv].fee;
-            if (GameManager.Instance.Coin < fee)
-            {
-                NotificationManager.Instance.ShowNotification("재화가 부족합니다!!");
-                return;
-            }
-
-            GameManager.Instance.Coin -= fee;
-            maxCatsLv++;
-            itemMenuesLvText[0].text = $"Lv.{ItemFunctionManager.Instance.maxCatsList[maxCatsLv].step}";
-
-            isMaxLevel = maxCatsLv >= ItemFunctionManager.Instance.maxCatsList.Count - 1;
-            if (isMaxLevel)
-            {
-                increaseCatMaximumButton.interactable = false;
-                disabledBg[0].SetActive(true);
-                itemMenuesFeeText[0].text = "구매완료";
-                itemMenuesValueText[0].text = $"{ItemFunctionManager.Instance.maxCatsList[maxCatsLv].value}";
-            }
-            else
-            {
-                itemMenuesValueText[0].text = $"{ItemFunctionManager.Instance.maxCatsList[maxCatsLv].value} → {ItemFunctionManager.Instance.maxCatsList[maxCatsLv + 1].value}";
-                itemMenuesFeeText[0].text = $"{ItemFunctionManager.Instance.maxCatsList[maxCatsLv + 1].fee:N0}";
-            }
-        }
-
-        GameManager.Instance.MaxCats = (int)ItemFunctionManager.Instance.maxCatsList[maxCatsLv].value;
-
-        if (GoogleManager.Instance != null)
-        {
-            Debug.Log("구글 저장");
-            GoogleManager.Instance.SaveGameState();
-        }
-    }
-
-    // 재화 획득 시간 감소
-    private void ReduceCollectingTime()
-    {
-        if (itemMenuesFeeText[1] == null) return;
-
-        bool isMaxLevel = reduceCollectingTimeLv >= ItemFunctionManager.Instance.reduceCollectingTimeList.Count - 1;
-        if (isMaxLevel)
-        {
-            reduceCollectingTimeButton.interactable = false;
-            disabledBg[1].SetActive(true);
-            itemMenuesFeeText[1].text = "구매완료";
-        }
-        else
-        {
-            decimal fee = ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv].fee;
-            if (GameManager.Instance.Coin < fee)
-            {
-                NotificationManager.Instance.ShowNotification("재화가 부족합니다!!");
-                return;
-            }
-
-            GameManager.Instance.Coin -= fee;
-            reduceCollectingTimeLv++;
-            itemMenuesLvText[1].text = $"Lv.{ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv].step}";
-
-            isMaxLevel = reduceCollectingTimeLv >= ItemFunctionManager.Instance.reduceCollectingTimeList.Count - 1;
-            if (isMaxLevel)
-            {
-                reduceCollectingTimeButton.interactable = false;
-                disabledBg[1].SetActive(true);
-                itemMenuesFeeText[1].text = "구매완료";
-                itemMenuesValueText[1].text = $"{ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv].value}";
-            }
-            else
-            {
-                itemMenuesValueText[1].text = $"{ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv].value.ToString("0.0")} → {ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv + 1].value.ToString("0.0")}";
-                itemMenuesFeeText[1].text = $"{ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv + 1].fee:N0}";
-            }
-        }
-
-        if (GoogleManager.Instance != null)
-        {
-            Debug.Log("구글 저장");
-            GoogleManager.Instance.SaveGameState();
-        }
-    }
-
-    // 먹이 최대치 증가
-    private void IncreaseFoodMaximum()
-    {
-        if (itemMenuesFeeText[2] == null) return;
-
-        bool isMaxLevel = maxFoodsLv >= ItemFunctionManager.Instance.maxFoodsList.Count - 1;
-        if (isMaxLevel)
-        {
-            increaseFoodMaximumButton.interactable = false;
-            disabledBg[2].SetActive(true);
-            itemMenuesFeeText[2].text = "구매완료";
-        }
-        else
-        {
-            decimal fee = ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv].fee;
-            if (GameManager.Instance.Coin < fee)
-            {
-                NotificationManager.Instance.ShowNotification("재화가 부족합니다!!");
-                return;
-            }
-
-            GameManager.Instance.Coin -= fee;
-            maxFoodsLv++;
-            itemMenuesLvText[2].text = $"Lv.{ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv].step}";
-
-            isMaxLevel = maxFoodsLv >= ItemFunctionManager.Instance.maxFoodsList.Count - 1;
-            if (isMaxLevel)
-            {
-                increaseFoodMaximumButton.interactable = false;
-                disabledBg[2].SetActive(true);
-                itemMenuesFeeText[2].text = "구매완료";
-                itemMenuesValueText[2].text = $"{ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv].value}";
-            }
-            else
-            {
-                itemMenuesValueText[2].text = $"{ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv].value} → {ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv + 1].value}";
-                itemMenuesFeeText[2].text = $"{ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv + 1].fee:N0}";
-            }
-        }
-
-        SpawnManager.Instance.UpdateFoodText();
-        SpawnManager.Instance.OnMaxFoodIncreased();
-
-        if (GoogleManager.Instance != null)
-        {
-            Debug.Log("구글 저장");
-            GoogleManager.Instance.SaveGameState();
-        }
-    }
-
-    // 먹이 생성 시간 감소
-    private void ReduceProducingFoodTime()
-    {
-        if (itemMenuesFeeText[3] == null) return;
-
-        bool isMaxLevel = reduceProducingFoodTimeLv >= ItemFunctionManager.Instance.reduceProducingFoodTimeList.Count - 1;
-        if (isMaxLevel)
-        {
-            reduceProducingFoodTimeButton.interactable = false;
-            disabledBg[3].SetActive(true);
-            itemMenuesFeeText[3].text = "구매완료";
-        }
-        else
-        {
-            decimal fee = ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].fee;
-            if (GameManager.Instance.Coin < fee)
-            {
-                NotificationManager.Instance.ShowNotification("재화가 부족합니다!!");
-                return;
-            }
-
-            GameManager.Instance.Coin -= fee;
-            reduceProducingFoodTimeLv++;
-            itemMenuesLvText[3].text = $"Lv.{ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].step}";
-
-            isMaxLevel = reduceProducingFoodTimeLv >= ItemFunctionManager.Instance.reduceProducingFoodTimeList.Count - 1;
-            if (isMaxLevel)
-            {
-                reduceProducingFoodTimeButton.interactable = false;
-                disabledBg[3].SetActive(true);
-                itemMenuesFeeText[3].text = "구매완료";
-                itemMenuesValueText[3].text = $"{ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].value}";
-            }
-            else
-            {
-                itemMenuesValueText[3].text = $"{ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].value.ToString("0.0")} → {ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv + 1].value.ToString("0.0")}";
-                itemMenuesFeeText[3].text = $"{ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv + 1].fee:N0}";
-            }
-        }
-
-        if (GoogleManager.Instance != null)
-        {
-            Debug.Log("구글 저장");
-            GoogleManager.Instance.SaveGameState();
-        }
-    }
-
-    // 자동 먹이 시간 감소
-    private void AutoCollecting()
-    {
-        if (itemMenuesFeeText[4] == null) return;
-
-        bool isMaxLevel = autoCollectingLv >= ItemFunctionManager.Instance.autoCollectingList.Count - 1;
-        if (isMaxLevel)
-        {
-            autoCollectingButton.interactable = false;
-            disabledBg[4].SetActive(true);
-            itemMenuesFeeText[4].text = "구매완료";
-        }
-        else
-        {
-            decimal fee = ItemFunctionManager.Instance.autoCollectingList[autoCollectingLv].fee;
-            if (GameManager.Instance.Coin < fee)
-            {
-                NotificationManager.Instance.ShowNotification("재화가 부족합니다!!");
-                return;
-            }
-
-            GameManager.Instance.Coin -= fee;
-            autoCollectingLv++;
-            itemMenuesLvText[4].text = $"Lv.{ItemFunctionManager.Instance.autoCollectingList[autoCollectingLv].step}";
-
-            isMaxLevel = autoCollectingLv >= ItemFunctionManager.Instance.autoCollectingList.Count - 1;
-            if (isMaxLevel)
-            {
-                autoCollectingButton.interactable = false;
-                disabledBg[4].SetActive(true);
-                itemMenuesFeeText[4].text = "구매완료";
-                itemMenuesValueText[4].text = $"{ItemFunctionManager.Instance.autoCollectingList[autoCollectingLv].value}";
-            }
-            else
-            {
-                itemMenuesValueText[4].text = $"{ItemFunctionManager.Instance.autoCollectingList[autoCollectingLv].value} → {ItemFunctionManager.Instance.autoCollectingList[autoCollectingLv + 1].value}";
-                itemMenuesFeeText[4].text = $"{ItemFunctionManager.Instance.autoCollectingList[autoCollectingLv + 1].fee:N0}";
-            }
-        }
-
-        if (GoogleManager.Instance != null)
-        {
-            Debug.Log("구글 저장");
-            GoogleManager.Instance.SaveGameState();
-        }
-    }
-
-    // ======================================================================================================================
 
     #region Save System
+
     [Serializable]
     private class SaveData
     {
-        public int maxCatsLv;                   // 고양이 최대 보유수 레벨
-        public int reduceCollectingTimeLv;      // 재화 획득 시간 레벨
-        public int maxFoodsLv;                  // 먹이 최대치 레벨
-        public int reduceProducingFoodTimeLv;   // 먹이 생성 시간 레벨
-        public int autoCollectingLv;            // 자동 먹이주기 레벨
+        public int maxCatsLv;                       // 고양이 최대 보유수 레벨
+        public int reduceCollectingTimeLv;          // 재화 획득 시간 레벨
+        public int maxFoodsLv;                      // 먹이 최대치 레벨
+        public int reduceProducingFoodTimeLv;       // 먹이 생성 시간 레벨
+        public int autoCollectingLv;                // 자동 먹이주기 레벨
     }
 
     public string GetSaveData()
@@ -513,51 +465,27 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         if (string.IsNullOrEmpty(data)) return;
 
         SaveData savedData = JsonUtility.FromJson<SaveData>(data);
-
-        // 레벨 데이터 복원
         this.maxCatsLv = savedData.maxCatsLv;
         this.reduceCollectingTimeLv = savedData.reduceCollectingTimeLv;
         this.maxFoodsLv = savedData.maxFoodsLv;
         this.reduceProducingFoodTimeLv = savedData.reduceProducingFoodTimeLv;
         this.autoCollectingLv = savedData.autoCollectingLv;
 
-        // UI 상태 업데이트
-        UpdateAllItemStates();
+        UpdateAllUI();
+
+        isDataLoaded = true;
     }
 
-    // 모든 아이템 상태 업데이트
-    private void UpdateAllItemStates()
+    private void GoogleSave()
     {
-        UpdateItemState(maxCatsLv, 0, increaseCatMaximumButton, ItemFunctionManager.Instance.maxCatsList);
-        UpdateItemState(reduceCollectingTimeLv, 1, reduceCollectingTimeButton, ItemFunctionManager.Instance.reduceCollectingTimeList);
-        UpdateItemState(maxFoodsLv, 2, increaseFoodMaximumButton, ItemFunctionManager.Instance.maxFoodsList);
-        UpdateItemState(reduceProducingFoodTimeLv, 3, reduceProducingFoodTimeButton, ItemFunctionManager.Instance.reduceProducingFoodTimeList);
-        UpdateItemState(autoCollectingLv, 4, autoCollectingButton, ItemFunctionManager.Instance.autoCollectingList);
-
-        // 관련 시스템 업데이트
-        GameManager.Instance.MaxCats = (int)ItemFunctionManager.Instance.maxCatsList[maxCatsLv].value;
-        SpawnManager.Instance.UpdateFoodText();
-    }
-
-    private void UpdateItemState(int level, int index, Button button, List<(int step, float value, decimal fee)> itemList)
-    {
-        if (itemMenuesFeeText[index] == null) return;
-
-        bool isMaxLevel = level >= itemList.Count - 1;
-        if (isMaxLevel)
+        if (GoogleManager.Instance != null)
         {
-            button.interactable = false;
-            disabledBg[index].SetActive(true);
-            itemMenuesFeeText[index].text = "구매완료";
-            itemMenuesValueText[index].text = $"{itemList[level].value}";
-        }
-        else
-        {
-            itemMenuesLvText[index].text = $"Lv.{itemList[level].step}";
-            itemMenuesValueText[index].text = $"{itemList[level].value} → {itemList[level + 1].value}";
-            itemMenuesFeeText[index].text = $"{itemList[level + 1].fee:N0}";
+            Debug.Log("구글 저장");
+            GoogleManager.Instance.SaveGameState();
         }
     }
+
     #endregion
+
 
 }

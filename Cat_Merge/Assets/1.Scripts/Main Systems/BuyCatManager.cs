@@ -12,7 +12,6 @@ public class BuyCatManager : MonoBehaviour, ISaveable
 
     #region Variables
 
-    // Singleton Instance
     public static BuyCatManager Instance { get; private set; }
 
     [Header("---[BuyCat]")]

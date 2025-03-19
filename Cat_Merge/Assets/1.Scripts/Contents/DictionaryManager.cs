@@ -87,6 +87,11 @@ public class DictionaryManager : MonoBehaviour
     [SerializeField] private Button[] friendshipButtonPrefabs;  // 레벨 1~5 버튼 프리팹 배열
     private Button[] activeButtons; // 실제 사용되는 5개의 버튼
 
+    [Header("---[fullStar]")]
+    [SerializeField] private Transform fullStarImgParent;
+    [SerializeField] private GameObject fullStarPrefabs;
+    private GameObject fullStar;
+
     // 현재 선택된 고양이 등급 추적
     public int currentSelectedCatGrade = -1;
 
@@ -588,6 +593,9 @@ public class DictionaryManager : MonoBehaviour
             activeButtons[i] = Instantiate(friendshipButtonPrefabs[i], friendshipButtonParent);
             activeButtons[i].gameObject.SetActive(false); // 초기에는 비활성화
         }
+
+        if (fullStar != null) return;
+        fullStar = Instantiate(fullStarPrefabs, fullStarImgParent);
     }
 
     // 우정도 버튼 상태 업데이트
@@ -600,6 +608,7 @@ public class DictionaryManager : MonoBehaviour
         for (int i = 0; i < activeButtons.Length; i++)
         {
             var button = activeButtons[i];
+           
             if (button != null)
             {
                 // LockBG 상태 업데이트
@@ -621,47 +630,48 @@ public class DictionaryManager : MonoBehaviour
                 if (star != null)
                 {
                     star.gameObject.SetActive(friendshipInfo.isUnlocked[i]);
-                    if(friendshipInfo.isUnlocked[i])
-                    {
-                        GameObject fullStarObj = GameObject.Find("fullStar");
-                        if(fullStarObj != null)
-                        {
-                            RectTransform fullStar = fullStarObj.GetComponent<RectTransform>(); // RectTransform 가져오기
-                            if (fullStar != null)
-                            {
-                                Vector2 newOffsetMax = fullStar.offsetMax;
-                                switch (i)
-                                {
-                                    case 0:
-                                        newOffsetMax.x = -168; // right 값을 168로 변경
-                                        fullStar.offsetMax = newOffsetMax;
-                                        break;
-                                    case 1:
-                                        newOffsetMax.x = -126; // right 값을 168로 변경
-                                        fullStar.offsetMax = newOffsetMax;
-                                        break;
-                                    case 2:
-                                        newOffsetMax.x = -84; // right 값을 168로 변경
-                                        fullStar.offsetMax = newOffsetMax;
-                                        break;
-                                    case 3:
-                                        newOffsetMax.x = -42; // right 값을 168로 변경
-                                        fullStar.offsetMax = newOffsetMax;
-                                        break;
-                                    case 4:
-                                        newOffsetMax.x = 0; // right 값을 168로 변경
-                                        fullStar.offsetMax = newOffsetMax;
-                                        break;
-                                }
-                            }
-                        }                   
-                    }
                 }
 
                 // 버튼 상호작용 상태 설정
                 button.interactable = friendshipInfo.isUnlocked[i] && !friendshipInfo.isClaimed[i];
             }
         }
+        var fullStarImg = fullStar;
+        //fullStar 상태 업데이트
+        Transform fullStarBG = fullStarImg.transform.Find("fullStar");
+        if (fullStarImg != null)
+        {
+            Vector2 newOffsetMax = fullStarImg.GetComponent<RectTransform>().offsetMax;
+            newOffsetMax.x = -210;
+            newOffsetMax.y = 0;
+           
+            for(int i = 0; i < activeButtons.Length; i++)
+            {
+                if(friendshipInfo.isUnlocked[0])
+                {
+                    newOffsetMax.x = -168;
+                }
+                if (friendshipInfo.isUnlocked[1])
+                {
+                    newOffsetMax.x = -126;
+                }
+                if (friendshipInfo.isUnlocked[2])
+                {
+                    newOffsetMax.x = -84;
+                }
+                if (friendshipInfo.isUnlocked[3])
+                {
+                    newOffsetMax.x = -42;
+                }
+                if (friendshipInfo.isUnlocked[4])
+                {
+                    newOffsetMax.x = 0;
+                }
+            }
+            fullStarBG.GetComponent<RectTransform>().offsetMax = newOffsetMax;
+        }
+
+        
     }
 
     // 우정도 버튼 상태 업데이트 (고양이 선택 시)
@@ -697,17 +707,58 @@ public class DictionaryManager : MonoBehaviour
             }
         }
 
-        UpdateFriendshipButtonStates(catGrade);
+        var fullStarImg = fullStar;
+        //fullStar 상태 업데이트
+        Transform fullStarBG = fullStarImg.transform.Find("fullStar");
+        if (fullStarImg != null)
+        {
+            Vector2 newOffsetMax = fullStarImg.GetComponent<RectTransform>().offsetMax;
+            newOffsetMax.x = -210;
+            newOffsetMax.y = 0;
+
+            for (int i = 0; i < activeButtons.Length; i++)
+            {
+                if (friendshipInfo.isUnlocked[0])
+                {
+                    newOffsetMax.x = -168;
+                }
+                if (friendshipInfo.isUnlocked[1])
+                {
+                    newOffsetMax.x = -126;
+                }
+                if (friendshipInfo.isUnlocked[2])
+                {
+                    newOffsetMax.x = -84;
+                }
+                if (friendshipInfo.isUnlocked[3])
+                {
+                    newOffsetMax.x = -42;
+                }
+                if (friendshipInfo.isUnlocked[4])
+                {
+                    newOffsetMax.x = 0;
+                }
+            }
+            fullStarBG.GetComponent<RectTransform>().offsetMax = newOffsetMax;
+        }
+
+        //UpdateFriendshipButtonStates(catGrade);
+
     }
 
 
+    public bool buttonClick = false;
     // 우정도 버튼 클릭 처리
     private void OnFriendshipButtonClick(int catGrade, int level)
     {
         if (FriendshipManager.Instance.CanClaimLevelReward(catGrade, level))
         {
             FriendshipManager.Instance.ClaimReward(catGrade, level);
-            UpdateFriendshipButtonStates(catGrade);
+            //UpdateFriendshipButtonStates(catGrade);
+
+            Debug.Log("버튼 클릭");
+            buttonClick = true;
+            FriendshipManager.Instance.UpdateFriendshipUI(catGrade);
         }
     }
 

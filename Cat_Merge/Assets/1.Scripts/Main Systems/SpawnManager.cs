@@ -38,10 +38,10 @@ public class SpawnManager : MonoBehaviour, ISaveable
     private Coroutine createFoodCoroutine;
     private Coroutine autoCollectCoroutine;
 
-    private bool isDataLoaded = false;
+
+    private bool isDataLoaded = false;                              // 데이터 로드 확인
 
     #endregion
-
 
 
     #region Unity Methods
@@ -75,9 +75,9 @@ public class SpawnManager : MonoBehaviour, ISaveable
     #endregion
 
 
-
     #region Initialize
 
+    // 스폰 시스템 초기화 함수
     private void InitializeSpawnSystem()
     {
         createFoodCoroutine = StartCoroutine(CreateFoodTime());
@@ -87,10 +87,9 @@ public class SpawnManager : MonoBehaviour, ISaveable
     #endregion
 
 
-
     #region Spawn System
 
-    // 고양이 스폰 버튼 클릭
+    // 고양이 스폰 버튼 클릭 함수
     public void OnClickedSpawn()
     {
         if (!GameManager.Instance.CanSpawnCat())
@@ -111,6 +110,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
         GoogleSave();
     }
 
+    // 기본 고양이 스폰 함수
     private void SpawnBasicCat()
     {
         Cat catData = GetCatDataForSpawn();
@@ -122,6 +122,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
         FriendshipManager.Instance.AddExperience(1, 1);
     }
 
+    // 먹이 생성 코루틴 재시작 함수
     private void RestartFoodCoroutineIfStopped()
     {
         if (!isStoppedReduceCoroutine) return;
@@ -130,7 +131,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
         createFoodCoroutine = StartCoroutine(CreateFoodTime());
     }
 
-    // 자동머지시 고양이 스폰 함수
+    // 자동머지 고양이 스폰 함수 (AutoMerge)
     public void SpawnCat()
     {
         if (!GameManager.Instance.CanSpawnCat()) return;
@@ -144,7 +145,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
         FriendshipManager.Instance.AddExperience(1, 1);
     }
 
-    // 고양이 구매 상점의 고양이 구매 후 스폰 함수
+    // 구매한 고양이 스폰 함수 (BuyCat)
     public void SpawnGradeCat(int grade)
     {
         if (!GameManager.Instance.CanSpawnCat()) return;
@@ -159,6 +160,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
         FriendshipManager.Instance.UpdateFriendshipUI(grade + 1);
     }
 
+    // 고양이 데이터 설정 함수
     private void SetupCatData(GameObject cat, int grade)
     {
         if (cat.TryGetComponent<DragAndDropManager>(out var dragAndDrop))
@@ -168,7 +170,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
         }
     }
 
-    // 고양이 스폰 데이터를 선택하는 함수
+    // 스폰할 고양이 데이터 반환 함수
     private Cat GetCatDataForSpawn()
     {
         const int basicCatGrade = 0;
@@ -213,6 +215,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
     private IEnumerator CreateFoodTime()
     {
         float elapsed = 0f;
+        WaitForEndOfFrame waitFrame = new WaitForEndOfFrame();
 
         while (true)
         {
@@ -230,7 +233,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
             {
                 elapsed += Time.deltaTime;
                 foodFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / producingTime);
-                yield return null;
+                yield return waitFrame;
             }
 
             foodFillAmountImg.fillAmount = 1f;
@@ -244,13 +247,14 @@ public class SpawnManager : MonoBehaviour, ISaveable
     private IEnumerator AutoCollectingTime()
     {
         float elapsed = 0f;
+        WaitForEndOfFrame waitFrame = new WaitForEndOfFrame();
 
         while (true)
         {
             // 전투중이면 대기
             if (BattleManager.Instance.IsBattleActive)
             {
-                yield return null;
+                yield return waitFrame;
                 continue;
             }
 
@@ -264,7 +268,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
 
                 elapsed += Time.deltaTime;
                 autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / autoTime);
-                yield return null;
+                yield return waitFrame;
             }
 
             // 완료되면 먹이 줄이고 고양이 생성
@@ -280,14 +284,13 @@ public class SpawnManager : MonoBehaviour, ISaveable
                 elapsed = 0f;
             }
 
-            yield return null;
+            yield return waitFrame;
         }
     }
 
-    // 최대 먹이 수량이 증가했을 때 호출되는 함수
+    // 최대 먹이 수량 증가 처리 함수 (ItemMenu)
     public void OnMaxFoodIncreased()
     {
-        // 최대 레벨에 도달했는지 확인
         if (ItemMenuManager.Instance.MaxFoodsLv >= ItemFunctionManager.Instance.maxFoodsList.Count) return;
 
         int currentMaxFood = (int)ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value;
@@ -297,6 +300,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
         }
     }
 
+    // 먹이 텍스트 업데이트 함수
     public void UpdateFoodText()
     {
         int maxFood;
@@ -317,7 +321,6 @@ public class SpawnManager : MonoBehaviour, ISaveable
     #endregion
 
 
-
     #region Battle System
 
     // 전투 시작시 버튼 및 기능 비활성화시키는 함수
@@ -333,7 +336,6 @@ public class SpawnManager : MonoBehaviour, ISaveable
     }
 
     #endregion
-
 
 
     #region Save System
@@ -362,7 +364,6 @@ public class SpawnManager : MonoBehaviour, ISaveable
 
         UpdateFoodText();
 
-        // 현재 먹이가 최대치보다 적으면 코루틴 재시작
         int maxFood = (int)ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value;
         if (this.nowFood < maxFood)
         {

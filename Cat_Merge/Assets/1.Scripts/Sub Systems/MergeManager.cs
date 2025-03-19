@@ -20,16 +20,16 @@ public class MergeManager : MonoBehaviour, ISaveable
     private bool isMergeEnabled;                                    // 머지 활성화 상태
     private bool previousMergeState;                                // 이전 상태 저장
 
-    private bool isDataLoaded = false;
-
     [Header("---[UI Color]")]
     private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
     private const string inactiveColorCode = "#FFFFFF";             // 비활성화상태 Color
+
+
+    private bool isDataLoaded = false;                              // 데이터 로드 확인
     
     #endregion
 
     
-
     #region Unity Methods
 
     private void Awake()
@@ -59,7 +59,6 @@ public class MergeManager : MonoBehaviour, ISaveable
 
     #endregion
 
-   
 
     #region Button System
 
@@ -101,7 +100,6 @@ public class MergeManager : MonoBehaviour, ISaveable
 
     #endregion
 
-    
 
     #region Battle System
 
@@ -131,7 +129,6 @@ public class MergeManager : MonoBehaviour, ISaveable
 
     #endregion
 
-   
 
     #region UI System
 
@@ -157,7 +154,6 @@ public class MergeManager : MonoBehaviour, ISaveable
     #endregion
 
 
-
     #region Merge System
 
     // 고양이 Merge 함수
@@ -172,7 +168,7 @@ public class MergeManager : MonoBehaviour, ISaveable
         Cat nextCat = GetCatByGrade(cat1.CatGrade + 1);
         if (nextCat != null)
         {
-            //Debug.Log($"합성 성공 : {nextCat.CatName}");
+            //Debug.Log($"합성 성공");
             DictionaryManager.Instance.UnlockCat(nextCat.CatGrade - 1);
             QuestManager.Instance.AddMergeCount();
 
@@ -208,7 +204,6 @@ public class MergeManager : MonoBehaviour, ISaveable
     }
 
     #endregion
-
 
 
     #region Save System

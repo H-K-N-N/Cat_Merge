@@ -21,15 +21,15 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     private bool isAutoMoveEnabled;                                 // 자동 이동 활성화 상태
     private bool previousAutoMoveState;                             // 이전 상태 저장
 
-    private bool isDataLoaded = false;
-
     [Header("---[UI Color]")]
     private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
     private const string inactiveColorCode = "#FFFFFF";             // 비활성화상태 Color
 
+
+    private bool isDataLoaded = false;                              // 데이터 로드 확인
+
     #endregion
 
-    
 
     #region Unity Methods
 
@@ -60,11 +60,10 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
 
     #endregion
 
-    
 
     #region Button System
 
-    // 버튼 리스너 초기화
+    // 버튼 리스너 초기화 함수
     private void InitializeButtonListeners()
     {
         openAutoMovePanelButton.onClick.AddListener(OpenAutoMovePanel);
@@ -103,11 +102,10 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
 
     #endregion
 
-    
 
     #region Auto Move System
 
-    // 모든 고양이에게 자동이동 상태 적용
+    // 모든 고양이에게 자동이동 상태 적용하는 함수
     private void ApplyAutoMoveStateToAllCats()
     {
         CatData[] allCats = FindObjectsOfType<CatData>();
@@ -150,7 +148,6 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
 
     #endregion
 
-    
 
     #region Battle System
 
@@ -205,7 +202,6 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
 
     #endregion
 
-    
 
     #region Sort System
 
@@ -224,7 +220,6 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
 
     #endregion
 
-    
 
     #region Save System
 

@@ -47,8 +47,6 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
 
     private void Start()
     {
-        Debug.Log("AutoMoveManager 호출");
-
         // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
         if (!isDataLoaded)
         {

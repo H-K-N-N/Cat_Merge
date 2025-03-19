@@ -2,9 +2,16 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using System.Collections.Generic;
 
+// 고양이 구매 스크립트
+[DefaultExecutionOrder(-2)]
 public class BuyCatManager : MonoBehaviour, ISaveable
 {
+
+
+    #region Variables
+
     // Singleton Instance
     public static BuyCatManager Instance { get; private set; }
 
@@ -25,12 +32,27 @@ public class BuyCatManager : MonoBehaviour, ISaveable
 
     private ActivePanelManager activePanelManager;                                      // ActivePanelManager
 
-    private int[] buyCatCoinCounts;                                                     // 고양이 구매 횟수 (코인)
-    private int[] buyCatCashCounts;                                                     // 고양이 구매 횟수 (크리스탈)
-    private int[] buyCatCoinFee;                                                        // 고양이 구매 비용 (코인)
-    private int[] buyCatCashFee;                                                        // 고양이 구매 비용 (크리스탈)
+    // 개별 고양이 등급에 대한 구매 정보 클래스
+    [Serializable]
+    public class CatPurchaseInfo
+    {
+        public int catGrade;
+        public int coinPurchaseCount;
+        public int cashPurchaseCount;
+        public int coinPrice;
+        public int cashPrice;
+    }
 
-    // ======================================================================================================================
+    // 모든 고양이 구매 정보를 관리하는 딕셔너리
+    private Dictionary<int, CatPurchaseInfo> catPurchaseInfos = new Dictionary<int, CatPurchaseInfo>();
+
+    private bool isDataLoaded = false;
+
+    #endregion
+
+
+
+    #region Unity Methods
 
     private void Awake()
     {
@@ -42,58 +64,206 @@ public class BuyCatManager : MonoBehaviour, ISaveable
         {
             Destroy(gameObject);
         }
-        InitializeItemMenuManager();
-
-        buyCatCoinCounts = new int[GameManager.Instance.AllCatData.Length];   // 고양이 구매 횟수 (코인)
-        buyCatCashCounts = new int[GameManager.Instance.AllCatData.Length];   // 고양이 구매 횟수 (크리스탈)
-        buyCatCoinFee = new int[GameManager.Instance.AllCatData.Length];      // 고양이 구매 비용 (코인)
-        buyCatCashFee = new int[GameManager.Instance.AllCatData.Length];      // 고양이 구매 비용 (크리스탈)
-
-        // 고양이 구매 메뉴 관련
-        for (int i = 0; i < GameManager.Instance.AllCatData.Length; i++)
-        {
-            buyCatCoinCounts[i] = 0;
-            buyCatCashCounts[i] = 0;
-            buyCatCoinFee[i] = i * 5 + 10;
-            buyCatCashFee[i] = 5;
-
-            buyCatCountExplainTexts[i].text = $"구매 횟수 : {buyCatCoinCounts[i]}회 + {buyCatCashCounts[i]}회";
-            buyCatCoinFeeTexts[i].text = $"{buyCatCoinFee[i]}";
-            buyCatCashFeeTexts[i].text = $"{buyCatCashFee[i]}";
-        }
-
-        for (int i = 0; i < GameManager.Instance.AllCatData.Length; i++)
-        {
-
-            if (i < buyCatCoinButtons.Length && i < buyCatCashButtons.Length) // 얘도 포함
-            {
-                int index = i; // 얘가 있어야 함 근데 이유는 모름
-                buyCatCoinButtons[index].onClick.AddListener(() => BuyCatCoin(buyCatCoinButtons[index]));
-                buyCatCashButtons[index].onClick.AddListener(() => BuyCatCash(buyCatCashButtons[index]));
-            }
-            else
-            {
-                Debug.LogWarning($"Index {i} is out of bounds for buyCatCoinButtons array.");
-            }
-        }
     }
 
     private void Start()
+    {
+        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
+        if (!isDataLoaded)
+        {
+            InitializeCatPurchaseInfos();
+        }
+
+        InitializeBuyCatManager();
+        UpdateAllUI();
+    }
+
+    #endregion
+
+
+
+    #region Initialize
+
+    private void InitializeBuyCatManager()
+    {
+        buyCatMenuPanel.SetActive(false);
+
+        InitializeActivePanel();
+        InitializeButtonListeners();
+    }
+
+    private void InitializeActivePanel()
     {
         activePanelManager = FindObjectOfType<ActivePanelManager>();
         activePanelManager.RegisterPanel("BuyCatMenu", buyCatMenuPanel, bottomBuyCatButtonImg);
     }
 
-    // ======================================================================================================================
-
-    private void InitializeItemMenuManager()
+    private void InitializeCatPurchaseInfos()
     {
-        buyCatMenuPanel.SetActive(false);
-        OpenCloseBottomBuyCatMenuPanel();
+        if (GameManager.Instance == null) return;
+
+        catPurchaseInfos.Clear();
+        for (int i = 0; i < GameManager.Instance.AllCatData.Length; i++)
+        {
+            catPurchaseInfos[i] = new CatPurchaseInfo
+            {
+                catGrade = i,
+                coinPurchaseCount = 0,
+                cashPurchaseCount = 0,
+                coinPrice = 5,
+                cashPrice = 5
+            };
+        }
+
+        UpdateAllUI();
     }
 
-    // ======================================================================================================================
-    // [Battle]
+    private void UpdateAllUI()
+    {
+        // 초기화 중에는 저장하지 않도록 수정
+        bool shouldSave = isDataLoaded;
+        isDataLoaded = false;
+
+        for (int i = 0; i < GameManager.Instance.AllCatData.Length; i++)
+        {
+            CatPurchaseInfo info = GetCatPurchaseInfo(i);
+            buyCatCountExplainTexts[i].text = $"구매 횟수 : {info.coinPurchaseCount}회 + {info.cashPurchaseCount}회";
+            buyCatCoinFeeTexts[i].text = $"{info.coinPrice:N0}";
+            buyCatCashFeeTexts[i].text = $"{info.cashPrice:N0}";
+        }
+
+        isDataLoaded = shouldSave;
+    }
+
+    private void InitializeButtonListeners()
+    {
+        bottomBuyCatButton.onClick.AddListener(() => activePanelManager.TogglePanel("BuyCatMenu"));
+        buyCatBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("BuyCatMenu"));
+
+        for (int i = 0; i < GameManager.Instance.AllCatData.Length; i++)
+        {
+            int index = i;
+
+            buyCatCoinButtons[index].onClick.RemoveAllListeners();
+            buyCatCoinButtons[index].onClick.AddListener(() => BuyCatCoin(buyCatCoinButtons[index]));
+
+            buyCatCashButtons[index].onClick.RemoveAllListeners();
+            buyCatCashButtons[index].onClick.AddListener(() => BuyCatCash(buyCatCashButtons[index]));
+        }
+    }
+
+    #endregion
+
+
+
+    #region Button System
+
+    // 고양이 구매 버튼 함수(코인으로 구매)
+    private void BuyCatCoin(Button button)
+    {
+        if (!GameManager.Instance.CanSpawnCat())
+        {
+            NotificationManager.Instance.ShowNotification("고양이 보유수가 최대입니다!!");
+            return;
+        }
+
+        int catIndex = GetButtonIndex(button, buyCatCoinButtons);
+        if (catIndex == -1) return;
+
+        CatPurchaseInfo info = GetCatPurchaseInfo(catIndex);
+        if (GameManager.Instance.Coin < info.coinPrice)
+        {
+            NotificationManager.Instance.ShowNotification("재화가 부족합니다!!");
+            return;
+        }
+
+        GameManager.Instance.Coin -= info.coinPrice;
+        info.coinPurchaseCount++;
+        info.coinPrice *= 2;
+
+        QuestManager.Instance.AddPurchaseCatsCount();
+        DictionaryManager.Instance.UnlockCat(catIndex);
+
+        SpawnManager catSpawn = GetComponent<SpawnManager>();
+        catSpawn.SpawnGradeCat(catIndex);
+
+        // UI 업데이트
+        UpdateAllUI();
+
+        GoogleSave();
+    }
+
+    // 고양이 구매 버튼 함수(크리스탈로 구매)
+    private void BuyCatCash(Button button)
+    {
+        if (!GameManager.Instance.CanSpawnCat())
+        {
+            NotificationManager.Instance.ShowNotification("고양이 보유수가 최대입니다!!");
+            return;
+        }
+
+        int catIndex = GetButtonIndex(button, buyCatCashButtons);
+        if (catIndex == -1) return;
+
+        CatPurchaseInfo info = GetCatPurchaseInfo(catIndex);
+        if (GameManager.Instance.Cash < info.cashPrice)
+        {
+            NotificationManager.Instance.ShowNotification("재화가 부족합니다!!");
+            return;
+        }
+
+        GameManager.Instance.Cash -= info.cashPrice;
+        info.cashPurchaseCount++;
+        info.cashPrice *= 2;
+
+        QuestManager.Instance.AddPurchaseCatsCount();
+        DictionaryManager.Instance.UnlockCat(catIndex);
+
+        SpawnManager catSpawn = GetComponent<SpawnManager>();
+        catSpawn.SpawnGradeCat(catIndex);
+
+        // UI 업데이트
+        UpdateAllUI();
+
+        GoogleSave();
+    }
+
+    // 버튼 배열에서 인덱스 찾기
+    private int GetButtonIndex(Button button, Button[] buttons)
+    {
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            if (button == buttons[i])
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    // 고양이 구매 정보 가져오기
+    private CatPurchaseInfo GetCatPurchaseInfo(int catGrade)
+    {
+        // 정보 없으면 생성
+        //if (!catPurchaseInfos.ContainsKey(catGrade))
+        //{
+        //    catPurchaseInfos[catGrade] = new CatPurchaseInfo
+        //    {
+        //        catGrade = catGrade,
+        //        coinPurchaseCount = 0,
+        //        cashPurchaseCount = 0,
+        //        coinPrice = 5,
+        //        cashPrice = 5
+        //    };
+        //}
+        return catPurchaseInfos[catGrade];
+    }
+
+    #endregion
+
+
+
+    #region Battle System
 
     // 전투 시작시 버튼 및 기능 비활성화시키는 함수
     public void StartBattleBuyCatState()
@@ -112,131 +282,33 @@ public class BuyCatManager : MonoBehaviour, ISaveable
         bottomBuyCatButton.interactable = true;
     }
 
-    // ======================================================================================================================
+    #endregion
 
-    // 고양이 구매 메뉴 판넬 여는 함수
-    private void OpenCloseBottomBuyCatMenuPanel()
-    {
-        bottomBuyCatButton.onClick.AddListener(() => activePanelManager.TogglePanel("BuyCatMenu"));
-        buyCatBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("BuyCatMenu"));
-    }
 
-    // 고양이 구매 버튼 함수(코인으로 구매)
-    private void BuyCatCoin(Button button)
-    {
-        if (!GameManager.Instance.CanSpawnCat())
-        {
-            NotificationManager.Instance.ShowNotification("고양이 보유수가 최대입니다!!");
-            return;
-        }
-
-        int catIndex = -1;
-        for (int i = 0; i < buyCatCoinButtons.Length; i++)
-        {
-            if (button == buyCatCoinButtons[i])
-            {
-                catIndex = i;
-                break;
-            }
-        }
-
-        if (catIndex == -1) return;
-
-        if (GameManager.Instance.Coin < buyCatCoinFee[catIndex])
-        {
-            NotificationManager.Instance.ShowNotification("재화가 부족합니다!!");
-            return;
-        }
-
-        GameManager.Instance.Coin -= buyCatCoinFee[catIndex];
-        buyCatCoinCounts[catIndex]++;
-        buyCatCoinFee[catIndex] *= 2;
-
-        QuestManager.Instance.AddPurchaseCatsCount();
-        DictionaryManager.Instance.UnlockCat(catIndex);
-
-        SpawnManager catSpawn = GetComponent<SpawnManager>();
-        catSpawn.SpawnGradeCat(catIndex);
-
-        buyCatCountExplainTexts[catIndex].text = $"구매 횟수 : {buyCatCoinCounts[catIndex]}회 + {buyCatCashCounts[catIndex]}회";
-        buyCatCoinFeeTexts[catIndex].text = $"{buyCatCoinFee[catIndex]:N0}";
-
-        if (GoogleManager.Instance != null)
-        {
-            Debug.Log("구글 저장");
-            GoogleManager.Instance.SaveGameState();
-        }
-    }
-
-    // 고양이 구매 버튼 함수(크리스탈로 구매)
-    private void BuyCatCash(Button button)
-    {
-        if (!GameManager.Instance.CanSpawnCat())
-        {
-            NotificationManager.Instance.ShowNotification("고양이 보유수가 최대입니다!!");
-            return;
-        }
-
-        int catIndex = -1;
-        for (int i = 0; i < buyCatCashButtons.Length; i++)
-        {
-            if (button == buyCatCashButtons[i])
-            {
-                catIndex = i;
-                break;
-            }
-        }
-
-        if (catIndex == -1) return;
-
-        if (GameManager.Instance.Cash < buyCatCashFee[catIndex])
-        {
-            NotificationManager.Instance.ShowNotification("재화가 부족합니다!!");
-            return;
-        }
-
-        GameManager.Instance.Cash -= buyCatCashFee[catIndex];
-        buyCatCashCounts[catIndex]++;
-        buyCatCashFee[catIndex] *= 2;
-
-        QuestManager.Instance.AddPurchaseCatsCount();
-        DictionaryManager.Instance.UnlockCat(catIndex);
-
-        SpawnManager catSpawn = GetComponent<SpawnManager>();
-        catSpawn.SpawnGradeCat(catIndex);
-
-        buyCatCountExplainTexts[catIndex].text = $"구매 횟수 : {buyCatCoinCounts[catIndex]}회 + {buyCatCashCounts[catIndex]}회";
-        buyCatCashFeeTexts[catIndex].text = $"{buyCatCashFee[catIndex]:N0}";
-
-        if (GoogleManager.Instance != null)
-        {
-            Debug.Log("구글 저장");
-            GoogleManager.Instance.SaveGameState();
-        }
-    }
-
-    // ======================================================================================================================
 
     #region Save System
+
     [Serializable]
     private class SaveData
     {
-        public int[] buyCatCoinCounts;      // 고양이별 코인 구매 횟수
-        public int[] buyCatCashCounts;      // 고양이별 캐시 구매 횟수
-        public int[] buyCatCoinFee;         // 고양이별 코인 구매 비용
-        public int[] buyCatCashFee;         // 고양이별 캐시 구매 비용
+        public List<CatPurchaseInfo> purchaseInfos = new List<CatPurchaseInfo>();
     }
 
     public string GetSaveData()
     {
-        SaveData data = new SaveData
+        SaveData saveData = new SaveData();
+        foreach (var infos in catPurchaseInfos)
         {
-            buyCatCoinCounts = this.buyCatCoinCounts,
-            buyCatCashCounts = this.buyCatCashCounts,
-            buyCatCoinFee = this.buyCatCoinFee,
-            buyCatCashFee = this.buyCatCashFee
-        };
-        return JsonUtility.ToJson(data);
+            saveData.purchaseInfos.Add(new CatPurchaseInfo
+            {
+                catGrade = infos.Value.catGrade,
+                coinPurchaseCount = infos.Value.coinPurchaseCount,
+                cashPurchaseCount = infos.Value.cashPurchaseCount,
+                coinPrice = infos.Value.coinPrice,
+                cashPrice = infos.Value.cashPrice
+            });
+        }
+        return JsonUtility.ToJson(saveData);
     }
 
     public void LoadFromData(string data)
@@ -244,30 +316,38 @@ public class BuyCatManager : MonoBehaviour, ISaveable
         if (string.IsNullOrEmpty(data)) return;
 
         SaveData savedData = JsonUtility.FromJson<SaveData>(data);
-
-        // 데이터 복원
-        this.buyCatCoinCounts = savedData.buyCatCoinCounts;
-        this.buyCatCashCounts = savedData.buyCatCashCounts;
-        this.buyCatCoinFee = savedData.buyCatCoinFee;
-        this.buyCatCashFee = savedData.buyCatCashFee;
-
-        // UI 업데이트
-        UpdateAllBuyCatUI();
-    }
-
-    // UI 상태 업데이트
-    private void UpdateAllBuyCatUI()
-    {
-        for (int i = 0; i < GameManager.Instance.AllCatData.Length; i++)
+        
+        catPurchaseInfos.Clear();
+        foreach (var info in savedData.purchaseInfos)
         {
-            if (i < buyCatCountExplainTexts.Length)
+            if (info.catGrade < GameManager.Instance.AllCatData.Length)
             {
-                buyCatCountExplainTexts[i].text = $"구매 횟수 : {buyCatCoinCounts[i]}회 + {buyCatCashCounts[i]}회";
-                buyCatCoinFeeTexts[i].text = $"{buyCatCoinFee[i]:N0}";
-                buyCatCashFeeTexts[i].text = $"{buyCatCashFee[i]:N0}";
+                catPurchaseInfos[info.catGrade] = new CatPurchaseInfo
+                {
+                    catGrade = info.catGrade,
+                    coinPurchaseCount = info.coinPurchaseCount,
+                    cashPurchaseCount = info.cashPurchaseCount,
+                    coinPrice = info.coinPrice,
+                    cashPrice = info.cashPrice
+                };
             }
         }
+
+        UpdateAllUI();
+
+        isDataLoaded = true;
     }
+
+    private void GoogleSave()
+    {
+        if (GoogleManager.Instance != null)
+        {
+            Debug.Log("구글 저장");
+            GoogleManager.Instance.SaveGameState();
+        }
+    }
+
     #endregion
+
 
 }

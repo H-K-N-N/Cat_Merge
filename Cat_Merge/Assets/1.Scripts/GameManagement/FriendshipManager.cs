@@ -43,8 +43,6 @@ public class FriendshipManager : MonoBehaviour
     private Dictionary<int, CatFriendship> catFriendships = new Dictionary<int, CatFriendship>();
 
     // 레벨별 필요 경험치 데이터
-    private List<(int exp, int reward)> levelRequirements;
-
     private Dictionary<int, List<(int exp, int reward)>> levelByGrade = new Dictionary<int, List<(int exp, int reward)>>();
 
     // ======================================================================================================================
@@ -63,7 +61,6 @@ public class FriendshipManager : MonoBehaviour
         InitializeCatFriendships();
     }
 
-
     private void Start()
     {
         //// 레벨별 필요 경험치 데이터 초기화
@@ -80,6 +77,11 @@ public class FriendshipManager : MonoBehaviour
         }
 
         expGauge.value = 0f;
+
+
+        saveNextExpLv1 = levelByGrade[0][0].exp;
+        saveNextExpLv2 = levelByGrade[1][0].exp;
+        saveNextExpLv3 = levelByGrade[2][0].exp;
     }
 
 
@@ -125,26 +127,11 @@ public class FriendshipManager : MonoBehaviour
         var friendship = catFriendships[catGrade];
         friendship.currentExp += expAmount;
 
-        //// 최대 경험치 제한
-        //if (friendship.currentExp >= levelRequirements[4].exp)
-        //{
-        //    friendship.currentExp = levelRequirements[4].exp;
-        //}
-
         // 최대 경험치 제한
         if (friendship.currentExp >= levelByGrade[catGrade - 1][4].exp)
         {
             friendship.currentExp = levelByGrade[catGrade - 1][4].exp;
         }
-
-        //// 각 레벨 해금 상태 체크
-        //for (int i = 0; i < 5; i++)
-        //{
-        //    if (friendship.currentExp >= levelRequirements[i].exp)
-        //    {
-        //        friendship.isLevelUnlocked[i] = true;
-        //    }
-        //}
 
         // 각 레벨 해금 상태 체크
         for (int i = 0; i < 5; i++)
@@ -158,6 +145,10 @@ public class FriendshipManager : MonoBehaviour
         UpdateFriendshipUI(catGrade);
     }
 
+    
+    int saveNextExpLv1;
+    int saveNextExpLv2;
+    int saveNextExpLv3;
     // UI 업데이트
     public void UpdateFriendshipUI(int catGrade)
     {
@@ -165,51 +156,81 @@ public class FriendshipManager : MonoBehaviour
 
         var friendship = catFriendships[catGrade];
 
-        // 현재 선택된 고양이가 있고, 그 고양이의 정보를 보고 있을 때만 UI 업데이트
-        int selectedGrade = DictionaryManager.Instance.GetCurrentSelectedCatGrade();
-        if (selectedGrade != -1 && selectedGrade != catGrade)
-        {
-            // 선택된 고양이와 다른 고양이의 경험치가 변경된 경우
-            // UI 업데이트를 하지 않고 버튼 상태만 업데이트
-            DictionaryManager.Instance.UpdateFriendshipButtonStates(catGrade);
-            return;
-        }
-
         // 현재 레벨과 다음 레벨 경험치 계산
-        //int nextLevelExp = levelRequirements[0].exp;
         int nextLevelExp = levelByGrade[catGrade - 1][0].exp;
 
-        //for (int i = 4; i >= 0; i--)
-        //{
-        //    if (friendship.currentExp >= levelRequirements[i].exp)
-        //    {
-        //        currentLevel = i;
-        //        nextLevelExp = i < 4 ? levelRequirements[i + 1].exp : levelRequirements[i].exp;
-        //        break;
-        //    }
-        //}
-
-        // 이게 현재 경험치가 경험치 요구량이 됐을 때인데 여기서 말고 버튼 누를때 함수에 적어야함
+        // 현재 경험치가 필요 경험치 이상일 때
         for (int i = 4; i >= 0; i--)
         {
             if (friendship.currentExp >= levelByGrade[catGrade - 1][i].exp)
             {
+                if (DictionaryManager.Instance.buttonClick)
+                {
+                    friendship.currentExp -= nextLevelExp;
+                    nextLevelExp = i < 4 ? levelByGrade[catGrade - 1][i + 1].exp : levelByGrade[catGrade - 1][i].exp;
 
-                nextLevelExp = i < 4 ? levelByGrade[catGrade - 1][i + 1].exp : levelByGrade[catGrade - 1][i].exp;
-                break;
+                    switch (catGrade)
+                    {
+                        case 1:
+                            saveNextExpLv1 = nextLevelExp;
+                            expRequirementText.text = $"{friendship.currentExp} / {saveNextExpLv1}";
+                            break;
+                        case 2:
+                            saveNextExpLv2 = nextLevelExp;
+                            expRequirementText.text = $"{friendship.currentExp} / {saveNextExpLv2}";
+                            break;
+                        case 3:
+                            saveNextExpLv3 = nextLevelExp;
+                            expRequirementText.text = $"{friendship.currentExp} / {saveNextExpLv3}";
+                            break;
+                    }
+
+                    //saveNextExpLv1 = nextLevelExp;
+                    //expRequirementText.text = $"{friendship.currentExp} / {saveNextExpLv1}";
+                    DictionaryManager.Instance.buttonClick = false;
+                    break;
+                }
             }
         }
 
         // UI 텍스트 업데이트
         if (expRequirementText != null)
         {
-            expRequirementText.text = $"{friendship.currentExp} / {nextLevelExp}";
+            switch(catGrade)
+            {
+                case 1:
+                    expRequirementText.text = $"{friendship.currentExp} / {saveNextExpLv1}";
+                    break;
+                case 2:
+                    expRequirementText.text = $"{friendship.currentExp} / {saveNextExpLv2}";
+                    break;
+                case 3:
+                    expRequirementText.text = $"{friendship.currentExp} / {saveNextExpLv3}";
+                    break;
+
+            }
+            //expRequirementText.text = $"{friendship.currentExp} / {saveNextExpLv1}";
         }
 
         // 게이지 업데이트
         if (expGauge != null)
         {
-            float progress = (float)friendship.currentExp / nextLevelExp;
+            float progress = 0f;
+            switch (catGrade)
+            {
+                case 1:
+                    progress = (float)friendship.currentExp / saveNextExpLv1;
+                    break;
+                case 2:
+                    progress = (float)friendship.currentExp / saveNextExpLv2;
+                    break;
+                case 3:
+                    progress = (float)friendship.currentExp / saveNextExpLv3;
+                    break;
+
+            }
+
+            //float progress = (float)friendship.currentExp / saveNextExpLv1;
             expGauge.value = Mathf.Clamp01(progress);
         }
 

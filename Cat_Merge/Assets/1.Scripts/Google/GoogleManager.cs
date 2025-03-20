@@ -76,6 +76,8 @@ public class GoogleManager : MonoBehaviour
 
     public delegate void SaveCompletedCallback(bool success);
 
+    private Canvas loadingScreenCanvas;
+
     #endregion
 
 
@@ -140,6 +142,7 @@ public class GoogleManager : MonoBehaviour
         loadingScreen = GameObject.Find(loadingScreenName);
         if (loadingScreen != null)
         {
+            loadingScreenCanvas = loadingScreen.GetComponent<Canvas>();
             loadingScreen.SetActive(false);
             DontDestroyOnLoad(loadingScreen);
         }
@@ -158,6 +161,9 @@ public class GoogleManager : MonoBehaviour
     // 씬 로드 완료시 데이터를 적용하는 함수
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        // LoadingScreen의 카메라 업데이트
+        UpdateLoadingScreenCamera();
+
         // 씬이 로드될 때마다 삭제 버튼 찾기
         FindAndSetupDeleteButton();
 
@@ -294,6 +300,20 @@ public class GoogleManager : MonoBehaviour
 
 
     #region 로딩 화면 관리
+
+    private void UpdateLoadingScreenCamera()
+    {
+        if (loadingScreenCanvas != null)
+        {
+            // 현재 씬의 메인 카메라 찾기
+            Camera mainCamera = Camera.main;
+            if (mainCamera != null)
+            {
+                loadingScreenCanvas.worldCamera = mainCamera;
+                loadingScreenCanvas.planeDistance = 1f; // 필요한 경우 거리 조정
+            }
+        }
+    }
 
     // 로딩 화면을 표시하거나 숨기는 함수
     public void ShowLoadingScreen(bool show)

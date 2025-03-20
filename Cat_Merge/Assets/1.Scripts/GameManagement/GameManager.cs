@@ -385,7 +385,7 @@ public class GameManager : MonoBehaviour, ISaveable
             yield return new WaitForSecondsRealtime(0.1f);
         }
 
-        // 두 번째 저장 시도 (첫 번째가 실패했을 경우를 대비)
+        // 두 번째 저장 시도 (첫 번째가 실패했을 경우를 대비) (이거없으면 제대로 안됌)
         if (!saveCompleted)
         {
             saveCompleted = false;

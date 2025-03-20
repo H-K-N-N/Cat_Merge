@@ -2,10 +2,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 
-// 고양이 머지 Script
+// 고양이 머지 스크립트
+[DefaultExecutionOrder(-1)]
 public class MergeManager : MonoBehaviour, ISaveable
 {
+
+
     #region Variables
+
     public static MergeManager Instance { get; private set; }
 
     [Header("---[Merge On/Off System]")]
@@ -19,11 +23,15 @@ public class MergeManager : MonoBehaviour, ISaveable
     [Header("---[UI Color]")]
     private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
     private const string inactiveColorCode = "#FFFFFF";             // 비활성화상태 Color
+
+
+    private bool isDataLoaded = false;                              // 데이터 로드 확인
+    
     #endregion
 
-    // ======================================================================================================================
-
+    
     #region Unity Methods
+
     private void Awake()
     {
         if (Instance == null)
@@ -34,15 +42,25 @@ public class MergeManager : MonoBehaviour, ISaveable
         {
             Destroy(gameObject);
         }
-
-        isMergeEnabled = true;
     }
 
     private void Start()
     {
-        UpdateMergeButtonColor();
+        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
+        if (!isDataLoaded)
+        {
+            isMergeEnabled = true;
+            previousMergeState = isMergeEnabled;
+        }
+
         InitializeButtonListeners();
+        UpdateMergeButtonColor();
     }
+
+    #endregion
+
+
+    #region Button System
 
     // 버튼 리스너 초기화 함수
     private void InitializeButtonListeners()
@@ -51,11 +69,7 @@ public class MergeManager : MonoBehaviour, ISaveable
         closeMergePanelButton.onClick.AddListener(CloseMergePanel);
         mergeStateButton.onClick.AddListener(ToggleMergeState);
     }
-    #endregion
 
-    // ======================================================================================================================
-
-    #region Panel Control
     // 머지 패널 여는 함수
     private void OpenMergePanel()
     {
@@ -81,13 +95,14 @@ public class MergeManager : MonoBehaviour, ISaveable
         UpdateMergeButtonColor();
         CloseMergePanel();
 
-        GoogleManager.Instance.SaveGameState();
+        GoogleSave();
     }
+
     #endregion
 
-    // ======================================================================================================================
 
     #region Battle System
+
     // 전투 시작시 버튼 및 기능 비활성화시키는 함수
     public void StartBattleMergeState()
     {
@@ -100,23 +115,23 @@ public class MergeManager : MonoBehaviour, ISaveable
             mergePanel.SetActive(false);
         }
 
-        GoogleManager.Instance.SaveGameState();
+        GoogleSave();
     }
 
     // 전투 종료시 버튼 및 기능 기존 상태로 되돌려놓는 함수
     public void EndBattleMergeState()
     {
         isMergeEnabled = previousMergeState;
-
         openMergePanelButton.interactable = true;
 
-        GoogleManager.Instance.SaveGameState();
+        GoogleSave();
     }
+
     #endregion
 
-    // ======================================================================================================================
 
     #region UI System
+
     // 머지 버튼 색상 업데이트 함수
     private void UpdateMergeButtonColor()
     {
@@ -135,11 +150,12 @@ public class MergeManager : MonoBehaviour, ISaveable
     {
         return isMergeEnabled;
     }
+
     #endregion
 
-    // ======================================================================================================================
 
     #region Merge System
+
     // 고양이 Merge 함수
     public Cat MergeCats(Cat cat1, Cat cat2)
     {
@@ -152,7 +168,7 @@ public class MergeManager : MonoBehaviour, ISaveable
         Cat nextCat = GetCatByGrade(cat1.CatGrade + 1);
         if (nextCat != null)
         {
-            //Debug.Log($"합성 성공 : {nextCat.CatName}");
+            //Debug.Log($"합성 성공");
             DictionaryManager.Instance.UnlockCat(nextCat.CatGrade - 1);
             QuestManager.Instance.AddMergeCount();
 
@@ -186,11 +202,12 @@ public class MergeManager : MonoBehaviour, ISaveable
         }
         return null;
     }
+
     #endregion
 
-    // ======================================================================================================================
 
     #region Save System
+
     [Serializable]
     private class SaveData
     {
@@ -216,9 +233,21 @@ public class MergeManager : MonoBehaviour, ISaveable
         this.isMergeEnabled = savedData.isMergeEnabled;
         this.previousMergeState = savedData.previousMergeState;
 
-        // UI 상태 업데이트
         UpdateMergeButtonColor();
+
+        isDataLoaded = true;
     }
+
+    private void GoogleSave()
+    {
+        if (GoogleManager.Instance != null)
+        {
+            Debug.Log("구글 저장");
+            GoogleManager.Instance.SaveGameState();
+        }
+    }
+
     #endregion
+
 
 }

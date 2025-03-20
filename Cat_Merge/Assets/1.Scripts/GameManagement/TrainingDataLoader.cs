@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-[DefaultExecutionOrder(-3)]  // CatDataLoader와 같은 순서로 실행
+[DefaultExecutionOrder(-6)]
 public class TrainingDataLoader : MonoBehaviour
 {
     // 고양이별 훈련 데이터를 관리할 Dictionary (Key: CatId)

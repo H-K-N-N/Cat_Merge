@@ -2,10 +2,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 
-// 고양이 자동 이동 관련 스크립트
+// 고양이 자동이동 스크립트
+[DefaultExecutionOrder(-1)]
 public class AutoMoveManager : MonoBehaviour, ISaveable
 {
+
+
     #region Variables
+
     public static AutoMoveManager Instance { get; private set; }
 
     [Header("---[AutoMove On/Off System]")]
@@ -20,11 +24,15 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     [Header("---[UI Color]")]
     private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
     private const string inactiveColorCode = "#FFFFFF";             // 비활성화상태 Color
+
+
+    private bool isDataLoaded = false;                              // 데이터 로드 확인
+
     #endregion
 
-    // ======================================================================================================================
 
     #region Unity Methods
+
     private void Awake()
     {
         if (Instance == null)
@@ -35,21 +43,27 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
         {
             Destroy(gameObject);
         }
-
-        isAutoMoveEnabled = true;
     }
 
     private void Start()
     {
-        UpdateAutoMoveButtonColor();
+        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
+        if (!isDataLoaded)
+        {
+            isAutoMoveEnabled = true;
+            previousAutoMoveState = isAutoMoveEnabled;
+        }
+
         InitializeButtonListeners();
+        UpdateAutoMoveButtonColor();
     }
+
     #endregion
 
-    // ======================================================================================================================
 
     #region Button System
-    // 버튼 리스너 초기화
+
+    // 버튼 리스너 초기화 함수
     private void InitializeButtonListeners()
     {
         openAutoMovePanelButton.onClick.AddListener(OpenAutoMovePanel);
@@ -74,11 +88,7 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
             autoMovePanel.SetActive(false);
         }
     }
-    #endregion
 
-    // ======================================================================================================================
-
-    #region Auto Move System
     // 자동이동 상태 토글 함수
     public void ToggleAutoMoveState()
     {
@@ -87,10 +97,15 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
         UpdateAutoMoveButtonColor();
         CloseAutoMovePanel();
 
-        GoogleManager.Instance.SaveGameState();
+        GoogleSave();
     }
 
-    // 모든 고양이에게 자동이동 상태 적용
+    #endregion
+
+
+    #region Auto Move System
+
+    // 모든 고양이에게 자동이동 상태 적용하는 함수
     private void ApplyAutoMoveStateToAllCats()
     {
         CatData[] allCats = FindObjectsOfType<CatData>();
@@ -130,18 +145,19 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     {
         return autoMoveTime;
     }
+
     #endregion
 
-    // ======================================================================================================================
 
     #region Battle System
+
     // 전투 시작시 버튼 및 기능 비활성화 함수
     public void StartBattleAutoMoveState()
     {
         SaveAndDisableAutoMoveState();
         DisableAutoMoveUI();
 
-        GoogleManager.Instance.SaveGameState();
+        GoogleSave();
     }
 
     // 자동이동 상태 저장 및 비활성화 함수
@@ -168,7 +184,7 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
         RestoreAutoMoveState();
         EnableAutoMoveUI();
 
-        GoogleManager.Instance.SaveGameState();
+        GoogleSave();
     }
 
     // 자동이동 상태 복구 함수
@@ -183,11 +199,12 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     {
         openAutoMovePanelButton.interactable = true;
     }
+
     #endregion
 
-    // ======================================================================================================================
 
     #region Sort System
+
     // 모든 고양이 이동 중지 함수
     public void StopAllCatsMovement()
     {
@@ -200,11 +217,12 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
             cat.StopAllMovement();
         }
     }
+
     #endregion
 
-    // ======================================================================================================================
 
     #region Save System
+
     [Serializable]
     private class SaveData
     {
@@ -230,12 +248,22 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
         this.isAutoMoveEnabled = savedData.isAutoMoveEnabled;
         this.previousAutoMoveState = savedData.previousAutoMoveState;
 
-        // UI 상태 업데이트
         UpdateAutoMoveButtonColor();
-
-        // 모든 고양이에게 자동이동 상태 적용
         ApplyAutoMoveStateToAllCats();
+
+        isDataLoaded = true;
     }
+
+    private void GoogleSave()
+    {
+        if (GoogleManager.Instance != null)
+        {
+            Debug.Log("구글 저장");
+            GoogleManager.Instance.SaveGameState();
+        }
+    }
+
     #endregion
+
 
 }

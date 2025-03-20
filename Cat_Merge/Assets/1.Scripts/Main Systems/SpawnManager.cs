@@ -157,7 +157,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
         GameManager.Instance.AddCatCount();
 
         FriendshipManager.Instance.AddExperience(grade + 1, 1);
-        FriendshipManager.Instance.UpdateFriendshipUI(grade + 1);
+        //FriendshipManager.Instance.UpdateFriendshipUI(grade + 1);
     }
 
     // 고양이 데이터 설정 함수

@@ -174,11 +174,11 @@ public class MergeManager : MonoBehaviour, ISaveable
 
             // 머지되는 고양이의 경험치 증가 (2)
             FriendshipManager.Instance.AddExperience(cat1.CatGrade, 2);
-            FriendshipManager.Instance.UpdateFriendshipUI(cat1.CatGrade);
+            //FriendshipManager.Instance.UpdateFriendshipUI(cat1.CatGrade);
 
             // 생성되는 상위 등급 고양이의 경험치 증가 (1)
             FriendshipManager.Instance.AddExperience(nextCat.CatGrade, 1);
-            FriendshipManager.Instance.UpdateFriendshipUI(nextCat.CatGrade);
+            //FriendshipManager.Instance.UpdateFriendshipUI(nextCat.CatGrade);
 
             return nextCat;
         }

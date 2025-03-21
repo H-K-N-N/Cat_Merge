@@ -181,8 +181,6 @@ public class OptionManager : MonoBehaviour, ISaveable
         {
             Destroy(gameObject);
         }
-
-        //InitializeOptionManager();
     }
 
     private void Start()

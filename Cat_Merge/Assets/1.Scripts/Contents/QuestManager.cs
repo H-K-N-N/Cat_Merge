@@ -165,6 +165,7 @@ public class QuestManager : MonoBehaviour, ISaveable
 
     private void Start()
     {
+        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
         if (!isDataLoaded)
         {
             lastDailyReset = DateTime.Now;
@@ -1354,7 +1355,6 @@ public class QuestManager : MonoBehaviour, ISaveable
     {
         if (GoogleManager.Instance != null)
         {
-            Debug.Log("구글 저장");
             GoogleManager.Instance.SaveGameState();
         }
     }

@@ -97,6 +97,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     {
         InitializeBattleManager();
 
+        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
         if (!isDataLoaded)
         {
             bossStage = 1;
@@ -877,7 +878,6 @@ public class BattleManager : MonoBehaviour, ISaveable
     {
         if (GoogleManager.Instance != null)
         {
-            Debug.Log("구글 저장");
             GoogleManager.Instance.SaveGameState();
         }
     }

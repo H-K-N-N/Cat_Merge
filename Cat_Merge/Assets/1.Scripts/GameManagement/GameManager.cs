@@ -587,7 +587,6 @@ public class GameManager : MonoBehaviour, ISaveable
     {
         if (GoogleManager.Instance != null)
         {
-            Debug.Log("구글 저장");
             GoogleManager.Instance.SaveGameState();
         }
     }

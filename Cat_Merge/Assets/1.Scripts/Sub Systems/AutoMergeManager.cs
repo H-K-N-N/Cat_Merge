@@ -72,6 +72,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     {
         InitializeAutoMergeManager();
 
+        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
         if (!isDataLoaded)
         {
             InitializeDefaultValues();
@@ -582,7 +583,6 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     {
         if (GoogleManager.Instance != null)
         {
-            Debug.Log("구글 저장");
             GoogleManager.Instance.SaveGameState();
         }
     }

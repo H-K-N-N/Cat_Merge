@@ -58,10 +58,10 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     // 레벨별 필요 경험치 데이터
     private Dictionary<int, List<(int exp, int reward)>> levelByGrade = new Dictionary<int, List<(int exp, int reward)>>();
 
-    // 현재 레벨을 추적하기 위한 변수 추가
+    // 현재 레벨을 추적하기 위한 변수
     private Dictionary<int, int> currentLevels = new Dictionary<int, int>();
 
-    // FriendshipManager 클래스에 다음 변수 추가
+    // FriendshipManager 클래스에 다음 변수
     private Dictionary<int, bool[]> buttonUnlockStatus = new Dictionary<int, bool[]>();
 
 
@@ -86,16 +86,18 @@ public class FriendshipManager : MonoBehaviour, ISaveable
 
     private void Start()
     {
-        InitializeCatFriendships();
-        InitializeCurrentLevels();
-
-        InitializeUI();
+        // 기본 데이터 초기화 (항상 필요)
         InitializeFriendshipData();
 
+        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
         if (!isDataLoaded)
         {
-
+            InitializeCatFriendships();
+            InitializeCurrentLevels();
         }
+
+        // UI 초기화 (항상 마지막에 실행)
+        InitializeUI();
     }
 
     private void OnDestroy()
@@ -316,6 +318,8 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         friendship.currentExp += expAmount;
 
         UpdateFriendshipUI(catGrade);
+
+        GoogleSave();
     }
 
     // 애정도 UI 업데이트 함수
@@ -550,6 +554,8 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         GameManager.Instance.Cash += GetRewardAmount(level);
 
         UpdateFriendshipUI(catGrade);
+
+        GoogleSave();
     }
 
     // 다음 레벨 필요 경험치 조회 함수
@@ -599,16 +605,36 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     [Serializable]
     private class SaveData
     {
+        public List<CatFriendshipSaveData> friendshipList = new List<CatFriendshipSaveData>();
+    }
 
+    [Serializable]
+    private class CatFriendshipSaveData
+    {
+        public int catGrade;                // 고양이 등급
+        public int currentExp;              // 현재 경험치
+        public int currentLevel;            // 현재 레벨
+        public bool[] isLevelUnlocked;      // 레벨 해금 상태
+        public bool[] rewardsClaimed;       // 보상 수령 상태
     }
 
     public string GetSaveData()
     {
-        SaveData data = new SaveData();
+        SaveData saveData = new SaveData();
 
+        foreach (var pair in catFriendships)
+        {
+            saveData.friendshipList.Add(new CatFriendshipSaveData
+            {
+                catGrade = pair.Value.catGrade,
+                currentExp = pair.Value.currentExp,
+                currentLevel = currentLevels[pair.Key],
+                isLevelUnlocked = pair.Value.isLevelUnlocked,
+                rewardsClaimed = pair.Value.rewardsClaimed
+            });
+        }
 
-
-        return JsonUtility.ToJson(data);
+        return JsonUtility.ToJson(saveData);
     }
 
     public void LoadFromData(string data)
@@ -617,7 +643,23 @@ public class FriendshipManager : MonoBehaviour, ISaveable
 
         SaveData savedData = JsonUtility.FromJson<SaveData>(data);
 
+        // 데이터 복원
+        catFriendships.Clear();
+        currentLevels.Clear();
+        buttonUnlockStatus.Clear();
 
+        foreach (var savedItem in savedData.friendshipList)
+        {
+            catFriendships[savedItem.catGrade] = new CatFriendship(savedItem.catGrade)
+            {
+                currentExp = savedItem.currentExp,
+                isLevelUnlocked = savedItem.isLevelUnlocked,
+                rewardsClaimed = savedItem.rewardsClaimed
+            };
+
+            currentLevels[savedItem.catGrade] = savedItem.currentLevel;
+            buttonUnlockStatus[savedItem.catGrade] = new bool[5];
+        }
 
         isDataLoaded = true;
     }
@@ -626,7 +668,6 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     {
         if (GoogleManager.Instance != null)
         {
-            Debug.Log("구글 저장");
             GoogleManager.Instance.SaveGameState();
         }
     }

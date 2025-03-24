@@ -3,11 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using TMPro;
+using System;
 
 // BattleManager Script
-public class BattleManager : MonoBehaviour
+public class BattleManager : MonoBehaviour, ISaveable
 {
+
+
     #region Variables
+
     public static BattleManager Instance { get; private set; }
 
     [Header("---[Battle System]")]
@@ -42,8 +46,8 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Button giveupButton;               // 항복 버튼
 
     private Mouse currentBossData;                              // 현재 보스 데이터
-    private double currentBossHP;                                // 보스의 현재 HP
-    private double maxBossHP;                                    // 보스의 최대 HP
+    private double currentBossHP;                               // 보스의 현재 HP
+    private double maxBossHP;                                   // 보스의 최대 HP
 
     [Header("---[Warning Panel]")]
     [SerializeField] private GameObject warningPanel;           // 전투시스템 시작시 나오는 경고 Panel (warningDuration동안 지속)
@@ -64,11 +68,19 @@ public class BattleManager : MonoBehaviour
     private const float BOSS_DANGER_START_X = 1040f;            // Boss Danger 이미지 시작 좌표
     private const float BOSS_DANGER_END_X = -1040f;             // Boss Danger 이미지 끝 좌표
     private const float WARNING_IMAGE_Y = 0f;                   // 경고 이미지 Y 좌표
+
+    private Coroutine bossBattleCoroutine;                      // BossBattleRoutine 코루틴 추적을 위한 변수 추가
+    private Coroutine bossSpawnRoutine;                         // BossSpawnRoutine 코루틴 추적을 위한 변수 추가
+    private Coroutine bossAttackRoutine;                        // BossAttackRoutine 코루틴 추적을 위한 변수 추가
+    private Coroutine catsAttackRoutine;                        // CatsAttackRoutine 코루틴 추적을 위한 변수 추가
+
+    private bool isDataLoaded = false;                          // 데이터 로드 확인
+
     #endregion
 
-    // ======================================================================================================================================================================
 
     #region Unity Methods
+
     private void Awake()
     {
         if (Instance == null)
@@ -79,19 +91,26 @@ public class BattleManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
-        InitializeBattleManager();
     }
 
     private void Start()
     {
-        StartCoroutine(BossSpawnRoutine());
+        InitializeBattleManager();
+
+        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
+        if (!isDataLoaded)
+        {
+            bossStage = 1;
+        }
+
+        bossSpawnRoutine = StartCoroutine(BossSpawnRoutine());
     }
+
     #endregion
 
-    // ======================================================================================================================
 
     #region Initialization
+
     // BattleManager 초기 설정
     private void InitializeBattleManager()
     {
@@ -170,11 +189,14 @@ public class BattleManager : MonoBehaviour
     {
         giveupButton.onClick.AddListener(GiveUpState);
     }
+
     #endregion
 
-    // ======================================================================================================================
+
+    #region Battle
 
     #region Battle Core
+
     // 보스 스폰 코루틴
     private IEnumerator BossSpawnRoutine()
     {
@@ -354,7 +376,7 @@ public class BattleManager : MonoBehaviour
         // Slider관련 코루틴 시작
         StartCoroutine(ExecuteBattleSliders(warningDuration, sliderDuration));
         //StartCoroutine(ExecuteBattleSliders(warningDuration, bossDuration));
-        StartCoroutine(BossBattleRoutine(bossDuration));
+        bossBattleCoroutine = StartCoroutine(BossBattleRoutine(bossDuration));
         isBattleActive = true;
 
         // 고양이 자동 재화 수집 비활성화
@@ -365,8 +387,8 @@ public class BattleManager : MonoBehaviour
         MoveCatsTowardBossBoundary();
 
         // 보스 및 고양이 공격 코루틴 시작
-        StartCoroutine(BossAttackRoutine());
-        StartCoroutine(CatsAttackRoutine());
+        bossAttackRoutine = StartCoroutine(BossAttackRoutine());
+        catsAttackRoutine = StartCoroutine(CatsAttackRoutine());
     }
 
     // 항복 버튼 활성화 코루틴
@@ -375,9 +397,12 @@ public class BattleManager : MonoBehaviour
         yield return new WaitForSeconds(GIVEUP_BUTTON_DELAY);
         giveupButton.interactable = true;
     }
+
     #endregion
 
+
     #region Battle Sliders
+
     // Slider 감소 관리 코루틴
     private IEnumerator ExecuteBattleSliders(float warningDuration, float sliderDuration)
     {
@@ -425,9 +450,12 @@ public class BattleManager : MonoBehaviour
 
         respawnSliderCoroutine = null;
     }
+
     #endregion
 
+
     #region Battle Management
+
     // 보스 배틀 코루틴
     private IEnumerator BossBattleRoutine(float duration)
     {
@@ -494,9 +522,12 @@ public class BattleManager : MonoBehaviour
             }
         }
     }
+
     #endregion
 
+
     #region Battle System
+
     // 보스가 받는 데미지 함수
     public void TakeBossDamage(float damage)
     {
@@ -572,7 +603,7 @@ public class BattleManager : MonoBehaviour
         List<CatData> selectedCats = new List<CatData>();
         while (selectedCats.Count < attackCount)
         {
-            int randomIndex = Random.Range(0, catsAtBoundary.Count);
+            int randomIndex = UnityEngine.Random.Range(0, catsAtBoundary.Count);
             CatData selectedCat = catsAtBoundary[randomIndex];
 
             if (!selectedCats.Contains(selectedCat))
@@ -625,9 +656,12 @@ public class BattleManager : MonoBehaviour
             }
         }
     }
+
     #endregion
 
+
     #region Battle End
+
     // 항복 버튼 함수
     private void GiveUpState()
     {
@@ -638,25 +672,33 @@ public class BattleManager : MonoBehaviour
     // 전투 종료 함수
     public void EndBattle(bool isVictory)
     {
+        if (!isBattleActive) return;
+
         isBattleActive = false;
 
-        // 현재 실행 중인 슬라이더 코루틴 종료
-        if (warningSliderCoroutine != null)
-        {
-            StopCoroutine(warningSliderCoroutine);
-            warningSliderCoroutine = null;
+        //// 현재 실행 중인 슬라이더 코루틴 종료
+        //if (warningSliderCoroutine != null)
+        //{
+        //    StopCoroutine(warningSliderCoroutine);
+        //    warningSliderCoroutine = null;
 
-            warningSlider.maxValue = warningDuration;
-            warningSlider.value = 0f;
-        }
-        if (respawnSliderCoroutine != null)
-        {
-            StopCoroutine(respawnSliderCoroutine);
-            respawnSliderCoroutine = null;
+        //    warningSlider.maxValue = warningDuration;
+        //    warningSlider.value = 0f;
+        //}
+        //if (respawnSliderCoroutine != null)
+        //{
+        //    StopCoroutine(respawnSliderCoroutine);
+        //    respawnSliderCoroutine = null;
 
-            respawnSlider.maxValue = spawnInterval;
-            respawnSlider.value = 0f;
-        }
+        //    respawnSlider.maxValue = spawnInterval;
+        //    respawnSlider.value = 0f;
+        //}
+
+        // 모든 전투 관련 코루틴 종료
+        StopAllBattleCoroutines();
+
+        // 슬라이더 초기화
+        InitializeSliders();
 
         Destroy(currentBoss);
         currentBossData = null;
@@ -668,6 +710,8 @@ public class BattleManager : MonoBehaviour
         {
             bossStage++;
             QuestManager.Instance.AddStageCount();
+
+            GoogleSave();
         }
 
         // 전투 종료시 비활성화했던 기능들 다시 기존 상태로 복구
@@ -679,11 +723,11 @@ public class BattleManager : MonoBehaviour
         // 퀘스트 갱신
         QuestManager.Instance.AddBattleCount();
 
-        // 모든 고양이의 체력을 회복시켜줘야함
+        // 고양이들의 체력 회복
         CatData[] allCats = FindObjectsOfType<CatData>();
         foreach (var cat in allCats)
         {
-            if (!cat.isStuned)
+            //if (!cat.isStuned)
             {
                 cat.HealCatHP();
             }
@@ -692,11 +736,49 @@ public class BattleManager : MonoBehaviour
         // 자동 머지 재개
         AutoMergeManager.Instance.ResumeAutoMerge();
     }
+
+    // 모든 전투 관련 코루틴을 종료하는 함수 추가
+    private void StopAllBattleCoroutines()
+    {
+        if (warningSliderCoroutine != null)
+        {
+            StopCoroutine(warningSliderCoroutine);
+            warningSliderCoroutine = null;
+        }
+
+        if (respawnSliderCoroutine != null)
+        {
+            StopCoroutine(respawnSliderCoroutine);
+            respawnSliderCoroutine = null;
+        }
+
+        if (bossBattleCoroutine != null)
+        {
+            StopCoroutine(bossBattleCoroutine);
+            bossBattleCoroutine = null;
+        }
+
+        // 보스와 고양이의 공격 코루틴도 종료
+        if (bossAttackRoutine != null)
+        {
+            StopCoroutine(bossAttackRoutine);
+            bossAttackRoutine = null;
+        }
+
+        if (catsAttackRoutine != null)
+        {
+            StopCoroutine(catsAttackRoutine);
+            catsAttackRoutine = null;
+        }
+    }
+
     #endregion
 
-    // ======================================================================================================================
+    #endregion
+
 
     #region State Management
+
     // 모든 고양이의 자동 재화 수집 비활성화
     private void SetStartBattleAutoCollectState()
     {
@@ -749,10 +831,58 @@ public class BattleManager : MonoBehaviour
         ItemMenuManager.Instance.EndBattleItemMenuState();
         BuyCatManager.Instance.EndBattleBuyCatState();
     }
+
     #endregion
 
-    // ======================================================================================================================
 
+    #region Save System
+
+    [Serializable]
+    private class SaveData
+    {
+        public int bossStage;           // 현재 보스 스테이지
+    }
+
+    public string GetSaveData()
+    {
+        SaveData data = new SaveData
+        {
+            bossStage = this.bossStage
+        };
+
+        return JsonUtility.ToJson(data);
+    }
+
+    public void LoadFromData(string data)
+    {
+        if (string.IsNullOrEmpty(data)) return;
+
+        SaveData savedData = JsonUtility.FromJson<SaveData>(data);
+
+        this.bossStage = savedData.bossStage;
+
+        // 전투 중이었다면 전투 상태 초기화
+        if (isBattleActive)
+        {
+            EndBattle(false);
+        }
+
+        // 타이머 초기화
+        bossSpawnTimer = 0f;
+        respawnSlider.value = 0f;
+
+        isDataLoaded = true;
+    }
+
+    private void GoogleSave()
+    {
+        if (GoogleManager.Instance != null)
+        {
+            GoogleManager.Instance.SaveGameState();
+        }
+    }
+
+    #endregion
 
 
 }

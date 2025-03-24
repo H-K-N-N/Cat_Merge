@@ -2,11 +2,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
-// OptionManager Script
-public class OptionManager : MonoBehaviour
+// 옵션 스크립트
+public class OptionManager : MonoBehaviour, ISaveable
 {
-    // Singleton Instance
+
+
+    #region Variables
+
     public static OptionManager Instance { get; private set; }
 
     // ======================================================================================================================
@@ -159,32 +163,44 @@ public class OptionManager : MonoBehaviour
     }
     private OptionMenuType activeMenuType;      // 현재 활성화된 메뉴 타입
 
-    // ======================================================================================================================
+
+    private bool isDataLoaded = false;          // 데이터 로드 확인
+
+    #endregion
+
+
+    #region Unity Methods
 
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            //DontDestroyOnLoad(gameObject);  // 씬 전환시에도 유지
         }
         else
         {
             Destroy(gameObject);
-            //return;
         }
-        optionMenuPanel.SetActive(false);
-        InitializeOptionManager();
     }
 
     private void Start()
     {
+        optionMenuPanel.SetActive(false);
+
         activePanelManager = FindObjectOfType<ActivePanelManager>();
         activePanelManager.RegisterPanel("OptionMenu", optionMenuPanel, optionButtonImage);
+
+        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
+        if (!isDataLoaded)
+        {
+            InitializeOptionManager();
+        }
     }
 
-    // ======================================================================================================================
-    // [OptionManager]
+    #endregion
+
+
+    #region Initialize
 
     // 모든 OptionManager 시작 함수들 모음
     private void InitializeOptionManager()
@@ -199,7 +215,7 @@ public class OptionManager : MonoBehaviour
     // OptionButton 초기화 함수
     private void InitializeOptionButton()
     {
-        System.Action handleOptionMenu = () =>
+        Action handleOptionMenu = () =>
         {
             if (activeMenuType == OptionMenuType.System && currentActivePanel != -1)
             {
@@ -220,8 +236,10 @@ public class OptionManager : MonoBehaviour
         });
     }
 
-    // ======================================================================================================================
-    // [서브 메뉴]
+    #endregion
+
+
+    #region 서브 메뉴
 
     // 서브 메뉴 버튼 초기화 및 클릭 이벤트 추가 함수
     private void InitializeSubMenuButtons()
@@ -273,8 +291,10 @@ public class OptionManager : MonoBehaviour
         }
     }
 
-    // ======================================================================================================================
-    // [사운드 설정]
+    #endregion
+
+
+    #region 사운드 설정
 
     // Sound 초기화 함수
     private void InitializeSoundControllers()
@@ -310,6 +330,16 @@ public class OptionManager : MonoBehaviour
 
         UpdateToggleUI(bgmSettings.isOn, true, true);
         UpdateToggleUI(sfxSettings.isOn, false, true);
+
+        // 볼륨 슬라이더 값 변경 시 저장 이벤트 추가
+        bgmSettings.slider.onValueChanged.AddListener(_ => {
+            SetSoundToggleImage(true);
+            GoogleSave();
+        });
+        sfxSettings.slider.onValueChanged.AddListener(_ => {
+            SetSoundToggleImage(false);
+            GoogleSave();
+        });
     }
 
     // 사운드 On/Off 토글 함수
@@ -332,6 +362,8 @@ public class OptionManager : MonoBehaviour
         SetSoundToggleImage(isBgm);
         UpdateToggleUI(settings.isOn, isBgm);
         UpdateToggleButtonImage(settings.toggleButtonImage, settings.isOn);
+
+        GoogleSave();
     }
 
     // 토글 버튼 이미지 업데이트 함수
@@ -371,6 +403,7 @@ public class OptionManager : MonoBehaviour
         {
             StopAndStartCoroutine(ref settings.toggleCoroutine, AnimateToggle(settings.handle, targetX, settings.controller, targetVolume));
         }
+
     }
 
     // 코루틴 정지 후 실행시키는 함수
@@ -390,8 +423,10 @@ public class OptionManager : MonoBehaviour
         controller.SetVolume(targetVolume);
     }
 
-    // ======================================================================================================================
-    // [디스플레이 설정]
+    #endregion
+
+
+    #region 디스플레이 설정
 
     // Display 초기화 함수
     private void InitializeDisplayControllers()
@@ -434,6 +469,8 @@ public class OptionManager : MonoBehaviour
         settings.isOn = !settings.isOn;
         UpdateToggleUI(settings.handle, settings.isOn);
         UpdateToggleButtonImage(settings.toggleButtonImage, settings.isOn);
+
+        GoogleSave();
     }
 
     // 토글 UI 업데이트 함수
@@ -448,6 +485,7 @@ public class OptionManager : MonoBehaviour
         {
             StopAndStartCoroutine(ref effectSettings.toggleCoroutine, AnimateHandle(handle, targetX));
         }
+
     }
 
     // 토글 핸들 애니메이션 코루틴
@@ -467,8 +505,10 @@ public class OptionManager : MonoBehaviour
         handle.anchoredPosition = new Vector2(targetX, handle.anchoredPosition.y);
     }
 
-    // ======================================================================================================================
-    // [시스템 설정]
+    #endregion
+
+
+    #region 시스템 설정
 
     // System 초기화 함수
     private void InitializeSystemSettings()
@@ -783,7 +823,10 @@ public class OptionManager : MonoBehaviour
         canvasGroup.alpha = endAlpha;
     }
 
-    // ======================================================================================================================
+    #endregion
+
+
+    #region 버튼에 SFX 추가
 
     // 씬 로드 이벤트에 리스너 추가
     private void OnEnable()
@@ -847,8 +890,84 @@ public class OptionManager : MonoBehaviour
         }
     }
 
-    // ======================================================================================================================
+    #endregion
 
+
+    #region Save System
+
+    [Serializable]
+    private class SaveData
+    {
+        public bool bgmIsOn;        // BGM 활성화 상태
+        public float bgmVolume;     // BGM 볼륨값
+        public bool sfxIsOn;        // SFX 활성화 상태
+        public float sfxVolume;     // SFX 볼륨값
+
+        public bool effectIsOn;     // 이펙트 활성화 상태
+        public bool shakingIsOn;    // 화면 흔들림 활성화 상태
+        public bool savingIsOn;     // 절전모드 활성화 상태
+    }
+
+    public string GetSaveData()
+    {
+        SaveData data = new SaveData
+        {
+            bgmIsOn = bgmSettings.isOn,
+            bgmVolume = bgmSettings.slider.value,
+            sfxIsOn = sfxSettings.isOn,
+            sfxVolume = sfxSettings.slider.value,
+
+            effectIsOn = effectSettings.isOn,
+            shakingIsOn = shakingSettings.isOn,
+            savingIsOn = savingSettings.isOn
+        };
+
+        return JsonUtility.ToJson(data);
+    }
+
+    public void LoadFromData(string data)
+    {
+        if (string.IsNullOrEmpty(data)) return;
+
+        SaveData savedData = JsonUtility.FromJson<SaveData>(data);
+
+        // Sound Settings
+        bgmSettings.isOn = savedData.bgmIsOn;
+        bgmSettings.slider.value = savedData.bgmVolume;
+        sfxSettings.isOn = savedData.sfxIsOn;
+        sfxSettings.slider.value = savedData.sfxVolume;
+
+        UpdateToggleUI(bgmSettings.isOn, true, true);
+        UpdateToggleUI(sfxSettings.isOn, false, true);
+        UpdateToggleButtonImage(bgmSettings.toggleButtonImage, bgmSettings.isOn);
+        UpdateToggleButtonImage(sfxSettings.toggleButtonImage, sfxSettings.isOn);
+        SetSoundToggleImage(true);
+        SetSoundToggleImage(false);
+
+        // Display Settings
+        effectSettings.isOn = savedData.effectIsOn;
+        shakingSettings.isOn = savedData.shakingIsOn;
+        savingSettings.isOn = savedData.savingIsOn;
+
+        UpdateToggleUI(effectSettings.handle, effectSettings.isOn, true);
+        UpdateToggleUI(shakingSettings.handle, shakingSettings.isOn, true);
+        UpdateToggleUI(savingSettings.handle, savingSettings.isOn, true);
+        UpdateToggleButtonImage(effectSettings.toggleButtonImage, effectSettings.isOn);
+        UpdateToggleButtonImage(shakingSettings.toggleButtonImage, shakingSettings.isOn);
+        UpdateToggleButtonImage(savingSettings.toggleButtonImage, savingSettings.isOn);
+
+        isDataLoaded = true;
+    }
+
+    private void GoogleSave()
+    {
+        if (GoogleManager.Instance != null)
+        {
+            GoogleManager.Instance.SaveGameState();
+        }
+    }
+
+    #endregion
 
 
 }

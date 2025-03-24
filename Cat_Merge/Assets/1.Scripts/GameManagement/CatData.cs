@@ -175,7 +175,6 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     {
         catHp -= damage;
         UpdateHPBar();
-        //Debug.Log($"남은 체력 : {catHp}");
 
         if (catHp <= 0)
         {
@@ -189,22 +188,47 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         SetStunState(true);
         yield return new WaitForSeconds(stunTime);
         SetStunState(false);
-        //Debug.Log("고양이 체력 회복 완료!");
     }
 
     // 기절 상태 설정
     private void SetStunState(bool isStunned)
     {
         UpdateHPBar();
-        SetCollectingCoinsState(!isStunned);
-        SetAutoMoveState(!isStunned);
-        SetRaycastTarget(!isStunned);
+        //SetCollectingCoinsState(!isStunned);
+        //SetAutoMoveState(!isStunned);
+        //SetRaycastTarget(!isStunned);
         isStuned = isStunned;
         catImage.color = isStunned ? new Color(1f, 0.5f, 0.5f, 0.7f) : Color.white;
 
         if (!isStunned)
         {
             HealCatHP();
+
+            // 전투 중인지 확인
+            if (BattleManager.Instance != null && BattleManager.Instance.IsBattleActive)
+            {
+                // 전투 중이면 자동 재화 수집과 자동 이동은 비활성화 상태 유지
+                SetCollectingCoinsState(false);
+                SetAutoMoveState(false);
+                SetRaycastTarget(true);  // 드래그는 가능하도록 설정
+
+                // 보스 히트박스 경계로 이동
+                MoveTowardBossBoundary();
+            }
+            else
+            {
+                // 전투 중이 아니면 모든 기능 활성화
+                SetCollectingCoinsState(true);
+                SetAutoMoveState(true);
+                SetRaycastTarget(true);
+            }
+        }
+        else
+        {
+            // 기절 상태로 진입할 때는 모든 기능 비활성화
+            SetCollectingCoinsState(false);
+            SetAutoMoveState(false);
+            SetRaycastTarget(false);
         }
     }
 
@@ -217,6 +241,11 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     // 체력 회복
     public void HealCatHP()
     {
+        if (isStuned)
+        {
+            StopCoroutine(StunAndRecover(STUN_TIME));
+            SetStunState(false);
+        }
         catHp = catData.CatHp;
         UpdateHPBar();
     }

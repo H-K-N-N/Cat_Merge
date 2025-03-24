@@ -3,14 +3,14 @@ using TMPro;
 using UnityEngine.UI;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-
 
 // 고양이 도감 Script
-public class DictionaryManager : MonoBehaviour
+public class DictionaryManager : MonoBehaviour, ISaveable
 {
-    // Singleton Instance
+
+
+    #region Variables
+
     public static DictionaryManager Instance { get; private set; }
 
     [Header("---[Dictionary Manager]")]
@@ -29,13 +29,14 @@ public class DictionaryManager : MonoBehaviour
     [SerializeField] private GameObject normalCatButtonNewImage;    // Normal Cat Button의 New Image
     private event Action OnCatDataChanged;                          // 이벤트 정의
 
-    // ======================================================================================================================
 
     // 도감 해금 관련 변수
     private bool[] isCatUnlocked;                                   // 고양이 해금 여부 배열
     private bool[] isGetFirstUnlockedReward;                        // 고양이 첫 해금 보상 획득 여부 배열
 
-    // ======================================================================================================================
+
+    private int currentSelectedCatGrade;                            // 현재 선택된 고양이 등급 추적
+
 
     [Header("---[New Cat Panel UI]")]
     [SerializeField] private GameObject newCatPanel;                // New Cat Panel
@@ -70,37 +71,17 @@ public class DictionaryManager : MonoBehaviour
                                                                     // 희귀 고양이 scrollRectContents
                                                                     // 특수 고양이 scrollRectContents
 
-    // ======================================================================================================================
-
     [Header("---[Sub Menu UI Color]")]
     private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
     private const string inactiveColorCode = "#FFFFFF";             // 비활성화상태 Color
 
-    // ======================================================================================================================
-    // [애정도]
 
-    [Header("---[Test]")]
-    [SerializeField] private Transform buttonParent; // 버튼이 배치될 부모 오브젝트
-    [SerializeField] private Button[] buttonPrefabs; // 레벨 1~5 버튼 프리팹 배열 (5개)
+    private bool isDataLoaded = false;                              // 데이터 로드 확인
 
-    [Header("---[Friendship System]")]
-    [SerializeField] private Transform friendshipButtonParent;  // 애정도 버튼들의 부모 Transform
-    [SerializeField] private Button[] friendshipButtonPrefabs;  // 레벨 1~5 버튼 프리팹 배열
-    private Button[] activeButtons; // 실제 사용되는 5개의 버튼
+    #endregion
 
-    [Header("---[fullStar]")]
-    [SerializeField] private Transform fullStarImgParent;
-    [SerializeField] private GameObject fullStarPrefabs;
-    private Dictionary<int, GameObject> fullStars = new Dictionary<int, GameObject>(); // 각 고양이 등급별 fullStar
 
-    // 현재 선택된 고양이 등급 추적
-    public int currentSelectedCatGrade = -1;
-
-    // ======================================================================================================================
-
-    private Dictionary<int, Button[]> catFriendshipButtons = new Dictionary<int, Button[]>();
-
-    // ======================================================================================================================
+    #region Unity Menthods
 
     private void Awake()
     {
@@ -111,37 +92,58 @@ public class DictionaryManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
-            return;
         }
-
-        newCatPanel.SetActive(false);
-        dictionaryMenuPanel.SetActive(false);
-        activeMenuType = DictionaryMenuType.Normal;
-
-        // 애정도 버튼 초기화는 한 번만 실행
-        InitializeFriendshipButtons();
-        InitializeDictionaryManager();
     }
 
     private void Start()
     {
-        activePanelManager = FindObjectOfType<ActivePanelManager>();
-        activePanelManager.RegisterPanel("DictionaryMenu", dictionaryMenuPanel, dictionaryButtonImage);
+        InitializeDictionaryManager();
+
+        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
+        if (!isDataLoaded)
+        {
+            InitializeCatUnlockData();
+            PopulateDictionary();
+        }
+
+        InitializeNewImage();
     }
 
-    // ======================================================================================================================
-    // [초기 설정]
+    private void OnDestroy()
+    {
+        // 이벤트 핸들러 해제
+        OnCatDataChanged -= UpdateNewImageStatus;
+    }
 
-    // 모든 시작 함수들
+    #endregion
+
+
+    #region Initialize
+
+    // 기본 상태 초기화
+    private void InitializeDefaultValues()
+    {
+        newCatPanel.SetActive(false);
+        dictionaryMenuPanel.SetActive(false);
+        activeMenuType = DictionaryMenuType.Normal;
+    }
+
+    // 모든 구성요소 초기화
     private void InitializeDictionaryManager()
     {
-        LoadUnlockedCats();
-        ResetScrollPositions();
-        InitializeDictionaryButton();
-        InitializeSubMenuButtons();
-        PopulateDictionary();
-        InitializeInformationCatDefaultImage();
+        InitializeScrollPositions();
 
+        InitializeDefaultValues();
+        InitializeActivePanel();
+
+        InitializeDictionaryButton();
+
+        InitializeSubMenuButtons();
+    }
+
+    // New 이미지 관련 이벤트 및 UI 초기화
+    private void InitializeNewImage()
+    {
         // 이벤트 등록 (상태가 변경될 때 UpdateNewImageStatus 호출)
         OnCatDataChanged += UpdateNewImageStatus;
 
@@ -149,17 +151,47 @@ public class DictionaryManager : MonoBehaviour
         UpdateNewImageStatus();
     }
 
-    // ======================================================================================================================
-    // [해금 관련]
-
-    // 모든 해금 상태를 불러오는 함수
-    public void LoadUnlockedCats()
+    // 초기 스크롤 위치 초기화 함수
+    private void InitializeScrollPositions()
     {
-        InitializeCatUnlockData();
+        foreach (var scrollRect in dictionaryScrollRects)
+        {
+            scrollRect.verticalNormalizedPosition = 1f;
+        }
     }
 
-    // 고양이 해금 여부 초기화 함수
-    public void InitializeCatUnlockData()
+    // ActivePanel 초기화 함수
+    private void InitializeActivePanel()
+    {
+        activePanelManager = FindObjectOfType<ActivePanelManager>();
+        activePanelManager.RegisterPanel("DictionaryMenu", dictionaryMenuPanel, dictionaryButtonImage);
+
+        dictionaryButton.onClick.AddListener(() =>
+        {
+            activePanelManager.TogglePanel("DictionaryMenu");
+
+            // DictionaryMenu가 활성화될 때 InformationPanel 업데이트
+            if (activePanelManager.ActivePanelName == "DictionaryMenu")
+            {
+                UpdateInformationPanel();
+            }
+        });
+        dictionaryBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("DictionaryMenu"));
+    }
+
+    // DictionaryButton 초기화 함수
+    private void InitializeDictionaryButton()
+    {
+        submitButton.onClick.AddListener(CloseNewCatPanel);
+    }
+
+    #endregion
+
+
+    #region Cat Unlock System
+
+    // 모든 해금 상태 초기화 함수
+    private void InitializeCatUnlockData()
     {
         int allCatDataLength = GameManager.Instance.AllCatData.Length;
 
@@ -174,19 +206,18 @@ public class DictionaryManager : MonoBehaviour
         }
     }
 
-    // 특정 고양이를 해금하는 함수
+    // 특정 고양이 해금 함수
     public void UnlockCat(int CatGrade)
     {
-        if (CatGrade < 0 || CatGrade >= isCatUnlocked.Length || isCatUnlocked[CatGrade])
-        {
-            return;
-        }
+        if (CatGrade < 0 || CatGrade >= isCatUnlocked.Length || isCatUnlocked[CatGrade]) return;
 
         isCatUnlocked[CatGrade] = true;
         SaveUnlockedCats(CatGrade);
 
         // 이벤트 발생
         OnCatDataChanged?.Invoke();
+
+        GoogleSave();
     }
 
     // 특정 고양이의 해금 여부 확인 함수
@@ -208,6 +239,8 @@ public class DictionaryManager : MonoBehaviour
 
         // 이벤트 발생
         OnCatDataChanged?.Invoke();
+
+        GoogleSave();
     }
 
     // 특정 고양이의 첫 해금 보상 획득 여부 확인 함수
@@ -223,44 +256,15 @@ public class DictionaryManager : MonoBehaviour
         GetComponent<DictionaryManager>().ShowNewCatPanel(CatGrade);
     }
 
-    // ======================================================================================================================
-    // [메인 설정]
+    #endregion
 
-    // 초기 스크롤 위치 초기화 함수
-    private void ResetScrollPositions()
-    {
-        foreach (var scrollRect in dictionaryScrollRects)
-        {
-            scrollRect.verticalNormalizedPosition = 1f;
-        }
-    }
 
-    // DictionaryButton 설정하는 함수
-    private void InitializeDictionaryButton()
-    {
-        dictionaryButton.onClick.AddListener(() =>
-        {
-            activePanelManager.TogglePanel("DictionaryMenu");
-
-            // DictionaryMenu가 활성화될 때 InformationPanel 업데이트
-            if (activePanelManager.ActivePanelName == "DictionaryMenu")
-            {
-                UpdateInformationPanel();
-            }
-        });
-        dictionaryBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("DictionaryMenu"));
-
-        submitButton.onClick.AddListener(CloseNewCatPanel);
-    }
+    #region 도감 및 UI
 
     // 도감 데이터를 채우는 함수
     private void PopulateDictionary()
     {
-        if (GameManager.Instance.AllCatData == null || GameManager.Instance.AllCatData.Length == 0)
-        {
-            Debug.LogError("No cat data found in GameManager.");
-            return;
-        }
+        if (GameManager.Instance.AllCatData == null || GameManager.Instance.AllCatData.Length == 0) return;
 
         foreach (Transform child in scrollRectContents)
         {
@@ -286,22 +290,46 @@ public class DictionaryManager : MonoBehaviour
 
         RectTransform textRect = text.GetComponent<RectTransform>();
 
-        if (IsCatUnlocked(cat.CatGrade - 1))
+        // CatGrade는 1부터 시작하므로 배열 인덱스로 변환
+        int catIndex = cat.CatGrade - 1;
+
+        if (IsCatUnlocked(catIndex))
         {
             button.interactable = true;
             text.text = $"{cat.CatGrade}. {cat.CatName}";
             iconImage.sprite = cat.CatImage;
             iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
 
-            // 첫 해금 보상을 받았다면 해당 슬롯의 firstOpenBG 비활성화 / 받지 않았다면 firstOpenBG 활성화
-            if (IsGetFirstUnlockedReward(cat.CatGrade))
+            // 첫 해금 보상 확인 시에도 인덱스 사용
+            if (IsGetFirstUnlockedReward(catIndex))
             {
                 firstOpenBG.gameObject.SetActive(false);
             }
             else
             {
                 firstOpenBG.gameObject.SetActive(true);
-                firstOpenCashtext.text = $"+ {GameManager.Instance.AllCatData[cat.CatGrade].CatGetCoin}";
+                firstOpenCashtext.text = $"+ {cat.CatGetCoin}";
+            }
+
+            // 버튼 클릭 이벤트 설정
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(() =>
+            {
+                if (!IsGetFirstUnlockedReward(catIndex))
+                {
+                    GetFirstUnlockedReward(catIndex);
+                    firstOpenBG.gameObject.SetActive(false);
+                }
+                else
+                {
+                    ShowInformationPanel(catIndex);
+                }
+            });
+
+            // 버튼 SFX 등록
+            if (OptionManager.Instance != null)
+            {
+                button.onClick.AddListener(OptionManager.Instance.PlayButtonClickSound);
             }
         }
         else
@@ -311,21 +339,14 @@ public class DictionaryManager : MonoBehaviour
             textRect.anchoredPosition = new Vector2(textRect.anchoredPosition.x, 0);
             iconImage.sprite = cat.CatImage;
             iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 0f);
-
             firstOpenBG.gameObject.SetActive(false);
         }
-
-        //// 버튼이 인스턴스화된 후 SFX 등록
-        //if (button != null && OptionManager.Instance != null)
-        //{
-        //    button.onClick.AddListener(OptionManager.Instance.PlayButtonClickSound);
-        //}
     }
 
     // 새로운 고양이를 해금하면 도감을 업데이트하는 함수
     public void UpdateDictionary(int catGrade)
     {
-        // scrollRectContents 내의 CatGrade와 동일한 순번의 슬롯을 찾아서 해당 슬롯을 업데이트
+        // catGrade는 이미 0-based index이므로 그대로 사용
         Transform slot = scrollRectContents.GetChild(catGrade);
 
         slot.gameObject.SetActive(true);
@@ -340,16 +361,18 @@ public class DictionaryManager : MonoBehaviour
 
         button.interactable = true;
 
-        iconImage.sprite = GameManager.Instance.AllCatData[catGrade].CatImage;
+        Cat catData = GameManager.Instance.AllCatData[catGrade];
+        iconImage.sprite = catData.CatImage;
         iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
 
-        text.text = $"{catGrade + 1}. {GameManager.Instance.AllCatData[catGrade].CatName}";
+        // 표시되는 등급은 1-based
+        text.text = $"{catGrade + 1}. {catData.CatName}";
         textRect.anchoredPosition = new Vector2(textRect.anchoredPosition.x, 100);
 
         if (!IsGetFirstUnlockedReward(catGrade))
         {
             firstOpenBG.gameObject.SetActive(true);
-            firstOpenCashtext.text = $"+ {GameManager.Instance.AllCatData[catGrade].CatGetCoin}";
+            firstOpenCashtext.text = $"+ {catData.CatGetCoin}";
         }
         else
         {
@@ -370,16 +393,11 @@ public class DictionaryManager : MonoBehaviour
             }
         });
 
-        // 버튼 업데이트 후 SFX 등록
+        // 버튼 SFX 등록
         if (OptionManager.Instance != null)
         {
             button.onClick.AddListener(OptionManager.Instance.PlayButtonClickSound);
         }
-    }
-
-    private void InitializeInformationCatDefaultImage()
-    {
-        //informationCatDefaultImage = Resources.Load<Sprite>("Sprites/UI/I_UI_Book_mission/I_UI_Book_CatBG.9");
     }
 
     // 도감이 활성화 되거나 서브 메뉴를 누르면 InformationPanel을 기본 정보로 업데이트 해주는 함수
@@ -388,7 +406,6 @@ public class DictionaryManager : MonoBehaviour
         currentSelectedCatGrade = -1;
 
         // 이미지 설정
-        //informationCatIcon.sprite = informationCatDefaultImage;
         informationCatIcon.gameObject.SetActive(false);
 
         // 텍스트 설정
@@ -403,31 +420,18 @@ public class DictionaryManager : MonoBehaviour
         // fullInformationPanel의 Y좌표를 -312.5f로 고정
         fullInformationPanel.anchoredPosition = new Vector2(0, -312.5f);
 
-        // 애정도 버튼 비활성화
-        if (activeButtons != null)
-        {
-            foreach (var button in activeButtons)
-            {
-                if (button != null)
-                    button.gameObject.SetActive(false);
-            }
-        }
-
-        // 모든 fullStar 비활성화
-        foreach (var star in fullStars.Values)
-        {
-            if (star != null)
-                star.gameObject.SetActive(false);
-        }
+        // 애정도 UI 초기화
+        FriendshipManager.Instance.ResetUI();
     }
 
     // 고양이 정보를 Information Panel에 표시하는 함수
     private void ShowInformationPanel(int catGrade)
     {
+        // catGrade는 0-based index이므로, UI에 표시할 때 1을 더함
         currentSelectedCatGrade = catGrade + 1;
         var catData = GameManager.Instance.AllCatData[catGrade];
 
-        // 기존 정보 표시 코드...
+        // 기존 정보 표시 코드
         informationCatIcon.gameObject.SetActive(true);
         informationCatIcon.sprite = catData.CatImage;
 
@@ -443,17 +447,20 @@ public class DictionaryManager : MonoBehaviour
         catInformationPanel.GetComponent<ScrollRect>().velocity = Vector2.zero;
         fullInformationPanel.anchoredPosition = new Vector2(0, -312.5f);
 
-        // 현재 고양이의 fullStar만 활성화
-        foreach (var pair in fullStars)
-        {
-            if (pair.Value != null)
-                pair.Value.gameObject.SetActive(pair.Key == currentSelectedCatGrade);
-        }
-
-        // 애정도 UI 업데이트
-        UpdateFriendshipButtonsForCat(currentSelectedCatGrade);
-        FriendshipManager.Instance.UpdateFriendshipUI(currentSelectedCatGrade);
+        // 애정도 시스템 업데이트 호출
+        FriendshipManager.Instance.OnCatSelected(currentSelectedCatGrade);
     }
+
+    // 현재 선택된 고양이 등급 반환 함수 추가
+    public int GetCurrentSelectedCatGrade()
+    {
+        return currentSelectedCatGrade;
+    }
+
+    #endregion
+
+
+    #region New Cat Panel
 
     // 새로운 고양이 해금 효과 함수
     public void ShowNewCatPanel(int catGrade)
@@ -471,7 +478,6 @@ public class DictionaryManager : MonoBehaviour
         StartCoroutine(RotateHighlightImage());
 
         // 확인 버튼을 누르면 패널을 비활성화
-        //submitButton.onClick.RemoveAllListeners();            // 이걸 지워야 sfx소리가 해당 버튼에 잘 들어감
         submitButton.onClick.AddListener(CloseNewCatPanel);
     }
 
@@ -491,8 +497,10 @@ public class DictionaryManager : MonoBehaviour
         newCatPanel.SetActive(false);
     }
 
-    // ======================================================================================================================
-    // [서브 메뉴]
+    #endregion
+
+
+    #region Sub Menus
 
     // 서브 메뉴 버튼 초기화 및 클릭 이벤트 추가 함수
     private void InitializeSubMenuButtons()
@@ -539,7 +547,10 @@ public class DictionaryManager : MonoBehaviour
         }
     }
 
-    // ======================================================================================================================
+    #endregion
+
+
+    #region Notification System
 
     // 보상을 받을 수 있는 상태를 확인하는 함수
     public bool HasUnclaimedRewards()
@@ -572,238 +583,66 @@ public class DictionaryManager : MonoBehaviour
         }
     }
 
-    // 
-    private void OnDestroy()
+    #endregion
+
+
+    #region Save System
+
+    [Serializable]
+    private class SaveData
     {
-        // 이벤트 핸들러 해제
-        OnCatDataChanged -= UpdateNewImageStatus;
-
-        // 애정도 버튼 정리
-        if (activeButtons != null)
-        {
-            foreach (var button in activeButtons)
-            {
-                if (button != null)
-                    Destroy(button.gameObject);
-            }
-        }
-
-        // fullStars 정리
-        foreach (var star in fullStars.Values)
-        {
-            if (star != null)
-                Destroy(star.gameObject);
-        }
-        fullStars.Clear();
+        public bool[] isCatUnlocked;                   // 고양이 해금 상태
+        public bool[] isGetFirstUnlockedReward;        // 첫 해금 보상 수령 상태
     }
 
-    // ======================================================================================================================
-
-    // 현재 선택된 고양이 등급 반환 함수 추가
-    public int GetCurrentSelectedCatGrade()
+    public string GetSaveData()
     {
-        return currentSelectedCatGrade;
+        SaveData data = new SaveData
+        {
+            isCatUnlocked = this.isCatUnlocked,
+            isGetFirstUnlockedReward = this.isGetFirstUnlockedReward
+        };
+
+        return JsonUtility.ToJson(data);
     }
 
-    // ======================================================================================================================
-
-    // 애정도 버튼 초기화
-    private void InitializeFriendshipButtons()
+    public void LoadFromData(string data)
     {
-        if (activeButtons != null) return;
+        if (string.IsNullOrEmpty(data)) return;
 
-        activeButtons = new Button[5];
+        SaveData savedData = JsonUtility.FromJson<SaveData>(data);
 
-        // 각 고양이 등급별로 버튼 배열과 fullStar 초기화
-        for (int i = 1; i <= GameManager.Instance.AllCatData.Length; i++)
+        LoadCatUnlockData(savedData);
+        PopulateDictionary();
+
+        UpdateNewImageStatus();
+
+        isDataLoaded = true;
+    }
+
+    private void GoogleSave()
+    {
+        if (GoogleManager.Instance != null)
         {
-            // 버튼 초기화
-            Button[] buttons = new Button[5];
-            for (int j = 0; j < 5; j++)
-            {
-                buttons[j] = Instantiate(friendshipButtonPrefabs[j], friendshipButtonParent);
-                buttons[j].gameObject.SetActive(false);
-            }
-            catFriendshipButtons[i] = buttons;
-
-            // fullStar 초기화
-            GameObject fullStar = Instantiate(fullStarPrefabs, fullStarImgParent);
-            fullStar.gameObject.SetActive(false);
-            fullStars[i] = fullStar;
+            GoogleManager.Instance.SaveGameState();
         }
     }
 
-    // 애정도 버튼 상태 업데이트
-    public void UpdateFriendshipButtonStates(int catGrade)
+    private void LoadCatUnlockData(SaveData savedData)
     {
-        if (!catFriendshipButtons.ContainsKey(catGrade)) return;
+        // 데이터 복원
+        int length = GameManager.Instance.AllCatData.Length;
+        isCatUnlocked = new bool[length];
+        isGetFirstUnlockedReward = new bool[length];
 
-        var friendshipInfo = FriendshipManager.Instance.GetFriendshipInfo(catGrade);
-        var buttons = catFriendshipButtons[catGrade];
-        bool canActivateNextLevel = true;
-
-        // MAX 레벨 체크
-        bool isMaxLevel = FriendshipManager.Instance.IsMaxLevel(catGrade);
-
-        // 현재 진행 중인 레벨 찾기
-        int currentProgressLevel = 0;
-        for (int i = 0; i < friendshipInfo.isClaimed.Length; i++)
+        for (int i = 0; i < length; i++)
         {
-            if (!friendshipInfo.isClaimed[i])
-            {
-                currentProgressLevel = i;
-                break;
-            }
-            if (i == friendshipInfo.isClaimed.Length - 1)
-            {
-                currentProgressLevel = i;
-            }
-        }
-
-        for (int i = 0; i < buttons.Length; i++)
-        {
-            var button = buttons[i];
-            if (button != null)
-            {
-                bool isAlreadyClaimed = friendshipInfo.isClaimed[i];
-
-                // LockBG 상태 업데이트
-                Transform lockBG = button.transform.Find("LockBG");
-                if (lockBG != null)
-                {
-                    bool shouldLock = !isAlreadyClaimed && (!canActivateNextLevel || !friendshipInfo.isUnlocked[i]);
-                    lockBG.gameObject.SetActive(shouldLock && !isMaxLevel); // MAX 레벨이면 잠금 표시 제거
-                }
-
-                // FirstOpenBG 상태 업데이트
-                Transform firstOpenBG = button.transform.Find("FirstOpenBG");
-                if (firstOpenBG != null)
-                {
-                    bool canShowReward = !isAlreadyClaimed && canActivateNextLevel && friendshipInfo.isUnlocked[i];
-                    firstOpenBG.gameObject.SetActive(canShowReward && !isMaxLevel); // MAX 레벨이면 보상 표시 제거
-                }
-
-                // Star 상태 업데이트
-                Transform star = button.transform.FindDeepChild("Star");
-                if (star != null)
-                {
-                    star.gameObject.SetActive(isAlreadyClaimed);
-                }
-
-                // 버튼 상호작용 상태 설정
-                button.interactable = !isMaxLevel && !isAlreadyClaimed && canActivateNextLevel && friendshipInfo.isUnlocked[i];
-
-                // 다음 레벨 활성화 조건 체크
-                if (i == currentProgressLevel && !friendshipInfo.isClaimed[i] && !isMaxLevel)
-                {
-                    canActivateNextLevel = false;
-                }
-            }
-        }
-
-        // fullStar 업데이트
-        UpdateFullStarUI(catGrade, friendshipInfo);
-    }
-
-    // fullStar UI 업데이트를 위한 새로운 메서드
-    private void UpdateFullStarUI(int catGrade, (int currentExp, bool[] isUnlocked, bool[] isClaimed) friendshipInfo)
-    {
-        if (!fullStars.ContainsKey(catGrade)) return;
-
-        GameObject fullStar = fullStars[catGrade];
-        if (fullStar != null)
-        {
-            Transform fullStarBG = fullStar.transform.Find("fullStar");
-            if (fullStarBG != null)
-            {
-                Vector2 newOffsetMax = fullStar.GetComponent<RectTransform>().offsetMax;
-                newOffsetMax.x = -210;
-                newOffsetMax.y = 0;
-
-                int claimedCount = friendshipInfo.isClaimed.Count(claimed => claimed);
-                newOffsetMax.x = -210 + (claimedCount * 42);
-                fullStarBG.GetComponent<RectTransform>().offsetMax = newOffsetMax;
-            }
+            isCatUnlocked[i] = savedData.isCatUnlocked[i];
+            isGetFirstUnlockedReward[i] = savedData.isGetFirstUnlockedReward[i];
         }
     }
 
-    // 애정도 버튼 상태 업데이트 (고양이 선택 시)
-    private void UpdateFriendshipButtonsForCat(int catGrade)
-    {
-        if (!catFriendshipButtons.ContainsKey(catGrade)) return;
+    #endregion
 
-        var friendshipInfo = FriendshipManager.Instance.GetFriendshipInfo(catGrade);
-        var buttons = catFriendshipButtons[catGrade];
 
-        // 이전 activeButtons 비활성화
-        if (activeButtons != null)
-        {
-            foreach (var button in activeButtons)
-            {
-                if (button != null)
-                    button.gameObject.SetActive(false);
-            }
-        }
-
-        // 현재 고양이의 버튼으로 activeButtons 업데이트
-        activeButtons = buttons;
-
-        for (int i = 0; i < buttons.Length; i++)
-        {
-            var button = buttons[i];
-            if (button != null)
-            {
-                button.gameObject.SetActive(true);
-
-                // 보상 금액 텍스트 설정
-                Transform firstOpenBG = button.transform.Find("FirstOpenBG");
-                if (firstOpenBG != null)
-                {
-                    TextMeshProUGUI cashText = firstOpenBG.Find("Cash Text")?.GetComponent<TextMeshProUGUI>();
-                    if (cashText != null)
-                    {
-                        int rewardAmount = FriendshipManager.Instance.GetRewardAmount(i);
-                        cashText.text = $"+ {rewardAmount}";
-                    }
-                }
-
-                // 클릭 이벤트 재설정
-                int level = i;
-                button.onClick.RemoveAllListeners();
-                button.onClick.AddListener(() => OnFriendshipButtonClick(catGrade, level));
-            }
-        }
-
-        UpdateFriendshipButtonStates(catGrade);
-    }
-
-    public bool buttonClick = false;
-    // 애정도 버튼 클릭 처리
-    private void OnFriendshipButtonClick(int catGrade, int level)
-    {
-        if (FriendshipManager.Instance.CanClaimLevelReward(catGrade, level))
-        {
-            FriendshipManager.Instance.ClaimReward(catGrade, level);
-            buttonClick = true;
-            FriendshipManager.Instance.UpdateFriendshipUI(catGrade);
-        }
-    }
-
-}
-
-public static class TransformExtensions
-{
-    public static Transform FindDeepChild(this Transform parent, string name)
-    {
-        foreach (Transform child in parent)
-        {
-            if (child.name == name)
-                return child;
-
-            Transform found = child.FindDeepChild(name);
-            if (found != null)
-                return found;
-        }
-        return null;
-    }
 }

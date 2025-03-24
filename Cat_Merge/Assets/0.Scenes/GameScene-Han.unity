@@ -9864,24 +9864,6 @@ MonoBehaviour:
   catInformationPanel: {fileID: 245921775097064851}
   fullInformationPanel: {fileID: 7714306326824989434}
   scrollRectContents: {fileID: 6771215}
-  buttonParent: {fileID: 1842498429}
-  buttonPrefabs:
-  - {fileID: 6417560261492239897, guid: 4c953f4d7dbc1804d8ff8fd233b006ab, type: 3}
-  - {fileID: 3002102629705992229, guid: 9130c5ea26954f64484b665a4e91cf89, type: 3}
-  - {fileID: 6143572057613834663, guid: 2dcd594c11c7e72458514c098779c087, type: 3}
-  - {fileID: 1229656381234184344, guid: e0f5081b426d7394aaf1c21597083734, type: 3}
-  - {fileID: 6996001473353342274, guid: fb471b18870076a4ab77e79f38ed387f, type: 3}
-  friendshipButtonParent: {fileID: 1842498429}
-  friendshipButtonPrefabs:
-  - {fileID: 6417560261492239897, guid: 4c953f4d7dbc1804d8ff8fd233b006ab, type: 3}
-  - {fileID: 3002102629705992229, guid: 9130c5ea26954f64484b665a4e91cf89, type: 3}
-  - {fileID: 6143572057613834663, guid: 2dcd594c11c7e72458514c098779c087, type: 3}
-  - {fileID: 1229656381234184344, guid: e0f5081b426d7394aaf1c21597083734, type: 3}
-  - {fileID: 6996001473353342274, guid: fb471b18870076a4ab77e79f38ed387f, type: 3}
-  fullStarImgParent: {fileID: 356499857}
-  fullStarPrefabs: {fileID: 4628608901689326057, guid: cabaff55381edf84c8339f71953e51e8, type: 3}
-  currentSelectedCatGrade: -1
-  buttonClick: 0
 --- !u!114 &331588646
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10302,6 +10284,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22cadfe92549e624ba04f8f738e37108, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  friendshipButtonParent: {fileID: 1842498429}
+  friendshipButtonPrefabs:
+  - {fileID: 6417560261492239897, guid: 4c953f4d7dbc1804d8ff8fd233b006ab, type: 3}
+  - {fileID: 3002102629705992229, guid: 9130c5ea26954f64484b665a4e91cf89, type: 3}
+  - {fileID: 6143572057613834663, guid: 2dcd594c11c7e72458514c098779c087, type: 3}
+  - {fileID: 1229656381234184344, guid: e0f5081b426d7394aaf1c21597083734, type: 3}
+  - {fileID: 6996001473353342274, guid: fb471b18870076a4ab77e79f38ed387f, type: 3}
+  fullStarImgParent: {fileID: 356499857}
+  fullStarPrefab: {fileID: 4628608901689326057, guid: cabaff55381edf84c8339f71953e51e8, type: 3}
   expRequirementText: {fileID: 6938763843769043577}
   expGauge: {fileID: 3988397134415118282}
 --- !u!1 &335877571

@@ -612,14 +612,12 @@ public class QuestManager : MonoBehaviour, ISaveable
     // 플레이타임 증가 함수
     public void AddPlayTimeCount()
     {
-        //isUpdatingFromPlayTime = true;
         PlayTimeCount += Time.deltaTime;
 
         dailyQuestDictionary["플레이 시간"].questData.currentCount = (int)PlayTimeCount;
         weeklyQuestDictionary["플레이 시간"].questData.currentCount = (int)PlayTimeCount;
 
         UpdateQuestProgress("플레이 시간");
-        //isUpdatingFromPlayTime = false;
     }
 
     // 플레이타임 리셋 함수
@@ -726,7 +724,7 @@ public class QuestManager : MonoBehaviour, ISaveable
     // 스테이지 증가 함수
     public void AddStageCount()
     {
-        repeatQuestDictionary["보스 스테이지"].questData.currentCount = StageCount - 1;
+        repeatQuestDictionary["보스 스테이지"].questData.currentCount = StageCount;
 
         UpdateQuestProgress("보스 스테이지");
     }

@@ -57,26 +57,22 @@ public class GoogleManager : MonoBehaviour
     public static GoogleManager Instance { get; private set; }
 
     private TextMeshProUGUI logText;                        // 로그 텍스트 (나중에 없앨거임)
-    private GameObject loadingScreen;                       // 로딩 스크린 (나중에 없애거나 수정할듯)
     private Button deleteDataButton;                        // 게임 데이터 삭제 버튼
 
     private const string fileName = "GameCompleteState";        // 파일 이름
     private const string gameScene = "GameScene-Han";           // GameScene 이름
-    private const string loadingScreenName = "LoadingScreen";   // 로딩 스크린 이름
     private const float autoSaveInterval = 30f;                 // 주기적 자동 저장 시간
     private float autoSaveTimer = 0f;                           // 자동 저장 시간 계산 타이머
 
     private bool isLoggedIn = false;                        // 구글 로그인 여부
     private bool isDataLoaded = false;                      // 데이터 로드 여부
     private bool isSaving = false;                          // 현재 데이터 저장중 여부
-    private bool isDeletingData = false;                    // 현재 데이터 삭제중 여부
+    public bool isDeletingData = false;                     // 현재 데이터 삭제중 여부
 
     private CompleteGameState loadedGameState;
     private Dictionary<Type, string> cachedData = new Dictionary<Type, string>();
 
     public delegate void SaveCompletedCallback(bool success);
-
-    private Canvas loadingScreenCanvas;
 
     #endregion
 
@@ -108,7 +104,6 @@ public class GoogleManager : MonoBehaviour
         Application.targetFrameRate = 60;
 
         InitializeGooglePlay();
-        InitializeLoadingScreen();
 
         StartCoroutine(GPGS_Login());
     }
@@ -137,16 +132,6 @@ public class GoogleManager : MonoBehaviour
         UpdateLogText();
     }
 
-    private void InitializeLoadingScreen()
-    {
-        loadingScreen = GameObject.Find(loadingScreenName);
-        if (loadingScreen != null)
-        {
-            loadingScreenCanvas = loadingScreen.GetComponent<Canvas>();
-            loadingScreen.SetActive(false);
-            DontDestroyOnLoad(loadingScreen);
-        }
-    }
 
     private bool CanSkipAutoSave()
     {
@@ -161,9 +146,6 @@ public class GoogleManager : MonoBehaviour
     // 씬 로드 완료시 데이터를 적용하는 함수
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // LoadingScreen의 카메라 업데이트
-        UpdateLoadingScreenCamera();
-
         // 씬이 로드될 때마다 삭제 버튼 찾기
         FindAndSetupDeleteButton();
 
@@ -301,38 +283,11 @@ public class GoogleManager : MonoBehaviour
 
     #region 로딩 화면 관리
 
-    private void UpdateLoadingScreenCamera()
-    {
-        if (loadingScreenCanvas != null)
-        {
-            // 현재 씬의 메인 카메라 찾기
-            Camera mainCamera = Camera.main;
-            if (mainCamera != null)
-            {
-                loadingScreenCanvas.worldCamera = mainCamera;
-                loadingScreenCanvas.planeDistance = 1f; // 필요한 경우 거리 조정
-            }
-        }
-    }
 
     // 로딩 화면을 표시하거나 숨기는 함수
     public void ShowLoadingScreen(bool show)
     {
-        if (loadingScreen != null)
-        {
-            loadingScreen.SetActive(show);
-
-            // 로딩 화면 표시 중에는 게임 시간 정지
-            if (!isDeletingData)
-            {
-                Time.timeScale = show ? 0f : 1f;
-            }
-
-            if (show)
-            {
-                DontDestroyOnLoad(loadingScreen);
-            }
-        }
+        LoadingScreen.Instance.Show(show);
     }
 
     #endregion
@@ -580,7 +535,7 @@ public class GoogleManager : MonoBehaviour
                     SavedGameMetadataUpdate update = new SavedGameMetadataUpdate.Builder()
                         .WithUpdatedDescription($"Data deleted: {DateTime.Now.ToString()}")
                         .Build();
-                    
+
                     saveGameClient.CommitUpdate(game, update, emptyData, (saveStatus, savedGame) =>
                     {
                         bool success = saveStatus == SavedGameRequestStatus.Success;
@@ -750,7 +705,7 @@ public class GoogleManager : MonoBehaviour
                     SavedGameMetadataUpdate update = new SavedGameMetadataUpdate.Builder()
                         .WithUpdatedDescription($"Emergency save: {DateTime.Now.ToString()}")
                         .Build();
-                   
+
                     saveGameClient.CommitUpdate(game, update, data, (saveStatus, savedGame) => { });
                 }
             });

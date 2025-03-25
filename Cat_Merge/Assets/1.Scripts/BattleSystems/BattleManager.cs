@@ -38,6 +38,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     private bool isBattleActive;                                // 전투 활성화 여부
     public bool IsBattleActive => isBattleActive;
 
+
     [Header("---[Boss UI]")]
     [SerializeField] private GameObject battleHPUI;             // Battle HP UI (활성화/비활성화 제어)
     [SerializeField] private TextMeshProUGUI bossStageText;     // Boss Stage Text
@@ -49,7 +50,30 @@ public class BattleManager : MonoBehaviour, ISaveable
     private double currentBossHP;                               // 보스의 현재 HP
     private double maxBossHP;                                   // 보스의 최대 HP
 
-    [Header("---[Warning Panel]")]
+
+    [Header("---[Boss Result UI]")]
+    [SerializeField] private GameObject battleResultPanel;              // 전투 결과 패널
+    [SerializeField] private GameObject winPanel;                       // 승리 UI 패널
+    [SerializeField] private GameObject losePanel;                      // 패배 UI 패널
+    [SerializeField] private Button battleResultCloseButton;            // 전투 결과 패널 닫기 버튼
+    [SerializeField] private TextMeshProUGUI battleResultCountdownText; // 전투 결과 패널 카운트다운 Text
+    private Coroutine resultPanelCoroutine;                             // 결과 패널 자동 닫기 코루틴
+
+
+    [Header("---[Boss AutoRetry UI]")]
+    [SerializeField] private Button autoRetryPanelButton;       // 하위 단계 자동 도전 패널 버튼
+    [SerializeField] private Image autoRetryPanelButtonImage;   // 패널 버튼 이미지
+    [SerializeField] private GameObject autoRetryPanel;         // 하위 단계 자동 도전 패널
+    [SerializeField] private Button closeAutoRetryPanelButton;  // 하위 단계 자동 도전 패널 닫기 버튼
+    [SerializeField] private Button autoRetryButton;            // 하위 단계 자동 도전 토글 버튼
+    [SerializeField] private RectTransform autoRetryHandle;     // 토글 핸들
+    [SerializeField] private Image autoRetryButtonImage;        // 하위 단계 자동 도전 버튼 이미지
+    private int currentMaxBossStage;                            // 도전 가능한 보스 최대 스테이지
+    private bool isAutoRetryEnabled;                            // 하위 단계 자동 도전 상태
+    private Coroutine autoRetryToggleCoroutine;                 // 토글 애니메이션 코루틴
+
+
+    [Header("---[Warning UI]")]
     [SerializeField] private GameObject warningPanel;           // 전투시스템 시작시 나오는 경고 Panel (warningDuration동안 지속)
     [SerializeField] private Slider warningSlider;              // 리스폰시간이 됐을때 차오르는 Slider (warningDuration만큼 차오름)
     public float warningDuration = 2f;                          // warningPanel 활성화 시간
@@ -69,10 +93,13 @@ public class BattleManager : MonoBehaviour, ISaveable
     private const float BOSS_DANGER_END_X = -1040f;             // Boss Danger 이미지 끝 좌표
     private const float WARNING_IMAGE_Y = 0f;                   // 경고 이미지 Y 좌표
 
+
+    [Header("---[ETC]")]
     private Coroutine bossBattleCoroutine;                      // BossBattleRoutine 코루틴 추적을 위한 변수 추가
     private Coroutine bossSpawnRoutine;                         // BossSpawnRoutine 코루틴 추적을 위한 변수 추가
     private Coroutine bossAttackRoutine;                        // BossAttackRoutine 코루틴 추적을 위한 변수 추가
     private Coroutine catsAttackRoutine;                        // CatsAttackRoutine 코루틴 추적을 위한 변수 추가
+
 
     private bool isDataLoaded = false;                          // 데이터 로드 확인
 
@@ -101,8 +128,12 @@ public class BattleManager : MonoBehaviour, ISaveable
         if (!isDataLoaded)
         {
             bossStage = 1;
+            currentMaxBossStage = bossStage;
+
+            isAutoRetryEnabled = false;
         }
 
+        UpdateAutoRetryUI(isAutoRetryEnabled, true);
         bossSpawnRoutine = StartCoroutine(BossSpawnRoutine());
     }
 
@@ -188,6 +219,17 @@ public class BattleManager : MonoBehaviour, ISaveable
     private void InitializeButtonListeners()
     {
         giveupButton.onClick.AddListener(GiveUpState);
+        battleResultCloseButton.onClick.AddListener(CloseBattleResultPanel);
+
+        autoRetryPanelButton.onClick.AddListener(OpenAutoRetryPanel);
+        autoRetryButton.onClick.AddListener(ToggleAutoRetry);
+        closeAutoRetryPanelButton.onClick.AddListener(CloseAutoRetryPanel);
+
+        autoRetryPanelButtonImage = autoRetryPanelButton.GetComponent<Image>();
+        autoRetryButtonImage = autoRetryButton.GetComponent<Image>();
+        UpdateToggleButtonImage(autoRetryButtonImage, isAutoRetryEnabled);
+        UpdateAutoRetryPanelButtonColor(isAutoRetryEnabled);
+        UpdateAutoRetryUI(isAutoRetryEnabled, true);
     }
 
     #endregion
@@ -319,6 +361,16 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 보스 스폰 함수
     private void LoadAndDisplayBoss()
     {
+        // 자동 재도전 상태에 따라 도전할 스테이지 결정
+        if (isAutoRetryEnabled)
+        {
+            bossStage = Mathf.Max(1, currentMaxBossStage - 1);
+        }
+        else
+        {
+            bossStage = currentMaxBossStage;
+        }
+
         // bossStage에 맞는 Mouse를 가져와서 보스를 설정
         currentBossData = GetBossData();
         currentBoss = Instantiate(bossPrefab, bossUIParent);
@@ -375,7 +427,6 @@ public class BattleManager : MonoBehaviour, ISaveable
 
         // Slider관련 코루틴 시작
         StartCoroutine(ExecuteBattleSliders(warningDuration, sliderDuration));
-        //StartCoroutine(ExecuteBattleSliders(warningDuration, bossDuration));
         bossBattleCoroutine = StartCoroutine(BossBattleRoutine(bossDuration));
         isBattleActive = true;
 
@@ -660,6 +711,127 @@ public class BattleManager : MonoBehaviour, ISaveable
     #endregion
 
 
+    #region Battle Plus UI
+
+    // 전투 결과 보여주는 함수
+    private void ShowBattleResult(bool isVictory)
+    {
+        battleResultPanel.SetActive(true);
+        winPanel.SetActive(isVictory);
+        losePanel.SetActive(!isVictory);
+
+        if (resultPanelCoroutine != null)
+        {
+            StopCoroutine(resultPanelCoroutine);
+        }
+        resultPanelCoroutine = StartCoroutine(AutoCloseBattleResultPanel());
+    }
+
+    // 전투 결과 패널 닫는 함수
+    private void CloseBattleResultPanel()
+    {
+        if (resultPanelCoroutine != null)
+        {
+            StopCoroutine(resultPanelCoroutine);
+            resultPanelCoroutine = null;
+        }
+        battleResultPanel.SetActive(false);
+    }
+
+    // 전투 결과 패널 자동으로 닫는 코루틴
+    private IEnumerator AutoCloseBattleResultPanel()
+    {
+        float countdown = 3f;
+        while (countdown > 0)
+        {
+            battleResultCountdownText.text = $"{countdown:F0}초 후 자동 닫힘";
+            countdown -= Time.deltaTime;
+            yield return null;
+        }
+        CloseBattleResultPanel();
+    }
+
+    // 자동 재도전 패널 열기
+    private void OpenAutoRetryPanel()
+    {
+        autoRetryPanel.SetActive(true);
+    }
+
+    // 자동 재도전 패널 닫기
+    private void CloseAutoRetryPanel()
+    {
+        autoRetryPanel.SetActive(false);
+    }
+
+    // 토글 버튼 이미지 업데이트
+    private void UpdateToggleButtonImage(Image buttonImage, bool isOn)
+    {
+        string imagePath = isOn ? "Sprites/UI/I_UI_Option/I_UI_option_on_Frame.9" : "Sprites/UI/I_UI_Option/I_UI_option_off_Frame.9";
+        buttonImage.sprite = Resources.Load<Sprite>(imagePath);
+    }
+
+    // 자동 재도전 토글 함수
+    private void ToggleAutoRetry()
+    {
+        isAutoRetryEnabled = !isAutoRetryEnabled;
+        UpdateAutoRetryUI(isAutoRetryEnabled);
+        UpdateToggleButtonImage(autoRetryButtonImage, isAutoRetryEnabled);
+        UpdateAutoRetryPanelButtonColor(isAutoRetryEnabled);
+
+        GoogleSave();
+    }
+
+    // 자동 재도전 UI 업데이트
+    private void UpdateAutoRetryUI(bool state, bool instant = false)
+    {
+        float targetX = state ? 65f : -65f;
+
+        if (instant)
+        {
+            autoRetryHandle.anchoredPosition = new Vector2(targetX, autoRetryHandle.anchoredPosition.y);
+        }
+        else
+        {
+            if (autoRetryToggleCoroutine != null)
+            {
+                StopCoroutine(autoRetryToggleCoroutine);
+            }
+            autoRetryToggleCoroutine = StartCoroutine(AnimateAutoRetryHandle(targetX));
+        }
+    }
+
+    // 토글 핸들 애니메이션
+    private IEnumerator AnimateAutoRetryHandle(float targetX)
+    {
+        float elapsedTime = 0f;
+        float startX = autoRetryHandle.anchoredPosition.x;
+        float duration = 0.2f;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / duration;
+            autoRetryHandle.anchoredPosition = new Vector2(Mathf.Lerp(startX, targetX, t), autoRetryHandle.anchoredPosition.y);
+            yield return null;
+        }
+
+        autoRetryHandle.anchoredPosition = new Vector2(targetX, autoRetryHandle.anchoredPosition.y);
+    }
+
+    // 패널 버튼 색상 업데이트 함수 추가
+    private void UpdateAutoRetryPanelButtonColor(bool isEnabled)
+    {
+        if (autoRetryPanelButtonImage != null)
+        {
+            autoRetryPanelButtonImage.color = isEnabled ?
+                new Color32(130, 255, 0, 255) :
+                new Color32(255, 153, 21, 255);
+        }
+    }
+
+    #endregion
+
+
     #region Battle End
 
     // 항복 버튼 함수
@@ -672,27 +844,12 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 전투 종료 함수
     public void EndBattle(bool isVictory)
     {
-        if (!isBattleActive) return;
+        if (!isBattleActive)
+        {
+            return;
+        }
 
         isBattleActive = false;
-
-        //// 현재 실행 중인 슬라이더 코루틴 종료
-        //if (warningSliderCoroutine != null)
-        //{
-        //    StopCoroutine(warningSliderCoroutine);
-        //    warningSliderCoroutine = null;
-
-        //    warningSlider.maxValue = warningDuration;
-        //    warningSlider.value = 0f;
-        //}
-        //if (respawnSliderCoroutine != null)
-        //{
-        //    StopCoroutine(respawnSliderCoroutine);
-        //    respawnSliderCoroutine = null;
-
-        //    respawnSlider.maxValue = spawnInterval;
-        //    respawnSlider.value = 0f;
-        //}
 
         // 모든 전투 관련 코루틴 종료
         StopAllBattleCoroutines();
@@ -708,11 +865,13 @@ public class BattleManager : MonoBehaviour, ISaveable
 
         if (isVictory)
         {
-            bossStage++;
-            QuestManager.Instance.AddStageCount();
+            currentMaxBossStage = Mathf.Max(currentMaxBossStage, bossStage + 1);
 
-            GoogleSave();
+            QuestManager.Instance.AddStageCount();
         }
+
+        GoogleSave();
+        ShowBattleResult(isVictory);
 
         // 전투 종료시 비활성화했던 기능들 다시 기존 상태로 복구
         SetEndFunctions();
@@ -727,10 +886,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         CatData[] allCats = FindObjectsOfType<CatData>();
         foreach (var cat in allCats)
         {
-            //if (!cat.isStuned)
-            {
-                cat.HealCatHP();
-            }
+            cat.HealCatHP();
         }
 
         // 자동 머지 재개
@@ -840,14 +996,16 @@ public class BattleManager : MonoBehaviour, ISaveable
     [Serializable]
     private class SaveData
     {
-        public int bossStage;           // 현재 보스 스테이지
+        public int bossStage;               // 현재 보스 스테이지
+        public bool isAutoRetryEnabled;     // 하위 단계 자동 도전 상태
     }
 
     public string GetSaveData()
     {
         SaveData data = new SaveData
         {
-            bossStage = this.bossStage
+            bossStage = this.bossStage,
+            isAutoRetryEnabled = this.isAutoRetryEnabled
         };
 
         return JsonUtility.ToJson(data);
@@ -855,11 +1013,20 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     public void LoadFromData(string data)
     {
-        if (string.IsNullOrEmpty(data)) return;
+        if (string.IsNullOrEmpty(data))
+        {
+            return;
+        }
 
         SaveData savedData = JsonUtility.FromJson<SaveData>(data);
 
         this.bossStage = savedData.bossStage;
+        this.currentMaxBossStage = savedData.bossStage;
+        this.isAutoRetryEnabled = savedData.isAutoRetryEnabled;
+
+        UpdateToggleButtonImage(autoRetryButtonImage, isAutoRetryEnabled);
+        UpdateAutoRetryPanelButtonColor(isAutoRetryEnabled);
+        UpdateAutoRetryUI(isAutoRetryEnabled, true);
 
         // 전투 중이었다면 전투 상태 초기화
         if (isBattleActive)

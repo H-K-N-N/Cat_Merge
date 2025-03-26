@@ -57,26 +57,27 @@ public class GoogleManager : MonoBehaviour
     public static GoogleManager Instance { get; private set; }
 
     private TextMeshProUGUI logText;                        // 로그 텍스트 (나중에 없앨거임)
-    private GameObject loadingScreen;                       // 로딩 스크린 (나중에 없애거나 수정할듯)
     private Button deleteDataButton;                        // 게임 데이터 삭제 버튼
 
-    private const string fileName = "GameCompleteState";        // 파일 이름
-    private const string gameScene = "GameScene-Han";           // GameScene 이름
-    private const string loadingScreenName = "LoadingScreen";   // 로딩 스크린 이름
-    private const float autoSaveInterval = 30f;                 // 주기적 자동 저장 시간
-    private float autoSaveTimer = 0f;                           // 자동 저장 시간 계산 타이머
+    private const string fileName = "GameCompleteState";    // 파일 이름
+    private const string gameScene = "GameScene-Han";       // GameScene 이름
+    private const float autoSaveInterval = 30f;             // 주기적 자동 저장 시간
+    private float autoSaveTimer = 0f;                       // 자동 저장 시간 계산 타이머
 
     private bool isLoggedIn = false;                        // 구글 로그인 여부
     private bool isDataLoaded = false;                      // 데이터 로드 여부
     private bool isSaving = false;                          // 현재 데이터 저장중 여부
-    private bool isDeletingData = false;                    // 현재 데이터 삭제중 여부
+    public bool isDeletingData = false;                     // 현재 데이터 삭제중 여부
 
     private CompleteGameState loadedGameState;
     private Dictionary<Type, string> cachedData = new Dictionary<Type, string>();
 
     public delegate void SaveCompletedCallback(bool success);
 
-    private Canvas loadingScreenCanvas;
+    private bool isSceneTransitioning = false;              // 씬 전환 중인지 확인하는 플래그 추가
+    private bool isStartingGame = false;                    // 게임 시작 중인지 확인하는 플래그 추가
+
+    private Vector2 gameStartPosition;                      // 게임 시작 터치 위치를 저장할 변수 추가
 
     #endregion
 
@@ -108,7 +109,6 @@ public class GoogleManager : MonoBehaviour
         Application.targetFrameRate = 60;
 
         InitializeGooglePlay();
-        InitializeLoadingScreen();
 
         StartCoroutine(GPGS_Login());
     }
@@ -137,16 +137,6 @@ public class GoogleManager : MonoBehaviour
         UpdateLogText();
     }
 
-    private void InitializeLoadingScreen()
-    {
-        loadingScreen = GameObject.Find(loadingScreenName);
-        if (loadingScreen != null)
-        {
-            loadingScreenCanvas = loadingScreen.GetComponent<Canvas>();
-            loadingScreen.SetActive(false);
-            DontDestroyOnLoad(loadingScreen);
-        }
-    }
 
     private bool CanSkipAutoSave()
     {
@@ -161,16 +151,15 @@ public class GoogleManager : MonoBehaviour
     // 씬 로드 완료시 데이터를 적용하는 함수
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // LoadingScreen의 카메라 업데이트
-        UpdateLoadingScreenCamera();
-
         // 씬이 로드될 때마다 삭제 버튼 찾기
         FindAndSetupDeleteButton();
 
-        // 게임 씬이 로드되면 데이터 로드 시작
-        if (scene.name == gameScene)
+        // 카메라 업데이트는 항상 실행
+        LoadingScreen.Instance?.UpdateLoadingScreenCamera();
+
+        // 씬 전환 중이 아닐 때만 LoadDataAndInitializeGame 실행
+        if (scene.name == gameScene && !isSceneTransitioning)
         {
-            ShowLoadingScreen(true);
             StartCoroutine(LoadDataAndInitializeGame());
         }
     }
@@ -201,10 +190,6 @@ public class GoogleManager : MonoBehaviour
                 yield return null;
             }
         }
-
-        // 로딩 화면 숨기기 (약간의 지연 후)
-        yield return new WaitForSecondsRealtime(0.5f);
-        ShowLoadingScreen(false);
     }
 
     #endregion
@@ -215,7 +200,7 @@ public class GoogleManager : MonoBehaviour
     // logText 찾아서 설정하는 함수
     private void UpdateLogText()
     {
-        logText = GameObject.Find("Canvas/Title UI/Log Text")?.GetComponent<TextMeshProUGUI>();
+        logText = GameObject.Find("Canvas/Title UI/Main UI Panel/Log Text")?.GetComponent<TextMeshProUGUI>();
     }
 
     private IEnumerator GPGS_Login()
@@ -263,19 +248,47 @@ public class GoogleManager : MonoBehaviour
     // 게임 시작 버튼에 연결할 public 메서드
     public void OnGameStartButtonClick()
     {
-        SceneManager.LoadScene(gameScene);
+        // 이미 게임 시작 중이면 무시
+        if (isStartingGame) return;
+
+        // TitleManager 찾아서 게임 시작 알림
+        TitleManager titleManager = FindObjectOfType<TitleManager>();
+        titleManager?.OnGameStart();
+
+        // 터치 위치 가져오기
+        Vector2 touchPosition = Input.mousePosition;
+        StartCoroutine(StartGameWithLoad(touchPosition));
     }
 
     // 게임 시작 버튼에서 호출할 메서드
-    public IEnumerator StartGameWithLoad(Action onLoadComplete = null)
+    private IEnumerator StartGameWithLoad(Vector2 touchPosition)
     {
-        ShowLoadingScreen(true);
+        isStartingGame = true;
+        isSceneTransitioning = true;
+        gameStartPosition = touchPosition; // 터치 위치 저장
 
+        // 1. 로딩 화면 시작 (터치 위치 전달)
+        LoadingScreen.Instance.Show(true, touchPosition);
+
+        // 2. LoadingAnimationCoroutine 완료 대기 (화면이 완전히 검은색이 될 때까지)
+        yield return new WaitForSecondsRealtime(LoadingScreen.Instance.animationDuration);
+
+        // 3. 씬 전환
+        SceneManager.LoadScene(gameScene);
+
+        // 4. 씬 로드 완료 대기
+        yield return new WaitForEndOfFrame();
+
+        // 5. 데이터 로드 및 적용
         if (isLoggedIn)
         {
             bool loadComplete = false;
             LoadGameState(() => {
                 loadComplete = true;
+                if (isDataLoaded)
+                {
+                    ApplyLoadedGameState();
+                }
             });
 
             // 로드 완료 대기
@@ -287,52 +300,11 @@ public class GoogleManager : MonoBehaviour
             }
         }
 
-        // 씬 전환
-        SceneManager.LoadScene(gameScene);
-
-        if (onLoadComplete != null)
-        {
-            onLoadComplete();
-        }
-    }
-
-    #endregion
-
-
-    #region 로딩 화면 관리
-
-    private void UpdateLoadingScreenCamera()
-    {
-        if (loadingScreenCanvas != null)
-        {
-            // 현재 씬의 메인 카메라 찾기
-            Camera mainCamera = Camera.main;
-            if (mainCamera != null)
-            {
-                loadingScreenCanvas.worldCamera = mainCamera;
-                loadingScreenCanvas.planeDistance = 1f; // 필요한 경우 거리 조정
-            }
-        }
-    }
-
-    // 로딩 화면을 표시하거나 숨기는 함수
-    public void ShowLoadingScreen(bool show)
-    {
-        if (loadingScreen != null)
-        {
-            loadingScreen.SetActive(show);
-
-            // 로딩 화면 표시 중에는 게임 시간 정지
-            if (!isDeletingData)
-            {
-                Time.timeScale = show ? 0f : 1f;
-            }
-
-            if (show)
-            {
-                DontDestroyOnLoad(loadingScreen);
-            }
-        }
+        // 6. 로딩 화면 숨기기 (저장된 터치 위치 전달)
+        yield return new WaitForSecondsRealtime(0.5f);
+        LoadingScreen.Instance.Show(false, gameStartPosition);
+        isSceneTransitioning = false;
+        isStartingGame = false;
     }
 
     #endregion
@@ -425,7 +397,7 @@ public class GoogleManager : MonoBehaviour
     private IEnumerator SaveTimeout(SaveCompletedCallback callback)
     {
         // 최대 3초 대기
-        yield return new WaitForSeconds(2.0f);
+        yield return new WaitForSeconds(3.0f);
 
         // 아직 콜백이 호출되지 않았다면 호출
         if (callback != null) callback(true);
@@ -580,7 +552,7 @@ public class GoogleManager : MonoBehaviour
                     SavedGameMetadataUpdate update = new SavedGameMetadataUpdate.Builder()
                         .WithUpdatedDescription($"Data deleted: {DateTime.Now.ToString()}")
                         .Build();
-                    
+
                     saveGameClient.CommitUpdate(game, update, emptyData, (saveStatus, savedGame) =>
                     {
                         bool success = saveStatus == SavedGameRequestStatus.Success;
@@ -750,7 +722,7 @@ public class GoogleManager : MonoBehaviour
                     SavedGameMetadataUpdate update = new SavedGameMetadataUpdate.Builder()
                         .WithUpdatedDescription($"Emergency save: {DateTime.Now.ToString()}")
                         .Build();
-                   
+
                     saveGameClient.CommitUpdate(game, update, data, (saveStatus, savedGame) => { });
                 }
             });

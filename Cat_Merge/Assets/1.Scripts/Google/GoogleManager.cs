@@ -59,10 +59,10 @@ public class GoogleManager : MonoBehaviour
     private TextMeshProUGUI logText;                        // 로그 텍스트 (나중에 없앨거임)
     private Button deleteDataButton;                        // 게임 데이터 삭제 버튼
 
-    private const string fileName = "GameCompleteState";        // 파일 이름
-    private const string gameScene = "GameScene-Han";           // GameScene 이름
-    private const float autoSaveInterval = 30f;                 // 주기적 자동 저장 시간
-    private float autoSaveTimer = 0f;                           // 자동 저장 시간 계산 타이머
+    private const string fileName = "GameCompleteState";    // 파일 이름
+    private const string gameScene = "GameScene-Han";       // GameScene 이름
+    private const float autoSaveInterval = 30f;             // 주기적 자동 저장 시간
+    private float autoSaveTimer = 0f;                       // 자동 저장 시간 계산 타이머
 
     private bool isLoggedIn = false;                        // 구글 로그인 여부
     private bool isDataLoaded = false;                      // 데이터 로드 여부
@@ -73,6 +73,11 @@ public class GoogleManager : MonoBehaviour
     private Dictionary<Type, string> cachedData = new Dictionary<Type, string>();
 
     public delegate void SaveCompletedCallback(bool success);
+
+    private bool isSceneTransitioning = false;              // 씬 전환 중인지 확인하는 플래그 추가
+    private bool isStartingGame = false;                    // 게임 시작 중인지 확인하는 플래그 추가
+
+    private Vector2 gameStartPosition;                      // 게임 시작 터치 위치를 저장할 변수 추가
 
     #endregion
 
@@ -149,10 +154,12 @@ public class GoogleManager : MonoBehaviour
         // 씬이 로드될 때마다 삭제 버튼 찾기
         FindAndSetupDeleteButton();
 
-        // 게임 씬이 로드되면 데이터 로드 시작
-        if (scene.name == gameScene)
+        // 카메라 업데이트는 항상 실행
+        LoadingScreen.Instance?.UpdateLoadingScreenCamera();
+
+        // 씬 전환 중이 아닐 때만 LoadDataAndInitializeGame 실행
+        if (scene.name == gameScene && !isSceneTransitioning)
         {
-            ShowLoadingScreen(true);
             StartCoroutine(LoadDataAndInitializeGame());
         }
     }
@@ -183,10 +190,6 @@ public class GoogleManager : MonoBehaviour
                 yield return null;
             }
         }
-
-        // 로딩 화면 숨기기 (약간의 지연 후)
-        yield return new WaitForSecondsRealtime(0.5f);
-        ShowLoadingScreen(false);
     }
 
     #endregion
@@ -197,7 +200,7 @@ public class GoogleManager : MonoBehaviour
     // logText 찾아서 설정하는 함수
     private void UpdateLogText()
     {
-        logText = GameObject.Find("Canvas/Title UI/Log Text")?.GetComponent<TextMeshProUGUI>();
+        logText = GameObject.Find("Canvas/Title UI/Main UI Panel/Log Text")?.GetComponent<TextMeshProUGUI>();
     }
 
     private IEnumerator GPGS_Login()
@@ -245,19 +248,47 @@ public class GoogleManager : MonoBehaviour
     // 게임 시작 버튼에 연결할 public 메서드
     public void OnGameStartButtonClick()
     {
-        SceneManager.LoadScene(gameScene);
+        // 이미 게임 시작 중이면 무시
+        if (isStartingGame) return;
+
+        // TitleManager 찾아서 게임 시작 알림
+        TitleManager titleManager = FindObjectOfType<TitleManager>();
+        titleManager?.OnGameStart();
+
+        // 터치 위치 가져오기
+        Vector2 touchPosition = Input.mousePosition;
+        StartCoroutine(StartGameWithLoad(touchPosition));
     }
 
     // 게임 시작 버튼에서 호출할 메서드
-    public IEnumerator StartGameWithLoad(Action onLoadComplete = null)
+    private IEnumerator StartGameWithLoad(Vector2 touchPosition)
     {
-        ShowLoadingScreen(true);
+        isStartingGame = true;
+        isSceneTransitioning = true;
+        gameStartPosition = touchPosition; // 터치 위치 저장
 
+        // 1. 로딩 화면 시작 (터치 위치 전달)
+        LoadingScreen.Instance.Show(true, touchPosition);
+
+        // 2. LoadingAnimationCoroutine 완료 대기 (화면이 완전히 검은색이 될 때까지)
+        yield return new WaitForSecondsRealtime(LoadingScreen.Instance.animationDuration);
+
+        // 3. 씬 전환
+        SceneManager.LoadScene(gameScene);
+
+        // 4. 씬 로드 완료 대기
+        yield return new WaitForEndOfFrame();
+
+        // 5. 데이터 로드 및 적용
         if (isLoggedIn)
         {
             bool loadComplete = false;
             LoadGameState(() => {
                 loadComplete = true;
+                if (isDataLoaded)
+                {
+                    ApplyLoadedGameState();
+                }
             });
 
             // 로드 완료 대기
@@ -269,25 +300,11 @@ public class GoogleManager : MonoBehaviour
             }
         }
 
-        // 씬 전환
-        SceneManager.LoadScene(gameScene);
-
-        if (onLoadComplete != null)
-        {
-            onLoadComplete();
-        }
-    }
-
-    #endregion
-
-
-    #region 로딩 화면 관리
-
-
-    // 로딩 화면을 표시하거나 숨기는 함수
-    public void ShowLoadingScreen(bool show)
-    {
-        LoadingScreen.Instance.Show(show);
+        // 6. 로딩 화면 숨기기 (저장된 터치 위치 전달)
+        yield return new WaitForSecondsRealtime(0.5f);
+        LoadingScreen.Instance.Show(false, gameStartPosition);
+        isSceneTransitioning = false;
+        isStartingGame = false;
     }
 
     #endregion
@@ -380,7 +397,7 @@ public class GoogleManager : MonoBehaviour
     private IEnumerator SaveTimeout(SaveCompletedCallback callback)
     {
         // 최대 3초 대기
-        yield return new WaitForSeconds(2.0f);
+        yield return new WaitForSeconds(3.0f);
 
         // 아직 콜백이 호출되지 않았다면 호출
         if (callback != null) callback(true);

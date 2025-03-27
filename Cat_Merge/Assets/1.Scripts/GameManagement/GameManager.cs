@@ -241,7 +241,7 @@ public class GameManager : MonoBehaviour, ISaveable
     {
         if (coinText != null)
         {
-            coinText.text = coin.ToString("N0");
+            coinText.text = FormatCoinNumber(coin);
         }
     }
 
@@ -254,6 +254,75 @@ public class GameManager : MonoBehaviour, ISaveable
         }
     }
 
+    // 재화단위 설정 함수
+    public string FormatCoinNumber(long number)
+    {
+        if (number >= 1_0000_0000_0000) // 1조 이상
+        {
+            long trillion = number / 1_0000_0000_0000; // 조 단위
+            long billion = (number % 1_0000_0000_0000) / 1_0000_0000; // 억 단위
+
+            if (billion == 0)
+                return $"{trillion}조";
+            return $"{trillion}조 {billion}억";
+        }
+        if (number >= 1_0000_0000) // 1억 이상
+        {
+            long billion = number / 1_0000_0000; // 억 단위
+            long tenThousand = (number % 1_0000_0000) / 10000; // 만 단위
+
+            if (tenThousand == 0)
+                return $"{billion}억";
+            return $"{billion}억 {tenThousand}만";
+        }
+        if (number >= 10000) // 1만 이상
+        {
+            long tenThousand = number / 10000; // 만 단위
+            long remainder = number % 10000; // 나머지
+
+            if (remainder == 0)
+                return $"{tenThousand}만";
+            return $"{tenThousand}만 {remainder}";
+        }
+
+        return number.ToString(); // 1만 미만은 그대로 출력
+    }
+
+    // decimal 타입 오버로딩 추가
+    public string FormatCoinNumber(decimal number)
+    {
+        return FormatCoinNumber((long)number);
+    }
+
+    public string FormatPriceNumber(long number)
+    {
+        if (number >= 1_0000_0000_0000) // 1조 이상
+        {
+            long trillion = number / 1_0000_0000_0000; // 조 단위
+
+            return $"{trillion}조";
+        }
+        if (number >= 1_0000_0000) // 1억 이상
+        {
+            long billion = number / 1_0000_0000; // 억 단위
+
+            return $"{billion}억";
+        }
+        if (number >= 10000) // 1만 이상
+        {
+            long tenThousand = number / 10000; // 만 단위
+
+            return $"{tenThousand}만";
+        }
+
+        return number.ToString(); // 1만 미만은 그대로 출력
+    }
+
+    // decimal 타입 오버로딩 추가
+    public string FormatPriceNumber(decimal number)
+    {
+        return FormatPriceNumber((long)number);
+    }
     #endregion
 
 

@@ -51,6 +51,8 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
     [SerializeField] private Button reduceCollectingTimeButton;         // 재화 획득 시간 감소 버튼
     [SerializeField] private Button increaseFoodMaximumButton;          // 먹이 최대치 증가 버튼
     [SerializeField] private Button reduceProducingFoodTimeButton;      // 먹이 생성 시간 감소 버튼
+    [SerializeField] private Button foodUpgradeButton;                  // 먹이 업그레이드 버튼
+    [SerializeField] private Button foodUpgrade2Button;                 // 먹이 업그레이드2 버튼
     [SerializeField] private Button autoCollectingButton;               // 자동 먹이주기 버튼
 
     [SerializeField] private GameObject[] disabledBg;                   // 버튼 클릭 못할 때의 배경
@@ -81,6 +83,14 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
     // 먹이 생성 시간
     private int reduceProducingFoodTimeLv = 0;
     public int ReduceProducingFoodTimeLv { get => reduceProducingFoodTimeLv; set => reduceProducingFoodTimeLv = value; }
+
+    // 먹이 업그레이드
+    private int foodUpgradeLv = 0;
+    public int FoodUpgradeLv { get => foodUpgradeLv; set => foodUpgradeLv = value; }
+
+    // 먹이 업그레이드2
+    private int foodUpgrade2Lv = 0;
+    public int FoodUpgrade2Lv { get => foodUpgrade2Lv; set => foodUpgrade2Lv = value; }
 
     // 자동 먹이주기 시간
     private int autoCollectingLv = 0;
@@ -130,6 +140,8 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         reduceCollectingTimeLv = 0;
         maxFoodsLv = 0;
         reduceProducingFoodTimeLv = 0;
+        foodUpgradeLv = 0;
+        foodUpgrade2Lv = 0;
         autoCollectingLv = 0;
     }
 
@@ -178,6 +190,12 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         reduceProducingFoodTimeButton.onClick.RemoveAllListeners();
         reduceProducingFoodTimeButton.onClick.AddListener(ReduceProducingFoodTime);
 
+        foodUpgradeButton.onClick.RemoveAllListeners();
+        foodUpgradeButton.onClick.AddListener(FoodUpgrade);
+
+        foodUpgrade2Button.onClick.RemoveAllListeners();
+        foodUpgrade2Button.onClick.AddListener(FoodUpgrade2);
+
         autoCollectingButton.onClick.RemoveAllListeners();
         autoCollectingButton.onClick.AddListener(AutoCollecting);
     }
@@ -214,7 +232,9 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         UpdateItemUI(reduceCollectingTimeLv, 1, reduceCollectingTimeButton, ItemFunctionManager.Instance.reduceCollectingTimeList);
         UpdateItemUI(maxFoodsLv, 2, increaseFoodMaximumButton, ItemFunctionManager.Instance.maxFoodsList);
         UpdateItemUI(reduceProducingFoodTimeLv, 3, reduceProducingFoodTimeButton, ItemFunctionManager.Instance.reduceProducingFoodTimeList);
-        UpdateItemUI(autoCollectingLv, 4, autoCollectingButton, ItemFunctionManager.Instance.autoCollectingList);
+        UpdateItemUI(foodUpgradeLv, 4, foodUpgradeButton, ItemFunctionManager.Instance.foodUpgradeList);
+        UpdateItemUI(foodUpgrade2Lv, 5, foodUpgrade2Button, ItemFunctionManager.Instance.foodUpgrade2List);
+        UpdateItemUI(autoCollectingLv, 6, autoCollectingButton, ItemFunctionManager.Instance.autoCollectingList);
 
         UpdateRelatedSystems();
 
@@ -244,16 +264,31 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         disabledBg[index].SetActive(true);
 
         itemMenuesLvText[index].text = $"Lv.{level + 1}";
-        itemMenuesFeeText[index].text = "구매완료";
         itemMenuesValueText[index].text = $"{value}";
+        itemMenuesFeeText[index].text = "구매완료";
     }
 
+
+    private int nowFoodLv = 0;  // 클래스 레벨에 선언하여 값 유지
     // 일반 레벨 UI 설정 함수
     private void SetNormalLevelUI(int index, int level, List<(int step, float value, decimal fee)> itemList)
     {
         itemMenuesLvText[index].text = $"Lv.{itemList[level].step}";
-        itemMenuesValueText[index].text = $"{itemList[level].value} → {itemList[level + 1].value}";
-        itemMenuesFeeText[index].text = $"{itemList[level].fee:N0}";
+        if(index == 4)
+        {
+            itemMenuesValueText[index].text = $"{itemList[level].value - 1} → {itemList[level + 1].value - 1}";
+            nowFoodLv = (int)itemList[level].value - 1;
+        }
+        else if(index == 5)
+        {
+            itemMenuesValueText[index].text = $"{itemList[level].value}~{nowFoodLv}";
+        }
+        else
+        {
+            itemMenuesValueText[index].text = $"{itemList[level].value} → {itemList[level + 1].value}";
+        }
+       
+        itemMenuesFeeText[index].text = $"{GameManager.Instance.FormatPriceNumber(itemList[level].fee)}";
     }
 
     // 시스템 업데이트 함수
@@ -400,10 +435,32 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
     }
 
     // 자동 먹이주기 시간 감소 함수
+    private void FoodUpgrade()
+    {
+        ProcessUpgrade(
+            4,
+            ref foodUpgradeLv,
+            ItemFunctionManager.Instance.foodUpgradeList,
+            foodUpgradeButton
+            );
+    }
+
+    // 자동 먹이주기 시간 감소 함수
+    private void FoodUpgrade2()
+    {
+        ProcessUpgrade(
+            5,
+            ref foodUpgrade2Lv,
+            ItemFunctionManager.Instance.foodUpgrade2List,
+            foodUpgrade2Button
+            );
+    }
+
+    // 자동 먹이주기 시간 감소 함수
     private void AutoCollecting()
     {
         ProcessUpgrade(
-            4, 
+            6, 
             ref autoCollectingLv,
             ItemFunctionManager.Instance.autoCollectingList,
             autoCollectingButton

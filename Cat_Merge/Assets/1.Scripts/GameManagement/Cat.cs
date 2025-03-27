@@ -4,6 +4,7 @@ using UnityEngine;
 [System.Serializable]
 public class Cat
 {
+
     private int catId;           // 고양이 인덱스
     public int CatId { get => catId; set => catId = value; }
 

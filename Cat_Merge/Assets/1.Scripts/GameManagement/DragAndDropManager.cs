@@ -240,6 +240,7 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
             {
                 this.catData = mergedCat;
                 UpdateCatUI();
+                SpawnManager.Instance.RecallEffect(this.gameObject);
                 Destroy(nearbyCat.gameObject);
             }
         }
@@ -294,6 +295,8 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
     public void UpdateCatUI()
     {
         GetComponentInChildren<CatData>()?.SetCatData(catData);
+
+        //SpawnManager.Instance.RecallEffect()
     }
 
 }

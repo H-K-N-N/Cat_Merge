@@ -318,6 +318,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         {
             cat1.catData = mergedCat;
             cat1.UpdateCatUI();
+            SpawnManager.Instance.RecallEffect(cat1.gameObject);
             Destroy(cat2.gameObject);
         }
     }

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using System.Collections.Generic;
 
 // 고양이 머지 스크립트
 [DefaultExecutionOrder(-1)]
@@ -168,17 +169,16 @@ public class MergeManager : MonoBehaviour, ISaveable
         Cat nextCat = GetCatByGrade(cat1.CatGrade + 1);
         if (nextCat != null)
         {
+
             //Debug.Log($"합성 성공");
             DictionaryManager.Instance.UnlockCat(nextCat.CatGrade - 1);
             QuestManager.Instance.AddMergeCount();
 
             // 머지되는 고양이의 경험치 증가 (2)
             FriendshipManager.Instance.AddExperience(cat1.CatGrade, 2);
-            //FriendshipManager.Instance.UpdateFriendshipUI(cat1.CatGrade);
 
             // 생성되는 상위 등급 고양이의 경험치 증가 (1)
             FriendshipManager.Instance.AddExperience(nextCat.CatGrade, 1);
-            //FriendshipManager.Instance.UpdateFriendshipUI(nextCat.CatGrade);
 
             return nextCat;
         }

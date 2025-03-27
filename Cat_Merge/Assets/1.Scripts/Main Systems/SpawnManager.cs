@@ -22,6 +22,8 @@ public class SpawnManager : MonoBehaviour, ISaveable
     [SerializeField] private Image foodFillAmountImg;               // 소환 이미지
     [SerializeField] public Image autoFillAmountImg;                // 자동소환 이미지
 
+    [SerializeField] public GameObject effectPrefab;
+
     private int nowFood = 5;                                        // 현재 먹이 갯수
     public int NowFood
     {
@@ -157,7 +159,6 @@ public class SpawnManager : MonoBehaviour, ISaveable
         GameManager.Instance.AddCatCount();
 
         FriendshipManager.Instance.AddExperience(grade + 1, 1);
-        //FriendshipManager.Instance.UpdateFriendshipUI(grade + 1);
     }
 
     // 고양이 데이터 설정 함수
@@ -179,7 +180,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
     }
 
     // Panel내 랜덤 위치에 고양이 배치하는 함수
-    private GameObject LoadAndDisplayCats(Cat catData)
+    public GameObject LoadAndDisplayCats(Cat catData)
     {
         GameObject catUIObject = Instantiate(GameManager.Instance.catPrefab, catUIParent);
 
@@ -195,6 +196,8 @@ public class SpawnManager : MonoBehaviour, ISaveable
         {
             rectTransform.anchoredPosition = GetRandomPosition();
         }
+
+        RecallEffect(catUIObject);
 
         return catUIObject;
     }
@@ -316,6 +319,13 @@ public class SpawnManager : MonoBehaviour, ISaveable
         }
 
         nowAndMaxFoodText.text = $"({nowFood} / {maxFood})";
+    }
+
+    public void RecallEffect(GameObject catObj)
+    {
+        GameObject recallEffect = Instantiate(effectPrefab, catObj.transform.position, Quaternion.identity);
+        recallEffect.transform.SetParent(catObj.transform);
+        recallEffect.transform.localScale = Vector3.one;
     }
 
     #endregion

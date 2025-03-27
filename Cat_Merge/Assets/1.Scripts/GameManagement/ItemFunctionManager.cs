@@ -11,6 +11,8 @@ public class ItemFunctionManager : MonoBehaviour
     public List<(int step, float value, decimal fee)> reduceCollectingTimeList = new List<(int step, float value, decimal fee)>();
     public List<(int step, float value, decimal fee)> maxFoodsList = new List<(int step, float value, decimal fee)>();
     public List<(int step, float value, decimal fee)> reduceProducingFoodTimeList = new List<(int step, float value, decimal fee)>();
+    public List<(int step, float value, decimal fee)> foodUpgradeList = new List<(int step, float value, decimal fee)>();
+    public List<(int step, float value, decimal fee)> foodUpgrade2List = new List<(int step, float value, decimal fee)>();
     public List<(int step, float value, decimal fee)> autoCollectingList = new List<(int step, float value, decimal fee)>();
 
     private void Awake()
@@ -66,6 +68,26 @@ public class ItemFunctionManager : MonoBehaviour
             foreach (var item in itemData4)
             {
                 reduceProducingFoodTimeList.Add((item.step, item.value, item.fee));
+            }
+        }
+
+        // 먹이 업그레이드
+        var itemData5 = ItemItemUpgradeDataLoader.Instance.GetDataByNumber(5);
+        if (itemData5 != null)
+        {
+            foreach (var item in itemData5)
+            {
+                foodUpgradeList.Add((item.step, item.value, item.fee));
+            }
+        }
+
+        // 먹이 업그레이드2
+        var itemData6 = ItemItemUpgradeDataLoader.Instance.GetDataByNumber(6);
+        if (itemData6 != null)
+        {
+            foreach (var item in itemData6)
+            {
+                foodUpgrade2List.Add((item.step, item.value, item.fee));
             }
         }
 

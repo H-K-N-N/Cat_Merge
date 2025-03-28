@@ -38,8 +38,8 @@ public class BuyCatManager : MonoBehaviour, ISaveable
         public int catGrade;
         public int coinPurchaseCount;
         public int cashPurchaseCount;
-        public int coinPrice;
-        public int cashPrice;
+        public decimal coinPrice;
+        public decimal cashPrice;
     }
 
     // 모든 고양이 구매 정보를 관리하는 딕셔너리
@@ -133,8 +133,8 @@ public class BuyCatManager : MonoBehaviour, ISaveable
         {
             var info = GetCatPurchaseInfo(i);
             buyCatCountExplainTexts[i].text = $"구매 횟수 : {info.coinPurchaseCount}회 + {info.cashPurchaseCount}회";
-            buyCatCoinFeeTexts[i].text = $"{info.coinPrice:N0}";
-            buyCatCashFeeTexts[i].text = $"{info.cashPrice:N0}";
+            buyCatCoinFeeTexts[i].text = $"{GameManager.Instance.FormatPriceNumber(info.coinPrice)}";
+            buyCatCashFeeTexts[i].text = $"{GameManager.Instance.FormatPriceNumber(info.cashPrice)}";
         }
 
         isDataLoaded = shouldSave;

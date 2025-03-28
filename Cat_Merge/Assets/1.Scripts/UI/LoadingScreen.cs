@@ -14,7 +14,7 @@ public class LoadingScreen : MonoBehaviour
 
     private Canvas loadingScreenCanvas;
     private CanvasScaler canvasScaler;
-    [HideInInspector] public float animationDuration = 1.5f;
+    [HideInInspector] public float animationDuration = 1.25f;
     private Coroutine currentAnimation;
     private Vector2 maxMaskSize;
     private Vector2 minMaskSize = Vector2.zero;

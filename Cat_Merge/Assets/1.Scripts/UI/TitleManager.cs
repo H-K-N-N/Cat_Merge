@@ -25,6 +25,7 @@ public class TitleManager : MonoBehaviour
         touchToStartText.color = new Color(textColor.r, textColor.g, textColor.b, 0f);
     }
 
+    // 텍스트 깜빡임 코루틴
     private IEnumerator BlinkText()
     {
         // 깜빡임 관련 변수들
@@ -59,4 +60,5 @@ public class TitleManager : MonoBehaviour
             }
         }
     }
+
 }

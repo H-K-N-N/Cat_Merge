@@ -6,7 +6,10 @@ using TMPro;
 // 고양이의 정보와 행동을 관리하는 스크립트
 public class CatData : MonoBehaviour, ICanvasRaycastFilter
 {
+
+
     #region Variables
+
     private const float CLICK_AREA_SCALE = 0.9f;    // 클릭 영역 스케일
     private WaitForSeconds COLLECT_ANIMATION_DELAY = new WaitForSeconds(0.5f);
 
@@ -41,11 +44,12 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     public float CollectingTime { get => collectingTime; set => collectingTime = value; }
     private bool isCollectingCoins = true;          // 코인 수집 활성화 상태
     private Coroutine autoCollectCoroutine;         // 코인 수집 코루틴
+
     #endregion
 
-    // ======================================================================================================================
 
     #region Unity Methods
+
     private void Awake()
     {
         InitializeComponents();
@@ -67,11 +71,12 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             GameManager.Instance.DeleteCatCount();
         }
     }
+
     #endregion
 
-    // ======================================================================================================================
 
     #region Initialization
+
     // 컴포넌트 초기화
     private void InitializeComponents()
     {
@@ -135,11 +140,12 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             hpImage.SetActive(false);
         }
     }
+
     #endregion
 
-    // ======================================================================================================================
 
     #region Battle System
+
     // 보스 히트박스 경계로 고양이 밀어내기
     public void MoveOppositeBoss()
     {
@@ -249,11 +255,12 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         catHp = catData.CatHp;
         UpdateHPBar();
     }
+
     #endregion
 
-    // ======================================================================================================================
 
     #region Auto Movement
+
     // 자동 이동 상태 설정
     public void SetAutoMoveState(bool isEnabled)
     {
@@ -373,11 +380,12 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         isAnimating = false;
         currentMoveCoroutine = null;
     }
+
     #endregion
 
-    // ======================================================================================================================
 
     #region Auto Coin Collection
+
     // 자동 재화 수집 상태 설정
     public void SetCollectingCoinsState(bool isEnabled)
     {
@@ -460,11 +468,12 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         if (collectCoinText != null) collectCoinText.gameObject.SetActive(false);
         if (collectCoinImage != null) collectCoinImage.gameObject.SetActive(false);
     }
+
     #endregion
 
-    // ======================================================================================================================
 
     #region Movement Control
+
     // 모든 이동 코루틴 중지
     public void StopAllMovement()
     {
@@ -482,9 +491,11 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
         isAnimating = false;
     }
+
     #endregion
 
-    // ======================================================================================================================
+
+    #region Raycast
 
     // 레이캐스트 필터링 함수 구현
     public bool IsRaycastLocationValid(Vector2 screenPoint, Camera eventCamera)
@@ -501,6 +512,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         return (normalizedPoint.x * normalizedPoint.x + normalizedPoint.y * normalizedPoint.y) <= (CLICK_AREA_SCALE * CLICK_AREA_SCALE);
     }
 
-    // ======================================================================================================================
+    #endregion
+
 
 }

@@ -4,14 +4,21 @@ using UnityEngine;
 public class CameraManager : MonoBehaviour
 {
     private float targetAspect = 9f / 16f;
+    private Camera mainCamera;
 
     private void Awake()
     {
-        Camera cam = GetComponent<Camera>();
+        mainCamera = GetComponent<Camera>();
+
+        SetupAspectRatio();
+    }
+
+    public void SetupAspectRatio()
+    {
         float currentAspect = (float)Screen.width / Screen.height;
         float scaleHeight = currentAspect / targetAspect;
 
-        Rect rect = cam.rect;
+        Rect rect = mainCamera.rect;
 
         if (scaleHeight < 1)
         {
@@ -25,6 +32,8 @@ public class CameraManager : MonoBehaviour
             rect.x = (1f - scaleWidth) * 0.5f;
         }
 
-        cam.rect = rect;
+        mainCamera.rect = rect;
     }
+
+    
 }

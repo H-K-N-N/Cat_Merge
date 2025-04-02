@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 // 고양이 드래그 앤 드랍 Script
-public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
+public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, IPointerDownHandler, IPointerClickHandler
 {
     public Cat catData;                                 // 드래그하는 고양이의 데이터
     public RectTransform rectTransform;                 // RectTransform 참조
@@ -21,6 +21,8 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
 
     // ======================================================================================================================
 
+    public Animator animator;  // 애니메이터 변수
+
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
@@ -35,10 +37,11 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
 
     // ======================================================================================================================
 
-    // 드래그 시작 함수
-    public void OnBeginDrag(PointerEventData eventData)
+    // 클릭한 순간
+    public void OnPointerDown(PointerEventData eventData)
     {
         isDragging = true;
+        animator.SetBool("isGrab", isDragging);
 
         // 드래그 시작 위치 오프셋 계산
         Vector2 localPointerPosition;
@@ -53,6 +56,13 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
         {
             AutoMergeManager.Instance.StopMerging(this);
         }
+    }
+
+    // 클릭 뗀 순간
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        isDragging = false;
+        animator.SetBool("isGrab", isDragging);
     }
 
     // 드래그 진행중 함수
@@ -105,6 +115,8 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
     public void OnEndDrag(PointerEventData eventData)
     {
         isDragging = false;
+
+        animator.SetBool("isGrab", isDragging);
 
         if (BattleManager.Instance.IsBattleActive)
         {
@@ -299,4 +311,5 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IBeginDragHandler
         //SpawnManager.Instance.RecallEffect()
     }
 
+    
 }

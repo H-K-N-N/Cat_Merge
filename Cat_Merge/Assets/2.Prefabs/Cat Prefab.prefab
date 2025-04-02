@@ -300,6 +300,7 @@ GameObject:
   - component: {fileID: 4440387383682111487}
   - component: {fileID: -3185705115251794711}
   - component: {fileID: 6581758322604903725}
+  - component: {fileID: 369006820606142384}
   m_Layer: 6
   m_Name: Cat Prefab
   m_TagString: Untagged
@@ -396,6 +397,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rectTransform: {fileID: 0}
+  animator: {fileID: 369006820606142384}
+--- !u!95 &369006820606142384
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4442190507333617709}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 580be6e395441524d84124cee74ca565, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &7088968465046740359
 GameObject:
   m_ObjectHideFlags: 0

@@ -174,7 +174,20 @@ public class SpawnManager : MonoBehaviour, ISaveable
     // 스폰할 고양이 데이터 반환 함수
     private Cat GetCatDataForSpawn()
     {
-        const int basicCatGrade = 0;
+        int basicCatGrade;
+        basicCatGrade = UnityEngine.Random.Range(0, ItemMenuManager.Instance.maxFoodLv); // ※   1등급 고양이 부터 먹이 레벨 등급까지 소환인데 등급 통일을 좀 해야할듯
+                                                                             //      어디 함수가면 1등급 고양이는 매개변수에 1 넣어야 하는데
+                                                                             //      여기는 0을 넣어야지 1등급 고양이가 나옴 
+        
+        // 1등급 나오고 싶으면 0 
+        // 먹이업글 2를 개방 했을때 최소 2등급 부터 나와야하는데? 2등급이 나오려면 여기서는 1을 넣어야하고 ...
+
+        if(ItemMenuManager.Instance.foodUpgradeLv2Open)
+        {
+            basicCatGrade = UnityEngine.Random.Range(ItemMenuManager.Instance.minFoodLv - 1, ItemMenuManager.Instance.maxFoodLv); // 2등급 부터 나와야 하니까 min -1
+        }
+
+        Debug.Log(basicCatGrade);
         DictionaryManager.Instance.UnlockCat(basicCatGrade);
         return GameManager.Instance.AllCatData[basicCatGrade];
     }

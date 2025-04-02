@@ -53,6 +53,7 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
     [SerializeField] private Button reduceProducingFoodTimeButton;      // 먹이 생성 시간 감소 버튼
     [SerializeField] private Button foodUpgradeButton;                  // 먹이 업그레이드 버튼
     [SerializeField] private Button foodUpgrade2Button;                 // 먹이 업그레이드2 버튼
+    [SerializeField] private Button foodUpgrade2DisabledButton;         // 먹이 업그레이드2 잠김버튼
     [SerializeField] private Button autoCollectingButton;               // 자동 먹이주기 버튼
 
     [SerializeField] private GameObject[] disabledBg;                   // 버튼 클릭 못할 때의 배경
@@ -269,19 +270,31 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
     }
 
 
-    private int nowFoodLv = 0;  // 클래스 레벨에 선언하여 값 유지
+    public int minFoodLv = 2;  // 클래스 레벨에 선언하여 값 유지
+    public int maxFoodLv = 0;
+    public bool foodUpgradeLv2Open = false;
     // 일반 레벨 UI 설정 함수
     private void SetNormalLevelUI(int index, int level, List<(int step, float value, decimal fee)> itemList)
     {
         itemMenuesLvText[index].text = $"Lv.{itemList[level].step}";
         if(index == 4)
         {
-            itemMenuesValueText[index].text = $"{itemList[level].value - 1} → {itemList[level + 1].value - 1}";
-            nowFoodLv = (int)itemList[level].value - 1;
+            itemMenuesValueText[index].text = $"{itemList[level].value - 1} → {itemList[level + 1].value - 1}"; // 1(2-1) -> 2(3-1)
+            maxFoodLv = (int)itemList[level].value - 1;
+
+            itemMenuesValueText[5].text = $"{minFoodLv}~{maxFoodLv}";
+
+            if (maxFoodLv >= 15)
+            {
+                foodUpgrade2DisabledButton.gameObject.SetActive(false);
+                foodUpgrade2Button.gameObject.SetActive(true);
+                foodUpgradeLv2Open = true;
+            }
         }
         else if(index == 5)
         {
-            itemMenuesValueText[index].text = $"{itemList[level].value}~{nowFoodLv}";
+            minFoodLv = (int)itemList[level].value;
+            itemMenuesValueText[index].text = $"{minFoodLv}~{maxFoodLv}";
         }
         else
         {
@@ -289,6 +302,7 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         }
        
         itemMenuesFeeText[index].text = $"{GameManager.Instance.FormatPriceNumber(itemList[level].fee)}";
+
     }
 
     // 시스템 업데이트 함수

@@ -6,7 +6,10 @@ using UnityEngine.UI;
 // 고양이 정렬 관련 스크립트
 public class SortManager : MonoBehaviour
 {
+
+
     #region Variables
+
     [Header("---[Sort System]")]
     [SerializeField] private Button sortButton;                     // 정렬 버튼
     [SerializeField] private Transform gamePanel;                   // GamePanel
@@ -16,26 +19,33 @@ public class SortManager : MonoBehaviour
     private const float MOVE_DURATION = 0.1f;                       // 각 고양이의 이동 시간
     private const int CATS_PER_ROW = 7;                             // 한 줄에 배치될 고양이 수
     private const float SPACING = 10f;                              // 고양이 간 간격
+
     #endregion
 
-    // ======================================================================================================================
 
     #region Unity Methods
-    private void Awake()
+
+    private void Start()
     {
         InitializeButtonListeners();
     }
+
+    #endregion
+
+
+    #region Initialize
 
     // 버튼 리스너 초기화 함수
     private void InitializeButtonListeners()
     {
         sortButton.onClick.AddListener(SortCats);
     }
+
     #endregion
 
-    // ======================================================================================================================
 
     #region Sort System
+
     // 고양이 정렬 시작 함수
     private void SortCats()
     {
@@ -144,11 +154,12 @@ public class SortManager : MonoBehaviour
             }
         }
     }
+
     #endregion
 
-    // ======================================================================================================================
 
     #region Move Control
+
     // 모든 고양이의 이동을 중지시키는 함수
     private void StopAllCatMovements()
     {
@@ -175,11 +186,12 @@ public class SortManager : MonoBehaviour
     {
         SetAutoMoveState(AutoMoveManager.Instance.IsAutoMoveEnabled());
     }
+
     #endregion
 
-    // ======================================================================================================================
 
-    #region Battle
+    #region Battle System
+
     // 전투 시작시 버튼 및 기능 비활성화시키는 함수
     public void StartBattleSortState()
     {
@@ -197,9 +209,8 @@ public class SortManager : MonoBehaviour
     {
         sortButton.interactable = state;
     }
-    #endregion
 
-    // ======================================================================================================================
+    #endregion
 
 
 }

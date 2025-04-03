@@ -24,7 +24,7 @@ public class TitleAnimationManager : MonoBehaviour
 
     [Header("Animation Settings")]
     private float waitDuration = 0.5f;                          // 대기 시간
-    private float moveDuration = 1.0f;                          // 고양이 이동 시간
+    private float moveDuration = 2.0f;                          // 고양이 이동 시간
     private float zoomDuration = 0.5f;                          // 카메라 줌 시간
 
     private Vector2 leftStartPos = new Vector2(-130f, 0f);      // 왼쪽 고양이 시작 위치 (화면 왼쪽)
@@ -474,7 +474,7 @@ public class TitleAnimationManager : MonoBehaviour
     private Vector3 AdjustPositionToBounds(Vector3 position)
     {
         Vector3 adjustedPosition = position;
-        float padding = 50f;
+        float padding = 100f;
 
         // mainUIPanel의 크기를 기준으로 경계 설정
         Rect panelRect = mainUIPanel.rect;

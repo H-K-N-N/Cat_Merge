@@ -100,6 +100,9 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
 
     private bool isDataLoaded = false;              // 데이터 로드 확인
 
+    public int minFoodLv = 2;
+    public int maxFoodLv = 0;
+
     #endregion
 
 
@@ -144,6 +147,8 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         foodUpgradeLv = 0;
         foodUpgrade2Lv = 0;
         autoCollectingLv = 0;
+        minFoodLv = 2;
+        maxFoodLv = 0;
     }
 
     // 기본 ItemMenuManager 초기화 함수
@@ -229,13 +234,13 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         bool shouldSave = isDataLoaded;
         isDataLoaded = false;
 
-        UpdateItemUI(maxCatsLv, 0, increaseCatMaximumButton, ItemFunctionManager.Instance.maxCatsList);
-        UpdateItemUI(reduceCollectingTimeLv, 1, reduceCollectingTimeButton, ItemFunctionManager.Instance.reduceCollectingTimeList);
-        UpdateItemUI(maxFoodsLv, 2, increaseFoodMaximumButton, ItemFunctionManager.Instance.maxFoodsList);
-        UpdateItemUI(reduceProducingFoodTimeLv, 3, reduceProducingFoodTimeButton, ItemFunctionManager.Instance.reduceProducingFoodTimeList);
-        UpdateItemUI(foodUpgradeLv, 4, foodUpgradeButton, ItemFunctionManager.Instance.foodUpgradeList);
-        UpdateItemUI(foodUpgrade2Lv, 5, foodUpgrade2Button, ItemFunctionManager.Instance.foodUpgrade2List);
-        UpdateItemUI(autoCollectingLv, 6, autoCollectingButton, ItemFunctionManager.Instance.autoCollectingList);
+        UpdateItemUI(0, maxCatsLv, increaseCatMaximumButton, ItemFunctionManager.Instance.maxCatsList);
+        UpdateItemUI(1, reduceCollectingTimeLv, reduceCollectingTimeButton, ItemFunctionManager.Instance.reduceCollectingTimeList);
+        UpdateItemUI(2, maxFoodsLv, increaseFoodMaximumButton, ItemFunctionManager.Instance.maxFoodsList);
+        UpdateItemUI(3, reduceProducingFoodTimeLv, reduceProducingFoodTimeButton, ItemFunctionManager.Instance.reduceProducingFoodTimeList);
+        UpdateItemUI(4, foodUpgradeLv, foodUpgradeButton, ItemFunctionManager.Instance.foodUpgradeList);
+        UpdateItemUI(5, foodUpgrade2Lv, foodUpgrade2Button, ItemFunctionManager.Instance.foodUpgrade2List);
+        UpdateItemUI(6, autoCollectingLv, autoCollectingButton, ItemFunctionManager.Instance.autoCollectingList);
 
         UpdateRelatedSystems();
 
@@ -243,7 +248,7 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
     }
 
     // 아이템 UI 업데이트 함수
-    private void UpdateItemUI(int level, int index, Button button, List<(int step, float value, decimal fee)> itemList)
+    private void UpdateItemUI(int index, int level, Button button, List<(int step, float value, decimal fee)> itemList)
     {
         if (itemMenuesFeeText[index] == null) return;
 
@@ -269,41 +274,79 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         itemMenuesFeeText[index].text = "구매완료";
     }
 
-
-    public int minFoodLv = 2;  // 클래스 레벨에 선언하여 값 유지
-    public int maxFoodLv = 0;
-    public bool foodUpgradeLv2Open = false;
+    
     // 일반 레벨 UI 설정 함수
     private void SetNormalLevelUI(int index, int level, List<(int step, float value, decimal fee)> itemList)
     {
         itemMenuesLvText[index].text = $"Lv.{itemList[level].step}";
-        if(index == 4)
+        if (index == 4)
         {
             itemMenuesValueText[index].text = $"{itemList[level].value - 1} → {itemList[level + 1].value - 1}"; // 1(2-1) -> 2(3-1)
             maxFoodLv = (int)itemList[level].value - 1;
 
-            itemMenuesValueText[5].text = $"{minFoodLv}~{maxFoodLv}";
+            itemMenuesValueText[5].text = $"{minFoodLv-1}~{maxFoodLv} → {minFoodLv}~{maxFoodLv}";
 
             if (maxFoodLv >= 15)
             {
                 foodUpgrade2DisabledButton.gameObject.SetActive(false);
                 foodUpgrade2Button.gameObject.SetActive(true);
-                foodUpgradeLv2Open = true;
             }
         }
-        else if(index == 5)
+        else if (index == 5)
         {
             minFoodLv = (int)itemList[level].value;
-            itemMenuesValueText[index].text = $"{minFoodLv}~{maxFoodLv}";
+            itemMenuesValueText[index].text = $"{minFoodLv - 1}~{maxFoodLv} → {minFoodLv}~{maxFoodLv}";
         }
         else
         {
             itemMenuesValueText[index].text = $"{itemList[level].value} → {itemList[level + 1].value}";
         }
-       
-        itemMenuesFeeText[index].text = $"{GameManager.Instance.FormatPriceNumber(itemList[level].fee)}";
 
+        itemMenuesFeeText[index].text = $"{GameManager.Instance.FormatPriceNumber(itemList[level].fee)}";
     }
+
+    //public int minFoodLv = 0;
+    //public int maxFoodLv = 0;
+    //// 일반 레벨 UI 설정 함수
+    //private void SetNormalLevelUI(int index, int level, List<(int step, float value, decimal fee)> itemList)
+    //{
+    //    itemMenuesLvText[index].text = $"Lv.{itemList[level].step}";
+    //    if (index == 4)
+    //    {
+    //        itemMenuesValueText[index].text = $"{itemList[level].value - 1} → {itemList[level + 1].value - 1}";
+    //        maxFoodLv = (int)itemList[level].value - 1;
+
+    //        if (maxFoodLv >= 15)
+    //        {
+    //            if (foodUpgrade2DisabledButton.gameObject.activeSelf)
+    //            {
+    //                foodUpgrade2DisabledButton.gameObject.SetActive(false);
+    //            }
+    //            if (!foodUpgrade2Button.gameObject.activeSelf)
+    //            {
+    //                foodUpgrade2Button.gameObject.SetActive(true);
+    //            }
+    //        }
+    //    }
+    //    else if (index == 5)
+    //    {
+    //        minFoodLv = (int)itemList[level].value;
+
+    //        if (maxFoodLv < 15)
+    //        {
+    //            itemMenuesValueText[index].text = $"{minFoodLv - 1}~15 → {minFoodLv}~15";
+    //            return;
+    //        }
+
+    //        itemMenuesValueText[index].text = $"{minFoodLv-1}~{maxFoodLv} → {minFoodLv}~{maxFoodLv}";
+    //    }
+    //    else
+    //    {
+    //        itemMenuesValueText[index].text = $"{itemList[level].value} → {itemList[level + 1].value}";
+    //    }
+
+    //    itemMenuesFeeText[index].text = $"{GameManager.Instance.FormatPriceNumber(itemList[level].fee)}";
+    //}
 
     // 시스템 업데이트 함수
     private void UpdateRelatedSystems()
@@ -389,7 +432,7 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         }
         else
         {
-            UpdateItemUI(level, index, button, itemList);
+            UpdateItemUI(index, level,  button, itemList);
         }
 
         onSuccess?.Invoke();
@@ -515,7 +558,12 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         public int reduceCollectingTimeLv;          // 재화 획득 시간 레벨
         public int maxFoodsLv;                      // 먹이 최대치 레벨
         public int reduceProducingFoodTimeLv;       // 먹이 생성 시간 레벨
+        public int foodUpgradeLv;                   // 먹이 업그레이드1 레벨
+        public int foodUpgrade2Lv;                  // 먹이 업그레이드2 레벨
         public int autoCollectingLv;                // 자동 먹이주기 레벨
+
+        public int minFoodLv;                       // 먹이 최소 레벨
+        public int maxFoodLv;                       // 먹이 최대 레벨
     }
 
     public string GetSaveData()
@@ -526,7 +574,11 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
             reduceCollectingTimeLv = this.reduceCollectingTimeLv,
             maxFoodsLv = this.maxFoodsLv,
             reduceProducingFoodTimeLv = this.reduceProducingFoodTimeLv,
-            autoCollectingLv = this.autoCollectingLv
+            foodUpgradeLv = this.foodUpgradeLv,
+            foodUpgrade2Lv = this.foodUpgrade2Lv,
+            autoCollectingLv = this.autoCollectingLv,
+            minFoodLv = this.minFoodLv,
+            maxFoodLv = this.maxFoodLv
         };
         return JsonUtility.ToJson(data);
     }
@@ -540,7 +592,11 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         this.reduceCollectingTimeLv = savedData.reduceCollectingTimeLv;
         this.maxFoodsLv = savedData.maxFoodsLv;
         this.reduceProducingFoodTimeLv = savedData.reduceProducingFoodTimeLv;
+        this.foodUpgradeLv = savedData.foodUpgradeLv;
+        this.foodUpgrade2Lv = savedData.foodUpgrade2Lv;
         this.autoCollectingLv = savedData.autoCollectingLv;
+        this.minFoodLv = savedData.minFoodLv;
+        this.maxFoodLv = savedData.maxFoodLv;
 
         UpdateAllUI();
 

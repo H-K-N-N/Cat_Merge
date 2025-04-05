@@ -11,7 +11,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     #region Variables
 
     private const float CLICK_AREA_SCALE = 0.9f;    // 클릭 영역 스케일
-    private WaitForSeconds COLLECT_ANIMATION_DELAY = new WaitForSeconds(0.5f);
+    private WaitForSeconds COLLECT_ANIMATION_DELAY = new WaitForSeconds(1f); // 4월 5일 0.5->1로 바꿈
 
     [Header("Cat Data")]
     public Cat catData;                             // 고양이 기본 데이터
@@ -45,6 +45,8 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     private bool isCollectingCoins = true;          // 코인 수집 활성화 상태
     private Coroutine autoCollectCoroutine;         // 코인 수집 코루틴
 
+
+    public Animator animator;
     #endregion
 
 
@@ -279,6 +281,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
                 autoMoveCoroutine = null;
             }
             isAnimating = false;
+          
         }
     }
 
@@ -291,6 +294,8 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
             if (!isAnimating && (catDragAndDrop == null || !catDragAndDrop.isDragging))
             {
+                
+
                 Vector3 randomDirection = GetRandomDirection();
                 Vector3 targetPosition = (Vector3)rectTransform.anchoredPosition + randomDirection;
 
@@ -353,6 +358,9 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     {
         isAnimating = true;
 
+        Debug.Log($"움직임, isAnimation = {isAnimating}"); // true;
+        animator.SetBool("isWalk", isAnimating);
+
         if (currentMoveCoroutine != null)
         {
             StopCoroutine(currentMoveCoroutine);
@@ -369,6 +377,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         float elapsed = 0f;
         float duration = 0.5f;
 
+
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
@@ -378,6 +387,8 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
         rectTransform.anchoredPosition = targetPosition;
         isAnimating = false;
+        Debug.Log($"움직임 멈춤, isAnimation = {isAnimating}"); // false;
+        animator.SetBool("isWalk", isAnimating);
         currentMoveCoroutine = null;
     }
 
@@ -393,6 +404,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
         if (isCollectingCoins)
         {
+            
             if (autoCollectCoroutine == null)
             {
                 autoCollectCoroutine = StartCoroutine(AutoCollectCoins());
@@ -428,6 +440,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         float currentDelayTime = 0f;
         WaitForSeconds delay = null;
 
+        
         while (isCollectingCoins)
         {
             collectingTime = ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value;
@@ -441,6 +454,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
             yield return delay;
 
+
             if (catData != null && GameManager.Instance != null)
             {
                 int collectedCoins = catData.CatGetCoin;
@@ -448,11 +462,16 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
                 StartCoroutine(PlayCollectingAnimation(collectedCoins));
             }
         }
+
+       
+        
+
     }
 
     // 재화 수집 애니메이션 실행
     private IEnumerator PlayCollectingAnimation(int collectedCoins)
     {
+        animator.SetBool("isGetCoin", true);
         if (collectCoinText != null)
         {
             collectCoinText.text = $"+{collectedCoins}";
@@ -467,8 +486,9 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
         if (collectCoinText != null) collectCoinText.gameObject.SetActive(false);
         if (collectCoinImage != null) collectCoinImage.gameObject.SetActive(false);
+        animator.SetBool("isGetCoin", false);
     }
-
+    
     #endregion
 
 

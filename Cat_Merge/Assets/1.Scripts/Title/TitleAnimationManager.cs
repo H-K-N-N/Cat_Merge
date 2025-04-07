@@ -497,6 +497,11 @@ public class TitleAnimationManager : MonoBehaviour
         Vector3 startPosition = catTransform.anchoredPosition;
         float elapsed = 0f;
 
+        Vector3 moveDirection = targetPosition - startPosition;
+        float rotation = moveDirection.x > 0 ? 180f : 0f;
+
+        catTransform.rotation = Quaternion.Euler(0f, rotation, 0f);
+
         while (elapsed < moveDurationCat)
         {
             elapsed += Time.deltaTime;

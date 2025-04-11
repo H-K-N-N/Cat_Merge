@@ -38,6 +38,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     private bool isBattleActive;                                // 전투 활성화 여부
     public bool IsBattleActive => isBattleActive;
 
+    private HashSet<int> clearedStages = new HashSet<int>();    // 클리어한 스테이지 저장
 
     [Header("---[Boss UI]")]
     [SerializeField] private GameObject battleHPUI;             // Battle HP UI (활성화/비활성화 제어)
@@ -59,6 +60,12 @@ public class BattleManager : MonoBehaviour, ISaveable
     [SerializeField] private TextMeshProUGUI battleResultCountdownText; // 전투 결과 패널 카운트다운 Text
     private Coroutine resultPanelCoroutine;                             // 결과 패널 자동 닫기 코루틴
 
+    [SerializeField] private GameObject rewardSlotPrefab;          // Reward Slot 프리팹
+    [SerializeField] private Transform winRewardPanel;             // Win Panel의 Reward Panel
+    [SerializeField] private Transform loseRewardPanel;            // Lose Panel의 Reward Panel
+    private Sprite cashSprite;                                     // 캐시 이미지
+    private Sprite coinSprite;                                     // 코인 이미지
+    private List<GameObject> activeRewardSlots = new List<GameObject>();  // 현재 활성화된 보상 슬롯들
 
     [Header("---[Boss AutoRetry UI]")]
     [SerializeField] private Button autoRetryPanelButton;       // 하위 단계 자동 도전 패널 버튼
@@ -151,6 +158,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         InitializeBattleUI();
         InitializeCanvasGroups();
         InitializeButtonListeners();
+        InitializeRewardSprites();
     }
 
     // warningPanel 초기화 함수
@@ -230,6 +238,13 @@ public class BattleManager : MonoBehaviour, ISaveable
         UpdateToggleButtonImage(autoRetryButtonImage, isAutoRetryEnabled);
         UpdateAutoRetryPanelButtonColor(isAutoRetryEnabled);
         UpdateAutoRetryUI(isAutoRetryEnabled, true);
+    }
+
+    // 보상 이미지 초기화 함수
+    private void InitializeRewardSprites()
+    {
+        cashSprite = Resources.Load<Sprite>("Sprites/UI/I_UI_Main/I_UI_paidcoin.9");
+        coinSprite = Resources.Load<Sprite>("Sprites/UI/I_UI_Main/I_UI_coin.9");
     }
 
     #endregion
@@ -720,11 +735,44 @@ public class BattleManager : MonoBehaviour, ISaveable
         winPanel.SetActive(isVictory);
         losePanel.SetActive(!isVictory);
 
+        ClearRewardSlots();
+
+        // 승리했을 때 보상 슬롯 생성
+        if (isVictory)
+        {
+            bool isFirstClear = !clearedStages.Contains(bossStage);
+            if (isFirstClear)
+            {
+                // 최초 클리어 보상
+                CreateRewardSlot(winRewardPanel, cashSprite, currentBossData.ClearCashReward, true);
+                CreateRewardSlot(winRewardPanel, coinSprite, currentBossData.ClearCoinReward, true);
+            }
+            else
+            {
+                // 반복 클리어 보상
+                CreateRewardSlot(winRewardPanel, coinSprite, currentBossData.RepeatclearCoinReward, false);
+            }
+        }
+        else
+        {
+            // 패배 했을때 보상
+        }
+
         if (resultPanelCoroutine != null)
         {
             StopCoroutine(resultPanelCoroutine);
         }
         resultPanelCoroutine = StartCoroutine(AutoCloseBattleResultPanel());
+    }
+
+    // 보상 슬롯 제거 함수
+    private void ClearRewardSlots()
+    {
+        foreach (GameObject slot in activeRewardSlots)
+        {
+            Destroy(slot);
+        }
+        activeRewardSlots.Clear();
     }
 
     // 전투 결과 패널 닫는 함수
@@ -735,6 +783,7 @@ public class BattleManager : MonoBehaviour, ISaveable
             StopCoroutine(resultPanelCoroutine);
             resultPanelCoroutine = null;
         }
+        ClearRewardSlots();
         battleResultPanel.SetActive(false);
     }
 
@@ -829,6 +878,25 @@ public class BattleManager : MonoBehaviour, ISaveable
         }
     }
 
+    // 보상 슬롯 생성 함수
+    private void CreateRewardSlot(Transform parent, Sprite rewardSprite, decimal amount, bool isFirstClear = false)
+    {
+        GameObject rewardSlot = Instantiate(rewardSlotPrefab, parent);
+        activeRewardSlots.Add(rewardSlot);
+
+        // Reward Image 설정
+        Image rewardImage = rewardSlot.transform.Find("Background Image/Reward Image").GetComponent<Image>();
+        rewardImage.sprite = rewardSprite;
+
+        // Reward Text 설정
+        TextMeshProUGUI rewardText = rewardSlot.transform.Find("Reward Text").GetComponent<TextMeshProUGUI>();
+        rewardText.text = GameManager.Instance.FormatPriceNumber(amount);
+
+        // First Clear Image 설정
+        GameObject firstClearImage = rewardSlot.transform.Find("First Clear Image").gameObject;
+        firstClearImage.SetActive(isFirstClear);
+    }
+
     #endregion
 
 
@@ -857,21 +925,22 @@ public class BattleManager : MonoBehaviour, ISaveable
         // 슬라이더 초기화
         InitializeSliders();
 
+        ShowBattleResult(isVictory);
+        if (isVictory)
+        {
+            GiveStageReward();
+
+            currentMaxBossStage = Mathf.Max(currentMaxBossStage, bossStage + 1);
+            QuestManager.Instance.AddStageCount();
+        }
+
         Destroy(currentBoss);
         currentBossData = null;
         currentBoss = null;
         bossHitbox = null;
         battleHPUI.SetActive(false);
 
-        if (isVictory)
-        {
-            currentMaxBossStage = Mathf.Max(currentMaxBossStage, bossStage + 1);
-
-            QuestManager.Instance.AddStageCount();
-        }
-
         GoogleSave();
-        ShowBattleResult(isVictory);
 
         // 전투 종료시 비활성화했던 기능들 다시 기존 상태로 복구
         SetEndFunctions();
@@ -891,6 +960,29 @@ public class BattleManager : MonoBehaviour, ISaveable
 
         // 자동 머지 재개
         AutoMergeManager.Instance.ResumeAutoMerge();
+    }
+
+    // 보상 지급 함수
+    private void GiveStageReward()
+    {
+        if (currentBossData == null)
+        {
+            return;
+        }
+
+        bool isFirstClear = !clearedStages.Contains(bossStage);
+        if (isFirstClear)
+        {
+            // 최초 클리어 보상
+            GameManager.Instance.Cash += currentBossData.ClearCashReward;
+            GameManager.Instance.Coin += currentBossData.ClearCoinReward;
+            clearedStages.Add(bossStage);
+        }
+        else
+        {
+            // 반복 클리어 보상
+            GameManager.Instance.Coin += currentBossData.RepeatclearCoinReward;
+        }
     }
 
     // 모든 전투 관련 코루틴을 종료하는 함수 추가
@@ -998,6 +1090,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     {
         public int bossStage;               // 현재 보스 스테이지
         public bool isAutoRetryEnabled;     // 하위 단계 자동 도전 상태
+        public List<int> clearedStages;
     }
 
     public string GetSaveData()
@@ -1005,7 +1098,8 @@ public class BattleManager : MonoBehaviour, ISaveable
         SaveData data = new SaveData
         {
             bossStage = this.bossStage,
-            isAutoRetryEnabled = this.isAutoRetryEnabled
+            isAutoRetryEnabled = this.isAutoRetryEnabled,
+            clearedStages = new List<int>(this.clearedStages)
         };
 
         return JsonUtility.ToJson(data);
@@ -1023,6 +1117,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         this.bossStage = savedData.bossStage;
         this.currentMaxBossStage = savedData.bossStage;
         this.isAutoRetryEnabled = savedData.isAutoRetryEnabled;
+        this.clearedStages = new HashSet<int>(savedData.clearedStages ?? new List<int>());
 
         UpdateToggleButtonImage(autoRetryButtonImage, isAutoRetryEnabled);
         UpdateAutoRetryPanelButtonColor(isAutoRetryEnabled);

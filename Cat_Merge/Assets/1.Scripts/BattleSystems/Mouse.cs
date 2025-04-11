@@ -31,8 +31,18 @@ public class Mouse
     private int mouseArmor;             // 쥐 방어력
     public int MouseArmor { get => mouseArmor; set => mouseArmor = value; }
 
+
+    private int clearCashReward;            // 첫 클리어 캐쉬 보상
+    public int ClearCashReward { get => clearCashReward; set => clearCashReward = value; }
+
+    private decimal clearCoinReward;        // 첫 클리어 코인 보상
+    public decimal ClearCoinReward { get => clearCoinReward; set => clearCoinReward = value; }
+
+    private decimal repeatclearCoinReward;  // 반복 클리어 코인 보상
+    public decimal RepeatclearCoinReward { get => repeatclearCoinReward; set => repeatclearCoinReward = value; }
+
     public Mouse(int mouseId, string mouseName, int mouseGrade, double mouseDamage, double mouseHp, Sprite mouseImage, 
-        int numOfAttack, int mouseAttackSpeed, int mouseArmor)
+        int numOfAttack, int mouseAttackSpeed, int mouseArmor, int clearCashReward, decimal clearCoinReward, decimal repeatclearCoinReward)
     {
         MouseId = mouseId;
         MouseName = mouseName;
@@ -43,6 +53,9 @@ public class Mouse
         NumOfAttack = numOfAttack;
         MouseAttackSpeed = mouseAttackSpeed;
         MouseArmor = mouseArmor;
+        ClearCashReward = clearCashReward;
+        ClearCoinReward = clearCoinReward;
+        RepeatclearCoinReward = repeatclearCoinReward;
     }
 
 }

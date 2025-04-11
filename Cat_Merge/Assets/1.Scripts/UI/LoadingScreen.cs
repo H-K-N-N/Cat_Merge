@@ -51,7 +51,7 @@ public class LoadingScreen : MonoBehaviour
         canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         canvasScaler.matchWidthOrHeight = 1f;
 
-        maxMaskSize = new Vector2(4000, 4000);
+        maxMaskSize = new Vector2(10000, 10000);
 
         // 중앙 원형 이미지 설정
         circleImage.anchorMin = new Vector2(0.5f, 0.5f);

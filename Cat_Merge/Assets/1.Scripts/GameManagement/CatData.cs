@@ -44,9 +44,6 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     public float CollectingTime { get => collectingTime; set => collectingTime = value; }
     private bool isCollectingCoins = true;          // 코인 수집 활성화 상태
     private Coroutine autoCollectCoroutine;         // 코인 수집 코루틴
-
-
-    public Animator animator;
     #endregion
 
 
@@ -208,6 +205,8 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         isStuned = isStunned;
         catImage.color = isStunned ? new Color(1f, 0.5f, 0.5f, 0.7f) : Color.white;
 
+        
+
         if (!isStunned)
         {
             HealCatHP();
@@ -221,7 +220,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
                 SetRaycastTarget(true);  // 드래그는 가능하도록 설정
 
                 // 보스 히트박스 경계로 이동
-                MoveTowardBossBoundary();
+                MoveTowardBossBoundary();               
             }
             else
             {
@@ -358,9 +357,6 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     {
         isAnimating = true;
 
-        Debug.Log($"움직임, isAnimation = {isAnimating}"); // true;
-        animator.SetBool("isWalk", isAnimating);
-
         if (currentMoveCoroutine != null)
         {
             StopCoroutine(currentMoveCoroutine);
@@ -387,8 +383,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
         rectTransform.anchoredPosition = targetPosition;
         isAnimating = false;
-        Debug.Log($"움직임 멈춤, isAnimation = {isAnimating}"); // false;
-        animator.SetBool("isWalk", isAnimating);
+
         currentMoveCoroutine = null;
     }
 
@@ -471,7 +466,6 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     // 재화 수집 애니메이션 실행
     private IEnumerator PlayCollectingAnimation(int collectedCoins)
     {
-        animator.SetBool("isGetCoin", true);
         if (collectCoinText != null)
         {
             collectCoinText.text = $"+{collectedCoins}";
@@ -486,7 +480,6 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
         if (collectCoinText != null) collectCoinText.gameObject.SetActive(false);
         if (collectCoinImage != null) collectCoinImage.gameObject.SetActive(false);
-        animator.SetBool("isGetCoin", false);
     }
     
     #endregion

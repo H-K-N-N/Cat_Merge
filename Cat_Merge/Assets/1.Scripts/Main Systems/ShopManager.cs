@@ -54,8 +54,11 @@ public class ShopManager : MonoBehaviour, ISaveable
     private int doubleCoinForAdCoolTime = 20;                              // 코인 획득량 쿨타임 (600초)(게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
     private long lastDoubleCoinTimeReward = 0;                              // 마지막 doubleCoinForAd 보상 시간 저장
     private long remainingDoubleCoinCoolTimeBeforeAd = 0;                   // 광고 시청 전 남은 쿨타임을 저장
+    
     private const float doubleCoinDuration = 10f;                          // 코인 2배 지속시간 (300초)
     private const float doubleCoinMultiplier = 2f;                          // 코인 획득량 배수
+    private float coinMultiplier = 1f;                                      // 현재 코인 배수
+    private float multiplierEndTime = 0f;                                   // 배수 효과 종료 시간
 
     #endregion
 
@@ -176,11 +179,11 @@ public class ShopManager : MonoBehaviour, ISaveable
         // 쿨타임 텍스트 업데이트
         if (isAdAvailable)
         {
-            cashForAdCoolTimeText.text = "준비 완료"; //$"쿨타임 {cashForAdCoolTime}초";
+            cashForAdCoolTimeText.text = "준비 완료";
         }
         else
         {
-            cashForAdCoolTimeText.text = $"쿨타임 {remainTime}초";
+            cashForAdCoolTimeText.text = $"쿨타임 {(int)remainTime}초";
         }
     }
 
@@ -250,11 +253,11 @@ public class ShopManager : MonoBehaviour, ISaveable
 
         if (isTimeRewardAvailable)
         {
-            cashForTimeCoolTimeText.text = "준비 완료"; //$"쿨타임 {cashForTimeCoolTime}초";
+            cashForTimeCoolTimeText.text = "준비 완료";
         }
         else
         {
-            cashForTimeCoolTimeText.text = $"쿨타임 {remainTime}초";
+            cashForTimeCoolTimeText.text = $"쿨타임 {(int)remainTime}초";
         }
     }
 
@@ -292,6 +295,7 @@ public class ShopManager : MonoBehaviour, ISaveable
         bool isAdAvailable = IsDoubleCoinForAdAvailable() && !isWaitingForAd;
         long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         long remainTime = Math.Max(0, doubleCoinForAdCoolTime - (currentTime - lastDoubleCoinTimeReward));
+        float remainEffectTime = GetRemainingEffectTime();
 
         doubleCoinForAdButton.interactable = isAdAvailable;
         doubleCoinForAdRewardOnImage.SetActive(isAdAvailable);
@@ -300,14 +304,30 @@ public class ShopManager : MonoBehaviour, ISaveable
         doubleCoinForAdDisabledBG.SetActive(!isAdAvailable);
 
         // 쿨타임 텍스트 업데이트
-        if (isAdAvailable)
+        if (remainEffectTime > 0)
+        {
+            doubleCoinForAdCoolTimeText.text = $"쿨타임 {(int)remainTime}초 / 남은시간 {(int)remainEffectTime}초";
+        }
+        else if (isAdAvailable)
         {
             doubleCoinForAdCoolTimeText.text = "준비 완료";
         }
         else
         {
-            doubleCoinForAdCoolTimeText.text = $"쿨타임 {remainTime}초";
+            doubleCoinForAdCoolTimeText.text = $"쿨타임 {(int)remainTime}초";
         }
+    }
+
+    // 현재 코인 배수를 가져오는 함수
+    public float CurrentCoinMultiplier
+    {
+        get => Time.time < multiplierEndTime ? coinMultiplier : 1f;
+    }
+
+    // 배수 효과 남은 시간을 가져오는 함수
+    private float GetRemainingEffectTime()
+    {
+        return Mathf.Max(0f, multiplierEndTime - Time.time);
     }
 
     // DoubleCoinForAd 활성화 여부 판별 함수
@@ -337,7 +357,8 @@ public class ShopManager : MonoBehaviour, ISaveable
     public void OnDoubleCoinAdRewardComplete()
     {
         // 광고 보상 지급 - 모든 고양이의 재화 수급량 300초동안 2배로 증가
-        CatData.SetGlobalCoinMultiplier(doubleCoinMultiplier, doubleCoinDuration);
+        coinMultiplier = doubleCoinMultiplier;
+        multiplierEndTime = Time.time + doubleCoinDuration;
 
         // 마지막 광고 시청 시간 저장
         lastDoubleCoinTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -368,18 +389,24 @@ public class ShopManager : MonoBehaviour, ISaveable
     [Serializable]
     private class SaveData
     {
-        public long lastAdTimeReward;
-        public long lastTimeReward;
-        public long lastDoubleCoinTimeReward;
+        public long lastAdTimeReward;           // 
+        public long lastTimeReward;             // 
+        public long lastDoubleCoinTimeReward;   // 
+        public float multiplierEndTimeOffset;   // 효과 종료까지 남은 시간
+        public float coinMultiplier;            // 현재 적용 중인 배수
     }
 
     public string GetSaveData()
     {
+        float remainingTime = multiplierEndTime - Time.time;                    // 남은 시간 계산
+
         SaveData data = new SaveData
         {
             lastAdTimeReward = this.lastAdTimeReward,
             lastTimeReward = this.lastTimeReward,
-            lastDoubleCoinTimeReward = this.lastDoubleCoinTimeReward
+            lastDoubleCoinTimeReward = this.lastDoubleCoinTimeReward,
+            multiplierEndTimeOffset = remainingTime > 0 ? remainingTime : 0,    // 남은 시간이 있을 때만 저장
+            coinMultiplier = this.coinMultiplier
         };
         return JsonUtility.ToJson(data);
     }
@@ -392,6 +419,18 @@ public class ShopManager : MonoBehaviour, ISaveable
         this.lastAdTimeReward = savedData.lastAdTimeReward;
         this.lastTimeReward = savedData.lastTimeReward;
         this.lastDoubleCoinTimeReward = savedData.lastDoubleCoinTimeReward;
+
+        // 저장된 배수 효과가 있다면 복원
+        if (savedData.multiplierEndTimeOffset > 0)
+        {
+            this.coinMultiplier = savedData.coinMultiplier;
+            this.multiplierEndTime = Time.time + savedData.multiplierEndTimeOffset;
+        }
+        else
+        {
+            this.coinMultiplier = 1f;
+            this.multiplierEndTime = 0f;
+        }
 
         UpdateAllUI();
     }

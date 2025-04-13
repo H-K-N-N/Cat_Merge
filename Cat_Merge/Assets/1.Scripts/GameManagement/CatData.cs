@@ -45,10 +45,6 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     private bool isCollectingCoins = true;          // 코인 수집 활성화 상태
     private Coroutine autoCollectCoroutine;         // 코인 수집 코루틴
 
-    [Header("ShopManager 관련")]
-    private static float globalCoinMultiplier = 1f; // 전역 코인 획득량 배수
-    private static float globalMultiplierEndTime;   // 전역 배수 효과 종료 시간
-
     #endregion
 
 
@@ -445,10 +441,11 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
             yield return delay;
 
-            if (catData != null && GameManager.Instance != null)
+            if (catData != null)
             {
-                float currentMultiplier = Time.time < globalMultiplierEndTime ? globalCoinMultiplier : 1f;
+                float currentMultiplier = ShopManager.Instance.CurrentCoinMultiplier;
                 int collectedCoins = Mathf.RoundToInt(catData.CatGetCoin * currentMultiplier);
+
                 GameManager.Instance.Coin += collectedCoins;
                 StartCoroutine(PlayCollectingAnimation(collectedCoins));
             }
@@ -472,25 +469,6 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
         if (collectCoinText != null) collectCoinText.gameObject.SetActive(false);
         if (collectCoinImage != null) collectCoinImage.gameObject.SetActive(false);
-    }
-
-    // 전역 코인 획득량 배수 설정 (static 메서드)
-    public static void SetGlobalCoinMultiplier(float multiplier, float duration)
-    {
-        globalCoinMultiplier = multiplier;
-        globalMultiplierEndTime = Time.time + duration;
-    }
-
-    // 현재 전역 코인 배수 효과가 활성화되어 있는지 확인
-    public static bool IsGlobalMultiplierActive()
-    {
-        return Time.time < globalMultiplierEndTime;
-    }
-
-    // 남은 전역 코인 배수 효과 시간 반환
-    public static float GetRemainingMultiplierTime()
-    {
-        return Mathf.Max(0, globalMultiplierEndTime - Time.time);
     }
 
     #endregion

@@ -106,8 +106,6 @@ public class GoogleManager : MonoBehaviour
 
     public void Start()
     {
-        Application.targetFrameRate = 60;
-
         InitializeGooglePlay();
 
         StartCoroutine(GPGS_Login());

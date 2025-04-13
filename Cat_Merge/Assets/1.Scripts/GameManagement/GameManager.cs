@@ -126,6 +126,8 @@ public class GameManager : MonoBehaviour, ISaveable
 
     private void Start()
     {
+        Application.targetFrameRate = 60;
+
         // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
         if (!isDataLoaded)
         {

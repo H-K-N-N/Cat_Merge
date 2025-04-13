@@ -107,7 +107,7 @@ public class BuyCatManager : MonoBehaviour, ISaveable
         if (!GameManager.Instance) return;
 
         catPurchaseInfos.Clear();
-        for (int i = 0; i < GameManager.Instance.AllCatData.Length; i++)
+        for (int i = 0; i < 3; i++)
         {
             catPurchaseInfos[i] = new CatPurchaseInfo
             {
@@ -129,7 +129,7 @@ public class BuyCatManager : MonoBehaviour, ISaveable
         bool shouldSave = isDataLoaded;
         isDataLoaded = false;
 
-        for (int i = 0; i < GameManager.Instance.AllCatData.Length; i++)
+        for (int i = 0; i < 3; i++)
         {
             var info = GetCatPurchaseInfo(i);
             buyCatCountExplainTexts[i].text = $"구매 횟수 : {info.coinPurchaseCount}회 + {info.cashPurchaseCount}회";
@@ -143,7 +143,7 @@ public class BuyCatManager : MonoBehaviour, ISaveable
     // 버튼 리스너 초기화 함수
     private void InitializeButtonListeners()
     {
-        for (int i = 0; i < GameManager.Instance.AllCatData.Length; i++)
+        for (int i = 0; i < 3; i++)
         {
             int index = i;
 
@@ -302,7 +302,7 @@ public class BuyCatManager : MonoBehaviour, ISaveable
         catPurchaseInfos.Clear();
         foreach (var info in savedData.purchaseInfos)
         {
-            if (info.catGrade < GameManager.Instance.AllCatData.Length)
+            if (info.catGrade < 3)
             {
                 catPurchaseInfos[info.catGrade] = new CatPurchaseInfo
                 {

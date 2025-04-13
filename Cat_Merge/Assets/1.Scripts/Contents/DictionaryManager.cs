@@ -107,6 +107,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         }
 
         InitializeNewImage();
+        InitializeScrollPositions();
     }
 
     private void OnDestroy()
@@ -131,8 +132,6 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     // 모든 구성요소 초기화
     private void InitializeDictionaryManager()
     {
-        InitializeScrollPositions();
-
         InitializeDefaultValues();
         InitializeActivePanel();
 
@@ -156,7 +155,35 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     {
         foreach (var scrollRect in dictionaryScrollRects)
         {
-            scrollRect.verticalNormalizedPosition = 1f;
+            if (scrollRect != null && scrollRect.content != null)
+            {
+                // 전체 슬롯 개수를 3의 배수로 올림 계산
+                int totalSlots = GameManager.Instance.AllCatData.Length;
+                int adjustedTotalSlots = Mathf.CeilToInt(totalSlots / 3f) * 3;
+
+                // 행의 개수 계산 (3개씩 한 줄)
+                int rowCount = adjustedTotalSlots / 3;
+
+                // Grid Layout Group 설정값
+                const int SPACING_Y = 30;           // y spacing
+                const int CELL_SIZE_Y = 280;        // y cell size
+                const int VIEWPORT_HEIGHT = 680;    // viewport height
+
+                // 전체 컨텐츠 높이 계산: (행 간격 * (행 개수-1)) + (셀 높이 * 행 개수)
+                float contentHeight = (SPACING_Y * (rowCount - 1)) + (CELL_SIZE_Y * rowCount);
+
+                // 스크롤 시작 위치 계산: -(전체 높이 - 뷰포트 높이) * 0.5f
+                float targetY = -(contentHeight - VIEWPORT_HEIGHT) * 0.5f;
+
+                // 스크롤 컨텐츠의 위치를 상단으로 설정
+                scrollRect.content.anchoredPosition = new Vector2(
+                    scrollRect.content.anchoredPosition.x,
+                    targetY
+                );
+
+                // 스크롤 속도 초기화
+                scrollRect.velocity = Vector2.zero;
+            }
         }
     }
 

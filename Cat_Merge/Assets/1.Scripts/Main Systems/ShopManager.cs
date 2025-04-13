@@ -306,7 +306,7 @@ public class ShopManager : MonoBehaviour, ISaveable
         // 쿨타임 텍스트 업데이트
         if (remainEffectTime > 0)
         {
-            doubleCoinForAdCoolTimeText.text = $"쿨타임 {(int)remainTime}초 / 남은시간 {(int)remainEffectTime}초";
+            doubleCoinForAdCoolTimeText.text = $"효과 지속시간 {(int)remainEffectTime}초";
         }
         else if (isAdAvailable)
         {

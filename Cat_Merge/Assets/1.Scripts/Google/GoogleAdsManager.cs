@@ -5,6 +5,10 @@ using System;
 
 public class GoogleAdsManager : MonoBehaviour
 {
+
+
+    #region Variables
+
     // These ad units are configured to always serve test ads.
 #if UNITY_ANDROID
     private string _adUnitId = "ca-app-pub-3940256099942544/5354046379";
@@ -15,7 +19,12 @@ public class GoogleAdsManager : MonoBehaviour
 #endif
 
     private RewardedInterstitialAd rewardedInterstitialAd;
-    
+
+    #endregion
+
+
+    #region Unity Methods
+
     public void Awake()
     {
         // Initialize the Google Mobile Ads SDK.
@@ -30,6 +39,10 @@ public class GoogleAdsManager : MonoBehaviour
         LoadRewardedInterstitialAd();
     }
 
+    #endregion
+
+
+    #region Load Ad
 
     public void LoadRewardedInterstitialAd()
     {
@@ -60,7 +73,13 @@ public class GoogleAdsManager : MonoBehaviour
             });
     }
 
-    public void ShowRewardedInterstitialAd()
+    #endregion
+
+
+    #region Show Ad
+
+    // CashForAd ±¤°í (ShopManager)
+    public void ShowRewardedCashForAd()
     {
         if (rewardedInterstitialAd != null && rewardedInterstitialAd.CanShowAd())
         {
@@ -76,6 +95,26 @@ public class GoogleAdsManager : MonoBehaviour
             LoadRewardedInterstitialAd();
         }
     }
+
+    // DoubleCoinForAd ±¤°í (ShopManager)
+    public void ShowRewardedDoubleCoinForAd()
+    {
+        if (rewardedInterstitialAd != null && rewardedInterstitialAd.CanShowAd())
+        {
+            rewardedInterstitialAd.Show((Reward reward) =>
+            {
+                ShopManager.Instance.OnDoubleCoinAdRewardComplete();
+
+                LoadRewardedInterstitialAd();
+            });
+        }
+        else
+        {
+            LoadRewardedInterstitialAd();
+        }
+    }
+
+    #endregion
 
 
 }

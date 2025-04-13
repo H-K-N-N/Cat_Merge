@@ -441,9 +441,11 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
             yield return delay;
 
-            if (catData != null && GameManager.Instance != null)
+            if (catData != null)
             {
-                int collectedCoins = catData.CatGetCoin;
+                float currentMultiplier = ShopManager.Instance.CurrentCoinMultiplier;
+                int collectedCoins = Mathf.RoundToInt(catData.CatGetCoin * currentMultiplier);
+
                 GameManager.Instance.Coin += collectedCoins;
                 StartCoroutine(PlayCollectingAnimation(collectedCoins));
             }
@@ -500,7 +502,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     // 레이캐스트 필터링 함수 구현
     public bool IsRaycastLocationValid(Vector2 screenPoint, Camera eventCamera)
     {
-        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, screenPoint, eventCamera, out Vector2 localPoint)) 
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, screenPoint, eventCamera, out Vector2 localPoint))
             return false;
 
         Vector2 normalizedPoint = new Vector2(

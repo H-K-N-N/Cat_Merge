@@ -1774,7 +1774,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 80, y: 40}
-  m_SizeDelta: {x: 60, y: 60}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &55518393
 MonoBehaviour:
@@ -10467,6 +10467,7 @@ GameObject:
   - component: {fileID: 331588653}
   - component: {fileID: 331588662}
   - component: {fileID: 331588661}
+  - component: {fileID: 331588666}
   - component: {fileID: 331588640}
   - component: {fileID: 331588654}
   - component: {fileID: 331588650}
@@ -11110,6 +11111,24 @@ MonoBehaviour:
   cashForTimeCoolTimeText: {fileID: 482238523}
   cashForTimeNewImage: {fileID: 1189026564}
   cashForTimeDisabledBG: {fileID: 649009674}
+  doubleCoinForAdButton: {fileID: 1884417984}
+  doubleCoinForAdCoolTimeText: {fileID: 1529372756}
+  doubleCoinForAdRewardOnImage: {fileID: 180426957}
+  doubleCoinForAdRewardOffImage: {fileID: 824879953}
+  doubleCoinForAdNewImage: {fileID: 55518391}
+  doubleCoinForAdDisabledBG: {fileID: 258277249}
+--- !u!114 &331588666
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 331588638}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a3d38d7a1810f04b9989492e6de76e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &335877571
 GameObject:
   m_ObjectHideFlags: 0
@@ -64340,7 +64359,7 @@ GameObject:
   - component: {fileID: 2017113613}
   - component: {fileID: 2017113612}
   m_Layer: 5
-  m_Name: Coin Collect x2 For Ad Slot
+  m_Name: Double Coin For Ad Slot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

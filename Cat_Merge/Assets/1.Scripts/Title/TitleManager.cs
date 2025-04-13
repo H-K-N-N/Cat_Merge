@@ -18,6 +18,8 @@ public class TitleManager : MonoBehaviour
 
     private void Start()
     {
+        Application.targetFrameRate = 60;
+
         startButton.gameObject.SetActive(false);
     }
 

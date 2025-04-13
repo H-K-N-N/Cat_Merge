@@ -1,3 +1,5 @@
+using NUnit.Framework;
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum CharacterState
@@ -10,14 +12,52 @@ public enum CharacterState
     isAttack
 }
 
+[System.Serializable]
+public struct GradeOverrideData
+{
+    public int grade; // 예: 1 = Normal, 2 = Rare, 3 = Legend
+    public AnimatorOverrideController overrideController;
+}
+
 public class AnimatorManager : MonoBehaviour
 {
     private Animator animator;
+    public int catGrade;
+    [Header("등급별 애니메이터 오버라이드 리스트")]
+    public List<GradeOverrideData> overrideDataList;
+    private Dictionary<int, AnimatorOverrideController> overrideDict;
+
     private CharacterState currentState;
 
     void Awake()
     {
         animator = GetComponent<Animator>();
+
+        // 딕셔너리 초기화
+        overrideDict = new Dictionary<int, AnimatorOverrideController>();
+        foreach (var data in overrideDataList)
+        {
+            if (!overrideDict.ContainsKey(data.grade))
+            {
+                overrideDict.Add(data.grade, data.overrideController);
+            }
+        }
+    }
+
+    private void Start()
+    {
+        Cat catData = GameManager.Instance.AllCatData[2];
+        if (catData != null)
+        {
+            Debug.Log(catData);
+        }
+        else
+        {
+            Debug.Log("널");
+        }
+        catGrade = catData.CatGrade;
+        Debug.Log($"등급: {catGrade}");
+        ApplyAnimatorOverride(catGrade);
     }
     void Update()
     {
@@ -27,6 +67,7 @@ public class AnimatorManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha4)) ChangeState(CharacterState.isGrab);
         if (Input.GetKeyDown(KeyCode.Alpha5)) ChangeState(CharacterState.isBattle);
         if (Input.GetKeyDown(KeyCode.Alpha6)) ChangeState(CharacterState.isAttack);
+
     }
     public void ChangeState(CharacterState newState)
     {
@@ -51,6 +92,18 @@ public class AnimatorManager : MonoBehaviour
     private void SetBoolForState(CharacterState state)
     {
         animator.SetBool(state.ToString(), true);
+    }
+
+    void ApplyAnimatorOverride(int grade)
+    {
+        if (overrideDict.ContainsKey(grade))
+        {
+            animator.runtimeAnimatorController = overrideDict[grade];
+        }
+        else
+        {
+            Debug.LogWarning($"해당 등급({grade})의 오버라이드 컨트롤러가 등록되지 않았습니다!");
+        }
     }
 }
 

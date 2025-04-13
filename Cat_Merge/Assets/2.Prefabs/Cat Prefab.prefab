@@ -385,7 +385,6 @@ MonoBehaviour:
   isStuned: 0
   hpImage: {fileID: 0}
   hpFillImage: {fileID: 0}
-  animator: {fileID: 369006820606142384}
 --- !u!114 &6581758322604903725
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -399,7 +398,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rectTransform: {fileID: 0}
-  animator: {fileID: 369006820606142384}
 --- !u!95 &369006820606142384
 Animator:
   serializedVersion: 7
@@ -434,6 +432,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e241c30a29c85543b5f070adffc8b3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  catGrade: 0
+  overrideDataList:
+  - grade: 3
+    overrideController: {fileID: 22100000, guid: 64548e82a02c8a04a9606c63f998199d, type: 2}
 --- !u!1 &7088968465046740359
 GameObject:
   m_ObjectHideFlags: 0

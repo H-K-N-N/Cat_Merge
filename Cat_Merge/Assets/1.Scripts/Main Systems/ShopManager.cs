@@ -21,6 +21,8 @@ public class ShopManager : MonoBehaviour, ISaveable
 
     private ActivePanelManager activePanelManager;                  // ActivePanelManager
 
+    private bool isWaitingForAd = false;                                // 광고 대기 중인지 확인하는 변수 추가
+
     [Header("---[Free]")]
     [SerializeField] private Button cashForAdRewardButton;              // 광고 시청으로 캐쉬 획득 (광고 시청 불가능 상태일때 비활성화 = interactable 비활성화)
     [SerializeField] private TextMeshProUGUI cashForAdCoolTimeText;     // 광고 시청 쿨타임 Text
@@ -29,19 +31,21 @@ public class ShopManager : MonoBehaviour, ISaveable
     [SerializeField] private GameObject cashForAdNewImage;              // 광고 시청 가능 상태일때 활성화되는 New 이미지 오브젝트
     [SerializeField] private GameObject cashForAdDisabledBG;            // 광고 시청 불가능 상태일때 활성화되는 이미지 오브젝트
     private int cashForAdCoolTime = 10;                                // 광고 시청 쿨타임 (게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
-    private long lastAdTimeReward = 0;
-    private int cashForAdPrice = 30;
-    
+    private long lastAdTimeReward = 0;                                  // 마지막 cashForAd 보상 시간 저장
+    private int cashForAdPrice = 30;                                    // cashForAd 보상
+
     [SerializeField] private Button cashForTimeRewardButton;            // 쿨타임마다 활성화되는 무료 캐쉬 획득 (무료 캐쉬 획득 불가능 상태일때 비활성화 = interactable 비활성화)
     [SerializeField] private TextMeshProUGUI cashForTimeCoolTimeText;   // 광고 시청 쿨타임 Text
     [SerializeField] private GameObject cashForTimeNewImage;            // 무료 캐쉬 획득 가능 상태일때 활성화되는 New 이미지 오브젝트
     [SerializeField] private GameObject cashForTimeDisabledBG;          // 무료 캐쉬 획득 불가능 상태일때 활성화되는 이미지 오브젝트
     private int cashForTimeCoolTime = 10;                              // 무료 캐쉬 획득 쿨타임 (게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
-    private long lastTimeReward = 0;
-    private int cashForTimePrice = 5;
+    private long lastTimeReward = 0;                                    // 마지막 cashForTime 보상 시간 저장
+    private long remainingCoolTimeBeforeAd = 0;                         // 광고 시청 전 남은 쿨타임을 저장
+    private int cashForTimePrice = 5;                                   // cashForTime 보상
+
+    //[Header("---[Ad]")]
 
 
-    private bool isWaitingForAd = false;  // 광고 대기 중인지 확인하는 변수 추가
 
     #endregion
 
@@ -69,7 +73,7 @@ public class ShopManager : MonoBehaviour, ISaveable
 
     private void OnDisable()
     {
-        StopAllCoroutines();  // 코루틴 정리
+        StopAllCoroutines();
     }
 
     #endregion
@@ -178,43 +182,35 @@ public class ShopManager : MonoBehaviour, ISaveable
     {
         if (!IsCashForAdAvailable() || isWaitingForAd) return;
 
+        // CashForTime의 남은 쿨타임 저장
+        long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        remainingCoolTimeBeforeAd = Math.Max(0, cashForTimeCoolTime - (currentTime - lastTimeReward));
+
         // TODO: 광고 재생 로직 추가
-        // 테스트용 3초 대기 후 다음 진행 코루틴
-        StartCoroutine(TestAdCoroutine());
-    }
-
-    // 테스트용 광고 코루틴
-    private IEnumerator TestAdCoroutine()
-    {
-        // 3초 대기
-        float waitTime = 3f;
-        float elapsed = 0f;
-
-        while (elapsed < waitTime)
-        {
-            elapsed += Time.deltaTime;
-
-            // 여기에 진행 상태를 표시하는 UI를 추가 가능
-            yield return null;
-        }
-
-        // 광고 시청 완료 처리
         isWaitingForAd = true;
         cashForAdRewardButton.interactable = false;
-        OnAdRewardComplete();
-        isWaitingForAd = false;
+
+        GetComponent<GoogleAdsManager>().ShowRewardedInterstitialAd();
     }
 
     // 광고 시청 완료 시 실행되는 함수
-    private void OnAdRewardComplete()
+    public void OnAdRewardComplete()
     {
         // 광고 보상 지급
         GameManager.Instance.Cash += cashForAdPrice;
 
         // 마지막 광고 시청 시간 저장
         lastAdTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+        // CashForTime의 마지막 보상 시간을 광고 시청 시간만큼 조정
+        if (remainingCoolTimeBeforeAd > 0)
+        {
+            lastTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - (cashForTimeCoolTime - remainingCoolTimeBeforeAd);
+        }
+
         GoogleSave();
 
+        isWaitingForAd = false;
         UpdateCashForAdUI();
     }
 
@@ -262,6 +258,13 @@ public class ShopManager : MonoBehaviour, ISaveable
 
         UpdateCashForTimeUI();
     }
+
+    #endregion
+
+
+    #region Ad Shop System
+
+
 
     #endregion
 

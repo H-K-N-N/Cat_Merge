@@ -6,7 +6,7 @@ using TMPro;
 // 고양이의 정보와 행동을 관리하는 스크립트
 public class CatData : MonoBehaviour, ICanvasRaycastFilter
 {
-    public static CatData Instance { get; private set; }
+
 
     #region Variables
 
@@ -97,6 +97,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         if (collectCoinImage != null) collectCoinImage.gameObject.SetActive(false);
     }
 
+    // 
     private void CacheRectTransformData()
     {
         rectSize = rectTransform.rect.size;
@@ -104,7 +105,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         rectHalfHeight = rectSize.y * 0.5f;
     }
 
-    // UI 업데이트
+    // UI 업데이트 함수
     public void UpdateCatUI()
     {
         if (catDragAndDrop != null)
@@ -114,7 +115,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         catImage.sprite = catData.CatImage;
     }
     
-    // 고양이 데이터 설정
+    // 고양이 데이터 설정 함수
     public void SetCatData(Cat cat)
     {
         catData = cat;
@@ -146,7 +147,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
     #region Battle System
 
-    // 보스 히트박스 경계로 고양이 밀어내기
+    // 보스 히트박스 경계로 고양이 밀어내는 함수
     public void MoveOppositeBoss()
     {
         Vector3 catPosition = rectTransform.anchoredPosition;
@@ -161,7 +162,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
     }
 
-    // 보스 히트박스 경계로 고양이 이동
+    // 보스 히트박스 경계로 고양이 이동시키는 함수
     public void MoveTowardBossBoundary()
     {
         Vector3 catPosition = rectTransform.anchoredPosition;
@@ -176,7 +177,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
     }
 
-    // 데미지 처리
+    // 데미지 처리 함수
     public void TakeDamage(double damage)
     {
         catHp -= damage;
@@ -188,7 +189,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
     }
 
-    // 기절 및 회복 처리
+    // 기절 및 회복 처리 함수
     private IEnumerator StunAndRecover(float stunTime)
     {
         SetStunState(true);
@@ -196,17 +197,12 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         SetStunState(false);
     }
 
-    // 기절 상태 설정
+    // 기절 상태 설정 함수
     private void SetStunState(bool isStunned)
     {
         UpdateHPBar();
-        //SetCollectingCoinsState(!isStunned);
-        //SetAutoMoveState(!isStunned);
-        //SetRaycastTarget(!isStunned);
         isStuned = isStunned;
-        catImage.color = isStunned ? new Color(1f, 0.5f, 0.5f, 0.7f) : Color.white;
         GetComponent<AnimatorManager>().ChangeState(CharacterState.isFaint);
-        
 
         if (!isStunned)
         {
@@ -216,6 +212,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             if (BattleManager.Instance != null && BattleManager.Instance.IsBattleActive)
             {
                 GetComponent<AnimatorManager>().ChangeState(CharacterState.isBattle);
+
                 // 전투 중이면 자동 재화 수집과 자동 이동은 비활성화 상태 유지
                 SetCollectingCoinsState(false);
                 SetAutoMoveState(false);
@@ -227,6 +224,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             else
             {
                 GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
+
                 // 전투 중이 아니면 모든 기능 활성화
                 SetCollectingCoinsState(true);
                 SetAutoMoveState(true);
@@ -236,6 +234,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         else
         {
             GetComponent<AnimatorManager>().ChangeState(CharacterState.isFaint);
+
             // 기절 상태로 진입할 때는 모든 기능 비활성화
             SetCollectingCoinsState(false);
             SetAutoMoveState(false);
@@ -243,13 +242,13 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
     }
 
-    // Raycast Target 설정
+    // Raycast Target 설정 함수
     private void SetRaycastTarget(bool isActive)
     {
         catImage.raycastTarget = isActive;
     }
 
-    // 체력 회복
+    // 체력 회복 함수
     public void HealCatHP()
     {
         if (isStuned)
@@ -266,7 +265,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
     #region Auto Movement
 
-    // 자동 이동 상태 설정
+    // 자동 이동 상태 설정 함수
     public void SetAutoMoveState(bool isEnabled)
     {
         if (isEnabled && !isStuned)
@@ -288,7 +287,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
     }
 
-    // 자동 이동 실행
+    // 자동 이동 코루틴
     private IEnumerator AutoMove()
     {
         while (true)
@@ -297,8 +296,6 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
             if (!isAnimating && (catDragAndDrop == null || !catDragAndDrop.isDragging))
             {
-                
-
                 Vector3 randomDirection = GetRandomDirection();
                 Vector3 targetPosition = (Vector3)rectTransform.anchoredPosition + randomDirection;
 
@@ -313,7 +310,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
     }
 
-    // 랜덤 이동 방향 반환
+    // 랜덤 이동 방향 반환 함수
     private Vector3 GetRandomDirection()
     {
         float moveRange = 30f;
@@ -332,7 +329,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         return directions[Random.Range(0, directions.Length)];
     }
 
-    // 이동 범위 초과 확인
+    // 이동 범위 초과 확인 함수
     private bool IsOutOfBounds(Vector3 position)
     {
         Vector2 minBounds = (Vector2)parentPanel.rect.min + parentPanel.anchoredPosition;
@@ -341,7 +338,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         return position.x <= minBounds.x || position.x >= maxBounds.x || position.y <= minBounds.y || position.y >= maxBounds.y;
     }
 
-    // 범위 초과시 위치 조정
+    // 범위 초과시 위치 조정 함수
     private Vector3 AdjustPositionToBounds(Vector3 position)
     {
         Vector3 adjustedPosition = position;
@@ -356,7 +353,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         return adjustedPosition;
     }
 
-    // 부드러운 이동 시작
+    // 부드러운 이동 코루틴
     private IEnumerator SmoothMoveToPosition(Vector3 targetPosition)
     {
         isAnimating = true;
@@ -370,16 +367,23 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         yield return currentMoveCoroutine;
     }
 
-    // 실제 이동 실행
+    // 실제 이동 코루틴
     private IEnumerator DoSmoothMove(Vector3 targetPosition)
     {
         Vector3 startPosition = rectTransform.anchoredPosition;
         float elapsed = 0f;
         float duration = 0.5f;
 
-        if (!BattleManager.Instance.isBattleActive)
+        if (!GetComponent<DragAndDropManager>().isDragging)
         {
-            GetComponent<AnimatorManager>().ChangeState(CharacterState.isWalk);
+            if (BattleManager.Instance.isBattleActive)
+            {
+                GetComponent<AnimatorManager>().ChangeState(CharacterState.isWalk);
+            }
+            else
+            {
+                GetComponent<AnimatorManager>().ChangeState(CharacterState.isWalk);
+            }
         }
 
         while (elapsed < duration)
@@ -392,11 +396,17 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         rectTransform.anchoredPosition = targetPosition;
         isAnimating = false;
 
-        if (!BattleManager.Instance.isBattleActive)
+        if (!GetComponent<DragAndDropManager>().isDragging)
         {
-            GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
+            if (BattleManager.Instance.isBattleActive)
+            {
+                GetComponent<AnimatorManager>().ChangeState(CharacterState.isBattle);
+            }
+            else
+            {
+                GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
+            }
         }
-            
 
         currentMoveCoroutine = null;
     }
@@ -406,7 +416,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
     #region Auto Coin Collection
 
-    // 자동 재화 수집 상태 설정
+    // 자동 재화 수집 상태 설정 함수
     public void SetCollectingCoinsState(bool isEnabled)
     {
         isCollectingCoins = isEnabled;
@@ -430,7 +440,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
     }
 
-    // 코인 수집 UI 비활성화
+    // 코인 수집 UI 비활성화 함수
     public void DisableCollectUI()
     {
         if (collectCoinText != null)
@@ -443,12 +453,11 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
     }
 
-    // 자동 재화 수집 실행
+    // 자동 재화 수집 코루틴
     private IEnumerator AutoCollectCoins()
     {
         float currentDelayTime = 0f;
         WaitForSeconds delay = null;
-
         
         while (isCollectingCoins)
         {
@@ -473,16 +482,12 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
                 StartCoroutine(PlayCollectingAnimation(collectedCoins));
             }
         }
-
-       
-        
-
     }
 
-    // 재화 수집 애니메이션 실행
+    // 재화 수집 애니메이션 코루틴
     private IEnumerator PlayCollectingAnimation(int collectedCoins)
     {
-        if(!BattleManager.Instance.isBattleActive)
+        if (!BattleManager.Instance.isBattleActive && !GetComponent<DragAndDropManager>().isDragging)
         {
             GetComponent<AnimatorManager>().ChangeState(CharacterState.isGetCoin);
         }
@@ -502,7 +507,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         if (collectCoinText != null) collectCoinText.gameObject.SetActive(false);
         if (collectCoinImage != null) collectCoinImage.gameObject.SetActive(false);
 
-        if (!BattleManager.Instance.isBattleActive)
+        if (!BattleManager.Instance.isBattleActive && !GetComponent<DragAndDropManager>().isDragging)
         {
             GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
         }
@@ -513,7 +518,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
     #region Movement Control
 
-    // 모든 이동 코루틴 중지
+    // 모든 이동 코루틴 중지 함수
     public void StopAllMovement()
     {
         if (autoMoveCoroutine != null)
@@ -536,7 +541,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
     #region Raycast
 
-    // 레이캐스트 필터링 함수 구현
+    // 레이캐스트 필터링 함수
     public bool IsRaycastLocationValid(Vector2 screenPoint, Camera eventCamera)
     {
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, screenPoint, eventCamera, out Vector2 localPoint))

@@ -60,6 +60,8 @@ public class ShopManager : MonoBehaviour, ISaveable
     private float coinMultiplier = 1f;                                      // 현재 코인 배수
     private float multiplierEndTime = 0f;                                   // 배수 효과 종료 시간
 
+    private float battlePauseTime = 0f;                                     // 전투 중 멈춘 시간
+    private bool isBattlePaused = false;                                    // 전투 중 멈춤 상태
     #endregion
 
 
@@ -325,9 +327,27 @@ public class ShopManager : MonoBehaviour, ISaveable
     }
 
     // 배수 효과 남은 시간을 가져오는 함수
-    private float GetRemainingEffectTime()
+    public float GetRemainingEffectTime()
     {
-        return Mathf.Max(0f, multiplierEndTime - Time.time);
+        if (BattleManager.Instance.IsBattleActive)
+        {
+            if (!isBattlePaused)
+            {
+                isBattlePaused = true;
+                battlePauseTime = Time.time;
+            }
+            return Mathf.Max(0f, multiplierEndTime - battlePauseTime);
+        }
+        else
+        {
+            if (isBattlePaused)
+            {
+                isBattlePaused = false;
+                float pausedDuration = Time.time - battlePauseTime;
+                multiplierEndTime += pausedDuration;
+            }
+            return Mathf.Max(0f, multiplierEndTime - Time.time);
+        }
     }
 
     // DoubleCoinForAd 활성화 여부 판별 함수
@@ -356,9 +376,24 @@ public class ShopManager : MonoBehaviour, ISaveable
     // DoubleCoinForAd 광고 시청 완료 시 실행되는 함수
     public void OnDoubleCoinAdRewardComplete()
     {
+        // 기존 효과 지속시간 계산
+        float remainingTime = GetRemainingEffectTime();
+
         // 광고 보상 지급 - 모든 고양이의 재화 수급량 300초동안 2배로 증가
         coinMultiplier = doubleCoinMultiplier;
-        multiplierEndTime = Time.time + doubleCoinDuration;
+
+        // 기존 효과 지속시간이 있으면 그 시간에 새로운 지속시간을 더함
+        if (remainingTime > 0)
+        {
+            multiplierEndTime = Time.time + remainingTime + doubleCoinDuration;
+        }
+        else
+        {
+            multiplierEndTime = Time.time + doubleCoinDuration;
+        }
+
+        isBattlePaused = false;
+        battlePauseTime = 0f;
 
         // 마지막 광고 시청 시간 저장
         lastDoubleCoinTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -431,6 +466,10 @@ public class ShopManager : MonoBehaviour, ISaveable
             this.coinMultiplier = 1f;
             this.multiplierEndTime = 0f;
         }
+
+        // 전투관련 초기화
+        isBattlePaused = false;
+        battlePauseTime = 0f;
 
         UpdateAllUI();
     }

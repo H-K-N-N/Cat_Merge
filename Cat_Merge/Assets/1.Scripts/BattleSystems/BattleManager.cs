@@ -422,7 +422,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     private void UpdateBossUI()
     {
         battleHPUI.SetActive(true);
-        bossStageText.text = $"{currentBossData.MouseGrade} Stage";
+        bossStageText.text = $"{currentBossData.MouseGrade} 단계";
 
         maxBossHP = currentBossData.MouseHp;
         currentBossHP = maxBossHP;
@@ -458,6 +458,9 @@ public class BattleManager : MonoBehaviour, ISaveable
 
         // 고양이 자동 재화 수집 비활성화
         SetStartBattleAutoCollectState();
+
+        // DoubleCoinForAd 효과 일시정지
+        ShopManager.Instance.GetRemainingEffectTime();
 
         // 보스 히트박스 내,외에 존재하는 고양이들 이동시키기
         PushCatsAwayFromBoss();
@@ -733,13 +736,16 @@ public class BattleManager : MonoBehaviour, ISaveable
                 TakeBossDamage(damage);
             }
 
-
-            AnimatorManager anim = cat.GetComponent<AnimatorManager>();
-            if (anim != null)
+            // 드래그 중이 아닌 고양이만 전투 애니메이션으로 변경
+            DragAndDropManager dragManager = cat.GetComponent<DragAndDropManager>();
+            if (dragManager != null && !dragManager.isDragging)
             {
-                anim.ChangeState(CharacterState.isAttack);
+                AnimatorManager anim = cat.GetComponent<AnimatorManager>();
+                if (anim != null)
+                {
+                    anim.ChangeState(CharacterState.isAttack);
+                }
             }
-
         }
     }
 
@@ -775,7 +781,11 @@ public class BattleManager : MonoBehaviour, ISaveable
         }
         else
         {
-            // 패배 했을때 보상
+            // 패배 했을때 보상 (클리어한 최대 스테이지의 반복 클리어 보상) (첫 번째 스테이지에서의 패배는 보상 없음)
+            if (currentMaxBossStage > 1)
+            {
+                CreateRewardSlot(loseRewardPanel, coinSprite, currentBossData.RepeatclearCoinReward, false);
+            }
         }
 
         if (resultPanelCoroutine != null)
@@ -932,8 +942,6 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 전투 종료 함수
     public void EndBattle(bool isVictory)
     {
-
-
         if (!isBattleActive)
         {
             return;
@@ -948,12 +956,15 @@ public class BattleManager : MonoBehaviour, ISaveable
         InitializeSliders();
 
         ShowBattleResult(isVictory);
+        GiveStageReward(isVictory);
         if (isVictory)
         {
-            GiveStageReward();
-
             currentMaxBossStage = Mathf.Max(currentMaxBossStage, bossStage + 1);
             QuestManager.Instance.AddStageCount();
+        }
+        else
+        {
+            
         }
 
         Destroy(currentBoss);
@@ -991,29 +1002,43 @@ public class BattleManager : MonoBehaviour, ISaveable
 
         // 자동 머지 재개
         AutoMergeManager.Instance.ResumeAutoMerge();
+
+        // DoubleCoinForAd 효과 재개
+        ShopManager.Instance.GetRemainingEffectTime();
     }
 
     // 보상 지급 함수
-    private void GiveStageReward()
+    private void GiveStageReward(bool isVictory)
     {
         if (currentBossData == null)
         {
             return;
         }
 
-        bool isFirstClear = !clearedStages.Contains(bossStage);
-        if (isFirstClear)
+        if (isVictory)
         {
-            // 최초 클리어 보상
-            GameManager.Instance.Cash += currentBossData.ClearCashReward;
-            GameManager.Instance.Coin += currentBossData.ClearCoinReward;
-            clearedStages.Add(bossStage);
+            bool isFirstClear = !clearedStages.Contains(bossStage);
+            if (isFirstClear)
+            {
+                // 최초 클리어 보상
+                GameManager.Instance.Cash += currentBossData.ClearCashReward;
+                GameManager.Instance.Coin += currentBossData.ClearCoinReward;
+                clearedStages.Add(bossStage);
+            }
+            else
+            {
+                // 반복 클리어 보상
+                GameManager.Instance.Coin += currentBossData.RepeatclearCoinReward;
+            }
         }
         else
         {
-            // 반복 클리어 보상
-            GameManager.Instance.Coin += currentBossData.RepeatclearCoinReward;
+            if (currentMaxBossStage > 1)
+            {
+                GameManager.Instance.Coin += currentBossData.RepeatclearCoinReward;
+            }
         }
+        
     }
 
     // 모든 전투 관련 코루틴을 종료하는 함수 추가

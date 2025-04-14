@@ -422,7 +422,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     private void UpdateBossUI()
     {
         battleHPUI.SetActive(true);
-        bossStageText.text = $"{currentBossData.MouseGrade} Stage";
+        bossStageText.text = $"{currentBossData.MouseGrade} 단계";
 
         maxBossHP = currentBossData.MouseHp;
         currentBossHP = maxBossHP;
@@ -458,6 +458,9 @@ public class BattleManager : MonoBehaviour, ISaveable
 
         // 고양이 자동 재화 수집 비활성화
         SetStartBattleAutoCollectState();
+
+        // DoubleCoinForAd 효과 일시정지
+        ShopManager.Instance.GetRemainingEffectTime();
 
         // 보스 히트박스 내,외에 존재하는 고양이들 이동시키기
         PushCatsAwayFromBoss();
@@ -935,8 +938,6 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 전투 종료 함수
     public void EndBattle(bool isVictory)
     {
-
-
         if (!isBattleActive)
         {
             return;
@@ -994,6 +995,9 @@ public class BattleManager : MonoBehaviour, ISaveable
 
         // 자동 머지 재개
         AutoMergeManager.Instance.ResumeAutoMerge();
+
+        // DoubleCoinForAd 효과 재개
+        ShopManager.Instance.GetRemainingEffectTime();
     }
 
     // 보상 지급 함수

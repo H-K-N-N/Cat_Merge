@@ -301,9 +301,10 @@ GameObject:
   - component: {fileID: -3185705115251794711}
   - component: {fileID: 6581758322604903725}
   - component: {fileID: 369006820606142384}
+  - component: {fileID: -713044308344799042}
   m_Layer: 6
   m_Name: Cat Prefab
-  m_TagString: Untagged
+  m_TagString: Cat
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -397,7 +398,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rectTransform: {fileID: 0}
-  animator: {fileID: 369006820606142384}
 --- !u!95 &369006820606142384
 Animator:
   serializedVersion: 7
@@ -420,6 +420,27 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &-713044308344799042
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4442190507333617709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e241c30a29c85543b5f070adffc8b3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  catGrade: 1
+  overrideDataList:
+  - grade: 1
+    overrideController: {fileID: 22100000, guid: 6f96cc6aed2609e4c9058283e38af8da, type: 2}
+  - grade: 2
+    overrideController: {fileID: 22100000, guid: 1abe59f8037b56a4090a4adec736ed76, type: 2}
+  - grade: 3
+    overrideController: {fileID: 22100000, guid: 64548e82a02c8a04a9606c63f998199d, type: 2}
+  prefab: {fileID: 4442190507333617709}
 --- !u!1 &7088968465046740359
 GameObject:
   m_ObjectHideFlags: 0

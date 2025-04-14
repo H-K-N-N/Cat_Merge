@@ -21,8 +21,6 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
 
     // ======================================================================================================================
 
-    public Animator animator;  // 애니메이터 변수
-
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
@@ -41,7 +39,8 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
     public void OnPointerDown(PointerEventData eventData)
     {
         isDragging = true;
-        animator.SetBool("isGrab", isDragging);
+
+        GetComponent<AnimatorManager>().ChangeState(CharacterState.isGrab);
 
         // 드래그 시작 위치 오프셋 계산
         Vector2 localPointerPosition;
@@ -62,7 +61,7 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
     public void OnPointerClick(PointerEventData eventData)
     {
         isDragging = false;
-        animator.SetBool("isGrab", isDragging);
+        GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
     }
 
     // 드래그 진행중 함수
@@ -116,7 +115,6 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
     {
         isDragging = false;
 
-        animator.SetBool("isGrab", isDragging);
 
         if (BattleManager.Instance.IsBattleActive)
         {

@@ -3,47 +3,47 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-// °í¾çÀÌÀÇ Á¤º¸¿Í Çàµ¿À» °ü¸®ÇÏ´Â ½ºÅ©¸³Æ®
+// ê³ ì–‘ì´ì˜ ì •ë³´ì™€ í–‰ë™ì„ ê´€ë¦¬í•˜ëŠ” ìŠ¤í¬ë¦½íŠ¸
 public class CatData : MonoBehaviour, ICanvasRaycastFilter
 {
     public static CatData Instance { get; private set; }
 
     #region Variables
 
-    private const float CLICK_AREA_SCALE = 0.9f;    // Å¬¸¯ ¿µ¿ª ½ºÄÉÀÏ
-    private WaitForSeconds COLLECT_ANIMATION_DELAY = new WaitForSeconds(1f); // 4¿ù 5ÀÏ 0.5->1·Î ¹Ù²Ş
+    private const float CLICK_AREA_SCALE = 0.9f;    // í´ë¦­ ì˜ì—­ ìŠ¤ì¼€ì¼
+    private WaitForSeconds COLLECT_ANIMATION_DELAY = new WaitForSeconds(1f); // 4ì›” 5ì¼ 0.5->1ë¡œ ë°”ê¿ˆ
 
     [Header("Cat Data")]
-    public Cat catData;                             // °í¾çÀÌ ±âº» µ¥ÀÌÅÍ
-    private Image catImage;                         // °í¾çÀÌ ÀÌ¹ÌÁö ÄÄÆ÷³ÍÆ®
-    public double catHp;                            // ÇöÀç °í¾çÀÌ Ã¼·Â
-    public bool isStuned = false;                   // ±âÀı »óÅÂ ¿©ºÎ
-    private const float STUN_TIME = 10f;            // ±âÀı ½Ã°£
+    public Cat catData;                             // ê³ ì–‘ì´ ê¸°ë³¸ ë°ì´í„°
+    private Image catImage;                         // ê³ ì–‘ì´ ì´ë¯¸ì§€ ì»´í¬ë„ŒíŠ¸
+    public double catHp;                            // í˜„ì¬ ê³ ì–‘ì´ ì²´ë ¥
+    public bool isStuned = false;                   // ê¸°ì ˆ ìƒíƒœ ì—¬ë¶€
+    private const float STUN_TIME = 10f;            // ê¸°ì ˆ ì‹œê°„
 
     [Header("HP UI")]
-    [SerializeField] private GameObject hpImage;    // HP ÀÌ¹ÌÁö ¿ÀºêÁ§Æ®
-    [SerializeField] private Image hpFillImage;     // HP Fill ÀÌ¹ÌÁö
+    [SerializeField] private GameObject hpImage;    // HP ì´ë¯¸ì§€ ì˜¤ë¸Œì íŠ¸
+    [SerializeField] private Image hpFillImage;     // HP Fill ì´ë¯¸ì§€
 
     [Header("Transform")]
-    private RectTransform rectTransform;            // ÇöÀç ¿ÀºêÁ§Æ®ÀÇ RectTransform
-    private RectTransform parentPanel;              // ºÎ¸ğ ÆĞ³ÎÀÇ RectTransform
-    private DragAndDropManager catDragAndDrop;      // µå·¡±× ¾Ø µå·Ó ¸Å´ÏÀú
+    private RectTransform rectTransform;            // í˜„ì¬ ì˜¤ë¸Œì íŠ¸ì˜ RectTransform
+    private RectTransform parentPanel;              // ë¶€ëª¨ íŒ¨ë„ì˜ RectTransform
+    private DragAndDropManager catDragAndDrop;      // ë“œë˜ê·¸ ì•¤ ë“œë¡­ ë§¤ë‹ˆì €
     private Vector2 rectSize;
     private float rectHalfWidth;
     private float rectHalfHeight;
 
     [Header("Movement")]
-    private bool isAnimating = false;               // ÀÌµ¿ ¾Ö´Ï¸ŞÀÌ¼Ç ÁøÇà ¿©ºÎ
-    private Coroutine autoMoveCoroutine;            // ÀÚµ¿ ÀÌµ¿ ÄÚ·çÆ¾
-    private Coroutine currentMoveCoroutine;         // ÇöÀç ÁøÇà ÁßÀÎ ÀÌµ¿ ÄÚ·çÆ¾
+    private bool isAnimating = false;               // ì´ë™ ì• ë‹ˆë©”ì´ì…˜ ì§„í–‰ ì—¬ë¶€
+    private Coroutine autoMoveCoroutine;            // ìë™ ì´ë™ ì½”ë£¨í‹´
+    private Coroutine currentMoveCoroutine;         // í˜„ì¬ ì§„í–‰ ì¤‘ì¸ ì´ë™ ì½”ë£¨í‹´
 
     [Header("Coin Collection")]
-    private TextMeshProUGUI collectCoinText;        // ÄÚÀÎ È¹µæ ÅØ½ºÆ®
-    private Image collectCoinImage;                 // ÄÚÀÎ È¹µæ ÀÌ¹ÌÁö
-    private float collectingTime;                   // ÄÚÀÎ ¼öÁı °£°İ
+    private TextMeshProUGUI collectCoinText;        // ì½”ì¸ íšë“ í…ìŠ¤íŠ¸
+    private Image collectCoinImage;                 // ì½”ì¸ íšë“ ì´ë¯¸ì§€
+    private float collectingTime;                   // ì½”ì¸ ìˆ˜ì§‘ ê°„ê²©
     public float CollectingTime { get => collectingTime; set => collectingTime = value; }
-    private bool isCollectingCoins = true;          // ÄÚÀÎ ¼öÁı È°¼ºÈ­ »óÅÂ
-    private Coroutine autoCollectCoroutine;         // ÄÚÀÎ ¼öÁı ÄÚ·çÆ¾
+    private bool isCollectingCoins = true;          // ì½”ì¸ ìˆ˜ì§‘ í™œì„±í™” ìƒíƒœ
+    private Coroutine autoCollectCoroutine;         // ì½”ì¸ ìˆ˜ì§‘ ì½”ë£¨í‹´
     #endregion
 
 
@@ -62,7 +62,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         UpdateHPBar();
     }
 
-    // ¿ÀºêÁ§Æ® ÆÄ±«½Ã °í¾çÀÌ ¼ö °¨¼Ò
+    // ì˜¤ë¸Œì íŠ¸ íŒŒê´´ì‹œ ê³ ì–‘ì´ ìˆ˜ ê°ì†Œ
     private void OnDestroy()
     {
         if (GameManager.Instance != null)
@@ -76,7 +76,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
     #region Initialization
 
-    // ÄÄÆ÷³ÍÆ® ÃÊ±âÈ­
+    // ì»´í¬ë„ŒíŠ¸ ì´ˆê¸°í™”
     private void InitializeComponents()
     {
         catImage = GetComponent<Image>();
@@ -104,7 +104,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         rectHalfHeight = rectSize.y * 0.5f;
     }
 
-    // UI ¾÷µ¥ÀÌÆ®
+    // UI ì—…ë°ì´íŠ¸
     public void UpdateCatUI()
     {
         if (catDragAndDrop != null)
@@ -114,7 +114,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         catImage.sprite = catData.CatImage;
     }
     
-    // °í¾çÀÌ µ¥ÀÌÅÍ ¼³Á¤
+    // ê³ ì–‘ì´ ë°ì´í„° ì„¤ì •
     public void SetCatData(Cat cat)
     {
         catData = cat;
@@ -124,13 +124,13 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         GetComponent<AnimatorManager>().ApplyAnim(catData.CatGrade);
     }
 
-    // HP ¹Ù ¾÷µ¥ÀÌÆ® ÇÔ¼ö
+    // HP ë°” ì—…ë°ì´íŠ¸ í•¨ìˆ˜
     private void UpdateHPBar()
     {
         float hpRatio = (float)catHp / catData.CatHp;
         hpFillImage.fillAmount = hpRatio;
 
-        // ÀüÅõÁßÀÌ°í, Ã¼·ÂÀÌ ÃÖ´ëÄ¡°¡ ¾Æ´Ò ¶§ HP ¹Ù Ç¥½Ã
+        // ì „íˆ¬ì¤‘ì´ê³ , ì²´ë ¥ì´ ìµœëŒ€ì¹˜ê°€ ì•„ë‹ ë•Œ HP ë°” í‘œì‹œ
         if (BattleManager.Instance != null && BattleManager.Instance.IsBattleActive && hpRatio < 1f && hpRatio > 0f)
         {
             hpImage.SetActive(true);
@@ -146,37 +146,37 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
     #region Battle System
 
-    // º¸½º È÷Æ®¹Ú½º °æ°è·Î °í¾çÀÌ ¹Ğ¾î³»±â
+    // ë³´ìŠ¤ íˆíŠ¸ë°•ìŠ¤ ê²½ê³„ë¡œ ê³ ì–‘ì´ ë°€ì–´ë‚´ê¸°
     public void MoveOppositeBoss()
     {
         Vector3 catPosition = rectTransform.anchoredPosition;
         BossHitbox bossHitbox = BattleManager.Instance.bossHitbox;
 
-        // °í¾çÀÌ°¡ È÷Æ®¹Ú½º ³»ºÎ¿¡ ÀÖ´Â °æ¿ì
+        // ê³ ì–‘ì´ê°€ íˆíŠ¸ë°•ìŠ¤ ë‚´ë¶€ì— ìˆëŠ” ê²½ìš°
         if (bossHitbox.IsInHitbox(catPosition))
         {
-            // È÷Æ®¹Ú½º °æ°è¿¡ À§Ä¡ÇÏµµ·Ï ÀÌµ¿
+            // íˆíŠ¸ë°•ìŠ¤ ê²½ê³„ì— ìœ„ì¹˜í•˜ë„ë¡ ì´ë™
             Vector3 targetPosition = bossHitbox.GetClosestBoundaryPoint(catPosition);
             StartCoroutine(SmoothMoveToPosition(targetPosition));
         }
     }
 
-    // º¸½º È÷Æ®¹Ú½º °æ°è·Î °í¾çÀÌ ÀÌµ¿
+    // ë³´ìŠ¤ íˆíŠ¸ë°•ìŠ¤ ê²½ê³„ë¡œ ê³ ì–‘ì´ ì´ë™
     public void MoveTowardBossBoundary()
     {
         Vector3 catPosition = rectTransform.anchoredPosition;
         BossHitbox bossHitbox = BattleManager.Instance.bossHitbox;
 
-        // °í¾çÀÌ°¡ È÷Æ®¹Ú½º ¿ÜºÎ¿¡ ÀÖ´Â °æ¿ì
+        // ê³ ì–‘ì´ê°€ íˆíŠ¸ë°•ìŠ¤ ì™¸ë¶€ì— ìˆëŠ” ê²½ìš°
         if (!bossHitbox.IsInHitbox(catPosition) && BattleManager.Instance.isBattleActive)
         {
-            // È÷Æ®¹Ú½º °æ°è¿¡ À§Ä¡ÇÏµµ·Ï ÀÌµ¿
+            // íˆíŠ¸ë°•ìŠ¤ ê²½ê³„ì— ìœ„ì¹˜í•˜ë„ë¡ ì´ë™
             Vector3 targetPosition = bossHitbox.GetClosestBoundaryPoint(catPosition);
             StartCoroutine(SmoothMoveToPosition(targetPosition));
         }
     }
 
-    // µ¥¹ÌÁö Ã³¸®
+    // ë°ë¯¸ì§€ ì²˜ë¦¬
     public void TakeDamage(double damage)
     {
         catHp -= damage;
@@ -188,7 +188,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
     }
 
-    // ±âÀı ¹× È¸º¹ Ã³¸®
+    // ê¸°ì ˆ ë° íšŒë³µ ì²˜ë¦¬
     private IEnumerator StunAndRecover(float stunTime)
     {
         SetStunState(true);
@@ -196,7 +196,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         SetStunState(false);
     }
 
-    // ±âÀı »óÅÂ ¼³Á¤
+    // ê¸°ì ˆ ìƒíƒœ ì„¤ì •
     private void SetStunState(bool isStunned)
     {
         UpdateHPBar();
@@ -212,22 +212,22 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         {
             HealCatHP();
 
-            // ÀüÅõ ÁßÀÎÁö È®ÀÎ
+            // ì „íˆ¬ ì¤‘ì¸ì§€ í™•ì¸
             if (BattleManager.Instance != null && BattleManager.Instance.IsBattleActive)
             {
                 GetComponent<AnimatorManager>().ChangeState(CharacterState.isBattle);
-                // ÀüÅõ ÁßÀÌ¸é ÀÚµ¿ ÀçÈ­ ¼öÁı°ú ÀÚµ¿ ÀÌµ¿Àº ºñÈ°¼ºÈ­ »óÅÂ À¯Áö
+                // ì „íˆ¬ ì¤‘ì´ë©´ ìë™ ì¬í™” ìˆ˜ì§‘ê³¼ ìë™ ì´ë™ì€ ë¹„í™œì„±í™” ìƒíƒœ ìœ ì§€
                 SetCollectingCoinsState(false);
                 SetAutoMoveState(false);
-                SetRaycastTarget(true);  // µå·¡±×´Â °¡´ÉÇÏµµ·Ï ¼³Á¤
+                SetRaycastTarget(true);  // ë“œë˜ê·¸ëŠ” ê°€ëŠ¥í•˜ë„ë¡ ì„¤ì •
 
-                // º¸½º È÷Æ®¹Ú½º °æ°è·Î ÀÌµ¿
+                // ë³´ìŠ¤ íˆíŠ¸ë°•ìŠ¤ ê²½ê³„ë¡œ ì´ë™
                 MoveTowardBossBoundary();               
             }
             else
             {
                 GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
-                // ÀüÅõ ÁßÀÌ ¾Æ´Ï¸é ¸ğµç ±â´É È°¼ºÈ­
+                // ì „íˆ¬ ì¤‘ì´ ì•„ë‹ˆë©´ ëª¨ë“  ê¸°ëŠ¥ í™œì„±í™”
                 SetCollectingCoinsState(true);
                 SetAutoMoveState(true);
                 SetRaycastTarget(true);
@@ -236,20 +236,20 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         else
         {
             GetComponent<AnimatorManager>().ChangeState(CharacterState.isFaint);
-            // ±âÀı »óÅÂ·Î ÁøÀÔÇÒ ¶§´Â ¸ğµç ±â´É ºñÈ°¼ºÈ­
+            // ê¸°ì ˆ ìƒíƒœë¡œ ì§„ì…í•  ë•ŒëŠ” ëª¨ë“  ê¸°ëŠ¥ ë¹„í™œì„±í™”
             SetCollectingCoinsState(false);
             SetAutoMoveState(false);
             SetRaycastTarget(false);
         }
     }
 
-    // Raycast Target ¼³Á¤
+    // Raycast Target ì„¤ì •
     private void SetRaycastTarget(bool isActive)
     {
         catImage.raycastTarget = isActive;
     }
 
-    // Ã¼·Â È¸º¹
+    // ì²´ë ¥ íšŒë³µ
     public void HealCatHP()
     {
         if (isStuned)
@@ -266,7 +266,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
     #region Auto Movement
 
-    // ÀÚµ¿ ÀÌµ¿ »óÅÂ ¼³Á¤
+    // ìë™ ì´ë™ ìƒíƒœ ì„¤ì •
     public void SetAutoMoveState(bool isEnabled)
     {
         if (isEnabled && !isStuned)
@@ -288,7 +288,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
     }
 
-    // ÀÚµ¿ ÀÌµ¿ ½ÇÇà
+    // ìë™ ì´ë™ ì‹¤í–‰
     private IEnumerator AutoMove()
     {
         while (true)
@@ -313,7 +313,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
     }
 
-    // ·£´ı ÀÌµ¿ ¹æÇâ ¹İÈ¯
+    // ëœë¤ ì´ë™ ë°©í–¥ ë°˜í™˜
     private Vector3 GetRandomDirection()
     {
         float moveRange = 30f;
@@ -332,7 +332,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         return directions[Random.Range(0, directions.Length)];
     }
 
-    // ÀÌµ¿ ¹üÀ§ ÃÊ°ú È®ÀÎ
+    // ì´ë™ ë²”ìœ„ ì´ˆê³¼ í™•ì¸
     private bool IsOutOfBounds(Vector3 position)
     {
         Vector2 minBounds = (Vector2)parentPanel.rect.min + parentPanel.anchoredPosition;
@@ -341,7 +341,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         return position.x <= minBounds.x || position.x >= maxBounds.x || position.y <= minBounds.y || position.y >= maxBounds.y;
     }
 
-    // ¹üÀ§ ÃÊ°ú½Ã À§Ä¡ Á¶Á¤
+    // ë²”ìœ„ ì´ˆê³¼ì‹œ ìœ„ì¹˜ ì¡°ì •
     private Vector3 AdjustPositionToBounds(Vector3 position)
     {
         Vector3 adjustedPosition = position;
@@ -356,7 +356,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         return adjustedPosition;
     }
 
-    // ºÎµå·¯¿î ÀÌµ¿ ½ÃÀÛ
+    // ë¶€ë“œëŸ¬ìš´ ì´ë™ ì‹œì‘
     private IEnumerator SmoothMoveToPosition(Vector3 targetPosition)
     {
         isAnimating = true;
@@ -370,7 +370,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         yield return currentMoveCoroutine;
     }
 
-    // ½ÇÁ¦ ÀÌµ¿ ½ÇÇà
+    // ì‹¤ì œ ì´ë™ ì‹¤í–‰
     private IEnumerator DoSmoothMove(Vector3 targetPosition)
     {
         Vector3 startPosition = rectTransform.anchoredPosition;
@@ -406,7 +406,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
     #region Auto Coin Collection
 
-    // ÀÚµ¿ ÀçÈ­ ¼öÁı »óÅÂ ¼³Á¤
+    // ìë™ ì¬í™” ìˆ˜ì§‘ ìƒíƒœ ì„¤ì •
     public void SetCollectingCoinsState(bool isEnabled)
     {
         isCollectingCoins = isEnabled;
@@ -430,7 +430,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
     }
 
-    // ÄÚÀÎ ¼öÁı UI ºñÈ°¼ºÈ­
+    // ì½”ì¸ ìˆ˜ì§‘ UI ë¹„í™œì„±í™”
     public void DisableCollectUI()
     {
         if (collectCoinText != null)
@@ -443,7 +443,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
     }
 
-    // ÀÚµ¿ ÀçÈ­ ¼öÁı ½ÇÇà
+    // ìë™ ì¬í™” ìˆ˜ì§‘ ì‹¤í–‰
     private IEnumerator AutoCollectCoins()
     {
         float currentDelayTime = 0f;
@@ -454,7 +454,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         {
             collectingTime = ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value;
 
-            // µô·¹ÀÌ ½Ã°£ÀÌ º¯°æµÇ¾ú´ÂÁö È®ÀÎ
+            // ë”œë ˆì´ ì‹œê°„ì´ ë³€ê²½ë˜ì—ˆëŠ”ì§€ í™•ì¸
             if (delay == null || !Mathf.Approximately(currentDelayTime, collectingTime))
             {
                 currentDelayTime = collectingTime;
@@ -464,9 +464,11 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             yield return delay;
 
 
-            if (catData != null && GameManager.Instance != null)
+            if (catData != null)
             {
-                int collectedCoins = catData.CatGetCoin;
+                float currentMultiplier = ShopManager.Instance.CurrentCoinMultiplier;
+                int collectedCoins = Mathf.RoundToInt(catData.CatGetCoin * currentMultiplier);
+
                 GameManager.Instance.Coin += collectedCoins;
                 StartCoroutine(PlayCollectingAnimation(collectedCoins));
             }
@@ -477,7 +479,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
     }
 
-    // ÀçÈ­ ¼öÁı ¾Ö´Ï¸ŞÀÌ¼Ç ½ÇÇà
+    // ì¬í™” ìˆ˜ì§‘ ì• ë‹ˆë©”ì´ì…˜ ì‹¤í–‰
     private IEnumerator PlayCollectingAnimation(int collectedCoins)
     {
         if(!BattleManager.Instance.isBattleActive)
@@ -511,7 +513,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
     #region Movement Control
 
-    // ¸ğµç ÀÌµ¿ ÄÚ·çÆ¾ ÁßÁö
+    // ëª¨ë“  ì´ë™ ì½”ë£¨í‹´ ì¤‘ì§€
     public void StopAllMovement()
     {
         if (autoMoveCoroutine != null)
@@ -534,10 +536,10 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
     #region Raycast
 
-    // ·¹ÀÌÄ³½ºÆ® ÇÊÅÍ¸µ ÇÔ¼ö ±¸Çö
+    // ë ˆì´ìºìŠ¤íŠ¸ í•„í„°ë§ í•¨ìˆ˜ êµ¬í˜„
     public bool IsRaycastLocationValid(Vector2 screenPoint, Camera eventCamera)
     {
-        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, screenPoint, eventCamera, out Vector2 localPoint)) 
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, screenPoint, eventCamera, out Vector2 localPoint))
             return false;
 
         Vector2 normalizedPoint = new Vector2(

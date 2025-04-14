@@ -65,9 +65,13 @@ public class MouseDataLoader : MonoBehaviour
                 int numOfAttack = int.Parse(validValues[6]);
                 int mouseAttackSpeed = int.Parse(validValues[7]);
                 int mouseArmor = int.Parse(validValues[8]);
+                int clearCashReward = int.Parse(validValues[9]);
+                decimal clearCoinReward = decimal.Parse(validValues[10]);
+                decimal repeatclearCoinReward = decimal.Parse(validValues[11]);
 
                 // Mouse 객체 생성 및 Dictionary에 추가
-                Mouse newMouse = new Mouse(mouseId, mouseName, mouseGrade, mouseDamage, mouseHp, mouseImage, numOfAttack, mouseAttackSpeed, mouseArmor);
+                Mouse newMouse = new Mouse(mouseId, mouseName, mouseGrade, mouseDamage, mouseHp, mouseImage, numOfAttack, mouseAttackSpeed, mouseArmor,
+                                        clearCashReward, clearCoinReward, repeatclearCoinReward);
                 if (!mouseDictionary.ContainsKey(mouseId))
                 {
                     mouseDictionary.Add(mouseId, newMouse);

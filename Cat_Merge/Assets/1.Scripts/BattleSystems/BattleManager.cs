@@ -15,92 +15,100 @@ public class BattleManager : MonoBehaviour, ISaveable
     public static BattleManager Instance { get; private set; }
 
     [Header("---[Battle System]")]
-    [SerializeField] private GameObject bossPrefab;             // º¸½º ÇÁ¸®ÆÕ
-    [SerializeField] private Transform bossUIParent;            // º¸½º¸¦ ¹èÄ¡ÇÒ ºÎ¸ğ Transform (UI Panel µî)
-    [SerializeField] private Slider respawnSlider;              // º¸½º ¼ÒÈ¯±îÁö ³²Àº ½Ã°£À» Ç¥½ÃÇÒ Slider UI
+    [SerializeField] private GameObject bossPrefab;             // ë³´ìŠ¤ í”„ë¦¬íŒ¹
+    [SerializeField] private Transform bossUIParent;            // ë³´ìŠ¤ë¥¼ ë°°ì¹˜í•  ë¶€ëª¨ Transform (UI Panel ë“±)
+    [SerializeField] private Slider respawnSlider;              // ë³´ìŠ¤ ì†Œí™˜ê¹Œì§€ ë‚¨ì€ ì‹œê°„ì„ í‘œì‹œí•  Slider UI
 
-    private const float DEFAULT_SPAWN_INTERVAL = 30.0f;          // º¸½º µîÀå ÁÖ±â (¿ø·¡ 300f)
-    private float spawnInterval;                                // º¸½º µîÀå ÁÖ±â
-    private Coroutine respawnSliderCoroutine;                   // Slider ÄÚ·çÆ¾
-    private float bossSpawnTimer = 0f;                          // º¸½º ½ºÆù Å¸ÀÌ¸Ó
-    private float sliderDuration;                               // Slider À¯Áö ½Ã°£
-    private const float DEFAULT_BOSS_DURATION = 30f;            // º¸½º À¯Áö ½Ã°£ (¿ø·¡ 30f)
-    private float bossDuration;                                 // º¸½º À¯Áö ½Ã°£
-    private int bossStage = 1;                                  // º¸½º ½ºÅ×ÀÌÁö
+
+    private const float DEFAULT_SPAWN_INTERVAL = 20f;          // ë³´ìŠ¤ ë“±ì¥ ì£¼ê¸°
+    private float spawnInterval;                                // ë³´ìŠ¤ ë“±ì¥ ì£¼ê¸°
+    private Coroutine respawnSliderCoroutine;                   // Slider ì½”ë£¨í‹´
+    private float bossSpawnTimer = 0f;                          // ë³´ìŠ¤ ìŠ¤í° íƒ€ì´ë¨¸
+    private float sliderDuration;                               // Slider ìœ ì§€ ì‹œê°„
+    private const float DEFAULT_BOSS_DURATION = 30f;            // ë³´ìŠ¤ ìœ ì§€ ì‹œê°„ (ì›ë˜ 30f)
+    private float bossDuration;                                 // ë³´ìŠ¤ ìœ ì§€ ì‹œê°„
+    private int bossStage = 1;                                  // ë³´ìŠ¤ ìŠ¤í…Œì´ì§€
     public int BossStage => bossStage;
 
-    private const float BOSS_ATTACK_DELAY = 2f;                 // º¸½º °ø°İ µô·¹ÀÌ
-    private const float CAT_ATTACK_DELAY = 1f;                  // °í¾çÀÌ °ø°İ µô·¹ÀÌ
-    private const float GIVEUP_BUTTON_DELAY = 2f;               // Ç×º¹ ¹öÆ° È°¼ºÈ­ µô·¹ÀÌ
+    private const float BOSS_ATTACK_DELAY = 2f;                 // ë³´ìŠ¤ ê³µê²© ë”œë ˆì´
+    private const float CAT_ATTACK_DELAY = 1f;                  // ê³ ì–‘ì´ ê³µê²© ë”œë ˆì´
+    private const float GIVEUP_BUTTON_DELAY = 2f;               // í•­ë³µ ë²„íŠ¼ í™œì„±í™” ë”œë ˆì´
 
-    private GameObject currentBoss;                             // ÇöÀç º¸½º
-    [HideInInspector] public BossHitbox bossHitbox;             // º¸½º È÷Æ®¹Ú½º
-    public bool isBattleActive;                                // ÀüÅõ È°¼ºÈ­ ¿©ºÎ
+    private GameObject currentBoss;                             // í˜„ì¬ ë³´ìŠ¤
+    [HideInInspector] public BossHitbox bossHitbox;             // ë³´ìŠ¤ íˆíŠ¸ë°•ìŠ¤
+    public bool isBattleActive;                                // ì „íˆ¬ í™œì„±í™” ì—¬ë¶€
     public bool IsBattleActive => isBattleActive;
 
+    private HashSet<int> clearedStages = new HashSet<int>();    // í´ë¦¬ì–´í•œ ìŠ¤í…Œì´ì§€ ì €ì¥
 
     [Header("---[Boss UI]")]
-    [SerializeField] private GameObject battleHPUI;             // Battle HP UI (È°¼ºÈ­/ºñÈ°¼ºÈ­ Á¦¾î)
+    [SerializeField] private GameObject battleHPUI;             // Battle HP UI (í™œì„±í™”/ë¹„í™œì„±í™” ì œì–´)
     [SerializeField] private TextMeshProUGUI bossStageText;     // Boss Stage Text
     [SerializeField] private Slider bossHPSlider;               // HP Slider
     [SerializeField] private TextMeshProUGUI bossHPText;        // HP % Text
-    [SerializeField] private Button giveupButton;               // Ç×º¹ ¹öÆ°
+    [SerializeField] private Button giveupButton;               // í•­ë³µ ë²„íŠ¼
 
-    private Mouse currentBossData;                              // ÇöÀç º¸½º µ¥ÀÌÅÍ
-    private double currentBossHP;                               // º¸½ºÀÇ ÇöÀç HP
-    private double maxBossHP;                                   // º¸½ºÀÇ ÃÖ´ë HP
+    private Mouse currentBossData;                              // í˜„ì¬ ë³´ìŠ¤ ë°ì´í„°
+    private double currentBossHP;                               // ë³´ìŠ¤ì˜ í˜„ì¬ HP
+    private double maxBossHP;                                   // ë³´ìŠ¤ì˜ ìµœëŒ€ HP
 
 
     [Header("---[Boss Result UI]")]
-    [SerializeField] private GameObject battleResultPanel;              // ÀüÅõ °á°ú ÆĞ³Î
-    [SerializeField] private GameObject winPanel;                       // ½Â¸® UI ÆĞ³Î
-    [SerializeField] private GameObject losePanel;                      // ÆĞ¹è UI ÆĞ³Î
-    [SerializeField] private Button battleResultCloseButton;            // ÀüÅõ °á°ú ÆĞ³Î ´İ±â ¹öÆ°
-    [SerializeField] private TextMeshProUGUI battleResultCountdownText; // ÀüÅõ °á°ú ÆĞ³Î Ä«¿îÆ®´Ù¿î Text
-    private Coroutine resultPanelCoroutine;                             // °á°ú ÆĞ³Î ÀÚµ¿ ´İ±â ÄÚ·çÆ¾
+    [SerializeField] private GameObject battleResultPanel;              // ì „íˆ¬ ê²°ê³¼ íŒ¨ë„
+    [SerializeField] private GameObject winPanel;                       // ìŠ¹ë¦¬ UI íŒ¨ë„
+    [SerializeField] private GameObject losePanel;                      // íŒ¨ë°° UI íŒ¨ë„
+    [SerializeField] private Button battleResultCloseButton;            // ì „íˆ¬ ê²°ê³¼ íŒ¨ë„ ë‹«ê¸° ë²„íŠ¼
+    [SerializeField] private TextMeshProUGUI battleResultCountdownText; // ì „íˆ¬ ê²°ê³¼ íŒ¨ë„ ì¹´ìš´íŠ¸ë‹¤ìš´ Text
+    private Coroutine resultPanelCoroutine;                             // ê²°ê³¼ íŒ¨ë„ ìë™ ë‹«ê¸° ì½”ë£¨í‹´
 
+    [SerializeField] private GameObject rewardSlotPrefab;          // Reward Slot í”„ë¦¬íŒ¹
+    [SerializeField] private Transform winRewardPanel;             // Win Panelì˜ Reward Panel
+    [SerializeField] private Transform loseRewardPanel;            // Lose Panelì˜ Reward Panel
+    private Sprite cashSprite;                                     // ìºì‹œ ì´ë¯¸ì§€
+    private Sprite coinSprite;                                     // ì½”ì¸ ì´ë¯¸ì§€
+    private List<GameObject> activeRewardSlots = new List<GameObject>();  // í˜„ì¬ í™œì„±í™”ëœ ë³´ìƒ ìŠ¬ë¡¯ë“¤
 
     [Header("---[Boss AutoRetry UI]")]
-    [SerializeField] private Button autoRetryPanelButton;       // ÇÏÀ§ ´Ü°è ÀÚµ¿ µµÀü ÆĞ³Î ¹öÆ°
-    [SerializeField] private Image autoRetryPanelButtonImage;   // ÆĞ³Î ¹öÆ° ÀÌ¹ÌÁö
-    [SerializeField] private GameObject autoRetryPanel;         // ÇÏÀ§ ´Ü°è ÀÚµ¿ µµÀü ÆĞ³Î
-    [SerializeField] private Button closeAutoRetryPanelButton;  // ÇÏÀ§ ´Ü°è ÀÚµ¿ µµÀü ÆĞ³Î ´İ±â ¹öÆ°
-    [SerializeField] private Button autoRetryButton;            // ÇÏÀ§ ´Ü°è ÀÚµ¿ µµÀü Åä±Û ¹öÆ°
-    [SerializeField] private RectTransform autoRetryHandle;     // Åä±Û ÇÚµé
-    [SerializeField] private Image autoRetryButtonImage;        // ÇÏÀ§ ´Ü°è ÀÚµ¿ µµÀü ¹öÆ° ÀÌ¹ÌÁö
-    private int currentMaxBossStage;                            // µµÀü °¡´ÉÇÑ º¸½º ÃÖ´ë ½ºÅ×ÀÌÁö
-    private bool isAutoRetryEnabled;                            // ÇÏÀ§ ´Ü°è ÀÚµ¿ µµÀü »óÅÂ
-    private Coroutine autoRetryToggleCoroutine;                 // Åä±Û ¾Ö´Ï¸ŞÀÌ¼Ç ÄÚ·çÆ¾
+    [SerializeField] private Button autoRetryPanelButton;       // í•˜ìœ„ ë‹¨ê³„ ìë™ ë„ì „ íŒ¨ë„ ë²„íŠ¼
+    [SerializeField] private Image autoRetryPanelButtonImage;   // íŒ¨ë„ ë²„íŠ¼ ì´ë¯¸ì§€
+    [SerializeField] private GameObject autoRetryPanel;         // í•˜ìœ„ ë‹¨ê³„ ìë™ ë„ì „ íŒ¨ë„
+    [SerializeField] private Button closeAutoRetryPanelButton;  // í•˜ìœ„ ë‹¨ê³„ ìë™ ë„ì „ íŒ¨ë„ ë‹«ê¸° ë²„íŠ¼
+    [SerializeField] private Button autoRetryButton;            // í•˜ìœ„ ë‹¨ê³„ ìë™ ë„ì „ í† ê¸€ ë²„íŠ¼
+    [SerializeField] private RectTransform autoRetryHandle;     // í† ê¸€ í•¸ë“¤
+    [SerializeField] private Image autoRetryButtonImage;        // í•˜ìœ„ ë‹¨ê³„ ìë™ ë„ì „ ë²„íŠ¼ ì´ë¯¸ì§€
+    private int currentMaxBossStage;                            // ë„ì „ ê°€ëŠ¥í•œ ë³´ìŠ¤ ìµœëŒ€ ìŠ¤í…Œì´ì§€
+    private bool isAutoRetryEnabled;                            // í•˜ìœ„ ë‹¨ê³„ ìë™ ë„ì „ ìƒíƒœ
+    private Coroutine autoRetryToggleCoroutine;                 // í† ê¸€ ì• ë‹ˆë©”ì´ì…˜ ì½”ë£¨í‹´
 
 
     [Header("---[Warning UI]")]
-    [SerializeField] private GameObject warningPanel;           // ÀüÅõ½Ã½ºÅÛ ½ÃÀÛ½Ã ³ª¿À´Â °æ°í Panel (warningDurationµ¿¾È Áö¼Ó)
-    [SerializeField] private Slider warningSlider;              // ¸®½ºÆù½Ã°£ÀÌ µÆÀ»¶§ Â÷¿À¸£´Â Slider (warningDuration¸¸Å­ Â÷¿À¸§)
-    public float warningDuration = 2f;                          // warningPanel È°¼ºÈ­ ½Ã°£
-    private Coroutine warningSliderCoroutine;                   // warningSlider ÄÚ·çÆ¾
+    [SerializeField] private GameObject warningPanel;           // ì „íˆ¬ì‹œìŠ¤í…œ ì‹œì‘ì‹œ ë‚˜ì˜¤ëŠ” ê²½ê³  Panel (warningDurationë™ì•ˆ ì§€ì†)
+    [SerializeField] private Slider warningSlider;              // ë¦¬ìŠ¤í°ì‹œê°„ì´ ëì„ë•Œ ì°¨ì˜¤ë¥´ëŠ” Slider (warningDurationë§Œí¼ ì°¨ì˜¤ë¦„)
+    public float warningDuration = 2f;                          // warningPanel í™œì„±í™” ì‹œê°„
+    private Coroutine warningSliderCoroutine;                   // warningSlider ì½”ë£¨í‹´
 
-    [SerializeField] private Image topWarningImage;             // »ó´Ü °æ°í ÀÌ¹ÌÁö
-    [SerializeField] private Image bossDangerImage;             // º¸½º À§Çè ÀÌ¹ÌÁö
-    [SerializeField] private Image bottomWarningImage;          // ÇÏ´Ü °æ°í ÀÌ¹ÌÁö
-    private CanvasGroup warningPanelCanvasGroup;                // Warning PanelÀÇ CanvasGroup
-    private CanvasGroup topWarningCanvasGroup;                  // »ó´Ü °æ°í ÀÌ¹ÌÁöÀÇ CanvasGroup
-    private CanvasGroup bossDangerCanvasGroup;                  // º¸½º À§Çè ÀÌ¹ÌÁöÀÇ CanvasGroup  
-    private CanvasGroup bottomWarningCanvasGroup;               // ÇÏ´Ü °æ°í ÀÌ¹ÌÁöÀÇ CanvasGroup
+    [SerializeField] private Image topWarningImage;             // ìƒë‹¨ ê²½ê³  ì´ë¯¸ì§€
+    [SerializeField] private Image bossDangerImage;             // ë³´ìŠ¤ ìœ„í—˜ ì´ë¯¸ì§€
+    [SerializeField] private Image bottomWarningImage;          // í•˜ë‹¨ ê²½ê³  ì´ë¯¸ì§€
+    private CanvasGroup warningPanelCanvasGroup;                // Warning Panelì˜ CanvasGroup
+    private CanvasGroup topWarningCanvasGroup;                  // ìƒë‹¨ ê²½ê³  ì´ë¯¸ì§€ì˜ CanvasGroup
+    private CanvasGroup bossDangerCanvasGroup;                  // ë³´ìŠ¤ ìœ„í—˜ ì´ë¯¸ì§€ì˜ CanvasGroup  
+    private CanvasGroup bottomWarningCanvasGroup;               // í•˜ë‹¨ ê²½ê³  ì´ë¯¸ì§€ì˜ CanvasGroup
 
-    private const float WARNING_IMAGE_START_X = -640f;          // °æ°í ÀÌ¹ÌÁö ½ÃÀÛ ÁÂÇ¥
-    private const float WARNING_IMAGE_END_X = 640f;             // °æ°í ÀÌ¹ÌÁö ³¡ ÁÂÇ¥
-    private const float BOSS_DANGER_START_X = 1040f;            // Boss Danger ÀÌ¹ÌÁö ½ÃÀÛ ÁÂÇ¥
-    private const float BOSS_DANGER_END_X = -1040f;             // Boss Danger ÀÌ¹ÌÁö ³¡ ÁÂÇ¥
-    private const float WARNING_IMAGE_Y = 0f;                   // °æ°í ÀÌ¹ÌÁö Y ÁÂÇ¥
+    private const float WARNING_IMAGE_START_X = -640f;          // ê²½ê³  ì´ë¯¸ì§€ ì‹œì‘ ì¢Œí‘œ
+    private const float WARNING_IMAGE_END_X = 640f;             // ê²½ê³  ì´ë¯¸ì§€ ë ì¢Œí‘œ
+    private const float BOSS_DANGER_START_X = 1040f;            // Boss Danger ì´ë¯¸ì§€ ì‹œì‘ ì¢Œí‘œ
+    private const float BOSS_DANGER_END_X = -1040f;             // Boss Danger ì´ë¯¸ì§€ ë ì¢Œí‘œ
+    private const float WARNING_IMAGE_Y = 0f;                   // ê²½ê³  ì´ë¯¸ì§€ Y ì¢Œí‘œ
 
 
     [Header("---[ETC]")]
-    private Coroutine bossBattleCoroutine;                      // BossBattleRoutine ÄÚ·çÆ¾ ÃßÀûÀ» À§ÇÑ º¯¼ö Ãß°¡
-    private Coroutine bossSpawnRoutine;                         // BossSpawnRoutine ÄÚ·çÆ¾ ÃßÀûÀ» À§ÇÑ º¯¼ö Ãß°¡
-    private Coroutine bossAttackRoutine;                        // BossAttackRoutine ÄÚ·çÆ¾ ÃßÀûÀ» À§ÇÑ º¯¼ö Ãß°¡
-    private Coroutine catsAttackRoutine;                        // CatsAttackRoutine ÄÚ·çÆ¾ ÃßÀûÀ» À§ÇÑ º¯¼ö Ãß°¡
+    private Coroutine bossBattleCoroutine;                      // BossBattleRoutine ì½”ë£¨í‹´ ì¶”ì ì„ ìœ„í•œ ë³€ìˆ˜ ì¶”ê°€
+    private Coroutine bossSpawnRoutine;                         // BossSpawnRoutine ì½”ë£¨í‹´ ì¶”ì ì„ ìœ„í•œ ë³€ìˆ˜ ì¶”ê°€
+    private Coroutine bossAttackRoutine;                        // BossAttackRoutine ì½”ë£¨í‹´ ì¶”ì ì„ ìœ„í•œ ë³€ìˆ˜ ì¶”ê°€
+    private Coroutine catsAttackRoutine;                        // CatsAttackRoutine ì½”ë£¨í‹´ ì¶”ì ì„ ìœ„í•œ ë³€ìˆ˜ ì¶”ê°€
 
-    private bool isDataLoaded = false;                          // µ¥ÀÌÅÍ ·Îµå È®ÀÎ
+    private bool isDataLoaded = false;                          // ë°ì´í„° ë¡œë“œ í™•ì¸
 
     #endregion
 
@@ -123,7 +131,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     {
         InitializeBattleManager();
 
-        // GoogleManager¿¡¼­ µ¥ÀÌÅÍ¸¦ ·ÎµåÇÏÁö ¸øÇÑ °æ¿ì¿¡¸¸ ÃÊ±âÈ­
+        // GoogleManagerì—ì„œ ë°ì´í„°ë¥¼ ë¡œë“œí•˜ì§€ ëª»í•œ ê²½ìš°ì—ë§Œ ì´ˆê¸°í™”
         if (!isDataLoaded)
         {
             bossStage = 1;
@@ -141,7 +149,7 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     #region Initialization
 
-    // BattleManager ÃÊ±â ¼³Á¤
+    // BattleManager ì´ˆê¸° ì„¤ì •
     private void InitializeBattleManager()
     {
         InitializeWarningPanel();
@@ -151,15 +159,16 @@ public class BattleManager : MonoBehaviour, ISaveable
         InitializeCanvasGroups();
         InitializeButtonListeners();
 
+        InitializeRewardSprites();
     }
 
-    // warningPanel ÃÊ±âÈ­ ÇÔ¼ö
+    // warningPanel ì´ˆê¸°í™” í•¨ìˆ˜
     private void InitializeWarningPanel()
     {
         warningPanel.SetActive(false);
     }
 
-    // ½Ã°£ ÃÊ±âÈ­ ÇÔ¼ö (º¸½º ¸®½ºÆù, º¸½º ÀüÅõ ½Ã°£)
+    // ì‹œê°„ ì´ˆê¸°í™” í•¨ìˆ˜ (ë³´ìŠ¤ ë¦¬ìŠ¤í°, ë³´ìŠ¤ ì „íˆ¬ ì‹œê°„)
     private void InitializeTimers()
     {
         spawnInterval = DEFAULT_SPAWN_INTERVAL - warningDuration;
@@ -167,7 +176,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         sliderDuration = bossDuration - warningDuration;
     }
 
-    // Sliders UI ÃÊ±âÈ­ ÇÔ¼ö
+    // Sliders UI ì´ˆê¸°í™” í•¨ìˆ˜
     private void InitializeSliders()
     {
         if (respawnSlider != null)
@@ -185,7 +194,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         }
     }
 
-    // Battle HP UI ÃÊ±âÈ­ ÇÔ¼ö
+    // Battle HP UI ì´ˆê¸°í™” í•¨ìˆ˜
     private void InitializeBattleUI()
     {
         if (battleHPUI != null)
@@ -194,7 +203,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         }
     }
 
-    // °æ°í UI °ü·Ã CanvasGroup ÃÊ±âÈ­ ÇÔ¼ö
+    // ê²½ê³  UI ê´€ë ¨ CanvasGroup ì´ˆê¸°í™” í•¨ìˆ˜
     private void InitializeCanvasGroups()
     {
         warningPanelCanvasGroup = SetupCanvasGroup(warningPanel);
@@ -203,10 +212,10 @@ public class BattleManager : MonoBehaviour, ISaveable
         bottomWarningCanvasGroup = SetupCanvasGroup(bottomWarningImage.gameObject);
     }
 
-    // UI ¿ÀºêÁ§Æ®¿¡ CanvasGroup ÄÄÆ÷³ÍÆ®°¡ ¾øÀ¸¸é Ãß°¡ÇÏ°í ¹İÈ¯ÇÏ´Â ÇÔ¼ö
+    // UI ì˜¤ë¸Œì íŠ¸ì— CanvasGroup ì»´í¬ë„ŒíŠ¸ê°€ ì—†ìœ¼ë©´ ì¶”ê°€í•˜ê³  ë°˜í™˜í•˜ëŠ” í•¨ìˆ˜
     private CanvasGroup SetupCanvasGroup(GameObject uiObject)
     {
-        // ±âÁ¸ CanvasGroupÀÌ ÀÖÀ¸¸é »ç¿ë, ¾øÀ¸¸é »õ·Î Ãß°¡
+        // ê¸°ì¡´ CanvasGroupì´ ìˆìœ¼ë©´ ì‚¬ìš©, ì—†ìœ¼ë©´ ìƒˆë¡œ ì¶”ê°€
         CanvasGroup canvasGroup = uiObject.GetComponent<CanvasGroup>();
         if (canvasGroup == null)
         {
@@ -215,7 +224,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         return canvasGroup;
     }
 
-    // ¹öÆ° ¸®½º³Ê ÃÊ±âÈ­ ÇÔ¼ö
+    // ë²„íŠ¼ ë¦¬ìŠ¤ë„ˆ ì´ˆê¸°í™” í•¨ìˆ˜
     private void InitializeButtonListeners()
     {
         giveupButton.onClick.AddListener(GiveUpState);
@@ -232,6 +241,13 @@ public class BattleManager : MonoBehaviour, ISaveable
         UpdateAutoRetryUI(isAutoRetryEnabled, true);
     }
 
+    // ë³´ìƒ ì´ë¯¸ì§€ ì´ˆê¸°í™” í•¨ìˆ˜
+    private void InitializeRewardSprites()
+    {
+        cashSprite = Resources.Load<Sprite>("Sprites/UI/I_UI_Main/I_UI_paidcoin.9");
+        coinSprite = Resources.Load<Sprite>("Sprites/UI/I_UI_Main/I_UI_coin.9");
+    }
+
     #endregion
 
 
@@ -239,18 +255,18 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     #region Battle Core
 
-    // º¸½º ½ºÆù ÄÚ·çÆ¾
+    // ë³´ìŠ¤ ìŠ¤í° ì½”ë£¨í‹´
     private IEnumerator BossSpawnRoutine()
     {
         while (true)
         {
-            // º¸½º°¡ ¾øÀ» ¶§¸¸ °ÔÀÌÁö¸¦ ÃæÀü
+            // ë³´ìŠ¤ê°€ ì—†ì„ ë•Œë§Œ ê²Œì´ì§€ë¥¼ ì¶©ì „
             if (currentBoss == null)
             {
                 bossSpawnTimer += Time.deltaTime;
                 respawnSlider.value = bossSpawnTimer;
 
-                // °ÔÀÌÁö°¡ ²Ë Â÷¸é º¸½º ¼ÒÈ¯
+                // ê²Œì´ì§€ê°€ ê½‰ ì°¨ë©´ ë³´ìŠ¤ ì†Œí™˜
                 if (bossSpawnTimer >= spawnInterval)
                 {
                     bossSpawnTimer = 0f;
@@ -266,10 +282,10 @@ public class BattleManager : MonoBehaviour, ISaveable
         }
     }
 
-    // warningPanel È°¼ºÈ­½Ã ÄÚ·çÆ¾
+    // warningPanel í™œì„±í™”ì‹œ ì½”ë£¨í‹´
     private IEnumerator LoadWarningPanel()
     {
-        // ÀÚµ¿ ¸ÓÁö ÀÏ½ÃÁ¤Áö
+        // ìë™ ë¨¸ì§€ ì¼ì‹œì •ì§€
         AutoMergeManager.Instance.PauseAutoMerge();
 
         warningPanel.SetActive(true);
@@ -277,31 +293,31 @@ public class BattleManager : MonoBehaviour, ISaveable
         float elapsedTime = 0f;
         float halfDuration = warningDuration / 2f;
 
-        // ÃÊ±â Åõ¸íµµ ¼³Á¤
+        // ì´ˆê¸° íˆ¬ëª…ë„ ì„¤ì •
         warningPanelCanvasGroup.alpha = 0f;
         topWarningCanvasGroup.alpha = 0f;
         bossDangerCanvasGroup.alpha = 0f;
         bottomWarningCanvasGroup.alpha = 0f;
 
-        // Image ÃÊ±â À§Ä¡ ¼³Á¤
+        // Image ì´ˆê¸° ìœ„ì¹˜ ì„¤ì •
         topWarningImage.rectTransform.anchoredPosition = new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y);
         bossDangerImage.rectTransform.anchoredPosition = new Vector2(BOSS_DANGER_START_X, WARNING_IMAGE_Y);
         bottomWarningImage.rectTransform.anchoredPosition = new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y);
 
-        // Ã¹ 1ÃÊ: Åõ¸í -> ¹İÅõ¸í
+        // ì²« 1ì´ˆ: íˆ¬ëª… -> ë°˜íˆ¬ëª…
         while (elapsedTime < halfDuration)
         {
             elapsedTime += Time.deltaTime;
             float normalizedTime = elapsedTime / halfDuration;
 
-            // Åõ¸íµµ Á¶Àı (0 -> 1.0)
+            // íˆ¬ëª…ë„ ì¡°ì ˆ (0 -> 1.0)
             float alpha = Mathf.Lerp(0f, 1.0f, normalizedTime);
             warningPanelCanvasGroup.alpha = alpha;
             topWarningCanvasGroup.alpha = alpha;
             bossDangerCanvasGroup.alpha = alpha;
             bottomWarningCanvasGroup.alpha = alpha;
 
-            // ÀÌ¹ÌÁö ÀÌµ¿
+            // ì´ë¯¸ì§€ ì´ë™
             float moveProgress = elapsedTime / warningDuration;
             topWarningImage.rectTransform.anchoredPosition = Vector2.Lerp(
                 new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y),
@@ -316,25 +332,25 @@ public class BattleManager : MonoBehaviour, ISaveable
                 new Vector2(BOSS_DANGER_END_X, WARNING_IMAGE_Y),
                 moveProgress);
 
-            // slider ¾÷µ¥ÀÌÆ®
+            // slider ì—…ë°ì´íŠ¸
             warningSlider.value = elapsedTime;
 
             yield return null;
         }
-        // ´ÙÀ½ 1ÃÊ: ¹İÅõ¸í -> Åõ¸í
+        // ë‹¤ìŒ 1ì´ˆ: ë°˜íˆ¬ëª… -> íˆ¬ëª…
         while (elapsedTime < warningDuration)
         {
             elapsedTime += Time.deltaTime;
             float normalizedTime = (elapsedTime - halfDuration) / halfDuration;
 
-            // Åõ¸íµµ Á¶Àı (1.0 -> 0)
+            // íˆ¬ëª…ë„ ì¡°ì ˆ (1.0 -> 0)
             float alpha = Mathf.Lerp(1.0f, 0f, normalizedTime);
             warningPanelCanvasGroup.alpha = alpha;
             topWarningCanvasGroup.alpha = alpha;
             bossDangerCanvasGroup.alpha = alpha;
             bottomWarningCanvasGroup.alpha = alpha;
 
-            // ÀÌ¹ÌÁö ÀÌµ¿
+            // ì´ë¯¸ì§€ ì´ë™
             float moveProgress = elapsedTime / warningDuration;
             topWarningImage.rectTransform.anchoredPosition = Vector2.Lerp(
                 new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y),
@@ -349,7 +365,7 @@ public class BattleManager : MonoBehaviour, ISaveable
                 new Vector2(BOSS_DANGER_END_X, WARNING_IMAGE_Y),
                 moveProgress);
 
-            // slider ¾÷µ¥ÀÌÆ®
+            // slider ì—…ë°ì´íŠ¸
             warningSlider.value = elapsedTime;
 
             yield return null;
@@ -358,10 +374,10 @@ public class BattleManager : MonoBehaviour, ISaveable
         warningPanel.SetActive(false);
     }
 
-    // º¸½º ½ºÆù ÇÔ¼ö
+    // ë³´ìŠ¤ ìŠ¤í° í•¨ìˆ˜
     private void LoadAndDisplayBoss()
     {
-        // ÀÚµ¿ ÀçµµÀü »óÅÂ¿¡ µû¶ó µµÀüÇÒ ½ºÅ×ÀÌÁö °áÁ¤
+        // ìë™ ì¬ë„ì „ ìƒíƒœì— ë”°ë¼ ë„ì „í•  ìŠ¤í…Œì´ì§€ ê²°ì •
         if (isAutoRetryEnabled)
         {
             bossStage = Mathf.Max(1, currentMaxBossStage - 1);
@@ -371,26 +387,26 @@ public class BattleManager : MonoBehaviour, ISaveable
             bossStage = currentMaxBossStage;
         }
 
-        // bossStage¿¡ ¸Â´Â Mouse¸¦ °¡Á®¿Í¼­ º¸½º¸¦ ¼³Á¤
+        // bossStageì— ë§ëŠ” Mouseë¥¼ ê°€ì ¸ì™€ì„œ ë³´ìŠ¤ë¥¼ ì„¤ì •
         currentBossData = GetBossData();
         currentBoss = Instantiate(bossPrefab, bossUIParent);
         bossHitbox = currentBoss.GetComponent<BossHitbox>();
 
-        // º¸½ºÀÇ MouseData¸¦ ¼³Á¤
+        // ë³´ìŠ¤ì˜ MouseDataë¥¼ ì„¤ì •
         MouseData mouseUIData = currentBoss.GetComponent<MouseData>();
         mouseUIData.SetMouseData(currentBossData);
 
-        // º¸½º À§Ä¡ ¼³Á¤
+        // ë³´ìŠ¤ ìœ„ì¹˜ ì„¤ì •
         RectTransform bossRectTransform = currentBoss.GetComponent<RectTransform>();
         bossRectTransform.anchoredPosition = new Vector2(0f, 250f);
 
         UpdateBossUI();
     }
 
-    // ÇØ´ç ½ºÅ×ÀÌÁö¿Í µ¿ÀÏÇÑ µî±ŞÀ» °®´Â º¸½º µ¥ÀÌÅÍ ºÒ·¯¿À´Â ÇÔ¼ö (MouseGrade)
+    // í•´ë‹¹ ìŠ¤í…Œì´ì§€ì™€ ë™ì¼í•œ ë“±ê¸‰ì„ ê°–ëŠ” ë³´ìŠ¤ ë°ì´í„° ë¶ˆëŸ¬ì˜¤ëŠ” í•¨ìˆ˜ (MouseGrade)
     private Mouse GetBossData()
     {
-        // ¸ğµç Mouse µ¥ÀÌÅÍ¸¦ °¡Á®¿Í¼­ bossStage¿¡ ¸Â´Â MouseGrade¸¦ Ã£À½
+        // ëª¨ë“  Mouse ë°ì´í„°ë¥¼ ê°€ì ¸ì™€ì„œ bossStageì— ë§ëŠ” MouseGradeë¥¼ ì°¾ìŒ
         foreach (Mouse mouse in GameManager.Instance.AllMouseData)
         {
             if (mouse.MouseGrade == bossStage)
@@ -402,7 +418,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         return null;
     }
 
-    // ÀüÅõ ½ÃÀÛÇÒ¶§¸¶´Ù Boss UI Panel ¼³Á¤ ÇÔ¼ö
+    // ì „íˆ¬ ì‹œì‘í• ë•Œë§ˆë‹¤ Boss UI Panel ì„¤ì • í•¨ìˆ˜
     private void UpdateBossUI()
     {
         battleHPUI.SetActive(true);
@@ -415,7 +431,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         bossHPText.text = $"{100f}%";
     } 
 
-    // ÀüÅõ ½ÃÀÛ ÇÔ¼ö
+    // ì „íˆ¬ ì‹œì‘ í•¨ìˆ˜
     private void StartBattle()
     {
         CatData[] allCats = FindObjectsOfType<CatData>();
@@ -428,31 +444,31 @@ public class BattleManager : MonoBehaviour, ISaveable
             }
         }
 
-        // ÀüÅõ ½ÃÀÛ½Ã ¿©·¯ ¿ÜºÎ ±â´Éµé ºñÈ°¼ºÈ­
+        // ì „íˆ¬ ì‹œì‘ì‹œ ì—¬ëŸ¬ ì™¸ë¶€ ê¸°ëŠ¥ë“¤ ë¹„í™œì„±í™”
         SetStartFunctions();
 
-        // Ç×º¹ ¹öÆ° ºñÈ°¼ºÈ­ ÈÄ 2ÃÊ µÚ È°¼ºÈ­
+        // í•­ë³µ ë²„íŠ¼ ë¹„í™œì„±í™” í›„ 2ì´ˆ ë’¤ í™œì„±í™”
         giveupButton.interactable = false;
         StartCoroutine(EnableGiveupButton());
 
-        // Slider°ü·Ã ÄÚ·çÆ¾ ½ÃÀÛ
+        // Sliderê´€ë ¨ ì½”ë£¨í‹´ ì‹œì‘
         StartCoroutine(ExecuteBattleSliders(warningDuration, sliderDuration));
         bossBattleCoroutine = StartCoroutine(BossBattleRoutine(bossDuration));
         isBattleActive = true;
 
-        // °í¾çÀÌ ÀÚµ¿ ÀçÈ­ ¼öÁı ºñÈ°¼ºÈ­
+        // ê³ ì–‘ì´ ìë™ ì¬í™” ìˆ˜ì§‘ ë¹„í™œì„±í™”
         SetStartBattleAutoCollectState();
 
-        // º¸½º È÷Æ®¹Ú½º ³»,¿Ü¿¡ Á¸ÀçÇÏ´Â °í¾çÀÌµé ÀÌµ¿½ÃÅ°±â
+        // ë³´ìŠ¤ íˆíŠ¸ë°•ìŠ¤ ë‚´,ì™¸ì— ì¡´ì¬í•˜ëŠ” ê³ ì–‘ì´ë“¤ ì´ë™ì‹œí‚¤ê¸°
         PushCatsAwayFromBoss();
         MoveCatsTowardBossBoundary();
 
-        // º¸½º ¹× °í¾çÀÌ °ø°İ ÄÚ·çÆ¾ ½ÃÀÛ
+        // ë³´ìŠ¤ ë° ê³ ì–‘ì´ ê³µê²© ì½”ë£¨í‹´ ì‹œì‘
         bossAttackRoutine = StartCoroutine(BossAttackRoutine());
         catsAttackRoutine = StartCoroutine(CatsAttackRoutine());
     }
 
-    // Ç×º¹ ¹öÆ° È°¼ºÈ­ ÄÚ·çÆ¾
+    // í•­ë³µ ë²„íŠ¼ í™œì„±í™” ì½”ë£¨í‹´
     private IEnumerator EnableGiveupButton()
     {
         yield return new WaitForSeconds(GIVEUP_BUTTON_DELAY);
@@ -464,19 +480,19 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     #region Battle Sliders
 
-    // Slider °¨¼Ò °ü¸® ÄÚ·çÆ¾
+    // Slider ê°ì†Œ ê´€ë¦¬ ì½”ë£¨í‹´
     private IEnumerator ExecuteBattleSliders(float warningDuration, float sliderDuration)
     {
-        // 1. warningSlider °¨¼Ò
+        // 1. warningSlider ê°ì†Œ
         warningSliderCoroutine = StartCoroutine(DecreaseWarningSliderDuringBossDuration(warningDuration));
         yield return warningSliderCoroutine;
 
-        // 2. respawnSlider °¨¼Ò
+        // 2. respawnSlider ê°ì†Œ
         respawnSliderCoroutine = StartCoroutine(DecreaseSliderDuringBossDuration(sliderDuration));
         yield return respawnSliderCoroutine;
     }
 
-    // º¸½º À¯Áö½Ã°£µ¿¾È warningSlider°¡ °¨¼ÒÇÏ´Â ÄÚ·çÆ¾
+    // ë³´ìŠ¤ ìœ ì§€ì‹œê°„ë™ì•ˆ warningSliderê°€ ê°ì†Œí•˜ëŠ” ì½”ë£¨í‹´
     private IEnumerator DecreaseWarningSliderDuringBossDuration(float duration)
     {
         float elapsedTime = 0f;
@@ -494,7 +510,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         warningSliderCoroutine = null;
     }
 
-    // º¸½º À¯Áö½Ã°£µ¿¾È respawnSlider°¡ °¨¼ÒÇÏ´Â ÄÚ·çÆ¾
+    // ë³´ìŠ¤ ìœ ì§€ì‹œê°„ë™ì•ˆ respawnSliderê°€ ê°ì†Œí•˜ëŠ” ì½”ë£¨í‹´
     private IEnumerator DecreaseSliderDuringBossDuration(float duration)
     {
         float elapsedTime = 0f;
@@ -517,7 +533,7 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     #region Battle Management
 
-    // º¸½º ¹èÆ² ÄÚ·çÆ¾
+    // ë³´ìŠ¤ ë°°í‹€ ì½”ë£¨í‹´
     private IEnumerator BossBattleRoutine(float duration)
     {
         float elapsedTime = 0f;
@@ -526,7 +542,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         {
             elapsedTime += Time.deltaTime;
 
-            // º¸½º Ã¼·ÂÀÌ 0 ÀÌÇÏ°¡ µÇ¸é Áï½Ã ÀüÅõ Á¾·á
+            // ë³´ìŠ¤ ì²´ë ¥ì´ 0 ì´í•˜ê°€ ë˜ë©´ ì¦‰ì‹œ ì „íˆ¬ ì¢…ë£Œ
             if (currentBossHP <= 0)
             {
                 EndBattle(true);
@@ -536,11 +552,11 @@ public class BattleManager : MonoBehaviour, ISaveable
             yield return null;
         }
 
-        // Á¦ÇÑ ½Ã°£ ÃÊ°ú·Î ÀüÅõ Á¾·á
+        // ì œí•œ ì‹œê°„ ì´ˆê³¼ë¡œ ì „íˆ¬ ì¢…ë£Œ
         EndBattle(false);
     }
 
-    // º¸½º ½ºÆù½Ã È÷Æ®¹Ú½º ¹üÀ§ ³»¿¡ ÀÖ´Â °í¾çÀÌ¸¦ ¹Ğ¾î³»´Â ÇÔ¼ö
+    // ë³´ìŠ¤ ìŠ¤í°ì‹œ íˆíŠ¸ë°•ìŠ¤ ë²”ìœ„ ë‚´ì— ìˆëŠ” ê³ ì–‘ì´ë¥¼ ë°€ì–´ë‚´ëŠ” í•¨ìˆ˜
     private void PushCatsAwayFromBoss()
     {
         if (currentBoss == null)
@@ -554,7 +570,7 @@ public class BattleManager : MonoBehaviour, ISaveable
             RectTransform catRectTransform = cat.GetComponent<RectTransform>();
             Vector3 catPosition = catRectTransform.anchoredPosition;
 
-            // °í¾çÀÌ°¡ È÷Æ®¹Ú½º °æ°è ³»¿¡ ÀÖ´ÂÁö È®ÀÎ ÈÄ È÷Æ®¹Ú½º ¿Ü°ûÀ¸·Î ¹Ğ¾î³»±â
+            // ê³ ì–‘ì´ê°€ íˆíŠ¸ë°•ìŠ¤ ê²½ê³„ ë‚´ì— ìˆëŠ”ì§€ í™•ì¸ í›„ íˆíŠ¸ë°•ìŠ¤ ì™¸ê³½ìœ¼ë¡œ ë°€ì–´ë‚´ê¸°
             if (bossHitbox.IsInHitbox(catPosition))
             {
                 cat.MoveOppositeBoss();
@@ -562,7 +578,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         }
     }
 
-    // º¸½º ½ºÆù½Ã È÷Æ®¹Ú½º ¹üÀ§ ¹Û¿¡ ÀÖ´Â °í¾çÀÌ¸¦ È÷Æ®¹Ú½º °æ°è·Î ÀÌµ¿½ÃÅ°´Â ÇÔ¼ö
+    // ë³´ìŠ¤ ìŠ¤í°ì‹œ íˆíŠ¸ë°•ìŠ¤ ë²”ìœ„ ë°–ì— ìˆëŠ” ê³ ì–‘ì´ë¥¼ íˆíŠ¸ë°•ìŠ¤ ê²½ê³„ë¡œ ì´ë™ì‹œí‚¤ëŠ” í•¨ìˆ˜
     private void MoveCatsTowardBossBoundary()
     {
         if (currentBoss == null || bossHitbox == null)
@@ -576,7 +592,7 @@ public class BattleManager : MonoBehaviour, ISaveable
             RectTransform catRectTransform = cat.GetComponent<RectTransform>();
             Vector3 catPosition = catRectTransform.anchoredPosition;
 
-            // °í¾çÀÌ°¡ È÷Æ®¹Ú½º °æ°è ¹Û¿¡ ÀÖ´ÂÁö È®ÀÎ ÈÄ È÷Æ®¹Ú½º ¿Ü°ûÀ¸·Î ¸ğÀ¸±â
+            // ê³ ì–‘ì´ê°€ íˆíŠ¸ë°•ìŠ¤ ê²½ê³„ ë°–ì— ìˆëŠ”ì§€ í™•ì¸ í›„ íˆíŠ¸ë°•ìŠ¤ ì™¸ê³½ìœ¼ë¡œ ëª¨ìœ¼ê¸°
             if (!bossHitbox.IsInHitbox(catPosition))
             {
                 cat.MoveTowardBossBoundary();
@@ -589,7 +605,7 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     #region Battle System
 
-    // º¸½º°¡ ¹Ş´Â µ¥¹ÌÁö ÇÔ¼ö
+    // ë³´ìŠ¤ê°€ ë°›ëŠ” ë°ë¯¸ì§€ í•¨ìˆ˜
     public void TakeBossDamage(float damage)
     {
         if (!IsBattleActive || currentBoss == null)
@@ -598,7 +614,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         }
         currentBossHP -= damage;
 
-        // º¸½ºÀÇ MouseData ÄÄÆ÷³ÍÆ®¸¦ ÅëÇØ µ¥¹ÌÁö ÅØ½ºÆ® Ç¥½Ã
+        // ë³´ìŠ¤ì˜ MouseData ì»´í¬ë„ŒíŠ¸ë¥¼ í†µí•´ ë°ë¯¸ì§€ í…ìŠ¤íŠ¸ í‘œì‹œ
         MouseData mouseData = currentBoss.GetComponent<MouseData>();
         if (mouseData != null)
         {
@@ -608,7 +624,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         UpdateBossHPUI();
     }
 
-    // º¸½º HP Slider ¹× ÅØ½ºÆ® ¾÷µ¥ÀÌÆ® ÇÔ¼ö
+    // ë³´ìŠ¤ HP Slider ë° í…ìŠ¤íŠ¸ ì—…ë°ì´íŠ¸ í•¨ìˆ˜
     private void UpdateBossHPUI()
     {
         bossHPSlider.value = (float)currentBossHP;
@@ -617,7 +633,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         bossHPText.text = $"{hpPercentage:F2}%";
     }
 
-    // º¸½º °ø°İ ÄÚ·çÆ¾
+    // ë³´ìŠ¤ ê³µê²© ì½”ë£¨í‹´
     private IEnumerator BossAttackRoutine()
     {
         while (IsBattleActive)
@@ -627,7 +643,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         }
     }
 
-    // º¸½º°¡ È÷Æ®¹Ú½º ³» °í¾çÀÌ N¸¶¸®¸¦ °ø°İÇÏ´Â ÇÔ¼ö
+    // ë³´ìŠ¤ê°€ íˆíŠ¸ë°•ìŠ¤ ë‚´ ê³ ì–‘ì´ Në§ˆë¦¬ë¥¼ ê³µê²©í•˜ëŠ” í•¨ìˆ˜
     private void BossAttackCats()
     {
         if (currentBoss == null || bossHitbox == null)
@@ -635,7 +651,7 @@ public class BattleManager : MonoBehaviour, ISaveable
             return;
         }
 
-        // È÷Æ®¹Ú½º °æ°è¿¡ ÀÖ´Â °í¾çÀÌ¸¦ Ã£À½
+        // íˆíŠ¸ë°•ìŠ¤ ê²½ê³„ì— ìˆëŠ” ê³ ì–‘ì´ë¥¼ ì°¾ìŒ
         List<CatData> catsAtBoundary = new List<CatData>();
         CatData[] allCats = FindObjectsOfType<CatData>();
         foreach (var cat in allCats)
@@ -659,7 +675,7 @@ public class BattleManager : MonoBehaviour, ISaveable
             return;
         }
 
-        // º¸½º °ø°İ ´ë»ó ¼±Á¤
+        // ë³´ìŠ¤ ê³µê²© ëŒ€ìƒ ì„ ì •
         int attackCount = Mathf.Min(catsAtBoundary.Count, currentBossData.NumOfAttack);
         List<CatData> selectedCats = new List<CatData>();
         while (selectedCats.Count < attackCount)
@@ -673,7 +689,7 @@ public class BattleManager : MonoBehaviour, ISaveable
             }
         }
 
-        // ¼±ÅÃµÈ °í¾çÀÌµé¿¡°Ô µ¥¹ÌÁö Àû¿ë
+        // ì„ íƒëœ ê³ ì–‘ì´ë“¤ì—ê²Œ ë°ë¯¸ì§€ ì ìš©
         foreach (var cat in selectedCats)
         {
             double damage = currentBossData.MouseDamage;
@@ -681,7 +697,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         }
     }
 
-    // °í¾çÀÌ °ø°İ ÄÚ·çÆ¾
+    // ê³ ì–‘ì´ ê³µê²© ì½”ë£¨í‹´
     private IEnumerator CatsAttackRoutine()
     {
         while (IsBattleActive)
@@ -692,7 +708,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         }
     }
 
-    // È÷Æ®¹Ú½º ³» °í¾çÀÌµéÀÌ º¸½º¸¦ °ø°İÇÏ´Â ÇÔ¼ö
+    // íˆíŠ¸ë°•ìŠ¤ ë‚´ ê³ ì–‘ì´ë“¤ì´ ë³´ìŠ¤ë¥¼ ê³µê²©í•˜ëŠ” í•¨ìˆ˜
     private void CatsAttackBoss()
     {
         if (currentBoss == null || bossHitbox == null)
@@ -732,12 +748,35 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     #region Battle Plus UI
 
-    // ÀüÅõ °á°ú º¸¿©ÁÖ´Â ÇÔ¼ö
+    // ì „íˆ¬ ê²°ê³¼ ë³´ì—¬ì£¼ëŠ” í•¨ìˆ˜
     private void ShowBattleResult(bool isVictory)
     {
         battleResultPanel.SetActive(true);
         winPanel.SetActive(isVictory);
         losePanel.SetActive(!isVictory);
+
+        ClearRewardSlots();
+
+        // ìŠ¹ë¦¬í–ˆì„ ë•Œ ë³´ìƒ ìŠ¬ë¡¯ ìƒì„±
+        if (isVictory)
+        {
+            bool isFirstClear = !clearedStages.Contains(bossStage);
+            if (isFirstClear)
+            {
+                // ìµœì´ˆ í´ë¦¬ì–´ ë³´ìƒ
+                CreateRewardSlot(winRewardPanel, cashSprite, currentBossData.ClearCashReward, true);
+                CreateRewardSlot(winRewardPanel, coinSprite, currentBossData.ClearCoinReward, true);
+            }
+            else
+            {
+                // ë°˜ë³µ í´ë¦¬ì–´ ë³´ìƒ
+                CreateRewardSlot(winRewardPanel, coinSprite, currentBossData.RepeatclearCoinReward, false);
+            }
+        }
+        else
+        {
+            // íŒ¨ë°° í–ˆì„ë•Œ ë³´ìƒ
+        }
 
         if (resultPanelCoroutine != null)
         {
@@ -746,7 +785,17 @@ public class BattleManager : MonoBehaviour, ISaveable
         resultPanelCoroutine = StartCoroutine(AutoCloseBattleResultPanel());
     }
 
-    // ÀüÅõ °á°ú ÆĞ³Î ´İ´Â ÇÔ¼ö
+    // ë³´ìƒ ìŠ¬ë¡¯ ì œê±° í•¨ìˆ˜
+    private void ClearRewardSlots()
+    {
+        foreach (GameObject slot in activeRewardSlots)
+        {
+            Destroy(slot);
+        }
+        activeRewardSlots.Clear();
+    }
+
+    // ì „íˆ¬ ê²°ê³¼ íŒ¨ë„ ë‹«ëŠ” í•¨ìˆ˜
     private void CloseBattleResultPanel()
     {
         if (resultPanelCoroutine != null)
@@ -754,42 +803,43 @@ public class BattleManager : MonoBehaviour, ISaveable
             StopCoroutine(resultPanelCoroutine);
             resultPanelCoroutine = null;
         }
+        ClearRewardSlots();
         battleResultPanel.SetActive(false);
     }
 
-    // ÀüÅõ °á°ú ÆĞ³Î ÀÚµ¿À¸·Î ´İ´Â ÄÚ·çÆ¾
+    // ì „íˆ¬ ê²°ê³¼ íŒ¨ë„ ìë™ìœ¼ë¡œ ë‹«ëŠ” ì½”ë£¨í‹´
     private IEnumerator AutoCloseBattleResultPanel()
     {
         float countdown = 3f;
         while (countdown > 0)
         {
-            battleResultCountdownText.text = $"{countdown:F0}ÃÊ ÈÄ ÀÚµ¿ ´İÈû";
+            battleResultCountdownText.text = $"{countdown:F0}ì´ˆ í›„ ìë™ ë‹«í˜";
             countdown -= Time.deltaTime;
             yield return null;
         }
         CloseBattleResultPanel();
     }
 
-    // ÀÚµ¿ ÀçµµÀü ÆĞ³Î ¿­±â
+    // ìë™ ì¬ë„ì „ íŒ¨ë„ ì—´ê¸°
     private void OpenAutoRetryPanel()
     {
         autoRetryPanel.SetActive(true);
     }
 
-    // ÀÚµ¿ ÀçµµÀü ÆĞ³Î ´İ±â
+    // ìë™ ì¬ë„ì „ íŒ¨ë„ ë‹«ê¸°
     private void CloseAutoRetryPanel()
     {
         autoRetryPanel.SetActive(false);
     }
 
-    // Åä±Û ¹öÆ° ÀÌ¹ÌÁö ¾÷µ¥ÀÌÆ®
+    // í† ê¸€ ë²„íŠ¼ ì´ë¯¸ì§€ ì—…ë°ì´íŠ¸
     private void UpdateToggleButtonImage(Image buttonImage, bool isOn)
     {
         string imagePath = isOn ? "Sprites/UI/I_UI_Option/I_UI_option_on_Frame.9" : "Sprites/UI/I_UI_Option/I_UI_option_off_Frame.9";
         buttonImage.sprite = Resources.Load<Sprite>(imagePath);
     }
 
-    // ÀÚµ¿ ÀçµµÀü Åä±Û ÇÔ¼ö
+    // ìë™ ì¬ë„ì „ í† ê¸€ í•¨ìˆ˜
     private void ToggleAutoRetry()
     {
         isAutoRetryEnabled = !isAutoRetryEnabled;
@@ -800,7 +850,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         GoogleSave();
     }
 
-    // ÀÚµ¿ ÀçµµÀü UI ¾÷µ¥ÀÌÆ®
+    // ìë™ ì¬ë„ì „ UI ì—…ë°ì´íŠ¸
     private void UpdateAutoRetryUI(bool state, bool instant = false)
     {
         float targetX = state ? 65f : -65f;
@@ -819,7 +869,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         }
     }
 
-    // Åä±Û ÇÚµé ¾Ö´Ï¸ŞÀÌ¼Ç
+    // í† ê¸€ í•¸ë“¤ ì• ë‹ˆë©”ì´ì…˜
     private IEnumerator AnimateAutoRetryHandle(float targetX)
     {
         float elapsedTime = 0f;
@@ -837,7 +887,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         autoRetryHandle.anchoredPosition = new Vector2(targetX, autoRetryHandle.anchoredPosition.y);
     }
 
-    // ÆĞ³Î ¹öÆ° »ö»ó ¾÷µ¥ÀÌÆ® ÇÔ¼ö Ãß°¡
+    // íŒ¨ë„ ë²„íŠ¼ ìƒ‰ìƒ ì—…ë°ì´íŠ¸ í•¨ìˆ˜ ì¶”ê°€
     private void UpdateAutoRetryPanelButtonColor(bool isEnabled)
     {
         if (autoRetryPanelButtonImage != null)
@@ -848,19 +898,38 @@ public class BattleManager : MonoBehaviour, ISaveable
         }
     }
 
+    // ë³´ìƒ ìŠ¬ë¡¯ ìƒì„± í•¨ìˆ˜
+    private void CreateRewardSlot(Transform parent, Sprite rewardSprite, decimal amount, bool isFirstClear = false)
+    {
+        GameObject rewardSlot = Instantiate(rewardSlotPrefab, parent);
+        activeRewardSlots.Add(rewardSlot);
+
+        // Reward Image ì„¤ì •
+        Image rewardImage = rewardSlot.transform.Find("Background Image/Reward Image").GetComponent<Image>();
+        rewardImage.sprite = rewardSprite;
+
+        // Reward Text ì„¤ì •
+        TextMeshProUGUI rewardText = rewardSlot.transform.Find("Reward Text").GetComponent<TextMeshProUGUI>();
+        rewardText.text = GameManager.Instance.FormatPriceNumber(amount);
+
+        // First Clear Image ì„¤ì •
+        GameObject firstClearImage = rewardSlot.transform.Find("First Clear Image").gameObject;
+        firstClearImage.SetActive(isFirstClear);
+    }
+
     #endregion
 
 
     #region Battle End
 
-    // Ç×º¹ ¹öÆ° ÇÔ¼ö
+    // í•­ë³µ ë²„íŠ¼ í•¨ìˆ˜
     private void GiveUpState()
     {
-        // giveup Panel°ü·Ã Ãß°¡ÇÒ°Å¸é ¿©±â¿¡ °ü·Ã ÇÔ¼ö Ãß°¡
+        // giveup Panelê´€ë ¨ ì¶”ê°€í• ê±°ë©´ ì—¬ê¸°ì— ê´€ë ¨ í•¨ìˆ˜ ì¶”ê°€
         EndBattle(false);
     }
 
-    // ÀüÅõ Á¾·á ÇÔ¼ö
+    // ì „íˆ¬ ì¢…ë£Œ í•¨ìˆ˜
     public void EndBattle(bool isVictory)
     {
 
@@ -872,11 +941,20 @@ public class BattleManager : MonoBehaviour, ISaveable
 
         isBattleActive = false;
 
-        // ¸ğµç ÀüÅõ °ü·Ã ÄÚ·çÆ¾ Á¾·á
+        // ëª¨ë“  ì „íˆ¬ ê´€ë ¨ ì½”ë£¨í‹´ ì¢…ë£Œ
         StopAllBattleCoroutines();
 
-        // ½½¶óÀÌ´õ ÃÊ±âÈ­
+        // ìŠ¬ë¼ì´ë” ì´ˆê¸°í™”
         InitializeSliders();
+
+        ShowBattleResult(isVictory);
+        if (isVictory)
+        {
+            GiveStageReward();
+
+            currentMaxBossStage = Mathf.Max(currentMaxBossStage, bossStage + 1);
+            QuestManager.Instance.AddStageCount();
+        }
 
         Destroy(currentBoss);
         currentBossData = null;
@@ -884,26 +962,18 @@ public class BattleManager : MonoBehaviour, ISaveable
         bossHitbox = null;
         battleHPUI.SetActive(false);
 
-        if (isVictory)
-        {
-            currentMaxBossStage = Mathf.Max(currentMaxBossStage, bossStage + 1);
-
-            QuestManager.Instance.AddStageCount();
-        }
-
         GoogleSave();
-        ShowBattleResult(isVictory);
 
-        // ÀüÅõ Á¾·á½Ã ºñÈ°¼ºÈ­Çß´ø ±â´Éµé ´Ù½Ã ±âÁ¸ »óÅÂ·Î º¹±¸
+        // ì „íˆ¬ ì¢…ë£Œì‹œ ë¹„í™œì„±í™”í–ˆë˜ ê¸°ëŠ¥ë“¤ ë‹¤ì‹œ ê¸°ì¡´ ìƒíƒœë¡œ ë³µêµ¬
         SetEndFunctions();
 
-        // °í¾çÀÌ ÀÚµ¿ ÀçÈ­ ¼öÁı È°¼ºÈ­
+        // ê³ ì–‘ì´ ìë™ ì¬í™” ìˆ˜ì§‘ í™œì„±í™”
         SetEndBattleAutoCollectState();
 
-        // Äù½ºÆ® °»½Å
+        // í€˜ìŠ¤íŠ¸ ê°±ì‹ 
         QuestManager.Instance.AddBattleCount();
 
-        // °í¾çÀÌµéÀÇ Ã¼·Â È¸º¹
+        // ê³ ì–‘ì´ë“¤ì˜ ì²´ë ¥ íšŒë³µ
         CatData[] allCats = FindObjectsOfType<CatData>();
         foreach (var cat in allCats)
         {
@@ -919,11 +989,34 @@ public class BattleManager : MonoBehaviour, ISaveable
             }
         }
 
-        // ÀÚµ¿ ¸ÓÁö Àç°³
+        // ìë™ ë¨¸ì§€ ì¬ê°œ
         AutoMergeManager.Instance.ResumeAutoMerge();
     }
 
-    // ¸ğµç ÀüÅõ °ü·Ã ÄÚ·çÆ¾À» Á¾·áÇÏ´Â ÇÔ¼ö Ãß°¡
+    // ë³´ìƒ ì§€ê¸‰ í•¨ìˆ˜
+    private void GiveStageReward()
+    {
+        if (currentBossData == null)
+        {
+            return;
+        }
+
+        bool isFirstClear = !clearedStages.Contains(bossStage);
+        if (isFirstClear)
+        {
+            // ìµœì´ˆ í´ë¦¬ì–´ ë³´ìƒ
+            GameManager.Instance.Cash += currentBossData.ClearCashReward;
+            GameManager.Instance.Coin += currentBossData.ClearCoinReward;
+            clearedStages.Add(bossStage);
+        }
+        else
+        {
+            // ë°˜ë³µ í´ë¦¬ì–´ ë³´ìƒ
+            GameManager.Instance.Coin += currentBossData.RepeatclearCoinReward;
+        }
+    }
+
+    // ëª¨ë“  ì „íˆ¬ ê´€ë ¨ ì½”ë£¨í‹´ì„ ì¢…ë£Œí•˜ëŠ” í•¨ìˆ˜ ì¶”ê°€
     private void StopAllBattleCoroutines()
     {
         if (warningSliderCoroutine != null)
@@ -944,7 +1037,7 @@ public class BattleManager : MonoBehaviour, ISaveable
             bossBattleCoroutine = null;
         }
 
-        // º¸½º¿Í °í¾çÀÌÀÇ °ø°İ ÄÚ·çÆ¾µµ Á¾·á
+        // ë³´ìŠ¤ì™€ ê³ ì–‘ì´ì˜ ê³µê²© ì½”ë£¨í‹´ë„ ì¢…ë£Œ
         if (bossAttackRoutine != null)
         {
             StopCoroutine(bossAttackRoutine);
@@ -965,7 +1058,7 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     #region State Management
 
-    // ¸ğµç °í¾çÀÌÀÇ ÀÚµ¿ ÀçÈ­ ¼öÁı ºñÈ°¼ºÈ­
+    // ëª¨ë“  ê³ ì–‘ì´ì˜ ìë™ ì¬í™” ìˆ˜ì§‘ ë¹„í™œì„±í™”
     private void SetStartBattleAutoCollectState()
     {
         CatData[] allCats = FindObjectsOfType<CatData>();
@@ -979,7 +1072,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         }
     }
 
-    // ¸ğµç °í¾çÀÌÀÇ ÀÚµ¿ ÀçÈ­ ¼öÁı ¿ø·¡ »óÅÂ·Î º¹±¸ (È°¼ºÈ­)
+    // ëª¨ë“  ê³ ì–‘ì´ì˜ ìë™ ì¬í™” ìˆ˜ì§‘ ì›ë˜ ìƒíƒœë¡œ ë³µêµ¬ (í™œì„±í™”)
     private void SetEndBattleAutoCollectState()
     {
         CatData[] allCats = FindObjectsOfType<CatData>();
@@ -992,7 +1085,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         }
     }
 
-    // ÀüÅõ½ÃÀÛ½Ã ºñÈ°¼ºÈ­µÇ´Â ¿ÜºÎ ±â´Éµé
+    // ì „íˆ¬ì‹œì‘ì‹œ ë¹„í™œì„±í™”ë˜ëŠ” ì™¸ë¶€ ê¸°ëŠ¥ë“¤
     private void SetStartFunctions()
     {
         MergeManager.Instance.StartBattleMergeState();
@@ -1005,7 +1098,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         BuyCatManager.Instance.StartBattleBuyCatState();
     }
 
-    // ÀüÅõÁ¾·á½Ã È°¼ºÈ­µÇ´Â ¿ÜºÎ ±â´Éµé
+    // ì „íˆ¬ì¢…ë£Œì‹œ í™œì„±í™”ë˜ëŠ” ì™¸ë¶€ ê¸°ëŠ¥ë“¤
     private void SetEndFunctions()
     {
         MergeManager.Instance.EndBattleMergeState();
@@ -1026,8 +1119,9 @@ public class BattleManager : MonoBehaviour, ISaveable
     [Serializable]
     private class SaveData
     {
-        public int bossStage;               // ÇöÀç º¸½º ½ºÅ×ÀÌÁö
-        public bool isAutoRetryEnabled;     // ÇÏÀ§ ´Ü°è ÀÚµ¿ µµÀü »óÅÂ
+        public int bossStage;               // í˜„ì¬ ë³´ìŠ¤ ìŠ¤í…Œì´ì§€
+        public bool isAutoRetryEnabled;     // í•˜ìœ„ ë‹¨ê³„ ìë™ ë„ì „ ìƒíƒœ
+        public List<int> clearedStages;
     }
 
     public string GetSaveData()
@@ -1035,7 +1129,8 @@ public class BattleManager : MonoBehaviour, ISaveable
         SaveData data = new SaveData
         {
             bossStage = this.bossStage,
-            isAutoRetryEnabled = this.isAutoRetryEnabled
+            isAutoRetryEnabled = this.isAutoRetryEnabled,
+            clearedStages = new List<int>(this.clearedStages)
         };
 
         return JsonUtility.ToJson(data);
@@ -1053,18 +1148,19 @@ public class BattleManager : MonoBehaviour, ISaveable
         this.bossStage = savedData.bossStage;
         this.currentMaxBossStage = savedData.bossStage;
         this.isAutoRetryEnabled = savedData.isAutoRetryEnabled;
+        this.clearedStages = new HashSet<int>(savedData.clearedStages ?? new List<int>());
 
         UpdateToggleButtonImage(autoRetryButtonImage, isAutoRetryEnabled);
         UpdateAutoRetryPanelButtonColor(isAutoRetryEnabled);
         UpdateAutoRetryUI(isAutoRetryEnabled, true);
 
-        // ÀüÅõ ÁßÀÌ¾ú´Ù¸é ÀüÅõ »óÅÂ ÃÊ±âÈ­
+        // ì „íˆ¬ ì¤‘ì´ì—ˆë‹¤ë©´ ì „íˆ¬ ìƒíƒœ ì´ˆê¸°í™”
         if (isBattleActive)
         {
             EndBattle(false);
         }
 
-        // Å¸ÀÌ¸Ó ÃÊ±âÈ­
+        // íƒ€ì´ë¨¸ ì´ˆê¸°í™”
         bossSpawnTimer = 0f;
         respawnSlider.value = 0f;
 

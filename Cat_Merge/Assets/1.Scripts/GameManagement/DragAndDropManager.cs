@@ -40,6 +40,8 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
     {
         isDragging = true;
 
+        GetComponent<AnimatorManager>().ChangeState(CharacterState.isGrab);
+
         // 드래그 시작 위치 오프셋 계산
         Vector2 localPointerPosition;
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
@@ -59,6 +61,7 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
     public void OnPointerClick(PointerEventData eventData)
     {
         isDragging = false;
+        GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
     }
 
     // 드래그 진행중 함수

@@ -19,12 +19,12 @@ public class BattleManager : MonoBehaviour, ISaveable
     [SerializeField] private Transform bossUIParent;            // 보스를 배치할 부모 Transform (UI Panel 등)
     [SerializeField] private Slider respawnSlider;              // 보스 소환까지 남은 시간을 표시할 Slider UI
 
-    private const float DEFAULT_SPAWN_INTERVAL = 300.0f;          // 보스 등장 주기 (원래 300f)
+    private const float DEFAULT_SPAWN_INTERVAL = 30.0f;          // 보스 등장 주기 (원래 300f)
     private float spawnInterval;                                // 보스 등장 주기
     private Coroutine respawnSliderCoroutine;                   // Slider 코루틴
     private float bossSpawnTimer = 0f;                          // 보스 스폰 타이머
     private float sliderDuration;                               // Slider 유지 시간
-    private const float DEFAULT_BOSS_DURATION = 30f;            // 보스 유지 시간
+    private const float DEFAULT_BOSS_DURATION = 30f;            // 보스 유지 시간 (원래 30f)
     private float bossDuration;                                 // 보스 유지 시간
     private int bossStage = 1;                                  // 보스 스테이지
     public int BossStage => bossStage;
@@ -35,7 +35,7 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     private GameObject currentBoss;                             // 현재 보스
     [HideInInspector] public BossHitbox bossHitbox;             // 보스 히트박스
-    private bool isBattleActive;                                // 전투 활성화 여부
+    public bool isBattleActive;                                // 전투 활성화 여부
     public bool IsBattleActive => isBattleActive;
 
 
@@ -413,11 +413,21 @@ public class BattleManager : MonoBehaviour, ISaveable
         bossHPSlider.maxValue = (float)maxBossHP;
         bossHPSlider.value = (float)currentBossHP;
         bossHPText.text = $"{100f}%";
-    }
+    } 
 
     // 전투 시작 함수
     private void StartBattle()
     {
+        CatData[] allCats = FindObjectsOfType<CatData>();
+        foreach (var cat in allCats)
+        {
+            AnimatorManager anim = cat.GetComponent<AnimatorManager>();
+            if (anim != null)
+            {
+                anim.ChangeState(CharacterState.isBattle);
+            }
+        }
+
         // 전투 시작시 여러 외부 기능들 비활성화
         SetStartFunctions();
 
@@ -676,6 +686,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     {
         while (IsBattleActive)
         {
+           
             yield return new WaitForSeconds(CAT_ATTACK_DELAY);
             CatsAttackBoss();
         }
@@ -705,6 +716,14 @@ public class BattleManager : MonoBehaviour, ISaveable
                 int damage = cat.catData.CatDamage;
                 TakeBossDamage(damage);
             }
+
+
+            AnimatorManager anim = cat.GetComponent<AnimatorManager>();
+            if (anim != null)
+            {
+                anim.ChangeState(CharacterState.isAttack);
+            }
+
         }
     }
 
@@ -844,6 +863,8 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 전투 종료 함수
     public void EndBattle(bool isVictory)
     {
+
+
         if (!isBattleActive)
         {
             return;
@@ -887,6 +908,15 @@ public class BattleManager : MonoBehaviour, ISaveable
         foreach (var cat in allCats)
         {
             cat.HealCatHP();
+        }
+
+        foreach (var cat in allCats)
+        {
+            AnimatorManager anim = cat.GetComponent<AnimatorManager>();
+            if (anim != null)
+            {
+                anim.ChangeState(CharacterState.isIdle);
+            }
         }
 
         // 자동 머지 재개

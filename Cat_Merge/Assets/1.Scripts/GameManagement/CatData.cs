@@ -6,7 +6,7 @@ using TMPro;
 // 고양이의 정보와 행동을 관리하는 스크립트
 public class CatData : MonoBehaviour, ICanvasRaycastFilter
 {
-
+    public static CatData Instance { get; private set; }
 
     #region Variables
 
@@ -113,7 +113,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
         catImage.sprite = catData.CatImage;
     }
-
+    
     // 고양이 데이터 설정
     public void SetCatData(Cat cat)
     {
@@ -121,6 +121,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         catHp = catData.CatHp;
         UpdateCatUI();
         UpdateHPBar();
+        GetComponent<AnimatorManager>().ApplyAnim(catData.CatGrade);
     }
 
     // HP 바 업데이트 함수
@@ -167,7 +168,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         BossHitbox bossHitbox = BattleManager.Instance.bossHitbox;
 
         // 고양이가 히트박스 외부에 있는 경우
-        if (!bossHitbox.IsInHitbox(catPosition))
+        if (!bossHitbox.IsInHitbox(catPosition) && BattleManager.Instance.isBattleActive)
         {
             // 히트박스 경계에 위치하도록 이동
             Vector3 targetPosition = bossHitbox.GetClosestBoundaryPoint(catPosition);
@@ -204,7 +205,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         //SetRaycastTarget(!isStunned);
         isStuned = isStunned;
         catImage.color = isStunned ? new Color(1f, 0.5f, 0.5f, 0.7f) : Color.white;
-
+        GetComponent<AnimatorManager>().ChangeState(CharacterState.isFaint);
         
 
         if (!isStunned)
@@ -214,6 +215,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             // 전투 중인지 확인
             if (BattleManager.Instance != null && BattleManager.Instance.IsBattleActive)
             {
+                GetComponent<AnimatorManager>().ChangeState(CharacterState.isBattle);
                 // 전투 중이면 자동 재화 수집과 자동 이동은 비활성화 상태 유지
                 SetCollectingCoinsState(false);
                 SetAutoMoveState(false);
@@ -224,6 +226,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             }
             else
             {
+                GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
                 // 전투 중이 아니면 모든 기능 활성화
                 SetCollectingCoinsState(true);
                 SetAutoMoveState(true);
@@ -232,6 +235,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
         else
         {
+            GetComponent<AnimatorManager>().ChangeState(CharacterState.isFaint);
             // 기절 상태로 진입할 때는 모든 기능 비활성화
             SetCollectingCoinsState(false);
             SetAutoMoveState(false);
@@ -356,7 +360,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     private IEnumerator SmoothMoveToPosition(Vector3 targetPosition)
     {
         isAnimating = true;
-
+       
         if (currentMoveCoroutine != null)
         {
             StopCoroutine(currentMoveCoroutine);
@@ -373,6 +377,10 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         float elapsed = 0f;
         float duration = 0.5f;
 
+        if (!BattleManager.Instance.isBattleActive)
+        {
+            GetComponent<AnimatorManager>().ChangeState(CharacterState.isWalk);
+        }
 
         while (elapsed < duration)
         {
@@ -383,6 +391,12 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
         rectTransform.anchoredPosition = targetPosition;
         isAnimating = false;
+
+        if (!BattleManager.Instance.isBattleActive)
+        {
+            GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
+        }
+            
 
         currentMoveCoroutine = null;
     }
@@ -396,7 +410,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     public void SetCollectingCoinsState(bool isEnabled)
     {
         isCollectingCoins = isEnabled;
-
+        
         if (isCollectingCoins)
         {
             
@@ -466,6 +480,11 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     // 재화 수집 애니메이션 실행
     private IEnumerator PlayCollectingAnimation(int collectedCoins)
     {
+        if(!BattleManager.Instance.isBattleActive)
+        {
+            GetComponent<AnimatorManager>().ChangeState(CharacterState.isGetCoin);
+        }
+        
         if (collectCoinText != null)
         {
             collectCoinText.text = $"+{collectedCoins}";
@@ -480,6 +499,11 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
         if (collectCoinText != null) collectCoinText.gameObject.SetActive(false);
         if (collectCoinImage != null) collectCoinImage.gameObject.SetActive(false);
+
+        if (!BattleManager.Instance.isBattleActive)
+        {
+            GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
+        }
     }
     
     #endregion

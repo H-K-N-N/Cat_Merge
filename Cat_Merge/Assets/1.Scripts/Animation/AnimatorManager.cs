@@ -4,6 +4,7 @@ using UnityEngine;
 
 public enum CharacterState
 {
+    isIdle,
     isWalk,
     isFaint,
     isGetCoin,
@@ -15,7 +16,7 @@ public enum CharacterState
 [System.Serializable]
 public struct GradeOverrideData
 {
-    public int grade; // 예: 1 = Normal, 2 = Rare, 3 = Legend
+    public int grade;
     public AnimatorOverrideController overrideController;
 }
 
@@ -25,14 +26,14 @@ public class AnimatorManager : MonoBehaviour
     public int catGrade;
     [Header("등급별 애니메이터 오버라이드 리스트")]
     public List<GradeOverrideData> overrideDataList;
-    private Dictionary<int, AnimatorOverrideController> overrideDict;
+    public Dictionary<int, AnimatorOverrideController> overrideDict;
 
     private CharacterState currentState;
+
 
     void Awake()
     {
         animator = GetComponent<Animator>();
-
         // 딕셔너리 초기화
         overrideDict = new Dictionary<int, AnimatorOverrideController>();
         foreach (var data in overrideDataList)
@@ -44,30 +45,14 @@ public class AnimatorManager : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        Cat catData = GameManager.Instance.AllCatData[2];
-        if (catData != null)
-        {
-            Debug.Log(catData);
-        }
-        else
-        {
-            Debug.Log("널");
-        }
-        catGrade = catData.CatGrade;
-        Debug.Log($"등급: {catGrade}");
-        ApplyAnimatorOverride(catGrade);
-    }
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1)) ChangeState(CharacterState.isWalk);
-        if (Input.GetKeyDown(KeyCode.Alpha2)) ChangeState(CharacterState.isFaint);
-        if (Input.GetKeyDown(KeyCode.Alpha3)) ChangeState(CharacterState.isGetCoin);
-        if (Input.GetKeyDown(KeyCode.Alpha4)) ChangeState(CharacterState.isGrab);
-        if (Input.GetKeyDown(KeyCode.Alpha5)) ChangeState(CharacterState.isBattle);
-        if (Input.GetKeyDown(KeyCode.Alpha6)) ChangeState(CharacterState.isAttack);
-
+        //if (Input.GetKeyDown(KeyCode.Alpha1)) ChangeState(CharacterState.isWalk);
+        //if (Input.GetKeyDown(KeyCode.Alpha2)) ChangeState(CharacterState.isFaint);
+        //if (Input.GetKeyDown(KeyCode.Alpha3)) ChangeState(CharacterState.isGetCoin);
+        //if (Input.GetKeyDown(KeyCode.Alpha4)) ChangeState(CharacterState.isGrab);
+        //if (Input.GetKeyDown(KeyCode.Alpha5)) ChangeState(CharacterState.isBattle);
+        //if (Input.GetKeyDown(KeyCode.Alpha6)) ChangeState(CharacterState.isAttack);
     }
     public void ChangeState(CharacterState newState)
     {
@@ -81,6 +66,7 @@ public class AnimatorManager : MonoBehaviour
 
     private void ResetAllStateBools()
     {
+        animator.SetBool("isIdle", false);
         animator.SetBool("isWalk", false);
         animator.SetBool("isFaint", false);
         animator.SetBool("isGetCoin", false);
@@ -94,7 +80,7 @@ public class AnimatorManager : MonoBehaviour
         animator.SetBool(state.ToString(), true);
     }
 
-    void ApplyAnimatorOverride(int grade)
+    public void ApplyAnimatorOverride(int grade)
     {
         if (overrideDict.ContainsKey(grade))
         {
@@ -104,6 +90,11 @@ public class AnimatorManager : MonoBehaviour
         {
             Debug.LogWarning($"해당 등급({grade})의 오버라이드 컨트롤러가 등록되지 않았습니다!");
         }
+    }
+
+    public void ApplyAnim(int grade)
+    {
+        ApplyAnimatorOverride(grade);
     }
 }
 

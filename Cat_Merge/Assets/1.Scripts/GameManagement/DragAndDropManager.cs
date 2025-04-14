@@ -115,6 +115,14 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
     {
         isDragging = false;
 
+        if (BattleManager.Instance.IsBattleActive)
+        {
+            GetComponent<AnimatorManager>().ChangeState(CharacterState.isBattle);
+        }
+        else
+        {
+            GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
+        }
 
         if (BattleManager.Instance.IsBattleActive)
         {

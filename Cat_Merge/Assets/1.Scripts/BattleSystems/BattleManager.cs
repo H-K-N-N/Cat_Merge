@@ -733,13 +733,16 @@ public class BattleManager : MonoBehaviour, ISaveable
                 TakeBossDamage(damage);
             }
 
-
-            AnimatorManager anim = cat.GetComponent<AnimatorManager>();
-            if (anim != null)
+            // 드래그 중이 아닌 고양이만 전투 애니메이션으로 변경
+            DragAndDropManager dragManager = cat.GetComponent<DragAndDropManager>();
+            if (dragManager != null && !dragManager.isDragging)
             {
-                anim.ChangeState(CharacterState.isAttack);
+                AnimatorManager anim = cat.GetComponent<AnimatorManager>();
+                if (anim != null)
+                {
+                    anim.ChangeState(CharacterState.isAttack);
+                }
             }
-
         }
     }
 

@@ -20,7 +20,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     [SerializeField] private Slider respawnSlider;              // 보스 소환까지 남은 시간을 표시할 Slider UI
 
 
-    private const float DEFAULT_SPAWN_INTERVAL = 20f;          // 보스 등장 주기
+    private const float DEFAULT_SPAWN_INTERVAL = 30f;          // 보스 등장 주기
     private float spawnInterval;                                // 보스 등장 주기
     private Coroutine respawnSliderCoroutine;                   // Slider 코루틴
     private float bossSpawnTimer = 0f;                          // 보스 스폰 타이머
@@ -705,7 +705,6 @@ public class BattleManager : MonoBehaviour, ISaveable
     {
         while (IsBattleActive)
         {
-           
             yield return new WaitForSeconds(CAT_ATTACK_DELAY);
             CatsAttackBoss();
         }

@@ -38,8 +38,8 @@ public class BuyCatManager : MonoBehaviour, ISaveable
         public int catGrade;
         public int coinPurchaseCount;
         public int cashPurchaseCount;
-        public decimal coinPrice;
-        public decimal cashPrice;
+        public long coinPrice;
+        public long cashPrice;
     }
 
     // 모든 고양이 구매 정보를 관리하는 딕셔너리
@@ -302,7 +302,7 @@ public class BuyCatManager : MonoBehaviour, ISaveable
         catPurchaseInfos.Clear();
         foreach (var info in savedData.purchaseInfos)
         {
-            if (info.catGrade < 3)
+            //if (info.catGrade < 3)
             {
                 catPurchaseInfos[info.catGrade] = new CatPurchaseInfo
                 {

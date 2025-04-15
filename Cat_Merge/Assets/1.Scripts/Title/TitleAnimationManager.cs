@@ -37,7 +37,7 @@ public class TitleAnimationManager : MonoBehaviour
 
     [Header("Title Drop Animation Settings")]
     private float startY = 1300f;                               // 시작 Y 좌표
-    private float endY = 700f;                                  // 최종 Y 좌표
+    private float endY = 500f;                                  // 최종 Y 좌표
 
     [Header("Title Breathing Animation Settings")]
     private float breathingDuration = 3.0f;                     // 한 번의 호흡 주기 시간
@@ -147,7 +147,7 @@ public class TitleAnimationManager : MonoBehaviour
         level2Cat.gameObject.SetActive(true);
 
         // 4. 잠시 대기
-        yield return new WaitForSeconds(waitDuration);
+        yield return new WaitForSeconds(waitDuration * 1.5f);
 
         // 5. 카메라 줌아웃
         yield return StartCoroutine(ResetZoom());
@@ -180,6 +180,9 @@ public class TitleAnimationManager : MonoBehaviour
         Vector2 leftStart = level1CatLeft.anchoredPosition;
         Vector2 rightStart = level1CatRight.anchoredPosition;
 
+        level1CatLeft.GetComponent<AnimatorManager>().ChangeState(CharacterState.isWalk);
+        level1CatRight.GetComponent<AnimatorManager>().ChangeState(CharacterState.isWalk);
+
         while (elapsed < moveDuration)
         {
             elapsed += Time.deltaTime;
@@ -191,6 +194,9 @@ public class TitleAnimationManager : MonoBehaviour
 
             yield return null;
         }
+
+        level1CatLeft.GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
+        level1CatRight.GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
 
         level1CatLeft.anchoredPosition = centerPos;
         level1CatRight.anchoredPosition = centerPos;
@@ -221,65 +227,7 @@ public class TitleAnimationManager : MonoBehaviour
 
     #region Title Name Drop
 
-    //// 타이틀 제목 드랍 애니메이션 코루틴 (1안)
-    //private IEnumerator TitleDropAnimation()
-    //{
-    //    titleNameImage.anchoredPosition = new Vector2(0, startY);
-
-    //    float gravity = 3000f;              // 중력 가속도
-    //    float dampening = 0.4f;             // 튕길 때 에너지 손실 계수
-    //    float velocity = 0f;                // 현재 속도
-    //    float currentY = startY;            // 현재 Y 위치
-
-    //    float maxDuration = 3f;             // 최대 실행 시간 (3초)
-    //    float elapsedTime = 0f;             // 총 경과 시간
-    //    float stuckTime = 0f;               // 같은 위치에 머무른 시간
-    //    Vector2 lastPosition = titleNameImage.anchoredPosition;
-
-    //    while (elapsedTime < maxDuration)
-    //    {
-    //        elapsedTime += Time.deltaTime;
-    //        float deltaTime = Time.deltaTime;
-
-    //        // 중력 적용
-    //        velocity -= gravity * deltaTime;
-
-    //        // 새로운 위치 계산
-    //        currentY += velocity * deltaTime;
-
-    //        // 바닥 충돌 체크
-    //        if (currentY < endY + 0.01f)
-    //        {
-    //            currentY = endY;
-    //            velocity = -velocity * dampening;
-    //        }
-
-    //        // 현재 위치 적용
-    //        Vector2 newPosition = new Vector2(0, currentY);
-    //        titleNameImage.anchoredPosition = newPosition;
-
-    //        // 정지 상태 감지 후 종료
-    //        if (Vector2.Distance(newPosition, lastPosition) < 0.01f)
-    //        {
-    //            stuckTime += deltaTime;
-    //            if (stuckTime > 0.5f)
-    //            {
-    //                break;
-    //            }
-    //        }
-    //        else
-    //        {
-    //            stuckTime = 0f;
-    //        }
-
-    //        lastPosition = newPosition;
-    //        yield return null;
-    //    }
-
-    //    titleNameImage.anchoredPosition = new Vector2(0, endY);
-    //}
-
-    // 타이틀 제목 드랍 애니메이션 코루틴 (2안)
+    // 타이틀 제목 드랍 애니메이션 코루틴
     private IEnumerator TitleDropAnimation()
     {
         titleNameImage.anchoredPosition = new Vector2(0, startY);
@@ -502,6 +450,8 @@ public class TitleAnimationManager : MonoBehaviour
 
         catTransform.rotation = Quaternion.Euler(0f, rotation, 0f);
 
+        catTransform.GetComponent<AnimatorManager>().ChangeState(CharacterState.isWalk);
+
         while (elapsed < moveDurationCat)
         {
             elapsed += Time.deltaTime;
@@ -511,6 +461,8 @@ public class TitleAnimationManager : MonoBehaviour
             catTransform.anchoredPosition = Vector3.Lerp(startPosition, targetPosition, smoothT);
             yield return null;
         }
+
+        catTransform.GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
 
         catTransform.anchoredPosition = targetPosition;
         isAnimating = false;

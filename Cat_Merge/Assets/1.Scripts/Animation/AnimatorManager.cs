@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public enum CharacterState
 {
@@ -42,6 +43,12 @@ public class AnimatorManager : MonoBehaviour
             {
                 overrideDict.Add(data.grade, data.overrideController);
             }
+        }
+
+        // TitleScene인 경우 catGrade를 사용한 등급 적용
+        if (SceneManager.GetActiveScene().name == "TitleScene")
+        {
+            ApplyAnim(catGrade);
         }
     }
 

@@ -91,6 +91,11 @@ public class ShopManager : MonoBehaviour, ISaveable
         StopAllCoroutines();
     }
 
+    private void OnDestroy()
+    {
+        StopAllCoroutines();
+    }
+
     #endregion
 
 
@@ -323,13 +328,32 @@ public class ShopManager : MonoBehaviour, ISaveable
     // 현재 코인 배수를 가져오는 함수
     public float CurrentCoinMultiplier
     {
-        get => Time.time < multiplierEndTime ? coinMultiplier : 1f;
+        get
+        {
+            if (Time.time < multiplierEndTime)
+            {
+                return coinMultiplier;
+            }
+            else
+            {
+                // 효과가 끝났을 때 초기화
+                if (coinMultiplier != 1f)
+                {
+                    coinMultiplier = 1f;
+                    multiplierEndTime = 0f;
+                    isBattlePaused = false;
+                    battlePauseTime = 0f;
+                    UpdateDoubleCoinForAdUI();
+                }
+                return 1f;
+            }
+        }
     }
 
     // 배수 효과 남은 시간을 가져오는 함수
     public float GetRemainingEffectTime()
     {
-        if (BattleManager.Instance.IsBattleActive)
+        if (BattleManager.Instance != null && BattleManager.Instance.IsBattleActive)
         {
             if (!isBattlePaused)
             {
@@ -376,44 +400,50 @@ public class ShopManager : MonoBehaviour, ISaveable
     // DoubleCoinForAd 광고 시청 완료 시 실행되는 함수
     public void OnDoubleCoinAdRewardComplete()
     {
-        // 기존 효과 지속시간 계산
-        float remainingTime = GetRemainingEffectTime();
-
-        // 광고 보상 지급 - 모든 고양이의 재화 수급량 300초동안 2배로 증가
-        coinMultiplier = doubleCoinMultiplier;
-
-        // 기존 효과 지속시간이 있으면 그 시간에 새로운 지속시간을 더함
-        if (remainingTime > 0)
+        if (isWaitingForAd)
         {
-            multiplierEndTime = Time.time + remainingTime + doubleCoinDuration;
+            // 기존 효과 지속시간 계산
+            float remainingTime = GetRemainingEffectTime();
+
+            // 광고 보상 지급 - 모든 고양이의 재화 수급량 300초동안 2배로 증가
+            coinMultiplier = doubleCoinMultiplier;
+
+            // 기존 효과 지속시간이 있으면 그 시간에 새로운 지속시간을 더함
+            if (remainingTime > 0)
+            {
+                multiplierEndTime = Time.time + remainingTime + doubleCoinDuration;
+            }
+            else
+            {
+                multiplierEndTime = Time.time + doubleCoinDuration;
+            }
+
+            // 전투 관련 상태 초기화
+            isBattlePaused = false;
+            battlePauseTime = 0f;
+
+            // 마지막 광고 시청 시간 저장
+            lastDoubleCoinTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+            // CashForTime의 마지막 보상 시간을 광고 시청 시간만큼 조정
+            if (remainingCoolTimeBeforeAd > 0)
+            {
+                lastTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - (cashForTimeCoolTime - remainingCoolTimeBeforeAd);
+            }
+
+            // CashForAd의 마지막 보상 시간을 광고 시청 시간만큼 조정
+            if (remainingCashAdCoolTimeBeforeAd > 0)
+            {
+                lastAdTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - (cashForAdCoolTime - remainingCashAdCoolTimeBeforeAd);
+            }
+
+            // 상태 업데이트
+            isWaitingForAd = false;
+            UpdateDoubleCoinForAdUI();
+
+            // 저장은 마지막에 실행
+            GoogleSave();
         }
-        else
-        {
-            multiplierEndTime = Time.time + doubleCoinDuration;
-        }
-
-        isBattlePaused = false;
-        battlePauseTime = 0f;
-
-        // 마지막 광고 시청 시간 저장
-        lastDoubleCoinTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-        // CashForTime의 마지막 보상 시간을 광고 시청 시간만큼 조정
-        if (remainingCoolTimeBeforeAd > 0)
-        {
-            lastTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - (cashForTimeCoolTime - remainingCoolTimeBeforeAd);
-        }
-
-        // CashForAd의 마지막 보상 시간을 광고 시청 시간만큼 조정
-        if (remainingCashAdCoolTimeBeforeAd > 0)
-        {
-            lastAdTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - (cashForAdCoolTime - remainingCashAdCoolTimeBeforeAd);
-        }
-
-        GoogleSave();
-
-        isWaitingForAd = false;
-        UpdateDoubleCoinForAdUI();
     }
 
     #endregion

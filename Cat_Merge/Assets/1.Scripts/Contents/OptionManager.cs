@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using TMPro;
 
 // 옵션 스크립트
 public class OptionManager : MonoBehaviour, ISaveable
@@ -140,6 +141,9 @@ public class OptionManager : MonoBehaviour, ISaveable
     [Header("---[System]")]
     [SerializeField] private Transform slotPanel;                   // 슬롯 버튼들의 부모 패널
     [SerializeField] private Button[] slotButtons;                  // 슬롯 버튼 배열
+    [SerializeField] private Button saveButton;                     // 저장 버튼
+    [SerializeField] private GameObject savePanel;                  // 저장 패널
+    [SerializeField] private TextMeshProUGUI saveStatusText;        // 저장 상태 텍스트
     [SerializeField] private Button quitButton;                     // 나가기 버튼
     [SerializeField] private GameObject informationPanel;           // 정보 패널들의 부모 패널
     [SerializeField] private GameObject[] informationPanels;        // 정보 패널 배열
@@ -149,6 +153,9 @@ public class OptionManager : MonoBehaviour, ISaveable
     private CanvasGroup slotPanelGroup;                             // 슬롯 패널의 CanvasGroup
     private const float systemAnimDuration = 0.5f;                  // 시스템 애니메이션 지속 시간
     private int currentActivePanel = -1;                            // 현재 활성화된 패널 인덱스
+
+    private const float SAVE_DURATION = 4f;                         // 저장 지속 시간 (3~5초)
+    private Coroutine saveCoroutine;                                // 저장 코루틴
 
     // ======================================================================================================================
     // [옵션 메뉴 타입 정의]
@@ -522,6 +529,7 @@ public class OptionManager : MonoBehaviour, ISaveable
 
         // InformationPanel 초기 설정
         informationPanel.SetActive(false);
+        savePanel.SetActive(false);
 
         // 버튼 및 패널 초기화
         originalButtonPositions = new Vector2[slotButtons.Length];
@@ -561,6 +569,13 @@ public class OptionManager : MonoBehaviour, ISaveable
             }
         });
 
+        // saveButton에 CanvasGroup 추가
+        CanvasGroup saveButtonGroup = saveButton.gameObject.GetComponent<CanvasGroup>();
+        if (saveButtonGroup == null)
+        {
+            saveButtonGroup = saveButton.gameObject.AddComponent<CanvasGroup>();
+        }
+
         // quitButton에 CanvasGroup 추가
         CanvasGroup exitButtonGroup = quitButton.gameObject.GetComponent<CanvasGroup>();
         if (exitButtonGroup == null)
@@ -583,6 +598,8 @@ public class OptionManager : MonoBehaviour, ISaveable
             ResetSystemMenu();
         });
 
+        // Save 버튼 클릭 이벤트 추가
+        saveButton.onClick.AddListener(() => { StartSaveProcess(); });
         // Quit 버튼 클릭 이벤트 추가
         quitButton.onClick.AddListener(() => { GameManager.Instance.HandleQuitInput(); });
     }
@@ -601,6 +618,7 @@ public class OptionManager : MonoBehaviour, ISaveable
 
         slotPanel.gameObject.SetActive(true);
         informationPanel.SetActive(false);
+        savePanel.SetActive(false);
 
         // 모든 버튼 초기화
         for (int i = 0; i < slotButtons.Length; i++)
@@ -612,6 +630,10 @@ public class OptionManager : MonoBehaviour, ISaveable
             buttonGroup.alpha = 1f;
         }
 
+        // Save 버튼 초기화
+        saveButton.gameObject.SetActive(true);
+        saveButton.GetComponent<CanvasGroup>().alpha = 1f;
+
         // Quit 버튼 초기화
         quitButton.gameObject.SetActive(true);
         quitButton.GetComponent<CanvasGroup>().alpha = 1f;
@@ -620,6 +642,66 @@ public class OptionManager : MonoBehaviour, ISaveable
         informationPanelBackButton.GetComponent<CanvasGroup>().alpha = 0f;
 
         currentActivePanel = -1;
+
+        //// 저장 코루틴이 실행 중이면 중지
+        //if (saveCoroutine != null)
+        //{
+        //    StopCoroutine(saveCoroutine);
+        //    saveCoroutine = null;
+        //}
+    }
+
+    // 저장 프로세스 시작 함수
+    private void StartSaveProcess()
+    {
+        if (saveCoroutine != null)
+        {
+            StopCoroutine(saveCoroutine);
+        }
+        saveCoroutine = StartCoroutine(SaveProcess());
+    }
+
+    // 저장 프로세스 코루틴
+    private IEnumerator SaveProcess()
+    {
+        // 저장 패널 활성화
+        savePanel.SetActive(true);
+        saveStatusText.text = "저장 중......";
+
+        // 게임 일시정지
+        Time.timeScale = 0f;
+
+#if UNITY_EDITOR
+        // 에디터 환경에서는 가상의 저장 프로세스 실행
+        Debug.Log("에디터 환경에서는 저장이 실행되지 않습니다.");
+        yield return new WaitForSecondsRealtime(2f);
+#else
+        // 실제 빌드 환경에서만 GoogleManager를 통해 강제 저장
+        bool saveCompleted = false;
+        GoogleManager.Instance.SaveGameStateSync((success) => { saveCompleted = true; });
+
+        // 저장 완료 대기
+        float elapsedTime = 0f;
+        while (!saveCompleted && elapsedTime < SAVE_DURATION)
+        {
+            elapsedTime += Time.unscaledDeltaTime;
+            yield return null;
+        }
+#endif
+
+        // 저장 상태 텍스트 업데이트
+        saveStatusText.text = "저장 완료!!";
+
+        // 1초 대기
+        yield return new WaitForSecondsRealtime(1f);
+
+        // 저장 패널 비활성화
+        savePanel.SetActive(false);
+
+        // 게임 재개
+        Time.timeScale = 1f;
+
+        saveCoroutine = null;
     }
 
     // 슬롯 버튼 클릭 이벤트 처리 함수
@@ -646,6 +728,7 @@ public class OptionManager : MonoBehaviour, ISaveable
                 animations.Add(FadeButton(slotButtons[i].GetComponent<CanvasGroup>(), 1f, 0f));
             }
         }
+        animations.Add(FadeButton(saveButton.GetComponent<CanvasGroup>(), 1f, 0f));
         animations.Add(FadeButton(quitButton.GetComponent<CanvasGroup>(), 1f, 0f));
 
         foreach (var anim in animations)
@@ -663,6 +746,7 @@ public class OptionManager : MonoBehaviour, ISaveable
                 slotButtons[i].gameObject.SetActive(false);
             }
         }
+        saveButton.gameObject.SetActive(false);
         quitButton.gameObject.SetActive(false);
 
         // 정보 패널 활성화 및 펼치기 애니메이션
@@ -767,6 +851,7 @@ public class OptionManager : MonoBehaviour, ISaveable
         {
             slotButtons[i].gameObject.SetActive(true);
         }
+        saveButton.gameObject.SetActive(true);
         quitButton.gameObject.SetActive(true);
 
         // 버튼 이동 및 페이드 인 동시 실행
@@ -779,6 +864,7 @@ public class OptionManager : MonoBehaviour, ISaveable
                 animations.Add(FadeButton(slotButtons[i].GetComponent<CanvasGroup>(), 0f, 1f));
             }
         }
+        animations.Add(FadeButton(saveButton.GetComponent<CanvasGroup>(), 0f, 1f));
         animations.Add(FadeButton(quitButton.GetComponent<CanvasGroup>(), 0f, 1f));
 
         foreach (var anim in animations)

@@ -747,7 +747,7 @@ public class BattleManager : MonoBehaviour, ISaveable
             AnimatorManager anim = cat.GetComponent<AnimatorManager>();
 
             // 드래그 중이 아닐 때만 애니메이션 상태 변경
-            if (dragManager != null && !dragManager.isDragging && anim != null)
+            if (dragManager != null && !dragManager.isDragging && anim != null && !cat.isStuned)
             {
                 if (bossHitbox.IsAtBoundary(catPosition))
                 {
@@ -759,7 +759,7 @@ public class BattleManager : MonoBehaviour, ISaveable
                     anim.ChangeState(CharacterState.isAttack);
 
                     // 공격 후 전투 대기 상태로 돌아가는 코루틴 시작
-                    StartCoroutine(ReturnToBattleStateCat(anim));
+                    StartCoroutine(ReturnToBattleStateCat(cat));
                 }
                 else
                 {
@@ -771,16 +771,17 @@ public class BattleManager : MonoBehaviour, ISaveable
     }
 
     // 공격 후 전투 대기 상태로 돌아가는 코루틴
-    private IEnumerator ReturnToBattleStateCat(AnimatorManager anim)
+    private IEnumerator ReturnToBattleStateCat(CatData cat)
     {
         // 공격 애니메이션이 재생되는 시간
         yield return new WaitForSeconds(1f);
 
         // 전투가 아직 진행 중이고, 해당 고양이가 아직 활성화 상태일 때만 상태 변경
-        if (isBattleActive && anim != null && anim.gameObject.activeSelf)
+        if (isBattleActive && cat != null && cat.gameObject.activeSelf && !cat.isStuned)
         {
-            DragAndDropManager dragManager = anim.GetComponent<DragAndDropManager>();
-            if (dragManager != null && !dragManager.isDragging)
+            DragAndDropManager dragManager = cat.GetComponent<DragAndDropManager>();
+            AnimatorManager anim = cat.GetComponent<AnimatorManager>();
+            if (dragManager != null && !dragManager.isDragging && anim != null)
             {
                 anim.ChangeState(CharacterState.isBattle);
             }

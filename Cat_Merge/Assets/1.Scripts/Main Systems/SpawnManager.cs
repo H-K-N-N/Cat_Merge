@@ -3,6 +3,7 @@ using TMPro;
 using System.Collections;
 using UnityEngine.UI;
 using System;
+using System.Collections.Generic;
 
 // 고양이 스폰 스크립트
 [DefaultExecutionOrder(-3)]
@@ -23,6 +24,11 @@ public class SpawnManager : MonoBehaviour, ISaveable
     [SerializeField] public Image autoFillAmountImg;                // 자동소환 이미지
 
     [SerializeField] public GameObject effectPrefab;
+
+    // 오브젝트 풀 관련 변수
+    private const int POOL_SIZE = 60;                               // 풀 크기
+    private Queue<GameObject> catPool = new Queue<GameObject>();    // 고양이 오브젝트 풀
+    private List<GameObject> activeCats = new List<GameObject>();   // 활성화된 고양이 목록
 
     private int nowFood = 5;                                        // 현재 먹이 갯수
     public int NowFood
@@ -70,6 +76,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
             NowFood = 5;
         }
 
+        InitializeObjectPool();
         InitializeSpawnSystem();
         UpdateFoodText();
     }
@@ -84,6 +91,46 @@ public class SpawnManager : MonoBehaviour, ISaveable
     {
         createFoodCoroutine = StartCoroutine(CreateFoodTime());
         autoCollectCoroutine = StartCoroutine(AutoCollectingTime());
+    }
+
+    #endregion
+
+
+    #region Object Pool
+
+    // 오브젝트 풀 초기화
+    private void InitializeObjectPool()
+    {
+        for (int i = 0; i < POOL_SIZE; i++)
+        {
+            GameObject cat = Instantiate(GameManager.Instance.catPrefab, catUIParent);
+            cat.SetActive(false);
+            catPool.Enqueue(cat);
+        }
+    }
+
+    // 풀에서 고양이 오브젝트 가져오기
+    private GameObject GetCatFromPool()
+    {
+        if (catPool.Count > 0)
+        {
+            GameObject cat = catPool.Dequeue();
+            cat.SetActive(true);
+            activeCats.Add(cat);
+            return cat;
+        }
+        return null;
+    }
+
+    // 고양이 오브젝트를 풀에 반환
+    public void ReturnCatToPool(GameObject cat)
+    {
+        if (cat != null)
+        {
+            cat.SetActive(false);
+            activeCats.Remove(cat);
+            catPool.Enqueue(cat);
+        }
     }
 
     #endregion
@@ -116,12 +163,14 @@ public class SpawnManager : MonoBehaviour, ISaveable
     private void SpawnBasicCat()
     {
         Cat catData = GetCatDataForSpawn();
-        LoadAndDisplayCats(catData);
+        GameObject newCat = LoadAndDisplayCats(catData);
 
-        GameManager.Instance.AddCatCount();
-        QuestManager.Instance.AddSpawnCount();
-
-        FriendshipManager.Instance.AddExperience(1, 1);
+        if (newCat != null)
+        {
+            GameManager.Instance.AddCatCount();
+            QuestManager.Instance.AddSpawnCount();
+            FriendshipManager.Instance.AddExperience(1, 1);
+        }
     }
 
     // 먹이 생성 코루틴 재시작 함수
@@ -141,10 +190,12 @@ public class SpawnManager : MonoBehaviour, ISaveable
         Cat catData = GetCatDataForSpawn();
         GameObject newCat = LoadAndDisplayCats(catData);
 
-        SetupCatData(newCat, 0);
-        GameManager.Instance.AddCatCount();
-
-        FriendshipManager.Instance.AddExperience(1, 1);
+        if (newCat != null)
+        {
+            SetupCatData(newCat, 0);
+            GameManager.Instance.AddCatCount();
+            FriendshipManager.Instance.AddExperience(1, 1);
+        }
     }
 
     // 구매한 고양이 스폰 함수 (BuyCat)
@@ -155,10 +206,12 @@ public class SpawnManager : MonoBehaviour, ISaveable
         Cat catData = GameManager.Instance.AllCatData[grade];
         GameObject newCat = LoadAndDisplayCats(catData);
 
-        SetupCatData(newCat, grade);
-        GameManager.Instance.AddCatCount();
-
-        FriendshipManager.Instance.AddExperience(grade + 1, 1);
+        if (newCat != null)
+        {
+            SetupCatData(newCat, grade);
+            GameManager.Instance.AddCatCount();
+            FriendshipManager.Instance.AddExperience(grade + 1, 1);
+        }
     }
 
     // 고양이 데이터 설정 함수
@@ -208,7 +261,8 @@ public class SpawnManager : MonoBehaviour, ISaveable
     // Panel내 랜덤 위치에 고양이 배치하는 함수
     public GameObject LoadAndDisplayCats(Cat catData)
     {
-        GameObject catUIObject = Instantiate(GameManager.Instance.catPrefab, catUIParent);
+        GameObject catUIObject = GetCatFromPool();
+        if (catUIObject == null) return null;
 
         // CatData 설정
         if (catUIObject.TryGetComponent<CatData>(out var catUIData))
@@ -347,6 +401,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
         nowAndMaxFoodText.text = $"({nowFood} / {maxFood})";
     }
 
+    // 구름 이펙트 적용 함수
     public void RecallEffect(GameObject catObj)
     {
         GameObject recallEffect = Instantiate(effectPrefab, catObj.transform.position, Quaternion.identity);
@@ -379,7 +434,16 @@ public class SpawnManager : MonoBehaviour, ISaveable
     [Serializable]
     private class SaveData
     {
-        public int nowFood;                         // 현재 음식
+        public int nowFood;                                                     // 현재 음식
+        public List<CatInstanceData> activeCats = new List<CatInstanceData>();  // 활성화된 고양이 데이터
+    }
+
+    [Serializable]
+    private class CatInstanceData
+    {
+        public int catGrade;
+        public float posX;
+        public float posY;
     }
 
     public string GetSaveData()
@@ -387,7 +451,24 @@ public class SpawnManager : MonoBehaviour, ISaveable
         SaveData data = new SaveData
         {
             nowFood = this.nowFood,
+            activeCats = new List<CatInstanceData>()
         };
+
+        // 활성화된 고양이 데이터 저장
+        foreach (var cat in activeCats)
+        {
+            if (cat.TryGetComponent<CatData>(out var catData) &&
+                cat.TryGetComponent<RectTransform>(out var rectTransform))
+            {
+                data.activeCats.Add(new CatInstanceData
+                {
+                    catGrade = catData.catData.CatGrade,
+                    posX = rectTransform.anchoredPosition.x,
+                    posY = rectTransform.anchoredPosition.y
+                });
+            }
+        }
+
         return JsonUtility.ToJson(data);
     }
 
@@ -397,8 +478,26 @@ public class SpawnManager : MonoBehaviour, ISaveable
 
         SaveData savedData = JsonUtility.FromJson<SaveData>(data);
         this.nowFood = savedData.nowFood;
-
         UpdateFoodText();
+
+        // 기존 활성화된 고양이들을 풀로 반환
+        foreach (var cat in activeCats.ToArray())
+        {
+            ReturnCatToPool(cat);
+        }
+        activeCats.Clear();
+
+        // 저장된 고양이 데이터로 재생성
+        foreach (var catData in savedData.activeCats)
+        {
+            Cat cat = GameManager.Instance.AllCatData[catData.catGrade - 1];
+            GameObject newCat = LoadAndDisplayCats(cat);
+            if (newCat != null && newCat.TryGetComponent<RectTransform>(out var rectTransform))
+            {
+                rectTransform.anchoredPosition = new Vector2(catData.posX, catData.posY);
+                GameManager.Instance.AddCatCount();
+            }
+        }
 
         int maxFood = (int)ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value;
         if (this.nowFood < maxFood)

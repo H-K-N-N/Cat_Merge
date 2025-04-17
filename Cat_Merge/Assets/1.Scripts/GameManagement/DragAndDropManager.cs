@@ -5,6 +5,10 @@ using UnityEngine.EventSystems;
 // 고양이 드래그 앤 드랍 Script
 public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, IPointerDownHandler, IPointerClickHandler
 {
+
+
+    #region Variables
+
     public Cat catData;                                 // 드래그하는 고양이의 데이터
     public RectTransform rectTransform;                 // RectTransform 참조
     private Canvas parentCanvas;                        // 부모 Canvas 참조
@@ -19,7 +23,10 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
     private const float EDGE_PUSH = 30f;                // 가장자리에서 밀어내는 거리
     private const float MERGE_DETECTION_SCALE = 0.1f;   // 합성 감지 범위 스케일
 
-    // ======================================================================================================================
+    #endregion
+
+
+    #region Unity Methods
 
     private void Awake()
     {
@@ -27,13 +34,15 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         parentCanvas = GetComponentInParent<Canvas>();
         parentRect = rectTransform.parent.GetComponent<RectTransform>();
 
-        // 패널 경계 미리 계산
         Vector2 panelSize = parentRect.rect.size * 0.5f;
         panelBoundsMin = -panelSize;
         panelBoundsMax = panelSize;
     }
 
-    // ======================================================================================================================
+    #endregion
+
+
+    #region Click & Drag and Drop
 
     // 클릭한 순간
     public void OnPointerDown(PointerEventData eventData)
@@ -64,15 +73,11 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
     }
 
-    // 드래그 진행중 함수
+    // 드래그 진행중
     public void OnDrag(PointerEventData eventData)
     {
         Vector2 localPointerPosition;
-        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            parentRect, eventData.position, parentCanvas.worldCamera, out localPointerPosition))
-        {
-            return;
-        }
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRect, eventData.position, parentCanvas.worldCamera, out localPointerPosition)) return;
 
         // 드래그 오프셋 적용 및 위치 제한
         Vector2 targetPosition = localPointerPosition + dragOffset;
@@ -110,37 +115,30 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         }
     }
 
-    // 드래그 종료 함수
+    // 드래그 종료
     public void OnEndDrag(PointerEventData eventData)
     {
+        if (!gameObject.activeSelf) return;
+
         isDragging = false;
 
         if (BattleManager.Instance.IsBattleActive)
         {
             GetComponent<AnimatorManager>().ChangeState(CharacterState.isBattle);
-        }
-        else
-        {
-            GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
-        }
-
-        if (BattleManager.Instance.IsBattleActive)
-        {
             BattleDrop(eventData);
         }
         else
         {
+            GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
+
             // 가장자리 드랍 체크는 머지 상태와 관계없이 항상 실행
             CheckEdgeDrop();
 
             // 머지 상태가 OFF일 경우 머지 X
-            if (!MergeManager.Instance.IsMergeEnabled())
-            {
-                return;
-            }
+            if (!MergeManager.Instance.IsMergeEnabled()) return;
 
             DragAndDropManager nearbyCat = FindNearbyCat();
-            if (nearbyCat != null && nearbyCat != this)
+            if (nearbyCat != null && nearbyCat != this && nearbyCat.gameObject.activeSelf)
             {
                 // 동일한 등급 확인 후 합성 처리
                 if (nearbyCat.catData.CatGrade == this.catData.CatGrade)
@@ -150,19 +148,7 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
                     {
                         StartCoroutine(PullNearbyCat(nearbyCat));
                     }
-                    else
-                    {
-                        //Debug.LogWarning("다음 등급의 고양이가 없음");
-                    }
                 }
-                else
-                {
-                    //Debug.LogWarning("등급이 다름");
-                }
-            }
-            else
-            {
-                //Debug.Log("드랍한 위치에 배치");
             }
         }
     }
@@ -197,15 +183,19 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         {
             elapsed += Time.deltaTime;
             rectTransform.localPosition = Vector3.Lerp(startPosition, targetPosition, elapsed / duration);
+
             yield return null;
         }
 
         rectTransform.localPosition = targetPosition;
     }
 
-    // ======================================================================================================================
+    #endregion
 
-    // 전투중일때 드래그 앤 드랍 (어디에 위치하든 가까운 보스 히트박스 외곽으로 이동되게 해야함)
+
+    #region Battle System
+
+    // 전투중일때 드래그 앤 드랍 관련 함수
     private void BattleDrop(PointerEventData eventData)
     {
         if (!BattleManager.Instance.IsBattleActive) return;
@@ -226,7 +216,10 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         }
     }
 
-    // ======================================================================================================================
+    #endregion
+
+
+    #region Merge System
 
     // 합성시 고양이가 끌려오는 애니메이션 코루틴
     private IEnumerator PullNearbyCat(DragAndDropManager nearbyCat)
@@ -246,45 +239,65 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         while (elapsed < duration)
         {
             if (nearbyCat == null) yield break;
+
             elapsed += Time.deltaTime;
             nearbyCat.rectTransform.localPosition = Vector3.Lerp(startPosition, targetPosition, elapsed / duration);
+
             yield return null;
         }
 
         if (nearbyCat != null)
         {
-            Cat mergedCat = MergeManager.Instance.MergeCats(this.catData, nearbyCat.catData);
-            if (mergedCat != null)
-            {
-                this.catData = mergedCat;
-                UpdateCatUI();
-                SpawnManager.Instance.RecallEffect(this.gameObject);
-                Destroy(nearbyCat.gameObject);
-            }
+            CompleteMerge(this, nearbyCat);
         }
     }
 
-    // 범위 내에서 가장 가까운 CatPrefab을 찾는 함수
+    // 고양이 머지 처리 함수
+    private void CompleteMerge(DragAndDropManager cat1, DragAndDropManager cat2)
+    {
+        if (cat1 == null || cat2 == null || !cat1.gameObject.activeSelf || !cat2.gameObject.activeSelf) return;
+        if (cat1 == cat2) return;
+
+        Cat mergedCat = MergeManager.Instance.MergeCats(cat1.catData, cat2.catData);
+        if (mergedCat != null)
+        {
+            SpawnManager.Instance.ReturnCatToPool(cat2.gameObject);
+            GameManager.Instance.DeleteCatCount();
+
+            cat1.catData = mergedCat;
+            cat1.UpdateCatUI();
+            SpawnManager.Instance.RecallEffect(cat1.gameObject);
+        }
+    }
+
+    // 범위 내에서 가장 가까운 고양이를 찾는 함수
     private DragAndDropManager FindNearbyCat()
     {
         // 현재 Rect 크기를 줄여서 감지 범위 조정 (감지 범위 조정 비율)
         Rect thisRect = GetWorldRect(rectTransform);
         thisRect = ShrinkRect(thisRect, MERGE_DETECTION_SCALE);
 
+        DragAndDropManager nearestCat = null;
+        float nearestDistance = float.MaxValue;
+
         int childCount = parentRect.childCount;
         for (int i = 0; i < childCount; i++)
         {
             Transform child = parentRect.GetChild(i);
-            if (child == transform) continue;
+            if (child == transform || !child.gameObject.activeSelf) continue;
 
-            // 충돌 확인
             DragAndDropManager otherCat = child.GetComponent<DragAndDropManager>();
             if (otherCat != null && thisRect.Overlaps(GetWorldRect(otherCat.rectTransform)))
             {
-                return otherCat;
+                float distance = Vector2.Distance(rectTransform.position, otherCat.rectTransform.position);
+                if (distance < nearestDistance)
+                {
+                    nearestDistance = distance;
+                    nearestCat = otherCat;
+                }
             }
         }
-        return null;
+        return nearestCat;
     }
 
     // RectTransform의 월드 좌표 기반 Rect를 반환하는 함수
@@ -292,6 +305,7 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
     {
         Vector3[] corners = new Vector3[4];
         rectTransform.GetWorldCorners(corners);
+
         return new Rect(corners[0].x, corners[0].y, corners[2].x - corners[0].x, corners[2].y - corners[0].y);
     }
 
@@ -309,13 +323,18 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         );
     }
 
+    #endregion
+
+
+    #region UI Update
+
     // CatUI 갱신하는 함수
     public void UpdateCatUI()
     {
         GetComponentInChildren<CatData>()?.SetCatData(catData);
-
-        //SpawnManager.Instance.RecallEffect()
     }
 
-    
+    #endregion
+
+
 }

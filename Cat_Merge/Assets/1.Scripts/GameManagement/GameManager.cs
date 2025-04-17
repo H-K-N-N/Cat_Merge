@@ -325,6 +325,7 @@ public class GameManager : MonoBehaviour, ISaveable
     {
         return FormatPriceNumber((long)number);
     }
+
     #endregion
 
 
@@ -456,7 +457,7 @@ public class GameManager : MonoBehaviour, ISaveable
             yield return new WaitForSecondsRealtime(0.1f);
         }
 
-        // 두 번째 저장 시도 (첫 번째가 실패했을 경우를 대비) (이거없으면 제대로 안됌)
+        // 두 번째 저장 시도 (첫 번째가 실패했을 경우를 대비)
         if (!saveCompleted)
         {
             saveCompleted = false;
@@ -488,13 +489,15 @@ public class GameManager : MonoBehaviour, ISaveable
     #endregion
 
 
-    #region Content
+    #region Content System
 
     // 필드의 모든 고양이 정보 업데이트 함수
     public void UpdateAllCatsInField()
     {
         // 이미 생성된 고양이의 데이터 수치를 새로 업데이트된 수치로 적용
         // 기존 Cat 수치로 생성된 고양이들을 성장으로 추가된 수치가 적용된 Cat으로 업데이트하기 위함
+
+        // 기존 시스템에서 오브젝트 풀링 시스템으로 변경해서 손봐줘야할듯함
         foreach (Transform child in gamePanel)
         {
             if (child.TryGetComponent<CatData>(out var catData))
@@ -523,44 +526,18 @@ public class GameManager : MonoBehaviour, ISaveable
     #region Save System
 
     [Serializable]
-    private class CatInstanceData
-    {
-        public int catId;               // 고양이 ID
-        public float posX;              // X 위치
-        public float posY;              // Y 위치
-    }
-
-    [Serializable]
     private class SaveData
     {
         public string coin;             // 기본 재화
         public string cash;             // 캐시 재화
-        public string currentCatCount;  // 현재 고양이 수
-        public List<CatInstanceData> fieldCats = new List<CatInstanceData>();  // 필드에 있는 고양이들 정보
     }
 
     public string GetSaveData()
     {
-        List<CatInstanceData> fieldCats = new List<CatInstanceData>();
-        foreach (Transform child in gamePanel)
-        {
-            if (child.TryGetComponent<CatData>(out var catData))
-            {
-                fieldCats.Add(new CatInstanceData
-                {
-                    catId = catData.catData.CatId,
-                    posX = child.GetComponent<RectTransform>().anchoredPosition.x,
-                    posY = child.GetComponent<RectTransform>().anchoredPosition.y
-                });
-            }
-        }
-
         SaveData data = new SaveData
         {
             coin = this.coin.ToString(),
-            cash = this.cash.ToString(),
-            currentCatCount = this.currentCatCount.ToString(),
-            fieldCats = fieldCats
+            cash = this.cash.ToString()
         };
 
         return JsonUtility.ToJson(data);
@@ -572,73 +549,11 @@ public class GameManager : MonoBehaviour, ISaveable
 
         SaveData savedData = JsonUtility.FromJson<SaveData>(data);
 
-        RemoveExistingCats();
-        int newCatCount = RecreateFieldCats(savedData.fieldCats);
-
         LoadBasicData(savedData);
-        currentCatCount = newCatCount;
 
         UpdateAllUI();
 
         isDataLoaded = true;
-    }
-
-    // 기존 고양이 제거 함수
-    private void RemoveExistingCats()
-    {
-        tempCatList.Clear();
-        foreach (Transform child in gamePanel)
-        {
-            if (child.GetComponent<CatData>() != null)
-            {
-                tempCatList.Add(child.gameObject);
-            }
-        }
-
-        foreach (var cat in tempCatList)
-        {
-            Destroy(cat);
-        }
-    }
-
-    // 필드 고양이 재생성 함수
-    private int RecreateFieldCats(List<CatInstanceData> fieldCats)
-    {
-        if (fieldCats == null) return 0;
-
-        int newCatCount = 0;
-        foreach (var catInstance in fieldCats)
-        {
-            Cat catData = allCatData.FirstOrDefault(c => c.CatId == catInstance.catId);
-            if (catData == null) continue;
-
-            GameObject catUIObject = Instantiate(catPrefab, gamePanel);
-            if (catUIObject == null) continue;
-
-            if (SetupCatInstance(catUIObject, catData, catInstance))
-            {
-                newCatCount++;
-            }
-        }
-        return newCatCount;
-    }
-
-    // 고양이 인스턴스 설정 함수
-    private bool SetupCatInstance(GameObject catUIObject, Cat catData, CatInstanceData instance)
-    {
-        if (!catUIObject.TryGetComponent<RectTransform>(out var rectTransform) ||
-            !catUIObject.TryGetComponent<CatData>(out var catComponent))
-            return false;
-
-        rectTransform.anchoredPosition = new Vector2(instance.posX, instance.posY);
-        catComponent.SetCatData(catData);
-
-        if (AutoMoveManager.Instance != null)
-        {
-            catComponent.SetAutoMoveState(AutoMoveManager.Instance.IsAutoMoveEnabled());
-        }
-
-        return true;
     }
 
     // 기본 데이터 로드 함수
@@ -660,15 +575,6 @@ public class GameManager : MonoBehaviour, ISaveable
         {
             GoogleManager.Instance.SaveGameState();
         }
-    }
-
-    // 로그 기록 함수
-    private void SaveLog(string message)
-    {
-        string path = $"{Application.persistentDataPath}/cat_count_log.txt";
-        string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-        string logMessage = $"[{timestamp}] {message}\n";
-        System.IO.File.AppendAllText(path, logMessage);
     }
 
     #endregion

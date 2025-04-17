@@ -678,6 +678,7 @@ public class OptionManager : MonoBehaviour, ISaveable
 #else
         // 실제 빌드 환경에서만 GoogleManager를 통해 강제 저장
         bool saveCompleted = false;
+        //GoogleManager.Instance.SaveGameState();
         GoogleManager.Instance.SaveGameStateSync((success) => { saveCompleted = true; });
 
         // 저장 완료 대기

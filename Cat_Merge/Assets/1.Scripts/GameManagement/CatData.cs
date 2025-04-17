@@ -28,9 +28,9 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     private RectTransform rectTransform;            // 현재 오브젝트의 RectTransform
     private RectTransform parentPanel;              // 부모 패널의 RectTransform
     private DragAndDropManager catDragAndDrop;      // 드래그 앤 드롭 매니저
-    private Vector2 rectSize;
-    private float rectHalfWidth;
-    private float rectHalfHeight;
+    private Vector2 rectSize;                       // 레이캐스트를 위한 rectSize
+    private float rectHalfWidth;                    // rectSize의 Width 절반값
+    private float rectHalfHeight;                   // rectSize의 Height 절반값
 
     [Header("Movement")]
     private bool isAnimating = false;               // 이동 애니메이션 진행 여부
@@ -44,6 +44,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     public float CollectingTime { get => collectingTime; set => collectingTime = value; }
     private bool isCollectingCoins = true;          // 코인 수집 활성화 상태
     private Coroutine autoCollectCoroutine;         // 코인 수집 코루틴
+
     #endregion
 
 
@@ -62,21 +63,12 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         UpdateHPBar();
     }
 
-    // 오브젝트 파괴시 고양이 수 감소
-    private void OnDestroy()
-    {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.DeleteCatCount();
-        }
-    }
-
     #endregion
 
 
     #region Initialization
 
-    // 컴포넌트 초기화
+    // 컴포넌트 초기화 함수
     private void InitializeComponents()
     {
         catImage = GetComponent<Image>();
@@ -97,7 +89,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         if (collectCoinImage != null) collectCoinImage.gameObject.SetActive(false);
     }
 
-    // 
+    // 레이캐스트를 위한 rectSize 설정 함수
     private void CacheRectTransformData()
     {
         rectSize = rectTransform.rect.size;
@@ -118,11 +110,38 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     // 고양이 데이터 설정 함수
     public void SetCatData(Cat cat)
     {
+        // 기존 코루틴 정리
+        if (autoCollectCoroutine != null)
+        {
+            StopCoroutine(autoCollectCoroutine);
+            autoCollectCoroutine = null;
+        }
+
+        // UI 상태 초기화
+        if (collectCoinText != null)
+        {
+            collectCoinText.gameObject.SetActive(false);
+        }
+        if (collectCoinImage != null)
+        {
+            collectCoinImage.gameObject.SetActive(false);
+        }
+
+        // 데이터 설정
         catData = cat;
         catHp = catData.CatHp;
+
+        // UI 업데이트
         UpdateCatUI();
         UpdateHPBar();
         GetComponent<AnimatorManager>().ApplyAnim(catData.CatGrade);
+
+        // 재화 수집 상태 초기화 및 시작
+        isCollectingCoins = true;
+        if (!BattleManager.Instance.IsBattleActive)
+        {
+            autoCollectCoroutine = StartCoroutine(AutoCollectCoins());
+        }
     }
 
     // HP 바 업데이트 함수
@@ -283,7 +302,6 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
                 autoMoveCoroutine = null;
             }
             isAnimating = false;
-          
         }
     }
 
@@ -390,6 +408,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         {
             elapsed += Time.deltaTime;
             rectTransform.anchoredPosition = Vector3.Lerp(startPosition, targetPosition, elapsed / duration);
+
             yield return null;
         }
 
@@ -423,7 +442,6 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         
         if (isCollectingCoins)
         {
-            
             if (autoCollectCoroutine == null)
             {
                 autoCollectCoroutine = StartCoroutine(AutoCollectCoins());
@@ -456,12 +474,17 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     // 자동 재화 수집 코루틴
     private IEnumerator AutoCollectCoins()
     {
+        if (autoCollectCoroutine != null) yield break;
+
         float currentDelayTime = 0f;
         WaitForSeconds delay = null;
-        
-        while (isCollectingCoins)
+
+        while (isCollectingCoins && gameObject.activeSelf)
         {
+            if (!isCollectingCoins || !gameObject.activeSelf) break;
+
             collectingTime = ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value;
+            //Debug.Log(collectingTime);
 
             // 딜레이 시간이 변경되었는지 확인
             if (delay == null || !Mathf.Approximately(currentDelayTime, collectingTime))
@@ -472,6 +495,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
             yield return delay;
 
+            if (!isCollectingCoins || !gameObject.activeSelf) break;
 
             if (catData != null)
             {
@@ -482,6 +506,8 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
                 StartCoroutine(PlayCollectingAnimation(collectedCoins));
             }
         }
+
+        autoCollectCoroutine = null;
     }
 
     // 재화 수집 애니메이션 코루틴
@@ -504,8 +530,14 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
         yield return COLLECT_ANIMATION_DELAY;
 
-        if (collectCoinText != null) collectCoinText.gameObject.SetActive(false);
-        if (collectCoinImage != null) collectCoinImage.gameObject.SetActive(false);
+        if (collectCoinText != null)
+        {
+            collectCoinText.gameObject.SetActive(false);
+        }
+        if (collectCoinImage != null)
+        {
+            collectCoinImage.gameObject.SetActive(false);
+        }
 
         if (!BattleManager.Instance.isBattleActive && !GetComponent<DragAndDropManager>().isDragging)
         {
@@ -544,8 +576,8 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     // 레이캐스트 필터링 함수
     public bool IsRaycastLocationValid(Vector2 screenPoint, Camera eventCamera)
     {
-        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, screenPoint, eventCamera, out Vector2 localPoint))
-            return false;
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, screenPoint, eventCamera, out Vector2 localPoint)) return false;
+
 
         Vector2 normalizedPoint = new Vector2(
             //localPoint.x / rectHalfWidth,

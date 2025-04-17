@@ -123,6 +123,8 @@ public class SortManager : MonoBehaviour
         List<GameObject> sortedCats = new List<GameObject>();
         foreach (Transform child in gamePanel)
         {
+            if (!child.gameObject.activeSelf) continue;
+
             // 자동 머지 중인 고양이는 제외
             DragAndDropManager dragManager = child.GetComponent<DragAndDropManager>();
             if (dragManager != null && AutoMergeManager.Instance != null &&
@@ -147,6 +149,8 @@ public class SortManager : MonoBehaviour
     {
         foreach (Transform child in gamePanel)
         {
+            if (!child.gameObject.activeSelf) continue;
+
             CatData catData = child.GetComponent<CatData>();
             if (catData != null)
             {
@@ -172,6 +176,8 @@ public class SortManager : MonoBehaviour
     {
         foreach (Transform child in gamePanel)
         {
+            if (!child.gameObject.activeSelf) continue;
+
             CatData catData = child.GetComponent<CatData>();
             if (catData != null)
             {

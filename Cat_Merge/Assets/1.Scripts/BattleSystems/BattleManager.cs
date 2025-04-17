@@ -21,7 +21,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     [SerializeField] private Slider respawnSlider;              // 보스 소환까지 남은 시간을 표시할 Slider UI
 
 
-    private const float DEFAULT_SPAWN_INTERVAL = 30f;          // 보스 등장 주기 (300f)
+    private const float DEFAULT_SPAWN_INTERVAL = 15f;          // 보스 등장 주기 (300f)
     private float spawnInterval;                                // 보스 등장 주기
     private Coroutine respawnSliderCoroutine;                   // Slider 코루틴
     private float bossSpawnTimer = 0f;                          // 보스 스폰 타이머
@@ -1037,16 +1037,15 @@ public class BattleManager : MonoBehaviour, ISaveable
         foreach (var cat in allCats)
         {
             cat.HealCatHP();
-        }
 
-        foreach (var cat in allCats)
-        {
             AnimatorManager anim = cat.GetComponent<AnimatorManager>();
             if (anim != null)
             {
                 anim.ChangeState(CharacterState.isIdle);
             }
         }
+
+        AutoMoveManager.Instance.EndBattleAutoMoveState();
 
         // 자동 머지 재개
         AutoMergeManager.Instance.ResumeAutoMerge();
@@ -1197,7 +1196,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     private void SetEndFunctions()
     {
         MergeManager.Instance.EndBattleMergeState();
-        AutoMoveManager.Instance.EndBattleAutoMoveState();
+        //AutoMoveManager.Instance.EndBattleAutoMoveState();
         GetComponent<SortManager>().EndBattleSortState();
 
         SpawnManager.Instance.EndBattleSpawnState();

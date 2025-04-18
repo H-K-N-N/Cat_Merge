@@ -8,10 +8,11 @@ using System;
 [Serializable]
 public class CatFriendship
 {
-    public int catGrade;           // 고양이 등급
-    public int currentExp;         // 현재 경험치
-    public bool[] isLevelUnlocked; // 각 레벨 해금 여부
-    public bool[] rewardsClaimed;  // 각 레벨별 보상 수령 여부
+    public int catGrade;                        // 고양이 등급
+    public int currentExp;                      // 현재 경험치
+    public bool[] isLevelUnlocked;              // 각 레벨 해금 여부
+    public bool[] rewardsClaimed;               // 각 레벨별 보상 수령 여부
+    public List<string> activePassiveEffects;   // 활성화된 패시브 효과 목록
 
     public CatFriendship(int grade)
     {
@@ -19,6 +20,7 @@ public class CatFriendship
         currentExp = 0;
         isLevelUnlocked = new bool[5];
         rewardsClaimed = new bool[5];
+        activePassiveEffects = new List<string>();
     }
 }
 
@@ -52,17 +54,11 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     private Button[] activeButtons;
     private bool buttonClick = false;
 
-    // 각 고양이별 애정도 정보 저장
-    private Dictionary<int, CatFriendship> catFriendships = new Dictionary<int, CatFriendship>();
-
-    // 레벨별 필요 경험치 데이터
-    private Dictionary<int, List<(int exp, int reward)>> levelByGrade = new Dictionary<int, List<(int exp, int reward)>>();
-
-    // 현재 레벨을 추적하기 위한 변수
-    private Dictionary<int, int> currentLevels = new Dictionary<int, int>();
-
-    // FriendshipManager 클래스에 다음 변수
-    private Dictionary<int, bool[]> buttonUnlockStatus = new Dictionary<int, bool[]>();
+    
+    private Dictionary<int, CatFriendship> catFriendships = new Dictionary<int, CatFriendship>();                           // 각 고양이별 애정도 정보 저장
+    private Dictionary<int, List<(int exp, int reward)>> levelByGrade = new Dictionary<int, List<(int exp, int reward)>>(); // 레벨별 필요 경험치 데이터
+    private Dictionary<int, int> currentLevels = new Dictionary<int, int>();                                                // 현재 레벨을 추적하기 위한 변수
+    private Dictionary<int, bool[]> buttonUnlockStatus = new Dictionary<int, bool[]>();                                     // FriendshipManager 클래스에 다음 변수
 
 
     private bool isDataLoaded = false;          // 데이터 로드 확인
@@ -296,7 +292,7 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     #endregion
 
 
-    #region 애정도 System
+    #region Friendship System
 
     // 애정도 버튼 클릭 처리 함수
     private void OnFriendshipButtonClick(int catGrade, int level)
@@ -410,12 +406,26 @@ public class FriendshipManager : MonoBehaviour, ISaveable
             }
         }
 
+        // 패시브 효과 데이터 가져오기
+        var passiveEffects = FriendshipDataLoader.Instance.GetDataByGrade(catGrade);
+
         for (int i = 0; i < buttons.Length; i++)
         {
             var button = buttons[i];
             if (button != null)
             {
                 bool isAlreadyClaimed = friendshipInfo.isClaimed[i];
+
+                // Passive Text 업데이트
+                Transform passiveTextTr = button.transform.Find("Passive Text");
+                if (passiveTextTr != null)
+                {
+                    TextMeshProUGUI passiveText = passiveTextTr.GetComponent<TextMeshProUGUI>();
+                    if (passiveText != null)
+                    {
+                        passiveText.text = passiveEffects[i].passive;
+                    }
+                }
 
                 // LockBG 상태 업데이트
                 Transform lockBG = button.transform.Find("LockBG");
@@ -511,6 +521,158 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     #endregion
 
 
+    #region Friendship Passive Effect System
+
+    // 패시브 효과 종류 리스트
+    private readonly List<string> passiveEffectTypes = new List<string>
+    {
+        "공격력 1% 증가",
+        "공격력 2% 증가",
+        "공격력 3% 증가",
+        "공격력 4% 증가",
+        "공격력 5% 증가",
+        "고양이 보유 숫자 1 증가",
+        "공격 속도 0.05초 증가",
+        "젤리 획득 속도 0.05초 증가",
+        "무료 다이아 획득량 1 증가",
+        "무료 다이아 획득 쿨타임 1초 감소",
+        "광고 다이아 획득량 5 증가",
+        "광고 다이아 획득 쿨타임 1초 감소",
+        "젤리 획득 버프 지속 시간 1초 증가",
+        "젤리 획득 버프 쿨타임 1초 감소"
+    };
+
+    // 패시브 효과 적용 함수
+    private void ApplyPassiveEffect(int catGrade, int level)
+    {
+        var passiveEffect = FriendshipDataLoader.Instance.GetDataByGrade(catGrade)[level].passive;
+        var friendship = catFriendships[catGrade];
+
+        if (!friendship.activePassiveEffects.Contains(passiveEffect))
+        {
+            friendship.activePassiveEffects.Add(passiveEffect);
+
+            Debug.Log($"[{catGrade}등급 고양이] 활성화된 패시브 효과 목록: {string.Join(", ", friendship.activePassiveEffects)}");
+
+            // 패시브 효과 매칭 및 적용
+            int effectIndex = passiveEffectTypes.IndexOf(passiveEffect);
+            if (effectIndex != -1)
+            {
+                switch (effectIndex)
+                {
+                    case 0:
+                        ApplyAttackDamageBuff(0.01f);
+                        break;
+                    case 1:
+                        ApplyAttackDamageBuff(0.02f);
+                        break;
+                    case 2:
+                        ApplyAttackDamageBuff(0.03f);
+                        break;
+                    case 3:
+                        ApplyAttackDamageBuff(0.04f);
+                        break;
+                    case 4:
+                        ApplyAttackDamageBuff(0.05f);
+                        break;
+                    case 5:
+                        ApplyCatCapacityIncrease();
+                        break;
+                    case 6:
+                        ApplyAttackSpeedBuff();
+                        break;
+                    case 7:
+                        ApplyJellyCollectSpeedBuff();
+                        break;
+                    case 8:
+                        ApplyFreeDiamondAmountBuff();
+                        break;
+                    case 9:
+                        ApplyFreeDiamondCooldownBuff();
+                        break;
+                    case 10:
+                        ApplyAdDiamondAmountBuff();
+                        break;
+                    case 11:
+                        ApplyAdDiamondCooldownBuff();
+                        break;
+                    case 12:
+                        ApplyJellyBuffDurationBuff();
+                        break;
+                    case 13:
+                        ApplyJellyBuffCooldownBuff();
+                        break;
+                }
+            }
+        }
+
+        GoogleSave();
+    }
+
+    // 각 패시브 효과 적용 함수들
+    private void ApplyAttackDamageBuff(float percentage)
+    {
+        Debug.Log($"공격력 {percentage * 100}% 증가 효과 적용");
+
+        // 앞으로 생성될 모든 고양이들에게 변경된 패시브 효과 적용
+        var allCats = GameManager.Instance.AllCatData;
+        for (int i = 0; i < allCats.Length; i++)
+        {
+            if (allCats[i] != null)
+            {
+                allCats[i].AddPassiveAttackDamageBuff(percentage);
+            }
+        }
+
+        // 현재 필드에 있는 고양이들에게 변경된 패시브 효과 적용
+        var activeCats = SpawnManager.Instance.GetActiveCats();
+        foreach (var catObj in activeCats)
+        {
+            catObj.GetComponent<CatData>().SetCatData(catObj.GetComponent<CatData>().catData);
+        }
+    }
+
+    private void ApplyCatCapacityIncrease() 
+    {
+        Debug.Log("고양이 보유 숫자 1 증가");
+    }
+
+    private void ApplyAttackSpeedBuff() 
+    {
+        Debug.Log("공격 속도 0.05초 증가");
+    }
+    private void ApplyJellyCollectSpeedBuff()
+    {
+        Debug.Log("젤리 획득 속도 0.05초 증가");
+    }
+    private void ApplyFreeDiamondAmountBuff()
+    {
+        Debug.Log("무료 다이아 획득량 1 증가");
+    }
+    private void ApplyFreeDiamondCooldownBuff()
+    {
+        Debug.Log("무료 다이아 획득 쿨타임 1초 감소");
+    }
+    private void ApplyAdDiamondAmountBuff()
+    {
+        Debug.Log("광고 다이아 획득량 5 증가");
+    }
+    private void ApplyAdDiamondCooldownBuff()
+    {
+        Debug.Log("광고 다이아 획득 쿨타임 1초 감소");
+    }
+    private void ApplyJellyBuffDurationBuff()
+    {
+        Debug.Log("젤리 획득 버프 지속 시간 1초 증가");
+    }
+    private void ApplyJellyBuffCooldownBuff()
+    {
+        Debug.Log("젤리 획득 버프 쿨타임 1초 감소");
+    }
+
+    #endregion
+
+
     #region Data Management
 
     // 특정 고양이의 애정도 정보 조회 함수
@@ -551,7 +713,12 @@ public class FriendshipManager : MonoBehaviour, ISaveable
 
         var friendship = catFriendships[catGrade];
         friendship.rewardsClaimed[level] = true;
+
+        // Cash 보상 지급
         GameManager.Instance.Cash += GetRewardAmount(level);
+
+        // 패시브 효과 적용
+        ApplyPassiveEffect(catGrade, level);
 
         UpdateFriendshipUI(catGrade);
 
@@ -611,11 +778,12 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     [Serializable]
     private class CatFriendshipSaveData
     {
-        public int catGrade;                // 고양이 등급
-        public int currentExp;              // 현재 경험치
-        public int currentLevel;            // 현재 레벨
-        public bool[] isLevelUnlocked;      // 레벨 해금 상태
-        public bool[] rewardsClaimed;       // 보상 수령 상태
+        public int catGrade;                        // 고양이 등급
+        public int currentExp;                      // 현재 경험치
+        public int currentLevel;                    // 현재 레벨
+        public bool[] isLevelUnlocked;              // 레벨 해금 상태
+        public bool[] rewardsClaimed;               // 보상 수령 상태
+        public List<string> activePassiveEffects;   // 활성화된 패시브 효과 목록
     }
 
     public string GetSaveData()
@@ -630,7 +798,8 @@ public class FriendshipManager : MonoBehaviour, ISaveable
                 currentExp = pair.Value.currentExp,
                 currentLevel = currentLevels[pair.Key],
                 isLevelUnlocked = pair.Value.isLevelUnlocked,
-                rewardsClaimed = pair.Value.rewardsClaimed
+                rewardsClaimed = pair.Value.rewardsClaimed,
+                activePassiveEffects = pair.Value.activePassiveEffects
             });
         }
 
@@ -654,11 +823,76 @@ public class FriendshipManager : MonoBehaviour, ISaveable
             {
                 currentExp = savedItem.currentExp,
                 isLevelUnlocked = savedItem.isLevelUnlocked,
-                rewardsClaimed = savedItem.rewardsClaimed
+                rewardsClaimed = savedItem.rewardsClaimed,
+                activePassiveEffects = savedItem.activePassiveEffects ?? new List<string>()
             };
 
             currentLevels[savedItem.catGrade] = savedItem.currentLevel;
             buttonUnlockStatus[savedItem.catGrade] = new bool[5];
+
+            // 저장된 패시브 효과들을 다시 적용
+            if (savedItem.activePassiveEffects != null)
+            {
+                foreach (var effect in savedItem.activePassiveEffects)
+                {
+                    int effectIndex = passiveEffectTypes.IndexOf(effect);
+                    if (effectIndex != -1)
+                    {
+                        switch (effectIndex)
+                        {
+                            case 0:
+                                ApplyAttackDamageBuff(0.01f);
+                                break;
+                            case 1:
+                                ApplyAttackDamageBuff(0.02f);
+                                break;
+                            case 2:
+                                ApplyAttackDamageBuff(0.03f);
+                                break;
+                            case 3:
+                                ApplyAttackDamageBuff(0.04f);
+                                break;
+                            case 4:
+                                ApplyAttackDamageBuff(0.05f);
+                                break;
+                            case 5:
+                                ApplyCatCapacityIncrease();
+                                break;
+                            case 6:
+                                ApplyAttackSpeedBuff();
+                                break;
+                            case 7:
+                                ApplyJellyCollectSpeedBuff();
+                                break;
+                            case 8:
+                                ApplyFreeDiamondAmountBuff();
+                                break;
+                            case 9:
+                                ApplyFreeDiamondCooldownBuff();
+                                break;
+                            case 10:
+                                ApplyAdDiamondAmountBuff();
+                                break;
+                            case 11:
+                                ApplyAdDiamondCooldownBuff();
+                                break;
+                            case 12:
+                                ApplyJellyBuffDurationBuff();
+                                break;
+                            case 13:
+                                ApplyJellyBuffCooldownBuff();
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 필드의 고양이들에게 패시브 적용
+        var activeCats = SpawnManager.Instance.GetActiveCats();
+        foreach (var catObj in activeCats)
+        {
+            catObj.GetComponent<CatData>().SetCatData(catObj.GetComponent<CatData>().catData);
         }
 
         isDataLoaded = true;

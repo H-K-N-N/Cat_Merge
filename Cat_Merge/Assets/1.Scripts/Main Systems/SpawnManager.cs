@@ -214,6 +214,12 @@ public class SpawnManager : MonoBehaviour, ISaveable
         }
     }
 
+    // 활성화된 고양이 목록 반환 함수
+    public List<GameObject> GetActiveCats()
+    {
+        return activeCats;
+    }
+
     // 고양이 데이터 설정 함수
     private void SetupCatData(GameObject cat, int grade)
     {
@@ -491,7 +497,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
         foreach (var catData in savedData.activeCats)
         {
             Cat cat = GameManager.Instance.AllCatData[catData.catGrade - 1];
-            GameObject newCat = LoadAndDisplayCats(cat);
+            GameObject newCat = LoadAndDisplayCatsRestartGame(cat);
             if (newCat != null && newCat.TryGetComponent<RectTransform>(out var rectTransform))
             {
                 rectTransform.anchoredPosition = new Vector2(catData.posX, catData.posY);
@@ -512,6 +518,19 @@ public class SpawnManager : MonoBehaviour, ISaveable
         }
 
         isDataLoaded = true;
+    }
+
+    private GameObject LoadAndDisplayCatsRestartGame(Cat cat)
+    {
+        GameObject catObject = GetCatFromPool();
+
+        if (catObject.TryGetComponent<CatData>(out var catData))
+        {
+            catData.SetCatData(cat);
+            catData.SetAutoMoveState(AutoMoveManager.Instance.IsAutoMoveEnabled());
+        }
+
+        return catObject;
     }
 
     private void GoogleSave()

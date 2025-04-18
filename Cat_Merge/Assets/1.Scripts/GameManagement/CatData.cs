@@ -6,7 +6,7 @@ using TMPro;
 // 고양이의 정보와 행동을 관리하는 스크립트
 public class CatData : MonoBehaviour, ICanvasRaycastFilter
 {
-
+    [SerializeField] private int currentDamage;     // 현재 공격력 (인스펙터 표시용)
 
     #region Variables
 
@@ -105,6 +105,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             catDragAndDrop.catData = catData;
         }
         catImage.sprite = catData.CatImage;
+        currentDamage = catData.CatDamage;
     }
     
     // 고양이 데이터 설정 함수
@@ -130,6 +131,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         // 데이터 설정
         catData = cat;
         catHp = catData.CatHp;
+        currentDamage = catData.CatDamage;
 
         // UI 업데이트
         UpdateCatUI();

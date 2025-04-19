@@ -552,7 +552,7 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         {
             friendship.activePassiveEffects.Add(passiveEffect);
 
-            Debug.Log($"[{catGrade}등급 고양이] 활성화된 패시브 효과 목록: {string.Join(", ", friendship.activePassiveEffects)}");
+            //Debug.Log($"[{catGrade}등급 고양이] 활성화된 패시브 효과 목록: {string.Join(", ", friendship.activePassiveEffects)}");
 
             // 패시브 효과 매칭 및 적용
             int effectIndex = passiveEffectTypes.IndexOf(passiveEffect);
@@ -609,10 +609,10 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         GoogleSave();
     }
 
-    // 각 패시브 효과 적용 함수들
+    // 공격력 1~5% 증가 효과 패시브 함수
     private void ApplyAttackDamageBuff(float percentage)
     {
-        Debug.Log($"공격력 {percentage * 100}% 증가 효과 적용");
+        //Debug.Log($"공격력 {percentage * 100}% 증가 효과 적용");
 
         // 앞으로 생성될 모든 고양이들에게 변경된 패시브 효과 적용
         var allCats = GameManager.Instance.AllCatData;
@@ -632,42 +632,106 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         }
     }
 
+    // 고양이 보유 숫자 1 증가 패시브 함수
     private void ApplyCatCapacityIncrease() 
     {
-        Debug.Log("고양이 보유 숫자 1 증가");
+        //Debug.Log("고양이 보유 숫자 1 증가");
+
+        GameManager.Instance.AddPassiveCatCapacity(1);
     }
 
+    // 공격 속도 0.05초 증가 패시브 함수
     private void ApplyAttackSpeedBuff() 
     {
         Debug.Log("공격 속도 0.05초 증가");
+
+        // 고양이들의 전투시 공격 속도를 0.05초만큼 증가하는 기능
+
+        // 앞으로 생성될 모든 고양이들에게 변경된 패시브 효과 적용
+
+        // 현재 필드에 있는 고양이들에게 변경된 패시브 효과 적용
+
     }
+
+    // 젤리 획득 속도 0.05초 증가 패시브 함수
     private void ApplyJellyCollectSpeedBuff()
     {
         Debug.Log("젤리 획득 속도 0.05초 증가");
+
+        // 고양이들의 자동 재화 획득 속도를 0.05초만큼 증가하는 기능
+
+
+
+        // 앞으로 생성될 모든 고양이들에게 변경된 패시브 효과 적용
+
+        // 현재 필드에 있는 고양이들에게 변경된 패시브 효과 적용
+
     }
+
+    // 무료 다이아 획득량 1 증가 패시브 함수
     private void ApplyFreeDiamondAmountBuff()
     {
         Debug.Log("무료 다이아 획득량 1 증가");
+
+        // 상점의 무료로 얻는 Cash 획득량을 영구적으로 1 증가하는 기능
+
+        // ShopManager의 cashForTimePrice의 값을 1 증가하는 기능
+
     }
+
+    // 무료 다이아 획득 쿨타임 1초 감소 패시브 함수
     private void ApplyFreeDiamondCooldownBuff()
     {
         Debug.Log("무료 다이아 획득 쿨타임 1초 감소");
+
+        // 상점의 무료로 얻는 Cash의 광고 시청 쿨타임을 영구적으로 1초 감소하는 기능
+
+        // ShopManager의 cashForTimeCoolTime의 값을 1 감소하는 기능
+
     }
+
+    // 광고 다이아 획득량 5 증가 패시브 함수
     private void ApplyAdDiamondAmountBuff()
     {
         Debug.Log("광고 다이아 획득량 5 증가");
+
+        // 상점의 광고를 보면 얻는 Cash 획득량을 영구적으로 5 증가하는 기능
+
+        // ShopManager의 cashForAdPrice의 값을 5 증가하는 기능
+
     }
+
+    // 광고 다이아 획득 쿨타임 1초 감소 패시브 함수
     private void ApplyAdDiamondCooldownBuff()
     {
         Debug.Log("광고 다이아 획득 쿨타임 1초 감소");
+
+        // 상점의 광고를 보면 얻는 Cash의 광고 시청 쿨타임을 영구적으로 1초 감소하는 기능
+
+        // ShopManager의 cashForAdCoolTime의 값을 1 감소하는 기능
+
     }
+
+    // 젤리 획득 버프 지속 시간 1초 증가 패시브 함수
     private void ApplyJellyBuffDurationBuff()
     {
         Debug.Log("젤리 획득 버프 지속 시간 1초 증가");
+
+        // 상점의 광고를 보면 얻는 일정 시간동안 고양이 재화 수집량 2배 효과의 지속시간을 1초 증가하는 기능
+
+        // ShopManager의 doubleCoinDuration의 값을 1 증가하는 기능
+
     }
+
+    // 젤리 획득 버프 쿨타임 1초 감소 패시브 함수
     private void ApplyJellyBuffCooldownBuff()
     {
         Debug.Log("젤리 획득 버프 쿨타임 1초 감소");
+
+        // 상점의 광고를 보면 얻는 일정 시간동안 고양이 재화 수집량 2배 효과의 쿨타임을 1초 감소하는 기능
+
+        // ShopManager의 doubleCoinForAdCoolTime의 값을 1 감소하는 기능
+
     }
 
     #endregion
@@ -888,12 +952,12 @@ public class FriendshipManager : MonoBehaviour, ISaveable
             }
         }
 
-        // 필드의 고양이들에게 패시브 적용
-        var activeCats = SpawnManager.Instance.GetActiveCats();
-        foreach (var catObj in activeCats)
-        {
-            catObj.GetComponent<CatData>().SetCatData(catObj.GetComponent<CatData>().catData);
-        }
+        //// 필드의 고양이들에게 패시브 적용
+        //var activeCats = SpawnManager.Instance.GetActiveCats();
+        //foreach (var catObj in activeCats)
+        //{
+        //    catObj.GetComponent<CatData>().SetCatData(catObj.GetComponent<CatData>().catData);
+        //}
 
         isDataLoaded = true;
     }

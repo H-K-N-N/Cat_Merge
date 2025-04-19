@@ -25,6 +25,7 @@ public class CatFriendship
 }
 
 // 고양이 애정도 스크립트
+[DefaultExecutionOrder(1)]
 public class FriendshipManager : MonoBehaviour, ISaveable
 {
 
@@ -585,7 +586,7 @@ public class FriendshipManager : MonoBehaviour, ISaveable
                         ApplyCoinCollectSpeedBuff();
                         break;
                     case 8:
-                        ApplyFreeDiamondAmountBuff();
+                        ApplyCashForTimeAmountBuff();
                         break;
                     case 9:
                         ApplyFreeDiamondCooldownBuff();
@@ -660,14 +661,9 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     }
 
     // 무료 다이아 획득량 1 증가 패시브 함수
-    private void ApplyFreeDiamondAmountBuff()
+    private void ApplyCashForTimeAmountBuff()
     {
-        Debug.Log("무료 다이아 획득량 1 증가");
-
-        // 상점의 무료로 얻는 Cash 획득량을 영구적으로 1 증가하는 기능
-
-        // ShopManager의 cashForTimePrice의 값을 1 증가하는 기능
-
+        ShopManager.Instance.AddPassiveCashForTimeAmount(1);
     }
 
     // 무료 다이아 획득 쿨타임 1초 감소 패시브 함수
@@ -920,7 +916,7 @@ public class FriendshipManager : MonoBehaviour, ISaveable
                                 ApplyCoinCollectSpeedBuff();
                                 break;
                             case 8:
-                                ApplyFreeDiamondAmountBuff();
+                                ApplyCashForTimeAmountBuff();
                                 break;
                             case 9:
                                 ApplyFreeDiamondCooldownBuff();

@@ -31,6 +31,8 @@ public class Cat
     private float passiveAttackDamage = 1.0f;    // 패시브 공격력 증가 배율 (기본값 1 = 100%)
     public float PassiveAttackDamage { get => passiveAttackDamage; set => passiveAttackDamage = value; }
 
+
+
     // 최종 스탯 계산용 프로퍼티
     public int CatDamage => (int)((GrowthDamage * (BaseDamage * 0.01) + GrowthDamage) * PassiveAttackDamage);
     public int CatHp => (int)(GrowthHp * (BaseHp * 0.01)) + GrowthHp;
@@ -46,7 +48,7 @@ public class Cat
     private string catExplain;   // 고양이 설명
     public string CatExplain { get => catExplain; set => catExplain = value; }
 
-    private int catAttackSpeed;  // 고양이 공격속도
+    private int catAttackSpeed;  // 고양이 공격속도 (1초)
     public int CatAttackSpeed { get => catAttackSpeed; set => catAttackSpeed = value; }
 
     private int catArmor;        // 고양이 방어력
@@ -72,7 +74,7 @@ public class Cat
         CatArmor = catArmor;
         CatMoveSpeed = catMoveSpeed;
 
-        PassiveAttackDamage = 1f;
+        PassiveAttackDamage = 1.0f;
     }
 
     // 성장 스탯 함수
@@ -89,6 +91,8 @@ public class Cat
         GrowthHp = 0;
     }
 
+
+
     // 패시브 공격력 증가 적용 함수
     public void AddPassiveAttackDamageBuff(float percentage)
     {
@@ -96,7 +100,7 @@ public class Cat
     }
 
     // 패시브 공격력 증가 초기화 함수
-    public void ResetPassiveEffects()
+    public void ResetPassiveAttackDamageBuff()
     {
         PassiveAttackDamage = 1f;
     }

@@ -262,6 +262,12 @@ public class BattleManager : MonoBehaviour, ISaveable
         }
     }
 
+    // 패시브로 인한 고양이 공격속도 증가 함수
+    public void AddPassiveCatAttackSpeedBuff(float amount)
+    {
+        catAttackDelay -= amount;
+    }
+
     #endregion
 
 

@@ -63,11 +63,11 @@ public class GoogleAdsManager : MonoBehaviour
             {
                 if (error != null || ad == null)
                 {
-                    Debug.Log("보상형 전면 광고 로딩 실패. 에러: " + error);
+                    //Debug.Log("보상형 전면 광고 로딩 실패. 에러: " + error);
                     return;
                 }
 
-                Debug.Log("보상형 전면 광고가 성공적으로 로딩되었습니다. 응답: " + ad.GetResponseInfo());
+                //Debug.Log("보상형 전면 광고가 성공적으로 로딩되었습니다. 응답: " + ad.GetResponseInfo());
 
                 rewardedInterstitialAd = ad;
             });

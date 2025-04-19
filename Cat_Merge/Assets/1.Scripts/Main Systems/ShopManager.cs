@@ -62,6 +62,7 @@ public class ShopManager : MonoBehaviour, ISaveable
 
     private float battlePauseTime = 0f;                                     // 전투 중 멈춘 시간
     private bool isBattlePaused = false;                                    // 전투 중 멈춤 상태
+
     #endregion
 
 
@@ -138,7 +139,6 @@ public class ShopManager : MonoBehaviour, ISaveable
         cashForTimeRewardButton.onClick.AddListener(OnClickCashForTime);
 
         doubleCoinForAdButton.onClick.AddListener(OnClickDoubleCoinForAd);
-
     }
 
     // New 이미지 상태 업데이트 함수
@@ -212,7 +212,7 @@ public class ShopManager : MonoBehaviour, ISaveable
         remainingCoolTimeBeforeAd = Math.Max(0, cashForTimeCoolTime - (currentTime - lastTimeReward));
         remainingDoubleCoinCoolTimeBeforeAd = Math.Max(0, doubleCoinForAdCoolTime - (currentTime - lastDoubleCoinTimeReward));
 
-        // TODO: 광고 재생 로직 추가
+        // 광고 재생
         isWaitingForAd = true;
         cashForAdRewardButton.interactable = false;
 
@@ -454,9 +454,9 @@ public class ShopManager : MonoBehaviour, ISaveable
     [Serializable]
     private class SaveData
     {
-        public long lastAdTimeReward;           // 
-        public long lastTimeReward;             // 
-        public long lastDoubleCoinTimeReward;   // 
+        public long lastAdTimeReward;           // 마지막 CashForAd 보상 받은 시간
+        public long lastTimeReward;             // 마지막 CasfFroTime 보상 받은 시간
+        public long lastDoubleCoinTimeReward;   // 마지막 DoubleCoinForAd 보상 받은 시간
         public float multiplierEndTimeOffset;   // 효과 종료까지 남은 시간
         public float coinMultiplier;            // 현재 적용 중인 배수
     }

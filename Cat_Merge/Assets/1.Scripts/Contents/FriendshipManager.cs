@@ -614,7 +614,6 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     {
         //Debug.Log($"공격력 {percentage * 100}% 증가 효과 적용");
 
-        // 앞으로 생성될 모든 고양이들에게 변경된 패시브 효과 적용
         var allCats = GameManager.Instance.AllCatData;
         for (int i = 0; i < allCats.Length; i++)
         {
@@ -624,7 +623,6 @@ public class FriendshipManager : MonoBehaviour, ISaveable
             }
         }
 
-        // 현재 필드에 있는 고양이들에게 변경된 패시브 효과 적용
         var activeCats = SpawnManager.Instance.GetActiveCats();
         foreach (var catObj in activeCats)
         {
@@ -643,14 +641,9 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     // 공격 속도 0.05초 증가 패시브 함수
     private void ApplyAttackSpeedBuff() 
     {
-        Debug.Log("공격 속도 0.05초 증가");
+        //Debug.Log("공격 속도 0.05초 증가");
 
-        // 고양이들의 전투시 공격 속도를 0.05초만큼 증가하는 기능
-
-        // 앞으로 생성될 모든 고양이들에게 변경된 패시브 효과 적용
-
-        // 현재 필드에 있는 고양이들에게 변경된 패시브 효과 적용
-
+        BattleManager.Instance.AddPassiveCatAttackSpeedBuff(0.05f);
     }
 
     // 젤리 획득 속도 0.05초 증가 패시브 함수

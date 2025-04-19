@@ -28,8 +28,13 @@ public class Cat
     private int growthHp;        // 성장한 체력
     public int GrowthHp { get => growthHp; set => growthHp = value; }
 
+
+
     private float passiveAttackDamage = 1.0f;    // 패시브 공격력 증가 배율 (기본값 1 = 100%)
     public float PassiveAttackDamage { get => passiveAttackDamage; set => passiveAttackDamage = value; }
+
+    private float passiveCoinCollectSpeed = 0f;    // 패시브 재화 수집 속도 증가량 (기본값 0초)
+    public float PassiveCoinCollectSpeed { get => passiveCoinCollectSpeed; set => passiveCoinCollectSpeed = value; }
 
 
 
@@ -73,8 +78,6 @@ public class Cat
         CatAttackSpeed = catAttackSpeed;
         CatArmor = catArmor;
         CatMoveSpeed = catMoveSpeed;
-
-        PassiveAttackDamage = 1.0f;
     }
 
     // 성장 스탯 함수
@@ -104,5 +107,19 @@ public class Cat
     {
         PassiveAttackDamage = 1f;
     }
+
+
+    // 패시브 재화 수집 속도 증가 적용 함수
+    public void AddPassiveCoinCollectSpeedBuff(float seconds)
+    {
+        PassiveCoinCollectSpeed += seconds;
+    }
+
+    // 패시브 공격력 증가 초기화 함수
+    public void ResetPassiveCoinCollectSpeedBuff()
+    {
+        PassiveCoinCollectSpeed = 0f;
+    }
+
 
 }

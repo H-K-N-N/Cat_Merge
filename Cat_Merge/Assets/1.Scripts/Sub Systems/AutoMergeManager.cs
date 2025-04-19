@@ -319,26 +319,21 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     // 머지 완료 처리 함수
     private void CompleteMerge(DragAndDropManager cat1, DragAndDropManager cat2)
     {
-        // 유효성 검사 추가
-        if (cat1 == null || cat2 == null || !cat1.gameObject.activeSelf || !cat2.gameObject.activeSelf)
-        {
-            return;
-        }
+        if (cat1 == null || cat2 == null || !cat1.gameObject.activeSelf || !cat2.gameObject.activeSelf) return;
+        if (cat1 == cat2) return;
 
-        // 동일한 고양이가 아닌지 확인
-        if (cat1 == cat2)
-        {
-            return;
-        }
+        cat1.GetComponent<CatData>()?.CleanupCoroutines();
+        cat2.GetComponent<CatData>()?.CleanupCoroutines();
 
         Cat mergedCat = MergeManager.Instance.MergeCats(cat1.catData, cat2.catData);
         if (mergedCat != null)
         {
+            SpawnManager.Instance.ReturnCatToPool(cat2.gameObject);
+            GameManager.Instance.DeleteCatCount();
+
             cat1.catData = mergedCat;
             cat1.UpdateCatUI();
             SpawnManager.Instance.RecallEffect(cat1.gameObject);
-            SpawnManager.Instance.ReturnCatToPool(cat2.gameObject);
-            GameManager.Instance.DeleteCatCount();
         }
     }
 
@@ -371,6 +366,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / MOVE_DURATION);
             cat.rectTransform.anchoredPosition = Vector2.Lerp(startPos, targetPosition, t);
+
             yield return null;
         }
 

@@ -33,15 +33,13 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     private float rectHalfHeight;                   // rectSize의 Height 절반값
 
     [Header("Movement")]
-    private bool isAnimating = false;               // 이동 애니메이션 진행 여부
+    private bool isMoveAnimating = false;           // 이동 애니메이션 진행 여부
     private Coroutine autoMoveCoroutine;            // 자동 이동 코루틴
     private Coroutine currentMoveCoroutine;         // 현재 진행 중인 이동 코루틴
 
     [Header("Coin Collection")]
     private TextMeshProUGUI collectCoinText;        // 코인 획득 텍스트
     private Image collectCoinImage;                 // 코인 획득 이미지
-    //private float collectingTime;                   // 코인 수집 간격
-    //public float CollectingTime { get => collectingTime; set => collectingTime = value; }
     private bool isCollectingCoins = true;          // 코인 수집 활성화 상태
     private Coroutine autoCollectCoroutine;         // 코인 수집 코루틴
 
@@ -106,26 +104,16 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
         catImage.sprite = catData.CatImage;
     }
-    
+
     // 고양이 데이터 설정 함수
     public void SetCatData(Cat cat)
     {
         // 기존 코루틴 정리
-        if (autoCollectCoroutine != null)
-        {
-            StopCoroutine(autoCollectCoroutine);
-            autoCollectCoroutine = null;
-        }
+        CleanupCoroutines();
 
         // UI 상태 초기화
-        if (collectCoinText != null)
-        {
-            collectCoinText.gameObject.SetActive(false);
-        }
-        if (collectCoinImage != null)
-        {
-            collectCoinImage.gameObject.SetActive(false);
-        }
+        collectCoinText.gameObject.SetActive(false);
+        collectCoinImage.gameObject.SetActive(false);
 
         // 데이터 설정
         catData = cat;
@@ -238,7 +226,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
                 SetRaycastTarget(true);  // 드래그는 가능하도록 설정
 
                 // 보스 히트박스 경계로 이동
-                MoveTowardBossBoundary();               
+                MoveTowardBossBoundary();
             }
             else
             {
@@ -289,7 +277,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     {
         if (isEnabled && !isStuned)
         {
-            if (!isAnimating && autoMoveCoroutine == null)
+            if (!isMoveAnimating && autoMoveCoroutine == null)
             {
                 autoMoveCoroutine = StartCoroutine(AutoMove());
             }
@@ -301,7 +289,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
                 StopCoroutine(autoMoveCoroutine);
                 autoMoveCoroutine = null;
             }
-            isAnimating = false;
+            isMoveAnimating = false;
         }
     }
 
@@ -312,7 +300,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         {
             yield return new WaitForSeconds(AutoMoveManager.Instance.AutoMoveTime());
 
-            if (!isAnimating && (catDragAndDrop == null || !catDragAndDrop.isDragging))
+            if (!isMoveAnimating && (catDragAndDrop == null || !catDragAndDrop.isDragging))
             {
                 Vector3 randomDirection = GetRandomDirection();
                 Vector3 targetPosition = (Vector3)rectTransform.anchoredPosition + randomDirection;
@@ -374,8 +362,8 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     // 부드러운 이동 코루틴
     private IEnumerator SmoothMoveToPosition(Vector3 targetPosition)
     {
-        isAnimating = true;
-       
+        isMoveAnimating = true;
+
         if (currentMoveCoroutine != null)
         {
             StopCoroutine(currentMoveCoroutine);
@@ -395,7 +383,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         // 드래그 중이 아닐 때만 애니메이션 상태 변경
         if (!GetComponent<DragAndDropManager>().isDragging)
         {
-            // 전투 중이든 아니든 이동할 때는 walk 상태로 변경
+            // 이동할 때는 무조건 walk 상태로 변경 (최우선)
             GetComponent<AnimatorManager>().ChangeState(CharacterState.isWalk);
         }
 
@@ -408,26 +396,23 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
 
         rectTransform.anchoredPosition = targetPosition;
-        isAnimating = false;
+        isMoveAnimating = false;
 
         // 드래그 중이 아닐 때만 애니메이션 상태 변경
         if (!GetComponent<DragAndDropManager>().isDragging)
         {
-            // 이동이 끝난 후, 재화수집 중인지 확인
-            if (collectCoinText != null && collectCoinText.gameObject.activeSelf)
+            // 이동이 끝난 후에도 isMoveAnimating이 true라면 여전히 다른 이동이 진행중
+            if (isMoveAnimating)
             {
-                GetComponent<AnimatorManager>().ChangeState(CharacterState.isGetCoin);
+                GetComponent<AnimatorManager>().ChangeState(CharacterState.isWalk);
+            }
+            else if (BattleManager.Instance.isBattleActive)
+            {
+                GetComponent<AnimatorManager>().ChangeState(CharacterState.isBattle);
             }
             else
             {
-                if (BattleManager.Instance.isBattleActive)
-                {
-                    GetComponent<AnimatorManager>().ChangeState(CharacterState.isBattle);
-                }
-                else
-                {
-                    GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
-                }
+                GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
             }
         }
 
@@ -443,7 +428,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     public void SetCollectingCoinsState(bool isEnabled)
     {
         isCollectingCoins = isEnabled;
-        
+
         if (isCollectingCoins)
         {
             if (autoCollectCoroutine == null)
@@ -475,44 +460,6 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
     }
 
-    //// 자동 재화 수집 코루틴
-    //private IEnumerator AutoCollectCoins()
-    //{
-    //    if (autoCollectCoroutine != null) yield break;
-
-    //    float currentDelayTime = 0f;
-    //    WaitForSeconds delay = null;
-
-    //    while (isCollectingCoins && gameObject.activeSelf)
-    //    {
-    //        if (!isCollectingCoins || !gameObject.activeSelf) break;
-
-    //        collectingTime = ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value;
-
-    //        // 딜레이 시간이 변경되었는지 확인
-    //        if (delay == null || !Mathf.Approximately(currentDelayTime, collectingTime))
-    //        {
-    //            currentDelayTime = collectingTime;
-    //            delay = new WaitForSeconds(currentDelayTime);
-    //        }
-
-    //        yield return delay;
-
-    //        if (!isCollectingCoins || !gameObject.activeSelf) break;
-
-    //        if (catData != null)
-    //        {
-    //            float currentMultiplier = ShopManager.Instance.CurrentCoinMultiplier;
-    //            int collectedCoins = Mathf.RoundToInt(catData.CatGetCoin * currentMultiplier);
-
-    //            GameManager.Instance.Coin += collectedCoins;
-    //            StartCoroutine(PlayCollectingAnimation(collectedCoins));
-    //        }
-    //    }
-
-    //    autoCollectCoroutine = null;
-    //}
-
     // 자동 재화 수집 코루틴
     private IEnumerator AutoCollectCoins()
     {
@@ -528,8 +475,9 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         {
             if (!isCollectingCoins || !gameObject.activeSelf) break;
 
-            // 수집 시간 업데이트 (매 프레임 체크하지 않고 실제 변경될 때만)
-            float newCollectingTime = ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value;
+            // 수집 시간 업데이트
+            float baseCollectingTime = ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value;
+            float newCollectingTime = baseCollectingTime - catData.PassiveCoinCollectSpeed;
 
             if (delay == null || !Mathf.Approximately(currentDelayTime, newCollectingTime))
             {
@@ -598,11 +546,14 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     // 재화 수집 애니메이션 코루틴
     private IEnumerator PlayCollectingAnimation(int collectedCoins)
     {
-        if (!BattleManager.Instance.isBattleActive && !GetComponent<DragAndDropManager>().isDragging)
+        // 이동 중이거나 드래그 중이면 애니메이션 상태를 변경하지 않음
+        if (!BattleManager.Instance.isBattleActive &&
+            !GetComponent<DragAndDropManager>().isDragging &&
+            !isMoveAnimating)  // isMoveAnimating으로 이동 중인지 체크
         {
             GetComponent<AnimatorManager>().ChangeState(CharacterState.isGetCoin);
         }
-        
+
         if (collectCoinText != null)
         {
             collectCoinText.text = $"+{collectedCoins}";
@@ -624,12 +575,23 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             collectCoinImage.gameObject.SetActive(false);
         }
 
-        if (!BattleManager.Instance.isBattleActive && !GetComponent<DragAndDropManager>().isDragging)
+        // 이동 중이거나 드래그 중이면 애니메이션 상태를 변경하지 않음
+        if (!BattleManager.Instance.isBattleActive &&
+            !GetComponent<DragAndDropManager>().isDragging &&
+            !isMoveAnimating)  // isMoveAnimating으로 이동 중인지 체크
         {
             GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
         }
     }
-    
+
+    // 모든 코루틴 정리 함수
+    public void CleanupCoroutines()
+    {
+        StopAllCoroutines();
+        autoCollectCoroutine = null;
+        isCollectingCoins = false;
+    }
+
     #endregion
 
 
@@ -650,7 +612,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             currentMoveCoroutine = null;
         }
 
-        isAnimating = false;
+        isMoveAnimating = false;
     }
 
     #endregion

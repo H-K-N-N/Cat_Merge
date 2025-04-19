@@ -582,7 +582,7 @@ public class FriendshipManager : MonoBehaviour, ISaveable
                         ApplyAttackSpeedBuff();
                         break;
                     case 7:
-                        ApplyJellyCollectSpeedBuff();
+                        ApplyCoinCollectSpeedBuff();
                         break;
                     case 8:
                         ApplyFreeDiamondAmountBuff();
@@ -612,8 +612,6 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     // 공격력 1~5% 증가 효과 패시브 함수
     private void ApplyAttackDamageBuff(float percentage)
     {
-        //Debug.Log($"공격력 {percentage * 100}% 증가 효과 적용");
-
         var allCats = GameManager.Instance.AllCatData;
         for (int i = 0; i < allCats.Length; i++)
         {
@@ -633,32 +631,32 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     // 고양이 보유 숫자 1 증가 패시브 함수
     private void ApplyCatCapacityIncrease() 
     {
-        //Debug.Log("고양이 보유 숫자 1 증가");
-
         GameManager.Instance.AddPassiveCatCapacity(1);
     }
 
     // 공격 속도 0.05초 증가 패시브 함수
     private void ApplyAttackSpeedBuff() 
     {
-        //Debug.Log("공격 속도 0.05초 증가");
-
         BattleManager.Instance.AddPassiveCatAttackSpeedBuff(0.05f);
     }
 
     // 젤리 획득 속도 0.05초 증가 패시브 함수
-    private void ApplyJellyCollectSpeedBuff()
+    private void ApplyCoinCollectSpeedBuff()
     {
-        Debug.Log("젤리 획득 속도 0.05초 증가");
+        var allCats = GameManager.Instance.AllCatData;
+        for (int i = 0; i < allCats.Length; i++)
+        {
+            if (allCats[i] != null)
+            {
+                allCats[i].AddPassiveCoinCollectSpeedBuff(0.05f);
+            }
+        }
 
-        // 고양이들의 자동 재화 획득 속도를 0.05초만큼 증가하는 기능
-
-
-
-        // 앞으로 생성될 모든 고양이들에게 변경된 패시브 효과 적용
-
-        // 현재 필드에 있는 고양이들에게 변경된 패시브 효과 적용
-
+        var activeCats = SpawnManager.Instance.GetActiveCats();
+        foreach (var catObj in activeCats)
+        {
+            catObj.GetComponent<CatData>().SetCatData(catObj.GetComponent<CatData>().catData);
+        }
     }
 
     // 무료 다이아 획득량 1 증가 패시브 함수
@@ -919,7 +917,7 @@ public class FriendshipManager : MonoBehaviour, ISaveable
                                 ApplyAttackSpeedBuff();
                                 break;
                             case 7:
-                                ApplyJellyCollectSpeedBuff();
+                                ApplyCoinCollectSpeedBuff();
                                 break;
                             case 8:
                                 ApplyFreeDiamondAmountBuff();

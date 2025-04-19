@@ -156,6 +156,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
         NowFood--;
         SpawnBasicCat();
         RestartFoodCoroutineIfStopped();
+
         GoogleSave();
     }
 

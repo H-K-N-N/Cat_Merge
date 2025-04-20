@@ -2,24 +2,31 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-// °í¾çÀÌ µå·¡±× ¾Ø µå¶ø Script
+// ê³ ì–‘ì´ ë“œë˜ê·¸ ì•¤ ë“œë Script
 public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, IPointerDownHandler, IPointerClickHandler
 {
-    public Cat catData;                                 // µå·¡±×ÇÏ´Â °í¾çÀÌÀÇ µ¥ÀÌÅÍ
-    public RectTransform rectTransform;                 // RectTransform ÂüÁ¶
-    private Canvas parentCanvas;                        // ºÎ¸ğ Canvas ÂüÁ¶
-    private RectTransform parentRect;                   // Ä³½Ì¿ë ºÎ¸ğ RectTransform
-    private Vector2 panelBoundsMin;                     // ÆĞ³Î °æ°è ÃÖ¼Ò°ª Ä³½Ì
-    private Vector2 panelBoundsMax;                     // ÆĞ³Î °æ°è ÃÖ´ë°ª Ä³½Ì
-    private Vector2 dragOffset;                         // µå·¡±× ½ÃÀÛ À§Ä¡ ¿ÀÇÁ¼Â
 
-    public bool isDragging { get; private set; }        // µå·¡±× »óÅÂ È®ÀÎ ÇÃ·¡±×
 
-    private const float EDGE_THRESHOLD = 10f;           // °¡ÀåÀÚ¸® °¨Áö ÀÓ°è°ª
-    private const float EDGE_PUSH = 30f;                // °¡ÀåÀÚ¸®¿¡¼­ ¹Ğ¾î³»´Â °Å¸®
-    private const float MERGE_DETECTION_SCALE = 0.1f;   // ÇÕ¼º °¨Áö ¹üÀ§ ½ºÄÉÀÏ
+    #region Variables
 
-    // ======================================================================================================================
+    public Cat catData;                                 // ë“œë˜ê·¸í•˜ëŠ” ê³ ì–‘ì´ì˜ ë°ì´í„°
+    public RectTransform rectTransform;                 // RectTransform ì°¸ì¡°
+    private Canvas parentCanvas;                        // ë¶€ëª¨ Canvas ì°¸ì¡°
+    private RectTransform parentRect;                   // ìºì‹±ìš© ë¶€ëª¨ RectTransform
+    private Vector2 panelBoundsMin;                     // íŒ¨ë„ ê²½ê³„ ìµœì†Œê°’ ìºì‹±
+    private Vector2 panelBoundsMax;                     // íŒ¨ë„ ê²½ê³„ ìµœëŒ€ê°’ ìºì‹±
+    private Vector2 dragOffset;                         // ë“œë˜ê·¸ ì‹œì‘ ìœ„ì¹˜ ì˜¤í”„ì…‹
+
+    public bool isDragging { get; private set; }        // ë“œë˜ê·¸ ìƒíƒœ í™•ì¸ í”Œë˜ê·¸
+
+    private const float EDGE_THRESHOLD = 10f;           // ê°€ì¥ìë¦¬ ê°ì§€ ì„ê³„ê°’
+    private const float EDGE_PUSH = 30f;                // ê°€ì¥ìë¦¬ì—ì„œ ë°€ì–´ë‚´ëŠ” ê±°ë¦¬
+    private const float MERGE_DETECTION_SCALE = 0.1f;   // í•©ì„± ê°ì§€ ë²”ìœ„ ìŠ¤ì¼€ì¼
+
+    #endregion
+
+
+    #region Unity Methods
 
     private void Awake()
     {
@@ -27,22 +34,24 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         parentCanvas = GetComponentInParent<Canvas>();
         parentRect = rectTransform.parent.GetComponent<RectTransform>();
 
-        // ÆĞ³Î °æ°è ¹Ì¸® °è»ê
         Vector2 panelSize = parentRect.rect.size * 0.5f;
         panelBoundsMin = -panelSize;
         panelBoundsMax = panelSize;
     }
 
-    // ======================================================================================================================
+    #endregion
 
-    // Å¬¸¯ÇÑ ¼ø°£
+
+    #region Click & Drag and Drop
+
+    // í´ë¦­í•œ ìˆœê°„
     public void OnPointerDown(PointerEventData eventData)
     {
         isDragging = true;
 
         GetComponent<AnimatorManager>().ChangeState(CatState.isGrab);
 
-        // µå·¡±× ½ÃÀÛ À§Ä¡ ¿ÀÇÁ¼Â °è»ê
+        // ë“œë˜ê·¸ ì‹œì‘ ìœ„ì¹˜ ì˜¤í”„ì…‹ ê³„ì‚°
         Vector2 localPointerPosition;
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
             parentRect, eventData.position, parentCanvas.worldCamera, out localPointerPosition))
@@ -50,45 +59,41 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
             dragOffset = rectTransform.localPosition - (Vector3)localPointerPosition;
         }
 
-        // ÀÚµ¿ ¸ÓÁö ÁßÀÎ °í¾çÀÌ Ã³¸®
+        // ìë™ ë¨¸ì§€ ì¤‘ì¸ ê³ ì–‘ì´ ì²˜ë¦¬
         if (AutoMergeManager.Instance != null && AutoMergeManager.Instance.IsMerging(this))
         {
             AutoMergeManager.Instance.StopMerging(this);
         }
     }
 
-    // Å¬¸¯ ¶¾ ¼ø°£
+    // í´ë¦­ ë—€ ìˆœê°„
     public void OnPointerClick(PointerEventData eventData)
     {
         isDragging = false;
         GetComponent<AnimatorManager>().ChangeState(CatState.isIdle);
     }
 
-    // µå·¡±× ÁøÇàÁß ÇÔ¼ö
+    // ë“œë˜ê·¸ ì§„í–‰ì¤‘
     public void OnDrag(PointerEventData eventData)
     {
         Vector2 localPointerPosition;
-        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            parentRect, eventData.position, parentCanvas.worldCamera, out localPointerPosition))
-        {
-            return;
-        }
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRect, eventData.position, parentCanvas.worldCamera, out localPointerPosition)) return;
 
-        // µå·¡±× ¿ÀÇÁ¼Â Àû¿ë ¹× À§Ä¡ Á¦ÇÑ
+        // ë“œë˜ê·¸ ì˜¤í”„ì…‹ ì ìš© ë° ìœ„ì¹˜ ì œí•œ
         Vector2 targetPosition = localPointerPosition + dragOffset;
         targetPosition.x = Mathf.Clamp(targetPosition.x, panelBoundsMin.x, panelBoundsMax.x);
         targetPosition.y = Mathf.Clamp(targetPosition.y, panelBoundsMin.y, panelBoundsMax.y);
 
         rectTransform.localPosition = targetPosition;
 
-        // YÃà ±âÁØ Á¤·Ä (60fps ±âÁØ 3ÇÁ·¹ÀÓ¸¶´Ù ½ÇÇà)
+        // Yì¶• ê¸°ì¤€ ì •ë ¬ (60fps ê¸°ì¤€ 3í”„ë ˆì„ë§ˆë‹¤ ì‹¤í–‰)
         if (Time.frameCount % 3 == 0)
         {
             UpdateSiblingIndexBasedOnY();
         }
     }
 
-    // YÃà °ªÀ» ±âÁØÀ¸·Î µå·¡±× °´Ã¼ÀÇ Á¤·ÄÀ» ¾÷µ¥ÀÌÆ®ÇÏ´Â ÇÔ¼ö
+    // Yì¶• ê°’ì„ ê¸°ì¤€ìœ¼ë¡œ ë“œë˜ê·¸ ê°ì²´ì˜ ì •ë ¬ì„ ì—…ë°ì´íŠ¸í•˜ëŠ” í•¨ìˆ˜
     private void UpdateSiblingIndexBasedOnY()
     {
         int childCount = parentRect.childCount;
@@ -110,7 +115,7 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         }
     }
 
-    // µå·¡±× Á¾·á ÇÔ¼ö
+    // ë“œë˜ê·¸ ì¢…ë£Œ í•¨ìˆ˜
     public void OnEndDrag(PointerEventData eventData)
     {
         isDragging = false;
@@ -130,10 +135,10 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         }
         else
         {
-            // °¡ÀåÀÚ¸® µå¶ø Ã¼Å©´Â ¸ÓÁö »óÅÂ¿Í °ü°è¾øÀÌ Ç×»ó ½ÇÇà
+            // ê°€ì¥ìë¦¬ ë“œë ì²´í¬ëŠ” ë¨¸ì§€ ìƒíƒœì™€ ê´€ê³„ì—†ì´ í•­ìƒ ì‹¤í–‰
             CheckEdgeDrop();
 
-            // ¸ÓÁö »óÅÂ°¡ OFFÀÏ °æ¿ì ¸ÓÁö X
+            // ë¨¸ì§€ ìƒíƒœê°€ OFFì¼ ê²½ìš° ë¨¸ì§€ X
             if (!MergeManager.Instance.IsMergeEnabled())
             {
                 return;
@@ -142,7 +147,7 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
             DragAndDropManager nearbyCat = FindNearbyCat();
             if (nearbyCat != null && nearbyCat != this)
             {
-                // µ¿ÀÏÇÑ µî±Ş È®ÀÎ ÈÄ ÇÕ¼º Ã³¸®
+                // ë™ì¼í•œ ë“±ê¸‰ í™•ì¸ í›„ í•©ì„± ì²˜ë¦¬
                 if (nearbyCat.catData.CatGrade == this.catData.CatGrade)
                 {
                     Cat nextCat = MergeManager.Instance.GetCatByGrade(this.catData.CatGrade + 1);
@@ -152,29 +157,29 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
                     }
                     else
                     {
-                        //Debug.LogWarning("´ÙÀ½ µî±ŞÀÇ °í¾çÀÌ°¡ ¾øÀ½");
+                        //Debug.LogWarning("ë‹¤ìŒ ë“±ê¸‰ì˜ ê³ ì–‘ì´ê°€ ì—†ìŒ");
                     }
                 }
                 else
                 {
-                    //Debug.LogWarning("µî±ŞÀÌ ´Ù¸§");
+                    //Debug.LogWarning("ë“±ê¸‰ì´ ë‹¤ë¦„");
                 }
             }
             else
             {
-                //Debug.Log("µå¶øÇÑ À§Ä¡¿¡ ¹èÄ¡");
+                //Debug.Log("ë“œëí•œ ìœ„ì¹˜ì— ë°°ì¹˜");
             }
         }
     }
 
-    // °¡ÀåÀÚ¸® µå¶ø¿©ºÎ È®ÀÎ ÇÔ¼ö
+    // ê°€ì¥ìë¦¬ ë“œëì—¬ë¶€ í™•ì¸ í•¨ìˆ˜
     private void CheckEdgeDrop()
     {
         Vector2 currentPos = rectTransform.localPosition;
         Vector2 targetPos = currentPos;
         bool needsAdjustment = false;
 
-        // °¡ÀåÀÚ¸® Ã¼Å© ¹× º¸Á¤
+        // ê°€ì¥ìë¦¬ ì²´í¬ ë° ë³´ì •
         if (Mathf.Abs(currentPos.x - panelBoundsMin.x) < EDGE_THRESHOLD) { targetPos.x += EDGE_PUSH; needsAdjustment = true; }
         if (Mathf.Abs(currentPos.x - panelBoundsMax.x) < EDGE_THRESHOLD) { targetPos.x -= EDGE_PUSH; needsAdjustment = true; }
         if (Mathf.Abs(currentPos.y - panelBoundsMax.y) < EDGE_THRESHOLD) { targetPos.y -= EDGE_PUSH; needsAdjustment = true; }
@@ -186,7 +191,7 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         }
     }
 
-    // °¡ÀåÀÚ¸®¿¡¼­ ¾ÈÂÊÀ¸·Î ºÎµå·´°Ô ÀÌµ¿ÇÏ´Â ¾Ö´Ï¸ŞÀÌ¼Ç ÄÚ·çÆ¾
+    // ê°€ì¥ìë¦¬ì—ì„œ ì•ˆìª½ìœ¼ë¡œ ë¶€ë“œëŸ½ê²Œ ì´ë™í•˜ëŠ” ì• ë‹ˆë©”ì´ì…˜ ì½”ë£¨í‹´
     private IEnumerator SmoothMoveToPosition(Vector3 targetPosition)
     {
         Vector3 startPosition = rectTransform.localPosition;
@@ -197,15 +202,19 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         {
             elapsed += Time.deltaTime;
             rectTransform.localPosition = Vector3.Lerp(startPosition, targetPosition, elapsed / duration);
+
             yield return null;
         }
 
         rectTransform.localPosition = targetPosition;
     }
 
-    // ======================================================================================================================
+    #endregion
 
-    // ÀüÅõÁßÀÏ¶§ µå·¡±× ¾Ø µå¶ø (¾îµğ¿¡ À§Ä¡ÇÏµç °¡±î¿î º¸½º È÷Æ®¹Ú½º ¿Ü°ûÀ¸·Î ÀÌµ¿µÇ°Ô ÇØ¾ßÇÔ)
+
+    #region Battle System
+
+    // ì „íˆ¬ì¤‘ì¼ë•Œ ë“œë˜ê·¸ ì•¤ ë“œë ê´€ë ¨ í•¨ìˆ˜
     private void BattleDrop(PointerEventData eventData)
     {
         if (!BattleManager.Instance.IsBattleActive) return;
@@ -214,24 +223,27 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         GameObject droppedObject = eventData.pointerDrag;
         CatData catData = droppedObject.GetComponent<CatData>();
 
-        // È÷Æ®¹Ú½º ³»ºÎ¶ó¸é
+        // íˆíŠ¸ë°•ìŠ¤ ë‚´ë¶€ë¼ë©´
         if (currentBossHitBox.IsInHitbox(this.rectTransform.anchoredPosition))
         {
             catData.MoveOppositeBoss();
         }
-        // È÷Æ®¹Ú½º ¿ÜºÎ¶ó¸é
+        // íˆíŠ¸ë°•ìŠ¤ ì™¸ë¶€ë¼ë©´
         else if (!currentBossHitBox.IsInHitbox(this.rectTransform.anchoredPosition))
         {
             catData.MoveTowardBossBoundary();
         }
     }
 
-    // ======================================================================================================================
+    #endregion
 
-    // ÇÕ¼º½Ã °í¾çÀÌ°¡ ²ø·Á¿À´Â ¾Ö´Ï¸ŞÀÌ¼Ç ÄÚ·çÆ¾
+
+    #region Merge System
+
+    // í•©ì„±ì‹œ ê³ ì–‘ì´ê°€ ëŒë ¤ì˜¤ëŠ” ì• ë‹ˆë©”ì´ì…˜ ì½”ë£¨í‹´
     private IEnumerator PullNearbyCat(DragAndDropManager nearbyCat)
     {
-        // ÀÚµ¿ ¸ÓÁö ÁßÀÎ °æ¿ì ÇØ´ç °í¾çÀÌµéÀ» ÀÚµ¿ ¸ÓÁö¿¡¼­ Á¦¿Ü
+        // ìë™ ë¨¸ì§€ ì¤‘ì¸ ê²½ìš° í•´ë‹¹ ê³ ì–‘ì´ë“¤ì„ ìë™ ë¨¸ì§€ì—ì„œ ì œì™¸
         if (AutoMergeManager.Instance != null)
         {
             AutoMergeManager.Instance.StopMerging(this);
@@ -246,56 +258,77 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         while (elapsed < duration)
         {
             if (nearbyCat == null) yield break;
+
             elapsed += Time.deltaTime;
             nearbyCat.rectTransform.localPosition = Vector3.Lerp(startPosition, targetPosition, elapsed / duration);
+
             yield return null;
         }
 
         if (nearbyCat != null)
         {
-            Cat mergedCat = MergeManager.Instance.MergeCats(this.catData, nearbyCat.catData);
-            if (mergedCat != null)
-            {
-                this.catData = mergedCat;
-                UpdateCatUI();
-                SpawnManager.Instance.RecallEffect(this.gameObject);
-                Destroy(nearbyCat.gameObject);
-            }
+            CompleteMerge(this, nearbyCat);
         }
     }
 
-    // ¹üÀ§ ³»¿¡¼­ °¡Àå °¡±î¿î CatPrefabÀ» Ã£´Â ÇÔ¼ö
+    // ê³ ì–‘ì´ ë¨¸ì§€ ì²˜ë¦¬ í•¨ìˆ˜
+    private void CompleteMerge(DragAndDropManager cat1, DragAndDropManager cat2)
+    {
+        if (cat1 == null || cat2 == null || !cat1.gameObject.activeSelf || !cat2.gameObject.activeSelf) return;
+        if (cat1 == cat2) return;
+
+        Cat mergedCat = MergeManager.Instance.MergeCats(cat1.catData, cat2.catData);
+        if (mergedCat != null)
+        {
+            SpawnManager.Instance.ReturnCatToPool(cat2.gameObject);
+            GameManager.Instance.DeleteCatCount();
+
+            cat1.catData = mergedCat;
+            cat1.UpdateCatUI();
+            SpawnManager.Instance.RecallEffect(cat1.gameObject);
+        }
+    }
+
+    // ë²”ìœ„ ë‚´ì—ì„œ ê°€ì¥ ê°€ê¹Œìš´ ê³ ì–‘ì´ë¥¼ ì°¾ëŠ” í•¨ìˆ˜
     private DragAndDropManager FindNearbyCat()
     {
-        // ÇöÀç Rect Å©±â¸¦ ÁÙ¿©¼­ °¨Áö ¹üÀ§ Á¶Á¤ (°¨Áö ¹üÀ§ Á¶Á¤ ºñÀ²)
+        // í˜„ì¬ Rect í¬ê¸°ë¥¼ ì¤„ì—¬ì„œ ê°ì§€ ë²”ìœ„ ì¡°ì • (ê°ì§€ ë²”ìœ„ ì¡°ì • ë¹„ìœ¨)
         Rect thisRect = GetWorldRect(rectTransform);
         thisRect = ShrinkRect(thisRect, MERGE_DETECTION_SCALE);
+
+        DragAndDropManager nearestCat = null;
+        float nearestDistance = float.MaxValue;
 
         int childCount = parentRect.childCount;
         for (int i = 0; i < childCount; i++)
         {
             Transform child = parentRect.GetChild(i);
-            if (child == transform) continue;
+            if (child == transform || !child.gameObject.activeSelf) continue;
 
-            // Ãæµ¹ È®ÀÎ
             DragAndDropManager otherCat = child.GetComponent<DragAndDropManager>();
             if (otherCat != null && thisRect.Overlaps(GetWorldRect(otherCat.rectTransform)))
             {
-                return otherCat;
+                float distance = Vector2.Distance(rectTransform.position, otherCat.rectTransform.position);
+                if (distance < nearestDistance)
+                {
+                    nearestDistance = distance;
+                    nearestCat = otherCat;
+                }
             }
         }
-        return null;
+        return nearestCat;
     }
 
-    // RectTransformÀÇ ¿ùµå ÁÂÇ¥ ±â¹İ Rect¸¦ ¹İÈ¯ÇÏ´Â ÇÔ¼ö
+    // RectTransformì˜ ì›”ë“œ ì¢Œí‘œ ê¸°ë°˜ Rectë¥¼ ë°˜í™˜í•˜ëŠ” í•¨ìˆ˜
     private Rect GetWorldRect(RectTransform rectTransform)
     {
         Vector3[] corners = new Vector3[4];
         rectTransform.GetWorldCorners(corners);
+
         return new Rect(corners[0].x, corners[0].y, corners[2].x - corners[0].x, corners[2].y - corners[0].y);
     }
 
-    // Rect Å©±â¸¦ ÁÙÀÌ´Â ÇÔ¼ö (°í¾çÀÌ µå¶ø½Ã ÇÕ¼º ¹üÀ§)
+    // Rect í¬ê¸°ë¥¼ ì¤„ì´ëŠ” í•¨ìˆ˜ (ê³ ì–‘ì´ ë“œëì‹œ í•©ì„± ë²”ìœ„)
     private Rect ShrinkRect(Rect rect, float scale)
     {
         float widthReduction = rect.width * (1 - scale) * 0.5f;
@@ -309,13 +342,18 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         );
     }
 
-    // CatUI °»½ÅÇÏ´Â ÇÔ¼ö
+    #endregion
+
+
+    #region UI Update
+
+    // CatUI ê°±ì‹ í•˜ëŠ” í•¨ìˆ˜
     public void UpdateCatUI()
     {
         GetComponentInChildren<CatData>()?.SetCatData(catData);
-
-        //SpawnManager.Instance.RecallEffect()
     }
 
-    
+    #endregion
+
+
 }

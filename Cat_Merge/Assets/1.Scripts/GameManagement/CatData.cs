@@ -11,7 +11,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     #region Variables
 
     private const float CLICK_AREA_SCALE = 0.9f;    // 클릭 영역 스케일
-    private WaitForSeconds COLLECT_ANIMATION_DELAY = new WaitForSeconds(1f); // 4월 5일 0.5->1로 바꿈
+    private WaitForSeconds COLLECT_ANIMATION_DELAY = new WaitForSeconds(1f);
 
     [Header("Cat Data")]
     public Cat catData;                             // 고양이 기본 데이터
@@ -28,9 +28,9 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     private RectTransform rectTransform;            // 현재 오브젝트의 RectTransform
     private RectTransform parentPanel;              // 부모 패널의 RectTransform
     private DragAndDropManager catDragAndDrop;      // 드래그 앤 드롭 매니저
-    private Vector2 rectSize;
-    private float rectHalfWidth;
-    private float rectHalfHeight;
+    private Vector2 rectSize;                       // 레이캐스트를 위한 rectSize
+    private float rectHalfWidth;                    // rectSize의 Width 절반값
+    private float rectHalfHeight;                   // rectSize의 Height 절반값
 
     [Header("Movement")]
     private bool isAnimating = false;               // 이동 애니메이션 진행 여부
@@ -40,10 +40,11 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     [Header("Coin Collection")]
     private TextMeshProUGUI collectCoinText;        // 코인 획득 텍스트
     private Image collectCoinImage;                 // 코인 획득 이미지
-    private float collectingTime;                   // 코인 수집 간격
-    public float CollectingTime { get => collectingTime; set => collectingTime = value; }
+    //private float collectingTime;                   // 코인 수집 간격
+    //public float CollectingTime { get => collectingTime; set => collectingTime = value; }
     private bool isCollectingCoins = true;          // 코인 수집 활성화 상태
     private Coroutine autoCollectCoroutine;         // 코인 수집 코루틴
+
     #endregion
 
 
@@ -62,21 +63,12 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         UpdateHPBar();
     }
 
-    // 오브젝트 파괴시 고양이 수 감소
-    private void OnDestroy()
-    {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.DeleteCatCount();
-        }
-    }
-
     #endregion
 
 
     #region Initialization
 
-    // 컴포넌트 초기화
+    // 컴포넌트 초기화 함수
     private void InitializeComponents()
     {
         catImage = GetComponent<Image>();
@@ -97,7 +89,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         if (collectCoinImage != null) collectCoinImage.gameObject.SetActive(false);
     }
 
-    // 
+    // 레이캐스트를 위한 rectSize 설정 함수
     private void CacheRectTransformData()
     {
         rectSize = rectTransform.rect.size;
@@ -118,11 +110,38 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     // 고양이 데이터 설정 함수
     public void SetCatData(Cat cat)
     {
+        // 기존 코루틴 정리
+        if (autoCollectCoroutine != null)
+        {
+            StopCoroutine(autoCollectCoroutine);
+            autoCollectCoroutine = null;
+        }
+
+        // UI 상태 초기화
+        if (collectCoinText != null)
+        {
+            collectCoinText.gameObject.SetActive(false);
+        }
+        if (collectCoinImage != null)
+        {
+            collectCoinImage.gameObject.SetActive(false);
+        }
+
+        // 데이터 설정
         catData = cat;
         catHp = catData.CatHp;
+
+        // UI 업데이트
         UpdateCatUI();
         UpdateHPBar();
         GetComponent<AnimatorManager>().ApplyAnim(catData.CatGrade);
+
+        // 재화 수집 상태 초기화 및 시작
+        isCollectingCoins = true;
+        if (!BattleManager.Instance.IsBattleActive)
+        {
+            autoCollectCoroutine = StartCoroutine(AutoCollectCoins());
+        }
     }
 
     // HP 바 업데이트 함수
@@ -283,7 +302,6 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
                 autoMoveCoroutine = null;
             }
             isAnimating = false;
-          
         }
     }
 
@@ -423,7 +441,6 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         
         if (isCollectingCoins)
         {
-            
             if (autoCollectCoroutine == null)
             {
                 autoCollectCoroutine = StartCoroutine(AutoCollectCoins());
@@ -453,35 +470,124 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
     }
 
+    //// 자동 재화 수집 코루틴
+    //private IEnumerator AutoCollectCoins()
+    //{
+    //    if (autoCollectCoroutine != null) yield break;
+
+    //    float currentDelayTime = 0f;
+    //    WaitForSeconds delay = null;
+
+    //    while (isCollectingCoins && gameObject.activeSelf)
+    //    {
+    //        if (!isCollectingCoins || !gameObject.activeSelf) break;
+
+    //        collectingTime = ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value;
+
+    //        // 딜레이 시간이 변경되었는지 확인
+    //        if (delay == null || !Mathf.Approximately(currentDelayTime, collectingTime))
+    //        {
+    //            currentDelayTime = collectingTime;
+    //            delay = new WaitForSeconds(currentDelayTime);
+    //        }
+
+    //        yield return delay;
+
+    //        if (!isCollectingCoins || !gameObject.activeSelf) break;
+
+    //        if (catData != null)
+    //        {
+    //            float currentMultiplier = ShopManager.Instance.CurrentCoinMultiplier;
+    //            int collectedCoins = Mathf.RoundToInt(catData.CatGetCoin * currentMultiplier);
+
+    //            GameManager.Instance.Coin += collectedCoins;
+    //            StartCoroutine(PlayCollectingAnimation(collectedCoins));
+    //        }
+    //    }
+
+    //    autoCollectCoroutine = null;
+    //}
+
     // 자동 재화 수집 코루틴
     private IEnumerator AutoCollectCoins()
     {
+        if (autoCollectCoroutine != null) yield break;
+
+        DragAndDropManager dragAndDropManager = GetComponent<DragAndDropManager>();
+
         float currentDelayTime = 0f;
         WaitForSeconds delay = null;
-        
-        while (isCollectingCoins)
-        {
-            collectingTime = ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value;
+        WaitForSeconds defaultDelay = new WaitForSeconds(3f);
 
-            // 딜레이 시간이 변경되었는지 확인
-            if (delay == null || !Mathf.Approximately(currentDelayTime, collectingTime))
+        while (isCollectingCoins && gameObject.activeSelf)
+        {
+            if (!isCollectingCoins || !gameObject.activeSelf) break;
+
+            // 수집 시간 업데이트 (매 프레임 체크하지 않고 실제 변경될 때만)
+            float newCollectingTime = ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value;
+
+            if (delay == null || !Mathf.Approximately(currentDelayTime, newCollectingTime))
             {
-                currentDelayTime = collectingTime;
+                currentDelayTime = newCollectingTime;
                 delay = new WaitForSeconds(currentDelayTime);
             }
 
-            yield return delay;
+            if (delay != null)
+            {
+                yield return delay;
+            }
+            else
+            {
+                yield return defaultDelay;
+            }
 
+            if (!isCollectingCoins || !gameObject.activeSelf) break;
 
             if (catData != null)
             {
                 float currentMultiplier = ShopManager.Instance.CurrentCoinMultiplier;
-                int collectedCoins = Mathf.RoundToInt(catData.CatGetCoin * currentMultiplier);
 
-                GameManager.Instance.Coin += collectedCoins;
-                StartCoroutine(PlayCollectingAnimation(collectedCoins));
+                int baseCoins = catData.CatGetCoin;
+                int multipliedCoins = Mathf.RoundToInt(baseCoins * currentMultiplier);
+
+                GameManager.Instance.Coin += multipliedCoins;
+
+                // 전투 중이거나 드래그 중이 아닐 때만 애니메이션 실행
+                if (!BattleManager.Instance.IsBattleActive && !dragAndDropManager.isDragging)
+                {
+                    StartCoroutine(PlayCollectingAnimation(multipliedCoins));
+                }
+                else
+                {
+                    UpdateCollectUI(multipliedCoins);
+                }
             }
         }
+
+        autoCollectCoroutine = null;
+    }
+
+    // UI 업데이트 전용 함수 (애니메이션 없이)
+    private void UpdateCollectUI(int coins)
+    {
+        if (collectCoinText != null)
+        {
+            collectCoinText.text = $"+{coins}";
+            collectCoinText.gameObject.SetActive(true);
+        }
+        if (collectCoinImage != null)
+        {
+            collectCoinImage.gameObject.SetActive(true);
+        }
+
+        StartCoroutine(DisableCollectUIDelayed());
+    }
+
+    // UI 비활성화 딜레이 코루틴
+    private IEnumerator DisableCollectUIDelayed()
+    {
+        yield return COLLECT_ANIMATION_DELAY;
+        DisableCollectUI();
     }
 
     // 재화 수집 애니메이션 코루틴
@@ -504,8 +610,14 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
         yield return COLLECT_ANIMATION_DELAY;
 
-        if (collectCoinText != null) collectCoinText.gameObject.SetActive(false);
-        if (collectCoinImage != null) collectCoinImage.gameObject.SetActive(false);
+        if (collectCoinText != null)
+        {
+            collectCoinText.gameObject.SetActive(false);
+        }
+        if (collectCoinImage != null)
+        {
+            collectCoinImage.gameObject.SetActive(false);
+        }
 
         if (!BattleManager.Instance.isBattleActive && !GetComponent<DragAndDropManager>().isDragging)
         {
@@ -544,12 +656,11 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     // 레이캐스트 필터링 함수
     public bool IsRaycastLocationValid(Vector2 screenPoint, Camera eventCamera)
     {
-        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, screenPoint, eventCamera, out Vector2 localPoint))
-            return false;
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, screenPoint, eventCamera, out Vector2 localPoint)) return false;
 
         Vector2 normalizedPoint = new Vector2(
-            //localPoint.x / rectHalfWidth,
-            (localPoint.x + 20f) / rectHalfWidth,
+            localPoint.x / rectHalfWidth,
+            //(localPoint.x + 20f) / rectHalfWidth,
             localPoint.y / rectHalfHeight
         );
 

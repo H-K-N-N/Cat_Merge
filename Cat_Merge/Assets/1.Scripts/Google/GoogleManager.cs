@@ -344,6 +344,8 @@ public class GoogleManager : MonoBehaviour
             return;
         }
 
+        //isSaving = true;
+
         CompleteGameState gameState = new CompleteGameState();
         ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
 
@@ -376,6 +378,7 @@ public class GoogleManager : MonoBehaviour
                         .Build();
 
                     saveGameClient.CommitUpdate(game, update, data, (saveStatus, savedGame) => {
+                        //isSaving = false;
                         bool success = saveStatus == SavedGameRequestStatus.Success;
 
                         callback?.Invoke(success);
@@ -383,6 +386,7 @@ public class GoogleManager : MonoBehaviour
                 }
                 else
                 {
+                    //isSaving = false;
                     callback?.Invoke(false);
                 }
             });

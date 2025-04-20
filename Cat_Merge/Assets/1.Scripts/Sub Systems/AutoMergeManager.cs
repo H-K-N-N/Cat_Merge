@@ -196,9 +196,11 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         {
             CleanupMergingCats();
 
-            // 모든 고양이를 등급순으로 정렬하여 가져옴
+            // 활성화된 고양이를 등급순으로 정렬하여 가져옴
             var allCats = FindObjectsOfType<DragAndDropManager>()
-                .Where(cat => cat != null && !cat.isDragging)
+                .Where(cat => cat != null && 
+                       cat.gameObject.activeSelf && 
+                       !cat.isDragging)
                 .OrderBy(cat => cat.catData.CatGrade)
                 .ToList();
 
@@ -207,11 +209,12 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             // 가장 낮은 등급부터 순차적으로 머지 시도
             for (int i = 0; i < allCats.Count; i++)
             {
-                if (allCats[i] == null) continue;
+                if (allCats[i] == null || !allCats[i].gameObject.activeSelf) continue;
 
                 // 같은 등급의 다른 고양이 찾기
                 var sameLevelCats = allCats
                     .Where(cat => cat != null &&
+                           cat.gameObject.activeSelf &&
                            cat != allCats[i] &&
                            cat.catData.CatGrade == allCats[i].catData.CatGrade)
                     .ToList();
@@ -244,13 +247,14 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     // 머지중인 고양이 정리 함수
     private void CleanupMergingCats()
     {
-        mergingCats.RemoveWhere(cat => cat == null || cat.isDragging);
+        mergingCats.RemoveWhere(cat => cat == null || !cat.gameObject.activeSelf || cat.isDragging);
     }
 
     // 유효한 머지인지 확인하는 함수
     private bool IsValidMergePair(DragAndDropManager cat1, DragAndDropManager cat2)
     {
         return cat1 != null && cat2 != null &&
+               cat1.gameObject.activeSelf && cat2.gameObject.activeSelf &&
                !cat1.isDragging && !cat2.isDragging &&
                !IsMaxLevelCat(cat1.catData) && !IsMaxLevelCat(cat2.catData) &&
                cat1.catData.CatGrade == cat2.catData.CatGrade;
@@ -259,7 +263,9 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     // 자동머지 랜덤위치 가져오는 함수
     private Vector2 GetRandomPosition()
     {
-        DragAndDropManager anyActiveCat = FindObjectOfType<DragAndDropManager>();
+        // 활성화된 고양이만 찾도록 수정
+        DragAndDropManager anyActiveCat = FindObjectsOfType<DragAndDropManager>().FirstOrDefault(cat => cat != null && cat.gameObject.activeSelf);
+
         if (anyActiveCat != null)
         {
             RectTransform parentRect = anyActiveCat.rectTransform?.parent?.GetComponent<RectTransform>();
@@ -313,13 +319,26 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     // 머지 완료 처리 함수
     private void CompleteMerge(DragAndDropManager cat1, DragAndDropManager cat2)
     {
+        // 유효성 검사 추가
+        if (cat1 == null || cat2 == null || !cat1.gameObject.activeSelf || !cat2.gameObject.activeSelf)
+        {
+            return;
+        }
+
+        // 동일한 고양이가 아닌지 확인
+        if (cat1 == cat2)
+        {
+            return;
+        }
+
         Cat mergedCat = MergeManager.Instance.MergeCats(cat1.catData, cat2.catData);
         if (mergedCat != null)
         {
             cat1.catData = mergedCat;
             cat1.UpdateCatUI();
             SpawnManager.Instance.RecallEffect(cat1.gameObject);
-            Destroy(cat2.gameObject);
+            SpawnManager.Instance.ReturnCatToPool(cat2.gameObject);
+            GameManager.Instance.DeleteCatCount();
         }
     }
 

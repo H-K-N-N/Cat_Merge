@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using System.Linq;
 
 // BattleManager Script
 public class BattleManager : MonoBehaviour, ISaveable
@@ -30,9 +31,10 @@ public class BattleManager : MonoBehaviour, ISaveable
     private int bossStage = 1;                                  // 보스 스테이지
     public int BossStage => bossStage;
 
-    private const float BOSS_ATTACK_DELAY = 2f;                 // 보스 공격 딜레이
-    private const float CAT_ATTACK_DELAY = 1f;                  // 고양이 공격 딜레이
     private const float GIVEUP_BUTTON_DELAY = 2f;               // 항복 버튼 활성화 딜레이
+    private const float BOSS_ATTACK_DELAY = 2f;                 // 보스 공격 딜레이
+    private float catAttackDelay = 1f;                          // 고양이 공격 딜레이
+    
 
     private GameObject currentBoss;                             // 현재 보스
     [HideInInspector] public BossHitbox bossHitbox;             // 보스 히트박스
@@ -69,16 +71,17 @@ public class BattleManager : MonoBehaviour, ISaveable
     private List<GameObject> activeRewardSlots = new List<GameObject>();  // 현재 활성화된 보상 슬롯들
 
     [Header("---[Boss AutoRetry UI]")]
-    [SerializeField] private Button autoRetryPanelButton;       // 하위 단계 자동 도전 패널 버튼
-    [SerializeField] private Image autoRetryPanelButtonImage;   // 패널 버튼 이미지
-    [SerializeField] private GameObject autoRetryPanel;         // 하위 단계 자동 도전 패널
-    [SerializeField] private Button closeAutoRetryPanelButton;  // 하위 단계 자동 도전 패널 닫기 버튼
-    [SerializeField] private Button autoRetryButton;            // 하위 단계 자동 도전 토글 버튼
-    [SerializeField] private RectTransform autoRetryHandle;     // 토글 핸들
-    [SerializeField] private Image autoRetryButtonImage;        // 하위 단계 자동 도전 버튼 이미지
-    private int currentMaxBossStage;                            // 도전 가능한 보스 최대 스테이지
-    private bool isAutoRetryEnabled;                            // 하위 단계 자동 도전 상태
-    private Coroutine autoRetryToggleCoroutine;                 // 토글 애니메이션 코루틴
+    [SerializeField] private Button autoRetryPanelButton;               // 하위 단계 자동 도전 패널 버튼
+    [SerializeField] private Image autoRetryPanelButtonImage;           // 패널 버튼 이미지
+    [SerializeField] private GameObject autoRetryPanel;                 // 하위 단계 자동 도전 패널
+    [SerializeField] private Button closeAutoRetryPanelButton;          // 하위 단계 자동 도전 패널 닫기 버튼
+    [SerializeField] private Button autoRetryButton;                    // 하위 단계 자동 도전 토글 버튼
+    [SerializeField] private RectTransform autoRetryHandle;             // 토글 핸들
+    [SerializeField] private Image autoRetryButtonImage;                // 하위 단계 자동 도전 버튼 이미지
+    [SerializeField] private TextMeshProUGUI currentMaxBossStageText;   // 도전 가능한 보스 최대 스테이지 텍스트
+    private int currentMaxBossStage;                                    // 도전 가능한 보스 최대 스테이지
+    private bool isAutoRetryEnabled;                                    // 하위 단계 자동 도전 상태
+    private Coroutine autoRetryToggleCoroutine;                         // 토글 애니메이션 코루틴
 
 
     [Header("---[Warning UI]")]
@@ -160,6 +163,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         InitializeButtonListeners();
 
         InitializeRewardSprites();
+        UpdateCurrentMaxBossStageText();
     }
 
     // warningPanel 초기화 함수
@@ -246,6 +250,16 @@ public class BattleManager : MonoBehaviour, ISaveable
     {
         cashSprite = Resources.Load<Sprite>("Sprites/UI/I_UI_Main/I_UI_paidcoin.9");
         coinSprite = Resources.Load<Sprite>("Sprites/UI/I_UI_Main/I_UI_coin.9");
+    }
+
+    // 최대 클리어 보스 스테이지 텍스트 업데이트 함수
+    private void UpdateCurrentMaxBossStageText()
+    {
+        if (currentMaxBossStageText != null)
+        {
+            int maxClearedStage = clearedStages.Count > 0 ? clearedStages.Max() : 0;
+            currentMaxBossStageText.text = $"최대 클리어 보스 스테이지 : {maxClearedStage}";
+        }
     }
 
     #endregion
@@ -640,6 +654,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         bossHPSlider.value = (float)currentBossHP;
 
         double hpPercentage = (currentBossHP / maxBossHP) * 100f;
+        hpPercentage = Math.Max(0, hpPercentage);
         bossHPText.text = $"{hpPercentage:F2}%";
     }
 
@@ -744,7 +759,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     {
         while (IsBattleActive)
         {
-            yield return new WaitForSeconds(CAT_ATTACK_DELAY);
+            yield return new WaitForSeconds(catAttackDelay);
             CatsAttackBoss();
         }
     }
@@ -767,22 +782,52 @@ public class BattleManager : MonoBehaviour, ISaveable
 
             RectTransform catRectTransform = cat.GetComponent<RectTransform>();
             Vector3 catPosition = catRectTransform.anchoredPosition;
-
-            if (bossHitbox.IsAtBoundary(catPosition))
-            {
-                int damage = cat.catData.CatDamage;
-                TakeBossDamage(damage);
-            }
-
-            // 드래그 중이 아닌 고양이만 전투 애니메이션으로 변경
             DragAndDropManager dragManager = cat.GetComponent<DragAndDropManager>();
-            if (dragManager != null && !dragManager.isDragging)
+            AnimatorManager anim = cat.GetComponent<AnimatorManager>();
+
+            // 드래그 중이 아닐 때만 애니메이션 상태 변경
+            if (dragManager != null && !dragManager.isDragging && anim != null && !cat.isStuned)
+            {
+                if (bossHitbox.IsAtBoundary(catPosition))
+                {
+                    // 공격 실행
+                    int damage = cat.catData.CatDamage;
+                    TakeBossDamage(damage);
+
+                    // 공격 애니메이션으로 변경
+                    anim.ChangeState(CharacterState.isAttack);
+
+                    // 공격 후 전투 대기 상태로 돌아가는 코루틴 시작
+                    StartCoroutine(ReturnToBattleStateCat(cat));
+                }
+                else
+                {
+                    // 히트박스 경계에 없는 경우 전투 대기 상태로
+                    anim.ChangeState(CharacterState.isBattle);
+                }
+            }
+        }
+    }
+
+    // 공격 후 전투 대기 상태로 돌아가는 코루틴
+    private IEnumerator ReturnToBattleStateCat(CatData cat)
+    {
+        // 공격 애니메이션이 재생되는 시간
+        yield return new WaitForSeconds(1f);
+
+        // 전투가 아직 진행 중이고, 해당 고양이가 아직 활성화 상태일 때만 상태 변경
+        if (isBattleActive && cat != null && cat.gameObject.activeSelf && !cat.isStuned)
+        {
+            DragAndDropManager dragManager = cat.GetComponent<DragAndDropManager>();
+            AnimatorManager anim = cat.GetComponent<AnimatorManager>();
+            if (dragManager != null && !dragManager.isDragging && anim != null)
             {
                 AnimatorManager anim = cat.GetComponent<AnimatorManager>();
                 if (anim != null)
                 {
                     anim.ChangeState(CatState.isAttack);
                 }
+
             }
         }
     }
@@ -822,7 +867,15 @@ public class BattleManager : MonoBehaviour, ISaveable
             // 패배 했을때 보상 (클리어한 최대 스테이지의 반복 클리어 보상) (첫 번째 스테이지에서의 패배는 보상 없음)
             if (currentMaxBossStage > 1)
             {
-                CreateRewardSlot(loseRewardPanel, coinSprite, currentBossData.RepeatclearCoinReward, false);
+                int maxClearedStage = clearedStages.Count > 0 ? clearedStages.Max() : 0;
+                if (maxClearedStage > 0)
+                {
+                    Mouse maxClearedBossData = GetBossDataByStage(maxClearedStage);
+                    if (maxClearedBossData != null)
+                    {
+                        CreateRewardSlot(loseRewardPanel, coinSprite, maxClearedBossData.RepeatclearCoinReward, false);
+                    }
+                }
             }
         }
 
@@ -998,6 +1051,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         if (isVictory)
         {
             currentMaxBossStage = Mathf.Max(currentMaxBossStage, bossStage + 1);
+            UpdateCurrentMaxBossStageText();
             QuestManager.Instance.AddStageCount();
         }
         else
@@ -1027,16 +1081,15 @@ public class BattleManager : MonoBehaviour, ISaveable
         foreach (var cat in allCats)
         {
             cat.HealCatHP();
-        }
 
-        foreach (var cat in allCats)
-        {
             AnimatorManager anim = cat.GetComponent<AnimatorManager>();
             if (anim != null)
             {
                 anim.ChangeState(CatState.isIdle);
             }
         }
+
+        AutoMoveManager.Instance.EndBattleAutoMoveState();
 
         // 자동 머지 재개
         AutoMergeManager.Instance.ResumeAutoMerge();
@@ -1073,10 +1126,32 @@ public class BattleManager : MonoBehaviour, ISaveable
         {
             if (currentMaxBossStage > 1)
             {
-                GameManager.Instance.Coin += currentBossData.RepeatclearCoinReward;
+                // 패배 시 최대 클리어 스테이지의 반복 보상 지급
+                int maxClearedStage = clearedStages.Count > 0 ? clearedStages.Max() : 0;
+                if (maxClearedStage > 0)
+                {
+                    Mouse maxClearedBossData = GetBossDataByStage(maxClearedStage);
+                    if (maxClearedBossData != null)
+                    {
+                        GameManager.Instance.Coin += maxClearedBossData.RepeatclearCoinReward;
+                        Debug.Log(maxClearedBossData.RepeatclearCoinReward);
+                    }
+                }
             }
         }
-        
+    }
+
+    // 특정 스테이지의 보스 데이터를 가져오는 함수
+    private Mouse GetBossDataByStage(int stage)
+    {
+        foreach (Mouse mouse in GameManager.Instance.AllMouseData)
+        {
+            if (mouse.MouseGrade == stage)
+            {
+                return mouse;
+            }
+        }
+        return null;
     }
 
     // 모든 전투 관련 코루틴을 종료하는 함수 추가
@@ -1165,7 +1240,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     private void SetEndFunctions()
     {
         MergeManager.Instance.EndBattleMergeState();
-        AutoMoveManager.Instance.EndBattleAutoMoveState();
+        //AutoMoveManager.Instance.EndBattleAutoMoveState();
         GetComponent<SortManager>().EndBattleSortState();
 
         SpawnManager.Instance.EndBattleSpawnState();
@@ -1184,7 +1259,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     {
         public int bossStage;               // 현재 보스 스테이지
         public bool isAutoRetryEnabled;     // 하위 단계 자동 도전 상태
-        public List<int> clearedStages;
+        public List<int> clearedStages;     // 클리어한 스테이지들
     }
 
     public string GetSaveData()
@@ -1209,13 +1284,14 @@ public class BattleManager : MonoBehaviour, ISaveable
         SaveData savedData = JsonUtility.FromJson<SaveData>(data);
 
         this.bossStage = savedData.bossStage;
-        this.currentMaxBossStage = savedData.bossStage;
         this.isAutoRetryEnabled = savedData.isAutoRetryEnabled;
         this.clearedStages = new HashSet<int>(savedData.clearedStages ?? new List<int>());
+        this.currentMaxBossStage = this.clearedStages.Count > 0 ? this.clearedStages.Max() + 1 : 1;
 
         UpdateToggleButtonImage(autoRetryButtonImage, isAutoRetryEnabled);
         UpdateAutoRetryPanelButtonColor(isAutoRetryEnabled);
         UpdateAutoRetryUI(isAutoRetryEnabled, true);
+        UpdateCurrentMaxBossStageText();
 
         // 전투 중이었다면 전투 상태 초기화
         if (isBattleActive)

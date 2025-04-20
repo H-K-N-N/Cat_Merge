@@ -25,9 +25,9 @@ public class ShopManager : MonoBehaviour, ISaveable
 
 
     [Header("---[기본적인 쿨타임들]")]
-    private const long DEFAULT_CASH_FOR_TIME_COOLTIME = 300;            // 무료 캐쉬 획득 쿨타임 (CashForTime)
-    private const long DEFAULT_CASH_FOR_AD_COOLTIME = 300;              // 광고 캐쉬 획득 쿨타임 (CashForAd)
-    private const long DEFAULT_DOUBLE_COIN_FOR_AD_COOLTIME = 300;       // 코인 2배 획득 쿨타임  (DoubleCoinForAd)
+    private const long DEFAULT_CASH_FOR_TIME_COOLTIME = 600;            // 무료 캐쉬 획득 쿨타임 (CashForTime) (600초)
+    private const long DEFAULT_CASH_FOR_AD_COOLTIME = 600;              // 광고 캐쉬 획득 쿨타임 (CashForAd) (600초)
+    private const long DEFAULT_DOUBLE_COIN_FOR_AD_COOLTIME = 600;       // 코인 2배 획득 쿨타임  (DoubleCoinForAd) (600초)
 
     [Header("---[Cash For Time]")]
     [SerializeField] private Button cashForTimeRewardButton;            // 쿨타임마다 활성화되는 무료 캐쉬 획득 (무료 캐쉬 획득 불가능 상태일때 비활성화 = interactable 비활성화)
@@ -36,7 +36,7 @@ public class ShopManager : MonoBehaviour, ISaveable
     [SerializeField] private TextMeshProUGUI cashForTimeInformationText;// Item Information Text
     [SerializeField] private GameObject cashForTimeNewImage;            // 무료 캐쉬 획득 가능 상태일때 활성화되는 New 이미지 오브젝트
     [SerializeField] private GameObject cashForTimeDisabledBG;          // 무료 캐쉬 획득 불가능 상태일때 활성화되는 이미지 오브젝트
-    private long cashForTimeCoolTime = DEFAULT_CASH_FOR_TIME_COOLTIME;  // 무료 캐쉬 획득 쿨타임 (600초)(게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
+    private long cashForTimeCoolTime = DEFAULT_CASH_FOR_TIME_COOLTIME;  // 무료 캐쉬 획득 쿨타임(게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
     private long lastTimeReward = 0;                                    // 마지막 cashForTime 보상 시간 저장
     private long passiveCashForTimeCoolTimeReduction = 0;               // 패시브로 인한 cashForTime 쿨타임 감소량
     //private long remainingCoolTimeBeforeAd = 0;                         // 광고 시청 전 남은 쿨타임을 저장
@@ -54,7 +54,7 @@ public class ShopManager : MonoBehaviour, ISaveable
     [SerializeField] private GameObject cashForAdRewardOffImage;        // 광고 시청 불가능 상태일때 활성화되는 이미지 오브젝트
     [SerializeField] private GameObject cashForAdNewImage;              // 광고 시청 가능 상태일때 활성화되는 New 이미지 오브젝트
     [SerializeField] private GameObject cashForAdDisabledBG;            // 광고 시청 불가능 상태일때 활성화되는 이미지 오브젝트
-    private long cashForAdCoolTime = DEFAULT_CASH_FOR_AD_COOLTIME;      // 광고 시청 쿨타임 (600초)(게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
+    private long cashForAdCoolTime = DEFAULT_CASH_FOR_AD_COOLTIME;      // 광고 시청 쿨타임 (게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
     private long lastAdTimeReward = 0;                                  // 마지막 cashForAd 보상 시간 저장
     private long passiveCashForAdCoolTimeReduction = 0;                 // 패시브로 인한 cashForAd 쿨타임 감소량
     //private long remainingCashAdCoolTimeBeforeAd = 0;                   // 광고 시청 전 남은 쿨타임을 저장
@@ -71,12 +71,12 @@ public class ShopManager : MonoBehaviour, ISaveable
     [SerializeField] private GameObject doubleCoinForAdRewardOffImage;          // 광고 시청 불가능 상태일때 활성화되는 이미지 오브젝트
     [SerializeField] private GameObject doubleCoinForAdNewImage;                // 광고 시청 가능 상태일때 활성화되는 New 이미지 오브젝트
     [SerializeField] private GameObject doubleCoinForAdDisabledBG;              // 광고 시청 불가능 상태일때 활성화되는 이미지 오브젝트
-    private long doubleCoinForAdCoolTime = DEFAULT_DOUBLE_COIN_FOR_AD_COOLTIME; // 코인 획득량 쿨타임 (600초)(게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
+    private long doubleCoinForAdCoolTime = DEFAULT_DOUBLE_COIN_FOR_AD_COOLTIME; // 코인 획득량 쿨타임 (게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
     private long lastDoubleCoinTimeReward = 0;                                  // 마지막 doubleCoinForAd 보상 시간 저장
     private long passiveDoubleCoinForAdCoolTimeReduction = 0;                   // 패시브로 인한 doubleCoinForAd 쿨타임 감소량
     //private long remainingDoubleCoinCoolTimeBeforeAd = 0;                       // 광고 시청 전 남은 쿨타임을 저장
     
-    private const float doubleCoinDuration = 100f;                          // 코인 2배 지속시간 (300초)
+    private const float doubleCoinDuration = 300f;                          // 코인 2배 지속시간 (300초)
     private const float doubleCoinMultiplier = 2f;                          // 코인 획득량 배수
     private float coinMultiplier = 1f;                                      // 현재 코인 배수
     private float multiplierEndTime = 0f;                                   // 배수 효과 종료 시간

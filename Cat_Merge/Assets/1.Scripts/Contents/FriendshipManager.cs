@@ -589,13 +589,13 @@ public class FriendshipManager : MonoBehaviour, ISaveable
                         ApplyCashForTimeAmountBuff();
                         break;
                     case 9:
-                        ApplyFreeDiamondCoolTimeBuff();
+                        ApplyCashForTimeCoolTimeBuff();
                         break;
                     case 10:
-                        ApplyAdDiamondAmountBuff();
+                        ApplyCashForAdAmountBuff();
                         break;
                     case 11:
-                        ApplyAdDiamondCoolTimeBuff();
+                        ApplyCashForAdCoolTimeBuff();
                         break;
                     case 12:
                         ApplyJellyBuffDurationBuff();
@@ -667,26 +667,21 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     }
 
     // 무료 다이아 획득 쿨타임 1초 감소 패시브 함수
-    private void ApplyFreeDiamondCoolTimeBuff()
+    private void ApplyCashForTimeCoolTimeBuff()
     {
         ShopManager.Instance.AddPassiveCashForTimeCoolTimeReduction(1);
     }
 
     // 광고 다이아 획득량 5 증가 패시브 함수
-    private void ApplyAdDiamondAmountBuff()
+    private void ApplyCashForAdAmountBuff()
     {
         ShopManager.Instance.AddPassiveCashForAdAmount(5);
     }
 
     // 광고 다이아 획득 쿨타임 1초 감소 패시브 함수
-    private void ApplyAdDiamondCoolTimeBuff()
+    private void ApplyCashForAdCoolTimeBuff()
     {
-        Debug.Log("광고 다이아 획득 쿨타임 1초 감소");
-
-        // 상점의 광고를 보면 얻는 Cash의 광고 시청 쿨타임을 영구적으로 1초 감소하는 기능
-
-        // ShopManager의 cashForAdCoolTime의 값을 1 감소하는 기능
-
+        ShopManager.Instance.AddPassiveCashForAdCoolTimeReduction(1);
     }
 
     // 젤리 획득 버프 지속 시간 1초 증가 패시브 함수
@@ -909,13 +904,13 @@ public class FriendshipManager : MonoBehaviour, ISaveable
                                 ApplyCashForTimeAmountBuff();
                                 break;
                             case 9:
-                                ApplyFreeDiamondCoolTimeBuff();
+                                ApplyCashForTimeCoolTimeBuff();
                                 break;
                             case 10:
-                                ApplyAdDiamondAmountBuff();
+                                ApplyCashForAdAmountBuff();
                                 break;
                             case 11:
-                                ApplyAdDiamondCoolTimeBuff();
+                                ApplyCashForAdCoolTimeBuff();
                                 break;
                             case 12:
                                 ApplyJellyBuffDurationBuff();

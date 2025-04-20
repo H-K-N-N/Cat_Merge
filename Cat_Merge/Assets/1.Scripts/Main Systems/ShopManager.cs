@@ -51,6 +51,7 @@ public class ShopManager : MonoBehaviour, ISaveable
     [SerializeField] private GameObject cashForAdDisabledBG;            // 광고 시청 불가능 상태일때 활성화되는 이미지 오브젝트
     private long cashForAdCoolTime = 300;                               // 광고 시청 쿨타임 (600초)(게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
     private long lastAdTimeReward = 0;                                  // 마지막 cashForAd 보상 시간 저장
+    private long passiveCashForAdCoolTimeReduction = 0;                 // 패시브로 인한 cashForAd 쿨타임 감소량
     //private long remainingCashAdCoolTimeBeforeAd = 0;                   // 광고 시청 전 남은 쿨타임을 저장
     private int cashForAdPrice = 30;                                    // cashForAd 보상
     private int passiveCashForAdAmount = 0;                             // 패시브로 인한 cashForAd 추가 광고 캐쉬 획득량
@@ -354,6 +355,15 @@ public class ShopManager : MonoBehaviour, ISaveable
         UpdateCashForAdUI();
     }
 
+    // 패시브로 인한 CashForAd의 쿨타임 감소 함수
+    public void AddPassiveCashForAdCoolTimeReduction(long seconds)
+    {
+        passiveCashForAdCoolTimeReduction += seconds;
+        cashForAdCoolTime = 300 - passiveCashForAdCoolTimeReduction;
+        GoogleSave();
+
+        UpdateCashForTimeUI();
+    }
 
 
     // DoubleCoinForAd UI 업데이트 함수

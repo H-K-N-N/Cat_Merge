@@ -209,7 +209,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     {
         UpdateHPBar();
         isStuned = isStunned;
-        GetComponent<AnimatorManager>().ChangeState(CharacterState.isFaint);
+        GetComponent<AnimatorManager>().ChangeState(CatState.isFaint);
 
         if (!isStunned)
         {
@@ -218,7 +218,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             // 전투 중인지 확인
             if (BattleManager.Instance != null && BattleManager.Instance.IsBattleActive)
             {
-                GetComponent<AnimatorManager>().ChangeState(CharacterState.isBattle);
+                GetComponent<AnimatorManager>().ChangeState(CatState.isBattle);
 
                 // 전투 중이면 자동 재화 수집과 자동 이동은 비활성화 상태 유지
                 SetCollectingCoinsState(false);
@@ -230,7 +230,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             }
             else
             {
-                GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
+                GetComponent<AnimatorManager>().ChangeState(CatState.isIdle);
 
                 // 전투 중이 아니면 모든 기능 활성화
                 SetCollectingCoinsState(true);
@@ -240,7 +240,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
         else
         {
-            GetComponent<AnimatorManager>().ChangeState(CharacterState.isFaint);
+            GetComponent<AnimatorManager>().ChangeState(CatState.isFaint);
 
             // 기절 상태로 진입할 때는 모든 기능 비활성화
             SetCollectingCoinsState(false);
@@ -380,7 +380,6 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         float elapsed = 0f;
         float duration = 0.5f;
 
-        // 드래그 중이 아닐 때만 애니메이션 상태 변경
         if (!GetComponent<DragAndDropManager>().isDragging)
         {
             // 이동할 때는 무조건 walk 상태로 변경 (최우선)
@@ -391,14 +390,12 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         {
             elapsed += Time.deltaTime;
             rectTransform.anchoredPosition = Vector3.Lerp(startPosition, targetPosition, elapsed / duration);
-
             yield return null;
         }
 
         rectTransform.anchoredPosition = targetPosition;
         isMoveAnimating = false;
 
-        // 드래그 중이 아닐 때만 애니메이션 상태 변경
         if (!GetComponent<DragAndDropManager>().isDragging)
         {
             // 이동이 끝난 후에도 isMoveAnimating이 true라면 여전히 다른 이동이 진행중
@@ -551,7 +548,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             !GetComponent<DragAndDropManager>().isDragging &&
             !isMoveAnimating)  // isMoveAnimating으로 이동 중인지 체크
         {
-            GetComponent<AnimatorManager>().ChangeState(CharacterState.isGetCoin);
+            GetComponent<AnimatorManager>().ChangeState(CatState.isGetCoin);
         }
 
         if (collectCoinText != null)
@@ -580,7 +577,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             !GetComponent<DragAndDropManager>().isDragging &&
             !isMoveAnimating)  // isMoveAnimating으로 이동 중인지 체크
         {
-            GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
+            GetComponent<AnimatorManager>().ChangeState(CatState.isIdle);
         }
     }
 

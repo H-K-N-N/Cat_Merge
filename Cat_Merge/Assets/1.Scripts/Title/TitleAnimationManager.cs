@@ -180,8 +180,8 @@ public class TitleAnimationManager : MonoBehaviour
         Vector2 leftStart = level1CatLeft.anchoredPosition;
         Vector2 rightStart = level1CatRight.anchoredPosition;
 
-        level1CatLeft.GetComponent<AnimatorManager>().ChangeState(CharacterState.isWalk);
-        level1CatRight.GetComponent<AnimatorManager>().ChangeState(CharacterState.isWalk);
+        level1CatLeft.GetComponent<AnimatorManager>().ChangeState(CatState.isWalk);
+        level1CatRight.GetComponent<AnimatorManager>().ChangeState(CatState.isWalk);
 
         while (elapsed < moveDuration)
         {
@@ -195,8 +195,8 @@ public class TitleAnimationManager : MonoBehaviour
             yield return null;
         }
 
-        level1CatLeft.GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
-        level1CatRight.GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
+        level1CatLeft.GetComponent<AnimatorManager>().ChangeState(CatState.isIdle);
+        level1CatRight.GetComponent<AnimatorManager>().ChangeState(CatState.isIdle);
 
         level1CatLeft.anchoredPosition = centerPos;
         level1CatRight.anchoredPosition = centerPos;
@@ -450,7 +450,7 @@ public class TitleAnimationManager : MonoBehaviour
 
         catTransform.rotation = Quaternion.Euler(0f, rotation, 0f);
 
-        catTransform.GetComponent<AnimatorManager>().ChangeState(CharacterState.isWalk);
+        catTransform.GetComponent<AnimatorManager>().ChangeState(CatState.isWalk);
 
         while (elapsed < moveDurationCat)
         {
@@ -462,7 +462,7 @@ public class TitleAnimationManager : MonoBehaviour
             yield return null;
         }
 
-        catTransform.GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
+        catTransform.GetComponent<AnimatorManager>().ChangeState(CatState.isIdle);
 
         catTransform.anchoredPosition = targetPosition;
         isAnimating = false;

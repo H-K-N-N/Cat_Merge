@@ -21,6 +21,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     [SerializeField] private Slider respawnSlider;              // 보스 소환까지 남은 시간을 표시할 Slider UI
 
 
+
     private const float DEFAULT_SPAWN_INTERVAL = 300f;          // 보스 등장 주기 (300f)
     private float spawnInterval;                                // 보스 등장 주기
     private Coroutine respawnSliderCoroutine;                   // Slider 코루틴
@@ -460,7 +461,7 @@ public class BattleManager : MonoBehaviour, ISaveable
             AnimatorManager anim = cat.GetComponent<AnimatorManager>();
             if (anim != null)
             {
-                anim.ChangeState(CharacterState.isBattle);
+                anim.ChangeState(CatState.isBattle);
             }
         }
 
@@ -568,6 +569,13 @@ public class BattleManager : MonoBehaviour, ISaveable
             // 보스 체력이 0 이하가 되면 즉시 전투 종료
             if (currentBossHP <= 0)
             {
+                MouseData mouse = FindAnyObjectByType<MouseData>();
+                MouseAnimatorManager anim = mouse.GetComponent<MouseAnimatorManager>();
+                if (anim != null)
+                {
+                    anim.ChangeState(MouseState.isFaint);
+                }
+                yield return new WaitForSeconds(0.9f);
                 EndBattle(true);
                 yield break;
             }
@@ -713,11 +721,43 @@ public class BattleManager : MonoBehaviour, ISaveable
             }
         }
 
+        MouseData mouse = FindAnyObjectByType<MouseData>();
+        MouseAnimatorManager anim = mouse.GetComponent<MouseAnimatorManager>();
+        if (anim != null)
+        {
+            int rand = UnityEngine.Random.Range(1, 4); // 1 이상 4 미만 → 1, 2, 3 중 하나
+            switch (rand)
+            {
+                case 1:
+                    anim.ChangeState(MouseState.isAttack1);
+                    break;
+                case 2:
+                    anim.ChangeState(MouseState.isAttack2);
+                    break;
+                case 3:
+                    anim.ChangeState(MouseState.isAttack3);
+                    break;
+            }
+        }
+
+        StartCoroutine(ReturnToBattleStateMouse(anim));
+
         // 선택된 고양이들에게 데미지 적용
         foreach (var cat in selectedCats)
         {
             double damage = currentBossData.MouseDamage;
             cat.TakeDamage(damage);
+        }
+    }
+
+    private IEnumerator ReturnToBattleStateMouse(MouseAnimatorManager anim)
+    {
+        // 공격 애니메이션이 재생되는 시간
+        yield return new WaitForSeconds(1f);
+
+        if(isBattleActive && anim != null && anim.gameObject.activeSelf)
+        {
+            anim.ChangeState(MouseState.isIdle);
         }
     }
 
@@ -789,7 +829,12 @@ public class BattleManager : MonoBehaviour, ISaveable
             AnimatorManager anim = cat.GetComponent<AnimatorManager>();
             if (dragManager != null && !dragManager.isDragging && anim != null)
             {
-                anim.ChangeState(CharacterState.isBattle);
+                AnimatorManager anim = cat.GetComponent<AnimatorManager>();
+                if (anim != null)
+                {
+                    anim.ChangeState(CatState.isAttack);
+                }
+
             }
         }
     }
@@ -1047,7 +1092,7 @@ public class BattleManager : MonoBehaviour, ISaveable
             AnimatorManager anim = cat.GetComponent<AnimatorManager>();
             if (anim != null)
             {
-                anim.ChangeState(CharacterState.isIdle);
+                anim.ChangeState(CatState.isIdle);
             }
         }
 

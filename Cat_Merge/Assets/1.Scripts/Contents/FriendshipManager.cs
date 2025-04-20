@@ -675,12 +675,7 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     // 광고 다이아 획득량 5 증가 패시브 함수
     private void ApplyAdDiamondAmountBuff()
     {
-        Debug.Log("광고 다이아 획득량 5 증가");
-
-        // 상점의 광고를 보면 얻는 Cash 획득량을 영구적으로 5 증가하는 기능
-
-        // ShopManager의 cashForAdPrice의 값을 5 증가하는 기능
-
+        ShopManager.Instance.AddPassiveCashForAdAmount(5);
     }
 
     // 광고 다이아 획득 쿨타임 1초 감소 패시브 함수

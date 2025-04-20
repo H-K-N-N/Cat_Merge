@@ -24,19 +24,6 @@ public class ShopManager : MonoBehaviour, ISaveable
     private bool isWaitingForAd = false;                            // 광고 대기 중인지 확인하는 변수 추가
 
 
-    [Header("---[Cash For Ad]")]
-    [SerializeField] private Button cashForAdRewardButton;              // 광고 시청으로 캐쉬 획득 (광고 시청 불가능 상태일때 비활성화 = interactable 비활성화)
-    [SerializeField] private TextMeshProUGUI cashForAdCoolTimeText;     // 광고 시청 쿨타임 Text
-    [SerializeField] private GameObject cashForAdRewardOnImage;         // 광고 시청 가능 상태일때 활성화되는 이미지 오브젝트
-    [SerializeField] private GameObject cashForAdRewardOffImage;        // 광고 시청 불가능 상태일때 활성화되는 이미지 오브젝트
-    [SerializeField] private GameObject cashForAdNewImage;              // 광고 시청 가능 상태일때 활성화되는 New 이미지 오브젝트
-    [SerializeField] private GameObject cashForAdDisabledBG;            // 광고 시청 불가능 상태일때 활성화되는 이미지 오브젝트
-    private long cashForAdCoolTime = 300;                               // 광고 시청 쿨타임 (600초)(게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
-    private long lastAdTimeReward = 0;                                  // 마지막 cashForAd 보상 시간 저장
-    //private long remainingCashAdCoolTimeBeforeAd = 0;                   // 광고 시청 전 남은 쿨타임을 저장
-    private int cashForAdPrice = 30;                                    // cashForAd 보상
-
-
     [Header("---[Cash For Time]")]
     [SerializeField] private Button cashForTimeRewardButton;            // 쿨타임마다 활성화되는 무료 캐쉬 획득 (무료 캐쉬 획득 불가능 상태일때 비활성화 = interactable 비활성화)
     [SerializeField] private TextMeshProUGUI cashForTimeNameText;       // Item Name Text
@@ -51,6 +38,23 @@ public class ShopManager : MonoBehaviour, ISaveable
     private int cashForTimePrice = 5;                                   // cashForTime 보상
     private int passiveCashForTimeAmount = 0;                           // 패시브로 인한 cashForTime 추가 무료 캐쉬 획득량
     public int CashForTimePrice => cashForTimePrice + passiveCashForTimeAmount;
+
+
+    [Header("---[Cash For Ad]")]
+    [SerializeField] private Button cashForAdRewardButton;              // 광고 시청으로 캐쉬 획득 (광고 시청 불가능 상태일때 비활성화 = interactable 비활성화)
+    [SerializeField] private TextMeshProUGUI cashForAdNameText;         // Item Name Text
+    [SerializeField] private TextMeshProUGUI cashForAdCoolTimeText;     // 광고 시청 쿨타임 Text
+    [SerializeField] private TextMeshProUGUI cashForAdInformationText;  // Item Information Text
+    [SerializeField] private GameObject cashForAdRewardOnImage;         // 광고 시청 가능 상태일때 활성화되는 이미지 오브젝트
+    [SerializeField] private GameObject cashForAdRewardOffImage;        // 광고 시청 불가능 상태일때 활성화되는 이미지 오브젝트
+    [SerializeField] private GameObject cashForAdNewImage;              // 광고 시청 가능 상태일때 활성화되는 New 이미지 오브젝트
+    [SerializeField] private GameObject cashForAdDisabledBG;            // 광고 시청 불가능 상태일때 활성화되는 이미지 오브젝트
+    private long cashForAdCoolTime = 300;                               // 광고 시청 쿨타임 (600초)(게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
+    private long lastAdTimeReward = 0;                                  // 마지막 cashForAd 보상 시간 저장
+    //private long remainingCashAdCoolTimeBeforeAd = 0;                   // 광고 시청 전 남은 쿨타임을 저장
+    private int cashForAdPrice = 30;                                    // cashForAd 보상
+    private int passiveCashForAdAmount = 0;                             // 패시브로 인한 cashForAd 추가 광고 캐쉬 획득량
+    public int CashForAdPrice => cashForAdPrice + passiveCashForAdAmount;
 
 
     [Header("---[Double Coin For Ad]")]
@@ -162,95 +166,6 @@ public class ShopManager : MonoBehaviour, ISaveable
 
     #region Free Shop System
 
-    // 주기적으로 보상 상태를 체크하는 코루틴
-    private IEnumerator CheckRewardStatus()
-    {
-        WaitForSeconds waitTime = new WaitForSeconds(1f);
-
-        while (true)
-        {
-            UpdateAllUI();
-
-            yield return waitTime;
-        }
-    }
-
-    // CashForAd UI 업데이트 함수
-    private void UpdateCashForAdUI()
-    {
-        bool isAdAvailable = IsCashForAdAvailable() && !isWaitingForAd;
-        long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        long remainTime = Math.Max(0, cashForAdCoolTime - (currentTime - lastAdTimeReward));
-
-        cashForAdRewardButton.interactable = isAdAvailable;
-        cashForAdRewardOnImage.SetActive(isAdAvailable);
-        cashForAdRewardOffImage.SetActive(!isAdAvailable);
-        cashForAdNewImage.SetActive(isAdAvailable);
-        cashForAdDisabledBG.SetActive(!isAdAvailable);
-
-        // 쿨타임 텍스트 업데이트
-        if (isAdAvailable)
-        {
-            cashForAdCoolTimeText.text = "준비 완료";
-        }
-        else
-        {
-            cashForAdCoolTimeText.text = $"쿨타임 {(int)remainTime}초";
-        }
-    }
-
-    // CashForTime 활성화 여부 판별 함수
-    private bool IsCashForAdAvailable()
-    {
-        long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-        return (currentTime - lastAdTimeReward) >= cashForAdCoolTime;
-    }
-
-    // CashForAd 버튼 클릭시 실행되는 함수
-    private void OnClickCashForAd()
-    {
-        if (!IsCashForAdAvailable() || isWaitingForAd) return;
-
-        // CashForTime과 DoubleCoinAd의 남은 쿨타임 저장
-        //long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        //remainingCoolTimeBeforeAd = Math.Max(0, cashForTimeCoolTime - (currentTime - lastTimeReward));
-        //remainingDoubleCoinCoolTimeBeforeAd = Math.Max(0, doubleCoinForAdCoolTime - (currentTime - lastDoubleCoinTimeReward));
-
-        // 광고 재생
-        isWaitingForAd = true;
-        cashForAdRewardButton.interactable = false;
-
-        GetComponent<GoogleAdsManager>().ShowRewardedCashForAd();
-    }
-
-    // 광고 시청 완료 시 실행되는 함수
-    public void OnAdRewardComplete()
-    {
-        // 광고 보상 지급
-        GameManager.Instance.Cash += cashForAdPrice;
-
-        // 마지막 광고 시청 시간 저장
-        lastAdTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-        //// CashForTime의 마지막 보상 시간을 광고 시청 시간만큼 조정
-        //if (remainingCoolTimeBeforeAd > 0)
-        //{
-        //    lastTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - (cashForTimeCoolTime - remainingCoolTimeBeforeAd);
-        //}
-
-        //// DoubleCoinAd의 마지막 보상 시간을 광고 시청 시간만큼 조정
-        //if (remainingDoubleCoinCoolTimeBeforeAd > 0)
-        //{
-        //    lastDoubleCoinTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - (doubleCoinForAdCoolTime - remainingDoubleCoinCoolTimeBeforeAd);
-        //}
-        isWaitingForAd = false;
-
-        GoogleSave();
-
-        UpdateCashForAdUI();
-    }
-
     // CashForTime UI 업데이트 함수
     private void UpdateCashForTimeUI()
     {
@@ -298,7 +213,7 @@ public class ShopManager : MonoBehaviour, ISaveable
     {
         if (!IsCashForTimeAvailable()) return;
 
-        // 시간 보상 지급 (패시브 효과가 적용된 값 사용)
+        // 시간 보상 지급
         GameManager.Instance.Cash += CashForTimePrice;
 
         // 마지막 보상 시간 저장
@@ -331,6 +246,115 @@ public class ShopManager : MonoBehaviour, ISaveable
 
 
     #region Ad Shop System
+
+    // 주기적으로 보상 상태를 체크하는 코루틴
+    private IEnumerator CheckRewardStatus()
+    {
+        WaitForSeconds waitTime = new WaitForSeconds(1f);
+
+        while (true)
+        {
+            UpdateAllUI();
+
+            yield return waitTime;
+        }
+    }
+
+    // CashForAd UI 업데이트 함수
+    private void UpdateCashForAdUI()
+    {
+        bool isAdAvailable = IsCashForAdAvailable() && !isWaitingForAd;
+        long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        long remainTime = Math.Max(0, cashForAdCoolTime - (currentTime - lastAdTimeReward));
+
+        cashForAdRewardButton.interactable = isAdAvailable;
+        cashForAdRewardOnImage.SetActive(isAdAvailable);
+        cashForAdRewardOffImage.SetActive(!isAdAvailable);
+        cashForAdNewImage.SetActive(isAdAvailable);
+        cashForAdDisabledBG.SetActive(!isAdAvailable);
+
+        // 쿨타임 텍스트 업데이트
+        if (isAdAvailable)
+        {
+            cashForAdCoolTimeText.text = "준비 완료";
+        }
+        else
+        {
+            cashForAdCoolTimeText.text = $"쿨타임 {(int)remainTime}초";
+        }
+
+        // 보상 관련 텍스트 업데이트
+        if (cashForAdNameText != null)
+        {
+            cashForAdNameText.text = $"광고 다이아 {CashForAdPrice}개";
+        }
+        if (cashForAdInformationText != null)
+        {
+            cashForAdInformationText.text = $"광고 시청 후 다이아 {CashForAdPrice}개 받기";
+        }
+    }
+
+    // CashForTime 활성화 여부 판별 함수
+    private bool IsCashForAdAvailable()
+    {
+        long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+        return (currentTime - lastAdTimeReward) >= cashForAdCoolTime;
+    }
+
+    // CashForAd 버튼 클릭시 실행되는 함수
+    private void OnClickCashForAd()
+    {
+        if (!IsCashForAdAvailable() || isWaitingForAd) return;
+
+        // CashForTime과 DoubleCoinAd의 남은 쿨타임 저장
+        //long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        //remainingCoolTimeBeforeAd = Math.Max(0, cashForTimeCoolTime - (currentTime - lastTimeReward));
+        //remainingDoubleCoinCoolTimeBeforeAd = Math.Max(0, doubleCoinForAdCoolTime - (currentTime - lastDoubleCoinTimeReward));
+
+        // 광고 재생
+        isWaitingForAd = true;
+        cashForAdRewardButton.interactable = false;
+
+        GetComponent<GoogleAdsManager>().ShowRewardedCashForAd();
+    }
+
+    // CashForAd 광고 시청 완료 시 실행되는 함수
+    public void OnCashForAdRewardComplete()
+    {
+        // 광고 보상 지급
+        GameManager.Instance.Cash += CashForAdPrice;
+
+        // 마지막 광고 시청 시간 저장
+        lastAdTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+        //// CashForTime의 마지막 보상 시간을 광고 시청 시간만큼 조정
+        //if (remainingCoolTimeBeforeAd > 0)
+        //{
+        //    lastTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - (cashForTimeCoolTime - remainingCoolTimeBeforeAd);
+        //}
+
+        //// DoubleCoinAd의 마지막 보상 시간을 광고 시청 시간만큼 조정
+        //if (remainingDoubleCoinCoolTimeBeforeAd > 0)
+        //{
+        //    lastDoubleCoinTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - (doubleCoinForAdCoolTime - remainingDoubleCoinCoolTimeBeforeAd);
+        //}
+        isWaitingForAd = false;
+
+        GoogleSave();
+
+        UpdateCashForAdUI();
+    }
+
+    // 패시브로 인한 CashForAd의 캐쉬 재화 추가 함수
+    public void AddPassiveCashForAdAmount(int amount)
+    {
+        passiveCashForAdAmount += amount;
+        GoogleSave();
+        UpdateCashForAdUI();
+    }
+
+
 
     // DoubleCoinForAd UI 업데이트 함수
     private void UpdateDoubleCoinForAdUI()

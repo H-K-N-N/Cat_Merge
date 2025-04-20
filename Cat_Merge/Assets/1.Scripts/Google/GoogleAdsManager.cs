@@ -85,7 +85,7 @@ public class GoogleAdsManager : MonoBehaviour
         {
             rewardedInterstitialAd.Show((Reward reward) =>
             {
-                ShopManager.Instance.OnAdRewardComplete();
+                ShopManager.Instance.OnCashForAdRewardComplete();
 
                 LoadRewardedInterstitialAd();
             });

@@ -11376,7 +11376,9 @@ MonoBehaviour:
   shopBackButton: {fileID: 153721518}
   shopNewImage: {fileID: 1399190082}
   cashForAdRewardButton: {fileID: 449420555}
+  cashForAdNameText: {fileID: 1170349301}
   cashForAdCoolTimeText: {fileID: 1495999452}
+  cashForAdInformationText: {fileID: 1002841039}
   cashForAdRewardOnImage: {fileID: 1169607117}
   cashForAdRewardOffImage: {fileID: 212329537}
   cashForAdNewImage: {fileID: 1436191645}
@@ -12074,7 +12076,7 @@ GameObject:
   - component: {fileID: 378489635}
   - component: {fileID: 378489634}
   m_Layer: 5
-  m_Name: Free Cash For Time Slot
+  m_Name: Cash For Time Slot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -37427,7 +37429,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uB2E4\uC774\uC544 30\uAC1C"
+  m_text: "\uAD11\uACE0 \uB2E4\uC774\uC544 30\uAC1C"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c7f9e1d048d0987499eff167c931517f, type: 2}
   m_sharedMaterial: {fileID: -8525234839207697280, guid: c7f9e1d048d0987499eff167c931517f, type: 2}
@@ -65171,7 +65173,7 @@ GameObject:
   - component: {fileID: 1999190000}
   - component: {fileID: 1999189999}
   m_Layer: 5
-  m_Name: Free Cash For Ad Slot
+  m_Name: Cash For Ad Slot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

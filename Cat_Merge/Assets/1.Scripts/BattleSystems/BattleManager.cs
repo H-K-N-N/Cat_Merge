@@ -21,7 +21,8 @@ public class BattleManager : MonoBehaviour, ISaveable
     [SerializeField] private Slider respawnSlider;              // 보스 소환까지 남은 시간을 표시할 Slider UI
 
 
-    private const float DEFAULT_SPAWN_INTERVAL = 10f;          // 보스 등장 주기
+
+    private const float DEFAULT_SPAWN_INTERVAL = 300f;          // 보스 등장 주기 (300f)
     private float spawnInterval;                                // 보스 등장 주기
     private Coroutine respawnSliderCoroutine;                   // Slider 코루틴
     private float bossSpawnTimer = 0f;                          // 보스 스폰 타이머
@@ -260,6 +261,12 @@ public class BattleManager : MonoBehaviour, ISaveable
             int maxClearedStage = clearedStages.Count > 0 ? clearedStages.Max() : 0;
             currentMaxBossStageText.text = $"최대 클리어 보스 스테이지 : {maxClearedStage}";
         }
+    }
+
+    // 패시브로 인한 고양이 공격속도 증가 함수
+    public void AddPassiveCatAttackSpeedBuff(float amount)
+    {
+        catAttackDelay -= amount;
     }
 
     #endregion

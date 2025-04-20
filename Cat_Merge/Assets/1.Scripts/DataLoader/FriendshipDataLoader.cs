@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-    [System.Serializable]
-    public class LevelData
-    {
-        public int grade; // 등급 (int)
-        public int[] expRequirements = new int[5]; // 1~5단계 경험치 요구량
-        public int[] rewards = new int[5]; // 1~5단계 보상 (int로 변경)
-        public int[] passiveEffects = new int[5]; // 1~5단계 패시브 효과 수치
-    }
+[System.Serializable]
+public class LevelData
+{
+    public int grade; // 등급 (int)
+    public int[] expRequirements = new int[5]; // 1~5단계 경험치 요구량
+    public int[] rewards = new int[5]; // 1~5단계 보상 (int로 변경)
+    public string[] passiveEffects = new string[5]; // 1~5단계 패시브 효과 수치
+}
 
 [DefaultExecutionOrder(-6)]
 public class FriendshipDataLoader : MonoBehaviour
@@ -17,7 +17,8 @@ public class FriendshipDataLoader : MonoBehaviour
     public static FriendshipDataLoader Instance { get; private set; }
 
     // 고양이 데이터를 관리할 Dictionary
-    public Dictionary<int, List<(int grade, int exp, int reward, int passive)>> dataByGrade = new Dictionary<int, List<(int grade, int exp, int reward, int passive)>>();
+    public Dictionary<int, List<(int grade, int exp, int reward, string passive)>> dataByGrade = 
+        new Dictionary<int, List<(int grade, int exp, int reward, string passive)>>();
 
     private void Awake()
     {
@@ -87,18 +88,14 @@ public class FriendshipDataLoader : MonoBehaviour
                     Debug.LogError($"보상 파싱 오류 (라인 {i + 1}): {values[6 + j]}");
 
                 // 패시브 효과 변환
-                if (int.TryParse(values[11 + j].Trim(), out int passive))
-                    data.passiveEffects[j] = passive;
-                else
-                    Debug.LogError($"패시브 효과 파싱 오류 (라인 {i + 1}): {values[11 + j]}");
+                string passive = values[11 + j].Trim();
+                data.passiveEffects[j] = passive;
             }
-
-            //levelDataList.Add(data);
 
             // 번호별로 데이터 추가
             if (!dataByGrade.ContainsKey(data.grade))
             {
-                dataByGrade[data.grade] = new List<(int grade, int exp, int reward, int passive)>();
+                dataByGrade[data.grade] = new List<(int grade, int exp, int reward, string passive)>();
             }
             for(int k = 0; k < 5; k++)
             {
@@ -109,7 +106,7 @@ public class FriendshipDataLoader : MonoBehaviour
         }
     }
 
-    public List<(int grade, int exp, int reward, int passive)> GetDataByGrade(int grade)
+    public List<(int grade, int exp, int reward, string passive)> GetDataByGrade(int grade)
     {
         if (dataByGrade.ContainsKey(grade))
         {
@@ -123,7 +120,7 @@ public class FriendshipDataLoader : MonoBehaviour
     }
 
     //// 디버깅용
-    //void PrintLevelData()
+    //private void PrintLevelData()
     //{
     //    foreach (var data in dataByGrade)
     //    {
@@ -147,5 +144,6 @@ public class FriendshipDataLoader : MonoBehaviour
     //    }
     //    return sprite;
     //}
+
 }
 

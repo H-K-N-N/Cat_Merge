@@ -277,6 +277,9 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         if (cat1 == null || cat2 == null || !cat1.gameObject.activeSelf || !cat2.gameObject.activeSelf) return;
         if (cat1 == cat2) return;
 
+        cat1.GetComponent<CatData>()?.CleanupCoroutines();
+        cat2.GetComponent<CatData>()?.CleanupCoroutines();
+
         Cat mergedCat = MergeManager.Instance.MergeCats(cat1.catData, cat2.catData);
         if (mergedCat != null)
         {

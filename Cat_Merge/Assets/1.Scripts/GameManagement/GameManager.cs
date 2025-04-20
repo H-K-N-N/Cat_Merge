@@ -28,7 +28,6 @@ public class GameManager : MonoBehaviour, ISaveable
     public GameObject catPrefab;                                            // 고양이 UI 프리팹
     [SerializeField] private Transform gamePanel;                           // 고양이 정보를 가져올 부모 Panel
     private List<RectTransform> catUIObjects = new List<RectTransform>();   // 고양이 UI 객체 리스트
-    private List<GameObject> tempCatList = new List<GameObject>();          // 임시 저장용
 
     [Header("---[Quit Panel]")]
     [SerializeField] private GameObject quitPanel;                          // 종료 확인 패널
@@ -64,6 +63,9 @@ public class GameManager : MonoBehaviour, ISaveable
             }
         }
     }
+
+    private int passiveCatCount = 0;                                        // 패시브 효과로 인한 추가 고양이 수
+    public int TotalMaxCats => maxCats + passiveCatCount;                   // 총 최대 고양이 수 (기본 + 패시브)
 
     [SerializeField] private TextMeshProUGUI coinText;                      // 기본재화 텍스트
     private decimal coin;                                                   // 기본재화
@@ -195,13 +197,13 @@ public class GameManager : MonoBehaviour, ISaveable
     // 고양이 생성 가능 여부 확인 함수
     public bool CanSpawnCat()
     {
-        return CurrentCatCount < MaxCats;
+        return CurrentCatCount < TotalMaxCats;
     }
 
     // 고양이 수 증가 함수
     public void AddCatCount()
     {
-        if (CurrentCatCount < MaxCats)
+        //if (CurrentCatCount < TotalMaxCats)
         {
             CurrentCatCount++;
         }
@@ -214,6 +216,13 @@ public class GameManager : MonoBehaviour, ISaveable
         {
             CurrentCatCount--;
         }
+    }
+
+    // 패시브로 인한 추가 고양이 수를 조절하는 메서드
+    public void AddPassiveCatCapacity(int amount)
+    {
+        passiveCatCount += amount;
+        UpdateCatCountText();
     }
 
     #endregion
@@ -234,7 +243,14 @@ public class GameManager : MonoBehaviour, ISaveable
     {
         if (catCountText != null)
         {
-            catCountText.text = $"{currentCatCount} / {maxCats}";
+            if (passiveCatCount > 0)
+            {
+                catCountText.text = $"{currentCatCount} / {maxCats}+{passiveCatCount}";
+            }
+            else
+            {
+                catCountText.text = $"{currentCatCount} / {maxCats}";
+            }
         }
     }
 

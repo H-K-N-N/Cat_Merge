@@ -383,7 +383,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         if (!GetComponent<DragAndDropManager>().isDragging)
         {
             // 이동할 때는 무조건 walk 상태로 변경 (최우선)
-            GetComponent<AnimatorManager>().ChangeState(CharacterState.isWalk);
+            GetComponent<AnimatorManager>().ChangeState(CatState.isWalk);
         }
 
         while (elapsed < duration)
@@ -401,15 +401,15 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             // 이동이 끝난 후에도 isMoveAnimating이 true라면 여전히 다른 이동이 진행중
             if (isMoveAnimating)
             {
-                GetComponent<AnimatorManager>().ChangeState(CharacterState.isWalk);
+                GetComponent<AnimatorManager>().ChangeState(CatState.isWalk);
             }
             else if (BattleManager.Instance.isBattleActive)
             {
-                GetComponent<AnimatorManager>().ChangeState(CharacterState.isBattle);
+                GetComponent<AnimatorManager>().ChangeState(CatState.isBattle);
             }
             else
             {
-                GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
+                GetComponent<AnimatorManager>().ChangeState(CatState.isIdle);
             }
         }
 

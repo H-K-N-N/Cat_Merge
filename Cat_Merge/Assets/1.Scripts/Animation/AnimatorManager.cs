@@ -82,11 +82,13 @@ public class AnimatorManager : MonoBehaviour
     {
         if (overrideDict.ContainsKey(grade))
         {
+            if (!animator.enabled) animator.enabled = true;
             animator.runtimeAnimatorController = overrideDict[grade];
         }
         else
         {
-            Debug.LogWarning($"해당 등급({grade})의 오버라이드 컨트롤러가 등록되지 않았습니다!");
+            animator.enabled = false;
+            //Debug.Log($"{grade}등급 모션이 없어 애니메이터를 비활성화합니다.");
         }
     }
 

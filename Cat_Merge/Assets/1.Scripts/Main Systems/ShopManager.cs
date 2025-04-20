@@ -60,6 +60,7 @@ public class ShopManager : MonoBehaviour, ISaveable
 
     [Header("---[Double Coin For Ad]")]
     [SerializeField] private Button doubleCoinForAdButton;                  // 광고 시청으로 코인 획득량 증가 효과 획득
+    [SerializeField] private TextMeshProUGUI doubleCoinForAdNameText;       // Item Name Text
     [SerializeField] private TextMeshProUGUI doubleCoinForAdCoolTimeText;   // 광고 시청 쿨타임 Text
     [SerializeField] private GameObject doubleCoinForAdRewardOnImage;       // 광고 시청 가능 상태일때 활성화되는 이미지 오브젝트
     [SerializeField] private GameObject doubleCoinForAdRewardOffImage;      // 광고 시청 불가능 상태일때 활성화되는 이미지 오브젝트
@@ -73,6 +74,8 @@ public class ShopManager : MonoBehaviour, ISaveable
     private const float doubleCoinMultiplier = 2f;                          // 코인 획득량 배수
     private float coinMultiplier = 1f;                                      // 현재 코인 배수
     private float multiplierEndTime = 0f;                                   // 배수 효과 종료 시간
+    private float passiveDoubleCoinDurationIncrease = 0f;                   // 패시브로 인한 효과지속시간 증가량
+    private float CurrentDoubleCoinDuration => doubleCoinDuration + passiveDoubleCoinDurationIncrease;
 
     private float battlePauseTime = 0f;                                     // 전투 중 멈춘 시간
     private bool isBattlePaused = false;                                    // 전투 중 멈춤 상태
@@ -380,6 +383,11 @@ public class ShopManager : MonoBehaviour, ISaveable
         doubleCoinForAdNewImage.SetActive(isAdAvailable);
         doubleCoinForAdDisabledBG.SetActive(!isAdAvailable);
 
+        if (doubleCoinForAdNameText != null)
+        {
+            doubleCoinForAdNameText.text = $"{CurrentDoubleCoinDuration}초 동안 재화 수급량 {doubleCoinMultiplier}배";
+        }
+
         // 쿨타임 텍스트 업데이트
         if (remainEffectTime > 0)
         {
@@ -475,17 +483,17 @@ public class ShopManager : MonoBehaviour, ISaveable
             // 기존 효과 지속시간 계산
             float remainingTime = GetRemainingEffectTime();
 
-            // 광고 보상 지급 - 모든 고양이의 재화 수급량 300초동안 2배로 증가
+            // 광고 보상 지급 - 모든 고양이의 재화 수급량 지정된 시간동안 2배로 증가
             coinMultiplier = doubleCoinMultiplier;
 
             // 기존 효과 지속시간이 있으면 그 시간에 새로운 지속시간을 더함
             if (remainingTime > 0)
             {
-                multiplierEndTime = Time.time + remainingTime + doubleCoinDuration;
+                multiplierEndTime = Time.time + remainingTime + CurrentDoubleCoinDuration;
             }
             else
             {
-                multiplierEndTime = Time.time + doubleCoinDuration;
+                multiplierEndTime = Time.time + CurrentDoubleCoinDuration;
             }
 
             // 전투 관련 상태 초기화
@@ -512,6 +520,15 @@ public class ShopManager : MonoBehaviour, ISaveable
 
             UpdateDoubleCoinForAdUI();
         }
+    }
+
+    // 패시브로 인한 DoubleCoinForAd 효과 지속시간 증가 함수
+    public void AddPassiveDoubleCoinDurationIncrease(float seconds)
+    {
+        passiveDoubleCoinDurationIncrease += seconds;
+        GoogleSave();
+
+        UpdateDoubleCoinForAdUI();
     }
 
     #endregion

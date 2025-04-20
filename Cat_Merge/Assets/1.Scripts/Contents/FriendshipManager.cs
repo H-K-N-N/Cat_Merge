@@ -598,10 +598,10 @@ public class FriendshipManager : MonoBehaviour, ISaveable
                         ApplyCashForAdCoolTimeBuff();
                         break;
                     case 12:
-                        ApplyJellyBuffDurationBuff();
+                        ApplyDoubleCoinForAdDurationBuff();
                         break;
                     case 13:
-                        ApplyJellyBuffCoolTimeBuff();
+                        ApplyDoubleCoinForAdCoolTimeBuff();
                         break;
                 }
             }
@@ -685,18 +685,13 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     }
 
     // 젤리 획득 버프 지속 시간 1초 증가 패시브 함수
-    private void ApplyJellyBuffDurationBuff()
+    private void ApplyDoubleCoinForAdDurationBuff()
     {
-        Debug.Log("젤리 획득 버프 지속 시간 1초 증가");
-
-        // 상점의 광고를 보면 얻는 일정 시간동안 고양이 재화 수집량 2배 효과의 지속시간을 1초 증가하는 기능
-
-        // ShopManager의 doubleCoinDuration의 값을 1 증가하는 기능
-
+        ShopManager.Instance.AddPassiveDoubleCoinDurationIncrease(1f);
     }
 
     // 젤리 획득 버프 쿨타임 1초 감소 패시브 함수
-    private void ApplyJellyBuffCoolTimeBuff()
+    private void ApplyDoubleCoinForAdCoolTimeBuff()
     {
         Debug.Log("젤리 획득 버프 쿨타임 1초 감소");
 
@@ -913,10 +908,10 @@ public class FriendshipManager : MonoBehaviour, ISaveable
                                 ApplyCashForAdCoolTimeBuff();
                                 break;
                             case 12:
-                                ApplyJellyBuffDurationBuff();
+                                ApplyDoubleCoinForAdDurationBuff();
                                 break;
                             case 13:
-                                ApplyJellyBuffCoolTimeBuff();
+                                ApplyDoubleCoinForAdCoolTimeBuff();
                                 break;
                         }
                     }

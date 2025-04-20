@@ -693,12 +693,7 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     // 젤리 획득 버프 쿨타임 1초 감소 패시브 함수
     private void ApplyDoubleCoinForAdCoolTimeBuff()
     {
-        Debug.Log("젤리 획득 버프 쿨타임 1초 감소");
-
-        // 상점의 광고를 보면 얻는 일정 시간동안 고양이 재화 수집량 2배 효과의 쿨타임을 1초 감소하는 기능
-
-        // ShopManager의 doubleCoinForAdCoolTime의 값을 1 감소하는 기능
-
+        ShopManager.Instance.AddPassiveDoubleCoinForAdCoolTimeReduction(1);
     }
 
     #endregion
@@ -918,13 +913,6 @@ public class FriendshipManager : MonoBehaviour, ISaveable
                 }
             }
         }
-
-        //// 필드의 고양이들에게 패시브 적용
-        //var activeCats = SpawnManager.Instance.GetActiveCats();
-        //foreach (var catObj in activeCats)
-        //{
-        //    catObj.GetComponent<CatData>().SetCatData(catObj.GetComponent<CatData>().catData);
-        //}
 
         isDataLoaded = true;
     }

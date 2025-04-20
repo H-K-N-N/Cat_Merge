@@ -24,6 +24,11 @@ public class ShopManager : MonoBehaviour, ISaveable
     private bool isWaitingForAd = false;                            // 광고 대기 중인지 확인하는 변수 추가
 
 
+    [Header("---[기본적인 쿨타임들]")]
+    private const long DEFAULT_CASH_FOR_TIME_COOLTIME = 300;            // 무료 캐쉬 획득 쿨타임 (CashForTime)
+    private const long DEFAULT_CASH_FOR_AD_COOLTIME = 300;              // 광고 캐쉬 획득 쿨타임 (CashForAd)
+    private const long DEFAULT_DOUBLE_COIN_FOR_AD_COOLTIME = 300;       // 코인 2배 획득 쿨타임  (DoubleCoinForAd)
+
     [Header("---[Cash For Time]")]
     [SerializeField] private Button cashForTimeRewardButton;            // 쿨타임마다 활성화되는 무료 캐쉬 획득 (무료 캐쉬 획득 불가능 상태일때 비활성화 = interactable 비활성화)
     [SerializeField] private TextMeshProUGUI cashForTimeNameText;       // Item Name Text
@@ -31,7 +36,7 @@ public class ShopManager : MonoBehaviour, ISaveable
     [SerializeField] private TextMeshProUGUI cashForTimeInformationText;// Item Information Text
     [SerializeField] private GameObject cashForTimeNewImage;            // 무료 캐쉬 획득 가능 상태일때 활성화되는 New 이미지 오브젝트
     [SerializeField] private GameObject cashForTimeDisabledBG;          // 무료 캐쉬 획득 불가능 상태일때 활성화되는 이미지 오브젝트
-    private long cashForTimeCoolTime = 300;                             // 무료 캐쉬 획득 쿨타임 (600초)(게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
+    private long cashForTimeCoolTime = DEFAULT_CASH_FOR_TIME_COOLTIME;  // 무료 캐쉬 획득 쿨타임 (600초)(게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
     private long lastTimeReward = 0;                                    // 마지막 cashForTime 보상 시간 저장
     private long passiveCashForTimeCoolTimeReduction = 0;               // 패시브로 인한 cashForTime 쿨타임 감소량
     //private long remainingCoolTimeBeforeAd = 0;                         // 광고 시청 전 남은 쿨타임을 저장
@@ -49,7 +54,7 @@ public class ShopManager : MonoBehaviour, ISaveable
     [SerializeField] private GameObject cashForAdRewardOffImage;        // 광고 시청 불가능 상태일때 활성화되는 이미지 오브젝트
     [SerializeField] private GameObject cashForAdNewImage;              // 광고 시청 가능 상태일때 활성화되는 New 이미지 오브젝트
     [SerializeField] private GameObject cashForAdDisabledBG;            // 광고 시청 불가능 상태일때 활성화되는 이미지 오브젝트
-    private long cashForAdCoolTime = 300;                               // 광고 시청 쿨타임 (600초)(게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
+    private long cashForAdCoolTime = DEFAULT_CASH_FOR_AD_COOLTIME;      // 광고 시청 쿨타임 (600초)(게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
     private long lastAdTimeReward = 0;                                  // 마지막 cashForAd 보상 시간 저장
     private long passiveCashForAdCoolTimeReduction = 0;                 // 패시브로 인한 cashForAd 쿨타임 감소량
     //private long remainingCashAdCoolTimeBeforeAd = 0;                   // 광고 시청 전 남은 쿨타임을 저장
@@ -59,16 +64,17 @@ public class ShopManager : MonoBehaviour, ISaveable
 
 
     [Header("---[Double Coin For Ad]")]
-    [SerializeField] private Button doubleCoinForAdButton;                  // 광고 시청으로 코인 획득량 증가 효과 획득
-    [SerializeField] private TextMeshProUGUI doubleCoinForAdNameText;       // Item Name Text
-    [SerializeField] private TextMeshProUGUI doubleCoinForAdCoolTimeText;   // 광고 시청 쿨타임 Text
-    [SerializeField] private GameObject doubleCoinForAdRewardOnImage;       // 광고 시청 가능 상태일때 활성화되는 이미지 오브젝트
-    [SerializeField] private GameObject doubleCoinForAdRewardOffImage;      // 광고 시청 불가능 상태일때 활성화되는 이미지 오브젝트
-    [SerializeField] private GameObject doubleCoinForAdNewImage;            // 광고 시청 가능 상태일때 활성화되는 New 이미지 오브젝트
-    [SerializeField] private GameObject doubleCoinForAdDisabledBG;          // 광고 시청 불가능 상태일때 활성화되는 이미지 오브젝트
-    private long doubleCoinForAdCoolTime = 300;                             // 코인 획득량 쿨타임 (600초)(게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
-    private long lastDoubleCoinTimeReward = 0;                              // 마지막 doubleCoinForAd 보상 시간 저장
-    //private long remainingDoubleCoinCoolTimeBeforeAd = 0;                   // 광고 시청 전 남은 쿨타임을 저장
+    [SerializeField] private Button doubleCoinForAdButton;                      // 광고 시청으로 코인 획득량 증가 효과 획득
+    [SerializeField] private TextMeshProUGUI doubleCoinForAdNameText;           // Item Name Text
+    [SerializeField] private TextMeshProUGUI doubleCoinForAdCoolTimeText;       // 광고 시청 쿨타임 Text
+    [SerializeField] private GameObject doubleCoinForAdRewardOnImage;           // 광고 시청 가능 상태일때 활성화되는 이미지 오브젝트
+    [SerializeField] private GameObject doubleCoinForAdRewardOffImage;          // 광고 시청 불가능 상태일때 활성화되는 이미지 오브젝트
+    [SerializeField] private GameObject doubleCoinForAdNewImage;                // 광고 시청 가능 상태일때 활성화되는 New 이미지 오브젝트
+    [SerializeField] private GameObject doubleCoinForAdDisabledBG;              // 광고 시청 불가능 상태일때 활성화되는 이미지 오브젝트
+    private long doubleCoinForAdCoolTime = DEFAULT_DOUBLE_COIN_FOR_AD_COOLTIME; // 코인 획득량 쿨타임 (600초)(게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
+    private long lastDoubleCoinTimeReward = 0;                                  // 마지막 doubleCoinForAd 보상 시간 저장
+    private long passiveDoubleCoinForAdCoolTimeReduction = 0;                   // 패시브로 인한 doubleCoinForAd 쿨타임 감소량
+    //private long remainingDoubleCoinCoolTimeBeforeAd = 0;                       // 광고 시청 전 남은 쿨타임을 저장
     
     private const float doubleCoinDuration = 100f;                          // 코인 2배 지속시간 (300초)
     private const float doubleCoinMultiplier = 2f;                          // 코인 획득량 배수
@@ -240,7 +246,7 @@ public class ShopManager : MonoBehaviour, ISaveable
     public void AddPassiveCashForTimeCoolTimeReduction(long seconds)
     {
         passiveCashForTimeCoolTimeReduction += seconds;
-        cashForTimeCoolTime = 300 - passiveCashForTimeCoolTimeReduction;
+        cashForTimeCoolTime = DEFAULT_CASH_FOR_TIME_COOLTIME - passiveCashForTimeCoolTimeReduction;
         GoogleSave();
 
         UpdateCashForTimeUI();
@@ -362,7 +368,7 @@ public class ShopManager : MonoBehaviour, ISaveable
     public void AddPassiveCashForAdCoolTimeReduction(long seconds)
     {
         passiveCashForAdCoolTimeReduction += seconds;
-        cashForAdCoolTime = 300 - passiveCashForAdCoolTimeReduction;
+        cashForAdCoolTime = DEFAULT_CASH_FOR_AD_COOLTIME - passiveCashForAdCoolTimeReduction;
         GoogleSave();
 
         UpdateCashForTimeUI();
@@ -526,6 +532,16 @@ public class ShopManager : MonoBehaviour, ISaveable
     public void AddPassiveDoubleCoinDurationIncrease(float seconds)
     {
         passiveDoubleCoinDurationIncrease += seconds;
+        GoogleSave();
+
+        UpdateDoubleCoinForAdUI();
+    }
+
+    // 패시브로 인한 DoubleCoinForAd 쿨타임 감소 함수
+    public void AddPassiveDoubleCoinForAdCoolTimeReduction(long seconds)
+    {
+        passiveDoubleCoinForAdCoolTimeReduction += seconds;
+        doubleCoinForAdCoolTime = DEFAULT_DOUBLE_COIN_FOR_AD_COOLTIME - passiveDoubleCoinForAdCoolTimeReduction;
         GoogleSave();
 
         UpdateDoubleCoinForAdUI();

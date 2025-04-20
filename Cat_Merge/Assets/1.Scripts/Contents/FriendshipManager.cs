@@ -589,19 +589,19 @@ public class FriendshipManager : MonoBehaviour, ISaveable
                         ApplyCashForTimeAmountBuff();
                         break;
                     case 9:
-                        ApplyFreeDiamondCooldownBuff();
+                        ApplyFreeDiamondCoolTimeBuff();
                         break;
                     case 10:
                         ApplyAdDiamondAmountBuff();
                         break;
                     case 11:
-                        ApplyAdDiamondCooldownBuff();
+                        ApplyAdDiamondCoolTimeBuff();
                         break;
                     case 12:
                         ApplyJellyBuffDurationBuff();
                         break;
                     case 13:
-                        ApplyJellyBuffCooldownBuff();
+                        ApplyJellyBuffCoolTimeBuff();
                         break;
                 }
             }
@@ -667,14 +667,9 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     }
 
     // 무료 다이아 획득 쿨타임 1초 감소 패시브 함수
-    private void ApplyFreeDiamondCooldownBuff()
+    private void ApplyFreeDiamondCoolTimeBuff()
     {
-        Debug.Log("무료 다이아 획득 쿨타임 1초 감소");
-
-        // 상점의 무료로 얻는 Cash의 광고 시청 쿨타임을 영구적으로 1초 감소하는 기능
-
-        // ShopManager의 cashForTimeCoolTime의 값을 1 감소하는 기능
-
+        ShopManager.Instance.AddPassiveCashForTimeCoolTimeReduction(1);
     }
 
     // 광고 다이아 획득량 5 증가 패시브 함수
@@ -689,7 +684,7 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     }
 
     // 광고 다이아 획득 쿨타임 1초 감소 패시브 함수
-    private void ApplyAdDiamondCooldownBuff()
+    private void ApplyAdDiamondCoolTimeBuff()
     {
         Debug.Log("광고 다이아 획득 쿨타임 1초 감소");
 
@@ -711,7 +706,7 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     }
 
     // 젤리 획득 버프 쿨타임 1초 감소 패시브 함수
-    private void ApplyJellyBuffCooldownBuff()
+    private void ApplyJellyBuffCoolTimeBuff()
     {
         Debug.Log("젤리 획득 버프 쿨타임 1초 감소");
 
@@ -919,19 +914,19 @@ public class FriendshipManager : MonoBehaviour, ISaveable
                                 ApplyCashForTimeAmountBuff();
                                 break;
                             case 9:
-                                ApplyFreeDiamondCooldownBuff();
+                                ApplyFreeDiamondCoolTimeBuff();
                                 break;
                             case 10:
                                 ApplyAdDiamondAmountBuff();
                                 break;
                             case 11:
-                                ApplyAdDiamondCooldownBuff();
+                                ApplyAdDiamondCoolTimeBuff();
                                 break;
                             case 12:
                                 ApplyJellyBuffDurationBuff();
                                 break;
                             case 13:
-                                ApplyJellyBuffCooldownBuff();
+                                ApplyJellyBuffCoolTimeBuff();
                                 break;
                         }
                     }

@@ -23,6 +23,7 @@ public class ShopManager : MonoBehaviour, ISaveable
 
     private bool isWaitingForAd = false;                            // 광고 대기 중인지 확인하는 변수 추가
 
+
     [Header("---[Cash For Ad]")]
     [SerializeField] private Button cashForAdRewardButton;              // 광고 시청으로 캐쉬 획득 (광고 시청 불가능 상태일때 비활성화 = interactable 비활성화)
     [SerializeField] private TextMeshProUGUI cashForAdCoolTimeText;     // 광고 시청 쿨타임 Text
@@ -45,6 +46,7 @@ public class ShopManager : MonoBehaviour, ISaveable
     [SerializeField] private GameObject cashForTimeDisabledBG;          // 무료 캐쉬 획득 불가능 상태일때 활성화되는 이미지 오브젝트
     private long cashForTimeCoolTime = 300;                             // 무료 캐쉬 획득 쿨타임 (600초)(게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
     private long lastTimeReward = 0;                                    // 마지막 cashForTime 보상 시간 저장
+    private long passiveCashForTimeCoolTimeReduction = 0;               // 패시브로 인한 cashForTime 쿨타임 감소량
     //private long remainingCoolTimeBeforeAd = 0;                         // 광고 시청 전 남은 쿨타임을 저장
     private int cashForTimePrice = 5;                                   // cashForTime 보상
     private int passiveCashForTimeAmount = 0;                           // 패시브로 인한 cashForTime 추가 무료 캐쉬 획득량
@@ -306,10 +308,20 @@ public class ShopManager : MonoBehaviour, ISaveable
         UpdateCashForTimeUI();
     }
 
-    // 패시브로 추가될 CashForTime의 캐쉬 재화 함수
+    // 패시브로 인한 CashForTime의 캐쉬 재화 추가 함수
     public void AddPassiveCashForTimeAmount(int amount)
     {
         passiveCashForTimeAmount += amount;
+        GoogleSave();
+
+        UpdateCashForTimeUI();
+    }
+
+    // 패시브로 인한 CashForTime의 쿨타임 감소 함수
+    public void AddPassiveCashForTimeCoolTimeReduction(long seconds)
+    {
+        passiveCashForTimeCoolTimeReduction += seconds;
+        cashForTimeCoolTime = 300 - passiveCashForTimeCoolTimeReduction;
         GoogleSave();
 
         UpdateCashForTimeUI();
@@ -480,7 +492,6 @@ public class ShopManager : MonoBehaviour, ISaveable
         public long lastTimeReward;                 // 마지막 CasfFroTime 보상 받은 시간
         public long lastDoubleCoinTimeReward;       // 마지막 DoubleCoinForAd 보상 받은 시간
         public float multiplierEndTimeOffset;       // 재화 획득량 2배 효과 종료까지 남은 시간
-        //public float coinMultiplier;                // 현재 적용 중인 배수
     }
 
     public string GetSaveData()
@@ -493,8 +504,6 @@ public class ShopManager : MonoBehaviour, ISaveable
             lastTimeReward = this.lastTimeReward,
             lastDoubleCoinTimeReward = this.lastDoubleCoinTimeReward,
             multiplierEndTimeOffset = remainingTime > 0 ? remainingTime : 0
-            //multiplierEndTimeOffset = remainingTime > 0 ? remainingTime : 0,    // 남은 시간이 있을 때만 저장
-            //coinMultiplier = this.coinMultiplier
         };
         return JsonUtility.ToJson(data);
     }

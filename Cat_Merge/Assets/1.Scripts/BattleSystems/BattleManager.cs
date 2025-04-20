@@ -802,7 +802,7 @@ public class BattleManager : MonoBehaviour, ISaveable
                     TakeBossDamage(damage);
 
                     // 공격 애니메이션으로 변경
-                    anim.ChangeState(CharacterState.isAttack);
+                    anim.ChangeState(CatState.isAttack);
 
                     // 공격 후 전투 대기 상태로 돌아가는 코루틴 시작
                     StartCoroutine(ReturnToBattleStateCat(cat));
@@ -810,7 +810,7 @@ public class BattleManager : MonoBehaviour, ISaveable
                 else
                 {
                     // 히트박스 경계에 없는 경우 전투 대기 상태로
-                    anim.ChangeState(CharacterState.isBattle);
+                    anim.ChangeState(CatState.isBattle);
                 }
             }
         }
@@ -829,7 +829,6 @@ public class BattleManager : MonoBehaviour, ISaveable
             AnimatorManager anim = cat.GetComponent<AnimatorManager>();
             if (dragManager != null && !dragManager.isDragging && anim != null)
             {
-                AnimatorManager anim = cat.GetComponent<AnimatorManager>();
                 if (anim != null)
                 {
                     anim.ChangeState(CatState.isAttack);

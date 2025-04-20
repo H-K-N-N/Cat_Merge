@@ -464,7 +464,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
 
         string catInfo = $"이름: {catData.CatName}\n" +
                          $"등급: {catData.CatGrade}\n" +
-                         $"공격력 증가량: {catData.BaseDamage}%\n" +
+                         $"공격력: {catData.BaseDamage}%\n" +
                          $"체력: {catData.CatHp}\n" +
                          $"재화수급량: {catData.CatGetCoin}";
         informationCatDetails.text = catInfo;

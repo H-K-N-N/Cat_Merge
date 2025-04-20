@@ -40,7 +40,7 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
     {
         isDragging = true;
 
-        GetComponent<AnimatorManager>().ChangeState(CharacterState.isGrab);
+        GetComponent<AnimatorManager>().ChangeState(CatState.isGrab);
 
         // 드래그 시작 위치 오프셋 계산
         Vector2 localPointerPosition;
@@ -61,7 +61,7 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
     public void OnPointerClick(PointerEventData eventData)
     {
         isDragging = false;
-        GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
+        GetComponent<AnimatorManager>().ChangeState(CatState.isIdle);
     }
 
     // 드래그 진행중 함수
@@ -117,11 +117,11 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
 
         if (BattleManager.Instance.IsBattleActive)
         {
-            GetComponent<AnimatorManager>().ChangeState(CharacterState.isBattle);
+            GetComponent<AnimatorManager>().ChangeState(CatState.isBattle);
         }
         else
         {
-            GetComponent<AnimatorManager>().ChangeState(CharacterState.isIdle);
+            GetComponent<AnimatorManager>().ChangeState(CatState.isIdle);
         }
 
         if (BattleManager.Instance.IsBattleActive)

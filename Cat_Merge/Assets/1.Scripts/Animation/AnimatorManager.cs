@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public enum CharacterState
+public enum CatState
 {
     isIdle,
     isWalk,
@@ -29,7 +29,7 @@ public class AnimatorManager : MonoBehaviour
     public List<GradeOverrideData> overrideDataList;
     public Dictionary<int, AnimatorOverrideController> overrideDict;
 
-    private CharacterState currentState;
+    private CatState currentState;
 
 
     void Awake()
@@ -52,16 +52,7 @@ public class AnimatorManager : MonoBehaviour
         }
     }
 
-    void Update()
-    {
-        //if (Input.GetKeyDown(KeyCode.Alpha1)) ChangeState(CharacterState.isWalk);
-        //if (Input.GetKeyDown(KeyCode.Alpha2)) ChangeState(CharacterState.isFaint);
-        //if (Input.GetKeyDown(KeyCode.Alpha3)) ChangeState(CharacterState.isGetCoin);
-        //if (Input.GetKeyDown(KeyCode.Alpha4)) ChangeState(CharacterState.isGrab);
-        //if (Input.GetKeyDown(KeyCode.Alpha5)) ChangeState(CharacterState.isBattle);
-        //if (Input.GetKeyDown(KeyCode.Alpha6)) ChangeState(CharacterState.isAttack);
-    }
-    public void ChangeState(CharacterState newState)
+    public void ChangeState(CatState newState)
     {
         if (currentState == newState) return;
 
@@ -82,7 +73,7 @@ public class AnimatorManager : MonoBehaviour
         animator.SetBool("isAttack", false);
     }
 
-    private void SetBoolForState(CharacterState state)
+    private void SetBoolForState(CatState state)
     {
         animator.SetBool(state.ToString(), true);
     }

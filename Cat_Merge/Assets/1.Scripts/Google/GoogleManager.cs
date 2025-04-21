@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
 using System.Text;
+using System.Security.Cryptography;
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
 using GooglePlayGames.BasicApi.SavedGame;
@@ -69,6 +70,8 @@ public class GoogleManager : MonoBehaviour
 
     private Vector2 gameStartPosition;                      // 게임 시작 터치 위치를 저장할 변수
 
+    private const string encryptionKey = "CatMergeGame_EncryptionKey";  // 암호화 키
+
     #endregion
 
 
@@ -97,6 +100,9 @@ public class GoogleManager : MonoBehaviour
     public void Start()
     {
         InitializeGooglePlay();
+
+        MigrateUnencryptedData();
+
         StartCoroutine(GPGS_Login());
     }
 
@@ -142,7 +148,7 @@ public class GoogleManager : MonoBehaviour
     #endregion
 
 
-    #region 구글 로그인 및 UI
+    #region Google Login & Game Start Setting
 
     // 구글 로그인 코루틴
     private IEnumerator GPGS_Login()
@@ -275,7 +281,7 @@ public class GoogleManager : MonoBehaviour
         isGameStarting = false;
     }
 
-    // 어떤 데이터라도 존재하는지 확인하는 함수
+    // 어떤 데이터라도 존재하는지 확인하는 함수 (첫 게임인지 판별)
     private bool CheckForAnyData(GameManager gameManager)
     {
         var saveables = gameManager.gameObject.GetComponents<MonoBehaviour>().OfType<ISaveable>();
@@ -297,7 +303,7 @@ public class GoogleManager : MonoBehaviour
     #endregion
 
 
-    #region Save System
+    #region Data Save and Load System
 
     // 자동 저장을 스킵해도 되는지 판별하는 함수
     private bool CanSkipAutoSave()
@@ -305,14 +311,119 @@ public class GoogleManager : MonoBehaviour
         return isDeleting || (GameManager.Instance != null && GameManager.Instance.isQuiting);
     }
 
-    // PlayerPrefs에 데이터 저장하는 함수
+    // 문자열 암호화 함수
+    private string EncryptData(string data)
+    {
+        if (string.IsNullOrEmpty(data)) return data;
+
+        try
+        {
+            byte[] dataBytes = Encoding.UTF8.GetBytes(data);
+            byte[] keyBytes = Encoding.UTF8.GetBytes(encryptionKey);
+            byte[] encryptedBytes = new byte[dataBytes.Length];
+
+            for (int i = 0; i < dataBytes.Length; i++)
+            {
+                encryptedBytes[i] = (byte)(dataBytes[i] ^ keyBytes[i % keyBytes.Length]);
+            }
+
+            return Convert.ToBase64String(encryptedBytes);
+        }
+        catch (Exception e)
+        {
+            Debug.Log($"암호화 에러: {e.Message}");
+            return data;
+        }
+    }
+
+    // 문자열 복호화 함수
+    private string DecryptData(string encryptedData)
+    {
+        if (string.IsNullOrEmpty(encryptedData)) return encryptedData;
+
+        try
+        {
+            // 데이터가 Base64 형식인지 확인 (암호화된 데이터인지 확인)
+            if (!IsValidBase64(encryptedData))
+            {
+                // Base64가 아니면 암호화되지 않은 데이터로 간주하고 그대로 반환
+                return encryptedData;
+            }
+
+            byte[] encryptedBytes = Convert.FromBase64String(encryptedData);
+            byte[] keyBytes = Encoding.UTF8.GetBytes(encryptionKey);
+            byte[] decryptedBytes = new byte[encryptedBytes.Length];
+
+            for (int i = 0; i < encryptedBytes.Length; i++)
+            {
+                decryptedBytes[i] = (byte)(encryptedBytes[i] ^ keyBytes[i % keyBytes.Length]);
+            }
+
+            return Encoding.UTF8.GetString(decryptedBytes);
+        }
+        catch (Exception e)
+        {
+            Debug.Log($"복호화 에러: {e.Message}");
+            return encryptedData;
+        }
+    }
+
+    // 문자열이 유효한 Base64 형식인지 확인하는 함수
+    private bool IsValidBase64(string base64String)
+    {
+        // Base64 문자열은 길이가 4의 배수여야 하며, 특정 문자만 포함해야 함
+        if (string.IsNullOrEmpty(base64String) || base64String.Length % 4 != 0)
+        {
+            return false;
+        }
+
+        // Base64에 사용되는 문자만 포함하는지 확인 (A-Z, a-z, 0-9, +, /, =)
+        foreach (char c in base64String)
+        {
+            if ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && (c < '0' || c > '9') && c != '+' && c != '/' && c != '=')
+            {
+                return false;
+            }
+        }
+
+        try
+        {
+            Convert.FromBase64String(base64String);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    // 모든 암호화되지 않은 데이터를 암호화하는 함수
+    public void MigrateUnencryptedData()
+    {
+        var saveables = Resources.FindObjectsOfTypeAll<MonoBehaviour>().OfType<ISaveable>();
+        foreach (ISaveable saveable in saveables)
+        {
+            MonoBehaviour mb = (MonoBehaviour)saveable;
+            string typeName = mb.GetType().FullName;
+            string data = PlayerPrefs.GetString(typeName, "");
+
+            if (!string.IsNullOrEmpty(data) && !IsValidBase64(data))
+            {
+                Debug.Log($"암호화되지 않은 데이터 발견: {typeName}, 암호화 중...");
+                SaveToPlayerPrefs(typeName, data);
+            }
+        }
+    }
+
+    // PlayerPrefs에 암호화된 데이터 저장하는 함수
     public void SaveToPlayerPrefs(string key, string data)
     {
-        PlayerPrefs.SetString(key, data);
+        string encryptedData = EncryptData(data);
+        PlayerPrefs.SetString(key, encryptedData);
         PlayerPrefs.Save();
     }
 
-    // PlayerPrefs에서 컴포넌트 데이터 로드하는 함수
+    // PlayerPrefs에서 데이터 로드하는 함수
     private void LoadFromLocalPlayerPrefs(GameObject gameManagerObject)
     {
         // GameManager 오브젝트에서 모든 컴포넌트 가져오기
@@ -341,12 +452,12 @@ public class GoogleManager : MonoBehaviour
 
             if (!string.IsNullOrEmpty(data))
             {
-                saveable.LoadFromData(data);
+                saveable.LoadFromData(DecryptData(data));
             }
         }
     }
 
-    // 로드된 데이터를 컴포넌트에 적용하는 함수
+    // 로드된 데이터를 적용하는 함수
     private void ApplyLoadedGameState(GameObject gameManagerObject)
     {
         var saveables = gameManagerObject.GetComponents<MonoBehaviour>().OfType<ISaveable>();
@@ -358,7 +469,7 @@ public class GoogleManager : MonoBehaviour
 
             if (!string.IsNullOrEmpty(data))
             {
-                saveable.LoadFromData(data);
+                saveable.LoadFromData(DecryptData(data));
             }
         }
     }
@@ -386,7 +497,7 @@ public class GoogleManager : MonoBehaviour
         }
 
         string jsonData = JsonUtility.ToJson(gameState);
-        SaveToCloud(jsonData);
+        SaveToCloud(EncryptData(jsonData));
         isSaving = false;
     }
 
@@ -436,14 +547,14 @@ public class GoogleManager : MonoBehaviour
                     {
                         if (readStatus == SavedGameRequestStatus.Success && data != null && data.Length > 0)
                         {
-                            string jsonData = Encoding.UTF8.GetString(data);
-                            CompleteGameState loadedState = JsonUtility.FromJson<CompleteGameState>(jsonData);
+                            string encryptedJsonData = Encoding.UTF8.GetString(data);
+                            string decryptedJsonData = DecryptData(encryptedJsonData);
+                            CompleteGameState loadedState = JsonUtility.FromJson<CompleteGameState>(decryptedJsonData);
 
                             foreach (var component in loadedState.components)
                             {
-                                PlayerPrefs.SetString(component.path, component.data);
+                                SaveToPlayerPrefs(component.path, component.data);
                             }
-                            PlayerPrefs.Save();
 
                             onComplete?.Invoke(true);
                         }
@@ -463,7 +574,7 @@ public class GoogleManager : MonoBehaviour
     #endregion
 
 
-    #region 데이터 삭제
+    #region Data Remove System
 
     // 저장된 게임 데이터를 삭제하는 함수
     public void DeleteGameData(Action<bool> onComplete = null)

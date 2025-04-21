@@ -32,10 +32,16 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     private float rectHalfWidth;                    // rectSize의 Width 절반값
     private float rectHalfHeight;                   // rectSize의 Height 절반값
 
+    [Header("Cat Image")]
+    private GameObject catImageObject;              // 고양이 이미지 오브젝트
+    private Image catSpriteImage;                   // 고양이 스프라이트 이미지
+
     [Header("Movement")]
-    private bool isMoveAnimating = false;           // 이동 애니메이션 진행 여부
-    private Coroutine autoMoveCoroutine;            // 자동 이동 코루틴
-    private Coroutine currentMoveCoroutine;         // 현재 진행 중인 이동 코루틴
+    private bool isMoveAnimating = false;               // 이동 애니메이션 진행 여부
+    private Coroutine autoMoveCoroutine;                // 자동 이동 코루틴
+    private Coroutine currentMoveCoroutine;             // 현재 진행 중인 이동 코루틴
+    private const float CAT_MOVE_SPEED = 100f;          // 기본 고양이 이동 속도 (단위:픽셀/초)
+    private const float CAT_BATTLE_MOVE_SPEED = 400f;   // 전투 중 고양이 이동 속도
 
     [Header("Coin Collection")]
     private TextMeshProUGUI collectCoinText;        // 코인 획득 텍스트
@@ -57,8 +63,76 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     private void Start()
     {
         UpdateCatUI();
+        StartCoroutine(SetupCatImage());
         autoCollectCoroutine = StartCoroutine(AutoCollectCoins());
         UpdateHPBar();
+    }
+
+    // 고양이 이미지 설정 코루틴 (Start 이후에 실행)
+    private IEnumerator SetupCatImage()
+    {
+        // 한 프레임 기다려서 모든 컴포넌트가 초기화되도록 함
+        yield return null;
+
+        // 원본 이미지 비활성화 (투명하게 만들되 레이캐스트는 가능하도록)
+        catImage.enabled = true;
+        Color imageColor = catImage.color;
+        imageColor.a = 0f;
+        catImage.color = imageColor;
+        catImage.sprite = catData.CatImage;
+
+        // 원본 애니메이터 참조
+        Animator originalAnimator = GetComponent<Animator>();
+        AnimatorManager originalAnimManager = GetComponent<AnimatorManager>();
+
+        if (catImageObject != null)
+        {
+            // 이미 애니메이터가 있는지 확인
+            Animator catImageAnimator = catImageObject.GetComponent<Animator>();
+            if (catImageAnimator == null && originalAnimator != null)
+            {
+                // Cat Image에 애니메이터 추가
+                catImageAnimator = catImageObject.AddComponent<Animator>();
+                catImageAnimator.runtimeAnimatorController = originalAnimator.runtimeAnimatorController;
+
+                // 원본 애니메이터 비활성화
+                originalAnimator.enabled = false;
+            }
+
+            // 이미 AnimatorManager가 있는지 확인
+            AnimatorManager catImageAnimManager = catImageObject.GetComponent<AnimatorManager>();
+            if (catImageAnimManager == null && originalAnimManager != null)
+            {
+                // Cat Image에 AnimatorManager 추가
+                catImageAnimManager = catImageObject.AddComponent<AnimatorManager>();
+
+                // AnimatorManager 데이터 복사 (다음 프레임에 수행)
+                yield return null;
+
+                // 원본 AnimatorManager에서 데이터 참조할 수 있는지 확인
+                if (originalAnimManager.overrideDataList != null)
+                {
+                    catImageAnimManager.catGrade = originalAnimManager.catGrade;
+                    catImageAnimManager.overrideDataList = originalAnimManager.overrideDataList;
+
+                    // 복사 후 원본 비활성화
+                    originalAnimManager.enabled = false;
+                }
+            }
+
+            // 고양이 이미지 업데이트
+            if (catData != null)
+            {
+                catSpriteImage.sprite = catData.CatImage;
+
+                // AnimatorManager 등급 설정
+                AnimatorManager animManager = catImageObject.GetComponent<AnimatorManager>();
+                if (animManager != null)
+                {
+                    animManager.ApplyAnim(catData.CatGrade);
+                }
+            }
+        }
     }
 
     #endregion
@@ -73,6 +147,19 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         rectTransform = GetComponent<RectTransform>();
         parentPanel = rectTransform.parent.GetComponent<RectTransform>();
         catDragAndDrop = GetComponentInParent<DragAndDropManager>();
+
+        catImageObject = transform.Find("Cat Image")?.gameObject;
+        if (catImageObject != null)
+        {
+            catSpriteImage = catImageObject.GetComponent<Image>();
+
+            // 중요: Cat Image의 Image 컴포넌트의 raycastTarget을 false로 설정
+            // 이렇게 하면 원본 오브젝트만 레이캐스트에 반응하고 회전된 Cat Image는 무시됨
+            if (catSpriteImage != null)
+            {
+                catSpriteImage.raycastTarget = false;
+            }
+        }
 
         Transform coinTextTransform = transform.Find("CollectCoinText");
         Transform coinImageTransform = transform.Find("CollectCoinImage");
@@ -102,7 +189,89 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         {
             catDragAndDrop.catData = catData;
         }
-        catImage.sprite = catData.CatImage;
+
+        // 원본 이미지 업데이트 (레이캐스트 영역용)
+        if (catImage != null)
+        {
+            catImage.sprite = catData.CatImage;
+            Color imageColor = catImage.color;
+            imageColor.a = 0f;
+            catImage.color = imageColor;
+        }
+
+        // Cat Image 스프라이트 업데이트
+        if (catSpriteImage != null)
+        {
+            catSpriteImage.sprite = catData.CatImage;
+        }
+
+        // Cat Image의 AnimatorManager 가져오기
+        AnimatorManager catImageAnimManager = GetCatImageAnimator();
+        if (catImageAnimManager != null)
+        {
+            catImageAnimManager.ApplyAnim(catData.CatGrade);
+        }
+    }
+
+    // Cat Image의 AnimatorManager를 가져오는 헬퍼 함수
+    private AnimatorManager GetCatImageAnimator()
+    {
+        // catImageObject가 있으면 사용
+        if (catImageObject != null)
+        {
+            AnimatorManager anim = catImageObject.GetComponent<AnimatorManager>();
+            if (anim != null)
+            {
+                return anim;
+            }
+        }
+
+        // Cat Image 찾기
+        Transform catImageTransform = transform.Find("Cat Image");
+        if (catImageTransform != null)
+        {
+            AnimatorManager anim = catImageTransform.GetComponent<AnimatorManager>();
+            if (anim != null)
+            {
+                // 나중을 위해 참조 저장
+                catImageObject = catImageTransform.gameObject;
+                return anim;
+            }
+        }
+
+        // 부득이한 경우 현재 게임오브젝트의 AnimatorManager 사용
+        return GetComponent<AnimatorManager>();
+    }
+
+    // 고양이 상태 변경을 위한 헬퍼 함수
+    public void ChangeCatState(CatState state)
+    {
+        AnimatorManager anim = GetCatImageAnimator();
+        if (anim != null)
+        {
+            anim.ChangeState(state);
+        }
+    }
+
+    // 드래그 상태 변경을 위한 함수
+    public void SetDragState(bool isDragging)
+    {
+        if (isDragging)
+        {
+            ChangeCatState(CatState.isGrab);
+        }
+        else
+        {
+            // 드래그 종료 시 상태 복원
+            if (BattleManager.Instance.isBattleActive)
+            {
+                ChangeCatState(CatState.isBattle);
+            }
+            else
+            {
+                ChangeCatState(CatState.isIdle);
+            }
+        }
     }
 
     // 고양이 데이터 설정 함수
@@ -122,7 +291,13 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         // UI 업데이트
         UpdateCatUI();
         UpdateHPBar();
-        GetComponent<AnimatorManager>().ApplyAnim(catData.CatGrade);
+
+        // 애니메이션 업데이트
+        AnimatorManager anim = GetCatImageAnimator();
+        if (anim != null)
+        {
+            anim.ApplyAnim(catData.CatGrade);
+        }
 
         // 재화 수집 상태 초기화 및 시작
         isCollectingCoins = true;
@@ -209,7 +384,8 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     {
         UpdateHPBar();
         isStuned = isStunned;
-        GetComponent<AnimatorManager>().ChangeState(CatState.isFaint);
+
+        ChangeCatState(CatState.isFaint);
 
         if (!isStunned)
         {
@@ -218,7 +394,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             // 전투 중인지 확인
             if (BattleManager.Instance != null && BattleManager.Instance.IsBattleActive)
             {
-                GetComponent<AnimatorManager>().ChangeState(CatState.isBattle);
+                ChangeCatState(CatState.isBattle);
 
                 // 전투 중이면 자동 재화 수집과 자동 이동은 비활성화 상태 유지
                 SetCollectingCoinsState(false);
@@ -230,7 +406,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             }
             else
             {
-                GetComponent<AnimatorManager>().ChangeState(CatState.isIdle);
+                ChangeCatState(CatState.isIdle);
 
                 // 전투 중이 아니면 모든 기능 활성화
                 SetCollectingCoinsState(true);
@@ -240,7 +416,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
         else
         {
-            GetComponent<AnimatorManager>().ChangeState(CatState.isFaint);
+            ChangeCatState(CatState.isFaint);
 
             // 기절 상태로 진입할 때는 모든 기능 비활성화
             SetCollectingCoinsState(false);
@@ -378,38 +554,94 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     {
         Vector3 startPosition = rectTransform.anchoredPosition;
         float elapsed = 0f;
-        float duration = 0.5f;
+        float distance = Vector3.Distance(startPosition, targetPosition);
 
-        if (!GetComponent<DragAndDropManager>().isDragging)
+        // 이동 속도에 따른 이동 시간 계산
+        float moveSpeed = CAT_MOVE_SPEED;
+        if (BattleManager.Instance.isBattleActive)
         {
-            // 이동할 때는 무조건 walk 상태로 변경 (최우선)
-            GetComponent<AnimatorManager>().ChangeState(CatState.isWalk);
+            moveSpeed = CAT_BATTLE_MOVE_SPEED;
         }
 
+        // 거리를 속도로 나눠 시간 계산 (최소 0.1초, 최대 5초로 제한)
+        float duration = Mathf.Clamp(distance / moveSpeed, 0.1f, 5f);
+
+        // 이동할 때는 무조건 walk 상태로 변경 (최우선)
+        if (!GetComponent<DragAndDropManager>().isDragging)
+        {
+            ChangeCatState(CatState.isWalk);
+        }
+
+        // 고양이의 이동 방향에 따라 이미지만 좌우반전
+        Vector3 moveDirection = targetPosition - startPosition;
+        if (moveDirection.x != 0)
+        {
+            // 이동 방향에 따라 이미지의 좌우 반전만 적용
+            bool isMovingRight = moveDirection.x > 0;
+
+            // 이미지 오브젝트만 뒤집기 (자식 UI 요소들에 영향 없음)
+            if (catImageObject != null)
+            {
+                if (isMovingRight)
+                {
+                    catImageObject.transform.localRotation = Quaternion.Euler(0, 180, 0);
+                }
+                else
+                {
+                    catImageObject.transform.localRotation = Quaternion.Euler(0, 0, 0);
+                }
+            }
+        }
+
+        bool wasMoving = false;
         while (elapsed < duration)
         {
+            wasMoving = true;
+
+            // 전투가 종료되었거나 드래그 중이면 이동 중단
+            if (!BattleManager.Instance.isBattleActive || GetComponent<DragAndDropManager>().isDragging)
+            {
+                // 전투가 종료된 경우 현재 위치에서 멈춤
+                if (!BattleManager.Instance.isBattleActive)
+                {
+                    isMoveAnimating = false;
+                    ChangeCatState(CatState.isIdle);
+                    currentMoveCoroutine = null;
+                    yield break;
+                }
+                break;
+            }
+
             elapsed += Time.deltaTime;
-            rectTransform.anchoredPosition = Vector3.Lerp(startPosition, targetPosition, elapsed / duration);
+            float t = elapsed / duration;
+            rectTransform.anchoredPosition = Vector3.Lerp(startPosition, targetPosition, t);
+
+            // 이동 중에는 계속 walk 상태 유지
+            if (!GetComponent<DragAndDropManager>().isDragging)
+            {
+                ChangeCatState(CatState.isWalk);
+            }
             yield return null;
         }
 
-        rectTransform.anchoredPosition = targetPosition;
+        // 전투가 진행중이고 목적지까지 도달했을 때만 최종 위치로 설정
+        if (BattleManager.Instance.isBattleActive && wasMoving)
+        {
+            rectTransform.anchoredPosition = targetPosition;
+        }
         isMoveAnimating = false;
 
         if (!GetComponent<DragAndDropManager>().isDragging)
         {
-            // 이동이 끝난 후에도 isMoveAnimating이 true라면 여전히 다른 이동이 진행중
-            if (isMoveAnimating)
+            // 전투가 아직 진행중이고 히트박스 경계에 도착했을 때만 isBattle 상태로 변경
+            if (BattleManager.Instance.isBattleActive && BattleManager.Instance.bossHitbox != null &&
+                BattleManager.Instance.bossHitbox.IsAtBoundary(rectTransform.anchoredPosition))
             {
-                GetComponent<AnimatorManager>().ChangeState(CatState.isWalk);
-            }
-            else if (BattleManager.Instance.isBattleActive)
-            {
-                GetComponent<AnimatorManager>().ChangeState(CatState.isBattle);
+                ChangeCatState(CatState.isBattle);
             }
             else
             {
-                GetComponent<AnimatorManager>().ChangeState(CatState.isIdle);
+                ChangeCatState(CatState.isIdle);
             }
         }
 
@@ -544,11 +776,9 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     private IEnumerator PlayCollectingAnimation(int collectedCoins)
     {
         // 이동 중이거나 드래그 중이면 애니메이션 상태를 변경하지 않음
-        if (!BattleManager.Instance.isBattleActive &&
-            !GetComponent<DragAndDropManager>().isDragging &&
-            !isMoveAnimating)  // isMoveAnimating으로 이동 중인지 체크
+        if (!BattleManager.Instance.isBattleActive && !GetComponent<DragAndDropManager>().isDragging && !isMoveAnimating)
         {
-            GetComponent<AnimatorManager>().ChangeState(CatState.isGetCoin);
+            ChangeCatState(CatState.isGetCoin);
         }
 
         if (collectCoinText != null)
@@ -573,11 +803,9 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
 
         // 이동 중이거나 드래그 중이면 애니메이션 상태를 변경하지 않음
-        if (!BattleManager.Instance.isBattleActive &&
-            !GetComponent<DragAndDropManager>().isDragging &&
-            !isMoveAnimating)  // isMoveAnimating으로 이동 중인지 체크
+        if (!BattleManager.Instance.isBattleActive && !GetComponent<DragAndDropManager>().isDragging && !isMoveAnimating)
         {
-            GetComponent<AnimatorManager>().ChangeState(CatState.isIdle);
+            ChangeCatState(CatState.isIdle);
         }
     }
 
@@ -622,13 +850,15 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     {
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, screenPoint, eventCamera, out Vector2 localPoint)) return false;
 
+        // 항상 원형 영역으로 클릭 가능하도록 설정
         Vector2 normalizedPoint = new Vector2(
             localPoint.x / rectHalfWidth,
-            //(localPoint.x + 20f) / rectHalfWidth,
             localPoint.y / rectHalfHeight
         );
 
-        return (normalizedPoint.x * normalizedPoint.x + normalizedPoint.y * normalizedPoint.y) <= (CLICK_AREA_SCALE * CLICK_AREA_SCALE);
+        // 원형 영역 체크 (회전에 영향받지 않음)
+        float distance = normalizedPoint.magnitude;
+        return distance <= CLICK_AREA_SCALE;
     }
 
     #endregion

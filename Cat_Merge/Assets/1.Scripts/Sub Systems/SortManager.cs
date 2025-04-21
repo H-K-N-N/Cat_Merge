@@ -59,6 +59,9 @@ public class SortManager : MonoBehaviour
         StopAllCatMovements();
         yield return new WaitForSeconds(MOVEMENT_DELAY);
 
+        // 모든 고양이 방향 초기화 (왼쪽 보기)
+        ResetAllCatDirections();
+
         // 등급순 정렬 및 위치 이동
         var sortedCats = GetSortedCats();
         yield return StartCoroutine(MoveCatsToPositions(sortedCats));
@@ -155,6 +158,32 @@ public class SortManager : MonoBehaviour
             if (catData != null)
             {
                 catData.SetAutoMoveState(isEnabled);
+            }
+        }
+    }
+
+    // 모든 고양이의 방향을 초기화하는 함수 (왼쪽을 보도록)
+    private void ResetAllCatDirections()
+    {
+        foreach (Transform child in gamePanel)
+        {
+            if (!child.gameObject.activeSelf) continue;
+
+            CatData catData = child.GetComponent<CatData>();
+            if (catData != null)
+            {
+                // Transform 내의 "Cat Image" 또는 "Image" 오브젝트 찾기
+                Transform catImageTransform = child.Find("Cat Image");
+                if (catImageTransform == null)
+                {
+                    catImageTransform = child.Find("Image");
+                }
+
+                // 찾은 오브젝트의 방향을 초기화 (Y 회전을 0으로)
+                if (catImageTransform != null)
+                {
+                    catImageTransform.localRotation = Quaternion.Euler(0, 0, 0);
+                }
             }
         }
     }

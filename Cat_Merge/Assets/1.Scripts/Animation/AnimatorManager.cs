@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -25,6 +24,7 @@ public class AnimatorManager : MonoBehaviour
 {
     private Animator animator;
     public int catGrade;
+
     [Header("등급별 애니메이터 오버라이드 리스트")]
     public List<GradeOverrideData> overrideDataList;
     public Dictionary<int, AnimatorOverrideController> overrideDict;
@@ -35,6 +35,7 @@ public class AnimatorManager : MonoBehaviour
     void Awake()
     {
         animator = GetComponent<Animator>();
+
         // 딕셔너리 초기화
         overrideDict = new Dictionary<int, AnimatorOverrideController>();
         foreach (var data in overrideDataList)
@@ -88,7 +89,6 @@ public class AnimatorManager : MonoBehaviour
         else
         {
             animator.enabled = false;
-            //Debug.Log($"{grade}등급 모션이 없어 애니메이터를 비활성화합니다.");
         }
     }
 
@@ -96,5 +96,7 @@ public class AnimatorManager : MonoBehaviour
     {
         ApplyAnimatorOverride(grade);
     }
+
+
 }
 

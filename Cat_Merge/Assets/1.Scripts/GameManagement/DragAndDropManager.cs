@@ -49,7 +49,13 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
     {
         isDragging = true;
 
-        GetComponent<AnimatorManager>().ChangeState(CatState.isGrab);
+        // 애니메이션 상태 변경
+        CatData catDataComponent = GetComponent<CatData>();
+        if (catDataComponent != null)
+        {
+            catDataComponent.StopAllMovement();
+            catDataComponent.SetDragState(true);
+        }
 
         // 드래그 시작 위치 오프셋 계산
         Vector2 localPointerPosition;
@@ -70,7 +76,13 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
     public void OnPointerClick(PointerEventData eventData)
     {
         isDragging = false;
-        GetComponent<AnimatorManager>().ChangeState(CatState.isIdle);
+
+        // 애니메이션 상태 변경
+        CatData catDataComponent = GetComponent<CatData>();
+        if (catDataComponent != null)
+        {
+            catDataComponent.SetDragState(false);
+        }
     }
 
     // 드래그 진행중
@@ -120,13 +132,11 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
     {
         isDragging = false;
 
-        if (BattleManager.Instance.IsBattleActive)
+        // 애니메이션 상태 변경
+        CatData catDataComponent = GetComponent<CatData>();
+        if (catDataComponent != null)
         {
-            GetComponent<AnimatorManager>().ChangeState(CatState.isBattle);
-        }
-        else
-        {
-            GetComponent<AnimatorManager>().ChangeState(CatState.isIdle);
+            catDataComponent.SetDragState(false);
         }
 
         if (BattleManager.Instance.IsBattleActive)
@@ -155,19 +165,7 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
                     {
                         StartCoroutine(PullNearbyCat(nearbyCat));
                     }
-                    else
-                    {
-                        //Debug.LogWarning("다음 등급의 고양이가 없음");
-                    }
                 }
-                else
-                {
-                    //Debug.LogWarning("등급이 다름");
-                }
-            }
-            else
-            {
-                //Debug.Log("드랍한 위치에 배치");
             }
         }
     }

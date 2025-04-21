@@ -78,7 +78,7 @@ public class GameManager : MonoBehaviour, ISaveable
             {
                 coin = value;
                 UpdateCoinText();
-                GoogleSave();
+                SaveToLocal();
             }
         }
     }
@@ -94,13 +94,16 @@ public class GameManager : MonoBehaviour, ISaveable
             {
                 cash = value;
                 UpdateCashText();
-                GoogleSave();
+                SaveToLocal();
             }
         }
     }
 
     private bool isBackButtonPressed = false;                               // 뒤로가기 버튼이 눌렸는지 여부
     [HideInInspector] public bool isQuiting = false;                        // 종료 여부
+
+    [Header("---[First Game Panel]")]
+    [SerializeField] private GameObject firstGamePanel;                     // 첫 게임 시작 패널
 
 
     private bool isDataLoaded = false;                                      // 데이터 로드 확인
@@ -157,8 +160,19 @@ public class GameManager : MonoBehaviour, ISaveable
     {
         currentCatCount = 0;
         maxCats = 8;
-        coin = 100000000000;
+        coin = 10000000;
         cash = 1000;
+    }
+
+    // 첫 게임 시작 패널을 보여주는 코루틴
+    public IEnumerator ShowFirstGamePanel()
+    {
+        if (firstGamePanel != null)
+        {
+            firstGamePanel.SetActive(true);
+            yield return new WaitForSeconds(2f);
+            firstGamePanel.SetActive(false);
+        }
     }
 
     // 게임 데이터 초기 로드 함수
@@ -203,10 +217,7 @@ public class GameManager : MonoBehaviour, ISaveable
     // 고양이 수 증가 함수
     public void AddCatCount()
     {
-        //if (CurrentCatCount < TotalMaxCats)
-        {
-            CurrentCatCount++;
-        }
+        CurrentCatCount++;
     }
 
     // 고양이 수 감소 함수
@@ -449,45 +460,56 @@ public class GameManager : MonoBehaviour, ISaveable
         isQuiting = true;
         Time.timeScale = 0f;
 
-        if (GoogleManager.Instance != null)
-        {
-            StartCoroutine(SaveAndQuitCoroutine());
-        }
-        else
-        {
-            QuitApplication();
-        }
+        //QuitApplication();
+        StartCoroutine(SaveAndQuitCoroutine());
     }
 
     // 저장 후 종료하는 코루틴
     private IEnumerator SaveAndQuitCoroutine()
     {
-        bool saveCompleted = false;
-        GoogleManager.Instance.SaveGameStateSync((success) => saveCompleted = true);
+        // 게임 일시정지
+        Time.timeScale = 0f;
 
-        // 저장 완료 또는 타임아웃 대기 (최대 3초)
-        float waitTime = 0f;
-        while (!saveCompleted && waitTime < 3.0f)
+        // 모든 컴포넌트의 데이터를 PlayerPrefs에 저장
+        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
+        foreach (ISaveable saveable in saveables)
         {
-            waitTime += 0.1f;
-            yield return new WaitForSecondsRealtime(0.1f);
+            MonoBehaviour mb = (MonoBehaviour)saveable;
+            string typeName = mb.GetType().FullName;
+            string data = saveable.GetSaveData();
+            PlayerPrefs.SetString(typeName, data);
+        }
+        PlayerPrefs.Save();
+
+        // 클라우드 저장 시도
+        if (GoogleManager.Instance != null && GoogleManager.Instance.isLoggedIn)
+        {
+            GoogleManager.Instance.SaveToCloudWithLocalData();
         }
 
-        // 두 번째 저장 시도 (첫 번째가 실패했을 경우를 대비)
-        if (!saveCompleted)
-        {
-            saveCompleted = false;
+        // 2초 대기
+        yield return new WaitForSecondsRealtime(1f);
 
-            GoogleManager.Instance.SaveGameStateSync((success) => saveCompleted = true);
+        //// 구글 로그인 상태인 경우에만 클라우드 저장 시도
+        //if (GoogleManager.Instance != null && GoogleManager.Instance.isLoggedIn)
+        //{
+        //    bool saveCompleted = false;
+        //    GoogleManager.Instance.SaveToCloudWithLocalData();
 
-            // 두 번째 저장 완료 대기
-            waitTime = 0f;
-            while (!saveCompleted && waitTime < 3.0f)
-            {
-                waitTime += 0.1f;
-                yield return new WaitForSecondsRealtime(0.1f);
-            }
-        }
+        //    // 클라우드 저장 완료 또는 타임아웃 대기 (최대 3초)
+        //    float waitTime = 0f;
+        //    while (!saveCompleted && waitTime < 3.0f)
+        //    {
+        //        waitTime += 0.1f;
+        //        yield return new WaitForSecondsRealtime(0.1f);
+
+        //        // 3초 후에는 강제로 저장 완료 처리
+        //        if (waitTime >= 3.0f)
+        //        {
+        //            saveCompleted = true;
+        //        }
+        //    }
+        //}
 
         QuitApplication();
     }
@@ -585,12 +607,11 @@ public class GameManager : MonoBehaviour, ISaveable
         }
     }
 
-    private void GoogleSave()
+    private void SaveToLocal()
     {
-        if (GoogleManager.Instance != null)
-        {
-            GoogleManager.Instance.SaveGameState();
-        }
+        string data = GetSaveData();
+        string key = this.GetType().FullName;
+        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

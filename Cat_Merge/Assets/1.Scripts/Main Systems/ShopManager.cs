@@ -228,7 +228,7 @@ public class ShopManager : MonoBehaviour, ISaveable
 
         // 마지막 보상 시간 저장
         lastTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        GoogleSave();
+        SaveToLocal();
 
         UpdateCashForTimeUI();
     }
@@ -237,7 +237,7 @@ public class ShopManager : MonoBehaviour, ISaveable
     public void AddPassiveCashForTimeAmount(int amount)
     {
         passiveCashForTimeAmount += amount;
-        GoogleSave();
+        SaveToLocal();
 
         UpdateCashForTimeUI();
     }
@@ -247,7 +247,7 @@ public class ShopManager : MonoBehaviour, ISaveable
     {
         passiveCashForTimeCoolTimeReduction += seconds;
         cashForTimeCoolTime = DEFAULT_CASH_FOR_TIME_COOLTIME - passiveCashForTimeCoolTimeReduction;
-        GoogleSave();
+        SaveToLocal();
 
         UpdateCashForTimeUI();
     }
@@ -351,7 +351,7 @@ public class ShopManager : MonoBehaviour, ISaveable
         //}
         isWaitingForAd = false;
 
-        GoogleSave();
+        SaveToLocal();
 
         UpdateCashForAdUI();
     }
@@ -360,7 +360,7 @@ public class ShopManager : MonoBehaviour, ISaveable
     public void AddPassiveCashForAdAmount(int amount)
     {
         passiveCashForAdAmount += amount;
-        GoogleSave();
+        SaveToLocal();
         UpdateCashForAdUI();
     }
 
@@ -369,7 +369,7 @@ public class ShopManager : MonoBehaviour, ISaveable
     {
         passiveCashForAdCoolTimeReduction += seconds;
         cashForAdCoolTime = DEFAULT_CASH_FOR_AD_COOLTIME - passiveCashForAdCoolTimeReduction;
-        GoogleSave();
+        SaveToLocal();
 
         UpdateCashForTimeUI();
     }
@@ -522,7 +522,7 @@ public class ShopManager : MonoBehaviour, ISaveable
             //}
             isWaitingForAd = false;
 
-            GoogleSave();
+            SaveToLocal();
 
             UpdateDoubleCoinForAdUI();
         }
@@ -532,7 +532,7 @@ public class ShopManager : MonoBehaviour, ISaveable
     public void AddPassiveDoubleCoinDurationIncrease(float seconds)
     {
         passiveDoubleCoinDurationIncrease += seconds;
-        GoogleSave();
+        SaveToLocal();
 
         UpdateDoubleCoinForAdUI();
     }
@@ -542,7 +542,7 @@ public class ShopManager : MonoBehaviour, ISaveable
     {
         passiveDoubleCoinForAdCoolTimeReduction += seconds;
         doubleCoinForAdCoolTime = DEFAULT_DOUBLE_COIN_FOR_AD_COOLTIME - passiveDoubleCoinForAdCoolTimeReduction;
-        GoogleSave();
+        SaveToLocal();
 
         UpdateDoubleCoinForAdUI();
     }
@@ -604,12 +604,11 @@ public class ShopManager : MonoBehaviour, ISaveable
         UpdateAllUI();
     }
 
-    private void GoogleSave()
+    private void SaveToLocal()
     {
-        if (GoogleManager.Instance != null)
-        {
-            GoogleManager.Instance.SaveGameState();
-        }
+        string data = GetSaveData();
+        string key = this.GetType().FullName;
+        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

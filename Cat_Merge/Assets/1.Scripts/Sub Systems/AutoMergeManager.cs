@@ -167,7 +167,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         GameManager.Instance.Cash -= AUTO_MERGE_COST;
         OnClickedAutoMerge();
 
-        GoogleSave();
+        SaveToLocal();
     }
 
     // 자동머지 버튼 클릭 처리 함수
@@ -394,7 +394,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         StopAllCoroutines();
         mergingCats.Clear();
 
-        GoogleSave();
+        SaveToLocal();
     }
 
     // 머지중인 고양이 정지 함수
@@ -494,7 +494,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             mergingCats.Clear();
             DisableAutoMergeUI();
 
-            GoogleSave();
+            SaveToLocal();
         }
         else
         {
@@ -513,7 +513,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             EnableAutoMergeUI();
             StartCoroutine(AutoMergeCoroutine());
 
-            GoogleSave();
+            SaveToLocal();
         }
         else
         {
@@ -595,12 +595,11 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         isDataLoaded = true;
     }
 
-    private void GoogleSave()
+    private void SaveToLocal()
     {
-        if (GoogleManager.Instance != null)
-        {
-            GoogleManager.Instance.SaveGameState();
-        }
+        string data = GetSaveData();
+        string key = this.GetType().FullName;
+        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

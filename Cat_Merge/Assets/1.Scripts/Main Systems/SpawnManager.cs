@@ -157,7 +157,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
         SpawnBasicCat();
         RestartFoodCoroutineIfStopped();
 
-        GoogleSave();
+        SaveToLocal();
     }
 
     // 기본 고양이 스폰 함수
@@ -329,7 +329,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
             foodFillAmountImg.fillAmount = 1f;
             NowFood++;
             elapsed = 0f;
-            GoogleSave();
+            SaveToLocal();
         }
     }
 
@@ -369,7 +369,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
                     NowFood--;
                     SpawnBasicCat();
                     RestartFoodCoroutineIfStopped();
-                    GoogleSave();
+                    SaveToLocal();
                 }
                 elapsed = 0f;
             }
@@ -502,9 +502,10 @@ public class SpawnManager : MonoBehaviour, ISaveable
             if (newCat != null && newCat.TryGetComponent<RectTransform>(out var rectTransform))
             {
                 rectTransform.anchoredPosition = new Vector2(catData.posX, catData.posY);
-                GameManager.Instance.AddCatCount();
             }
         }
+
+        GameManager.Instance.CurrentCatCount = activeCats.Count;
 
         int maxFood = (int)ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value;
         if (this.nowFood < maxFood)
@@ -534,12 +535,11 @@ public class SpawnManager : MonoBehaviour, ISaveable
         return catObject;
     }
 
-    private void GoogleSave()
+    private void SaveToLocal()
     {
-        if (GoogleManager.Instance != null)
-        {
-            GoogleManager.Instance.SaveGameState();
-        }
+        string data = GetSaveData();
+        string key = this.GetType().FullName;
+        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

@@ -174,6 +174,7 @@ public class QuestManager : MonoBehaviour, ISaveable
 
         InitializeQuestManager();
         CheckAndResetQuests();
+        UpdateAllUI();
     }
 
     private void Update()
@@ -481,6 +482,23 @@ public class QuestManager : MonoBehaviour, ISaveable
 
         // UI 업데이트
         UpdateQuestUI(questName, menuType);
+    }
+
+    private void UpdateAllUI()
+    {
+        // 스페셜 보상 UI 업데이트
+        UpdateDailySpecialRewardUI();
+        UpdateWeeklySpecialRewardUI();
+
+        // 보상 버튼 상태 업데이트
+        UpdateAllDailyRewardButtonState();
+        UpdateAllWeeklyRewardButtonState();
+        UpdateAllRepeatRewardButtonState();
+
+        // New 이미지 상태 업데이트
+        UpdateNewImageStatus();
+
+        SortRepeatQuests();
     }
 
     // 퀘스트 UI 업데이트
@@ -1349,14 +1367,6 @@ public class QuestManager : MonoBehaviour, ISaveable
         isDataLoaded = true;
     }
 
-    private void GoogleSave()
-    {
-        if (GoogleManager.Instance != null)
-        {
-            GoogleManager.Instance.SaveGameState();
-        }
-    }
-
     private void LoadQuestData(SaveData savedData)
     {
         // 퀘스트 데이터 복원을 위한 공통 함수
@@ -1417,19 +1427,11 @@ public class QuestManager : MonoBehaviour, ISaveable
         RestoreQuestData(repeatQuestDictionary, savedData.repeatQuestKeys, savedData.repeatQuestValues, QuestMenuType.Repeat);
     }
 
-    private void UpdateAllUI()
+    private void SaveToLocal()
     {
-        // 스페셜 보상 UI 업데이트
-        UpdateDailySpecialRewardUI();
-        UpdateWeeklySpecialRewardUI();
-
-        // 보상 버튼 상태 업데이트
-        UpdateAllDailyRewardButtonState();
-        UpdateAllWeeklyRewardButtonState();
-        UpdateAllRepeatRewardButtonState();
-
-        // New 이미지 상태 업데이트
-        UpdateNewImageStatus();
+        string data = GetSaveData();
+        string key = this.GetType().FullName;
+        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion
@@ -1451,7 +1453,7 @@ public class QuestManager : MonoBehaviour, ISaveable
         {
             ResetDailyQuests();
             lastDailyReset = now;
-            GoogleSave();
+            SaveToLocal();
         }
     }
 
@@ -1464,7 +1466,7 @@ public class QuestManager : MonoBehaviour, ISaveable
         {
             ResetWeeklyQuests();
             lastWeeklyReset = now;
-            GoogleSave();
+            SaveToLocal();
         }
     }
 
@@ -1495,7 +1497,7 @@ public class QuestManager : MonoBehaviour, ISaveable
         UpdateAllDailyRewardButtonState();
         UpdateNewImageStatus();
 
-        GoogleSave();
+        SaveToLocal();
     }
 
     private void ResetWeeklyQuests()
@@ -1518,7 +1520,7 @@ public class QuestManager : MonoBehaviour, ISaveable
         UpdateAllWeeklyRewardButtonState();
         UpdateNewImageStatus();
 
-        GoogleSave();
+        SaveToLocal();
     }
 
     #endregion

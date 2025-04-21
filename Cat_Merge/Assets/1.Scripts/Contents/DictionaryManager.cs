@@ -244,7 +244,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         // 이벤트 발생
         OnCatDataChanged?.Invoke();
 
-        GoogleSave();
+        SaveToLocal();
     }
 
     // 특정 고양이의 해금 여부 확인 함수
@@ -267,7 +267,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         // 이벤트 발생
         OnCatDataChanged?.Invoke();
 
-        GoogleSave();
+        SaveToLocal();
     }
 
     // 특정 고양이의 첫 해금 보상 획득 여부 확인 함수
@@ -647,14 +647,6 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         isDataLoaded = true;
     }
 
-    private void GoogleSave()
-    {
-        if (GoogleManager.Instance != null)
-        {
-            GoogleManager.Instance.SaveGameState();
-        }
-    }
-
     private void LoadCatUnlockData(SaveData savedData)
     {
         // 데이터 복원
@@ -667,6 +659,13 @@ public class DictionaryManager : MonoBehaviour, ISaveable
             isCatUnlocked[i] = savedData.isCatUnlocked[i];
             isGetFirstUnlockedReward[i] = savedData.isGetFirstUnlockedReward[i];
         }
+    }
+
+    private void SaveToLocal()
+    {
+        string data = GetSaveData();
+        string key = this.GetType().FullName;
+        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

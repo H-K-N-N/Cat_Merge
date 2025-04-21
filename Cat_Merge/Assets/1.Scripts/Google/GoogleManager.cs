@@ -92,16 +92,11 @@ public class GoogleManager : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    private void OnDestroy()
-    {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
-
-    public void Start()
+    private void Start()
     {
         InitializeGooglePlay();
 
-        MigrateUnencryptedData();
+        UnencryptedData();
 
         StartCoroutine(GPGS_Login());
     }
@@ -118,12 +113,17 @@ public class GoogleManager : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
     #endregion
 
 
     #region Initialize
 
-    // Google Play 관련 세팅  함수
+    // Google Play 관련 세팅 함수
     private void InitializeGooglePlay()
     {
         PlayGamesPlatform.DebugLogEnabled = true;
@@ -182,7 +182,7 @@ public class GoogleManager : MonoBehaviour
         }
     }
 
-    // 게임 시작 버튼에 연결할 public 메서드
+    // 게임 시작 버튼에 연결할 public 함수
     public void OnGameStartButtonClick()
     {
         // 이미 게임 시작 중이면 무시
@@ -327,11 +327,19 @@ public class GoogleManager : MonoBehaviour
                 encryptedBytes[i] = (byte)(dataBytes[i] ^ keyBytes[i % keyBytes.Length]);
             }
 
-            return Convert.ToBase64String(encryptedBytes);
+            string result = Convert.ToBase64String(encryptedBytes);
+
+            // 결과가 원본과 같은지 검증
+            if (result == data)
+            {
+                Debug.LogError("[암호화 실패] 암호화된 결과가 원본과 동일합니다!");
+            }
+
+            return result;
         }
         catch (Exception e)
         {
-            Debug.Log($"암호화 에러: {e.Message}");
+            Debug.LogError($"[암호화 오류] {e.Message}\n{e.StackTrace}");
             return data;
         }
     }
@@ -346,7 +354,6 @@ public class GoogleManager : MonoBehaviour
             // 데이터가 Base64 형식인지 확인 (암호화된 데이터인지 확인)
             if (!IsValidBase64(encryptedData))
             {
-                // Base64가 아니면 암호화되지 않은 데이터로 간주하고 그대로 반환
                 return encryptedData;
             }
 
@@ -359,11 +366,13 @@ public class GoogleManager : MonoBehaviour
                 decryptedBytes[i] = (byte)(encryptedBytes[i] ^ keyBytes[i % keyBytes.Length]);
             }
 
-            return Encoding.UTF8.GetString(decryptedBytes);
+            string result = Encoding.UTF8.GetString(decryptedBytes);
+
+            return result;
         }
         catch (Exception e)
         {
-            Debug.Log($"복호화 에러: {e.Message}");
+            Debug.LogError($"[복호화 오류] {e.Message}\n{e.StackTrace}");
             return encryptedData;
         }
     }
@@ -398,7 +407,7 @@ public class GoogleManager : MonoBehaviour
     }
 
     // 모든 암호화되지 않은 데이터를 암호화하는 함수
-    public void MigrateUnencryptedData()
+    private void UnencryptedData()
     {
         var saveables = Resources.FindObjectsOfTypeAll<MonoBehaviour>().OfType<ISaveable>();
         foreach (ISaveable saveable in saveables)
@@ -409,7 +418,6 @@ public class GoogleManager : MonoBehaviour
 
             if (!string.IsNullOrEmpty(data) && !IsValidBase64(data))
             {
-                Debug.Log($"암호화되지 않은 데이터 발견: {typeName}, 암호화 중...");
                 SaveToPlayerPrefs(typeName, data);
             }
         }
@@ -418,9 +426,54 @@ public class GoogleManager : MonoBehaviour
     // PlayerPrefs에 암호화된 데이터 저장하는 함수
     public void SaveToPlayerPrefs(string key, string data)
     {
-        string encryptedData = EncryptData(data);
-        PlayerPrefs.SetString(key, encryptedData);
-        PlayerPrefs.Save();
+        if (!string.IsNullOrEmpty(data))
+        {
+            // 원본 데이터와 암호화된 데이터
+            string encryptedData = EncryptData(data);
+
+            // 암호화가 제대로 되었는지 확인
+            bool isEncrypted = IsValidBase64(encryptedData) && encryptedData != data;
+
+            // 암호화가 실패했다면 다시 시도
+            if (!isEncrypted)
+            {
+                encryptedData = ForcedEncrypt(data);
+            }
+
+            PlayerPrefs.SetString(key, encryptedData);
+            PlayerPrefs.Save();
+        }
+    }
+
+    // 강제 암호화 함수 (문제 해결용)
+    private string ForcedEncrypt(string data)
+    {
+        if (string.IsNullOrEmpty(data)) return data;
+
+        try
+        {
+            // 명시적으로 단계별로 암호화 진행
+            byte[] dataBytes = Encoding.UTF8.GetBytes(data);
+            byte[] keyBytes = Encoding.UTF8.GetBytes(encryptionKey);
+            byte[] encryptedBytes = new byte[dataBytes.Length];
+
+            // XOR 암호화
+            for (int i = 0; i < dataBytes.Length; i++)
+            {
+                encryptedBytes[i] = (byte)(dataBytes[i] ^ keyBytes[i % keyBytes.Length]);
+            }
+
+            // Base64로 인코딩
+            string result = Convert.ToBase64String(encryptedBytes);
+            Debug.Log($"강제 암호화 결과: 길이={result.Length}, 시작={result.Substring(0, Math.Min(10, result.Length))}");
+            return result;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"강제 암호화 에러: {e.Message}");
+            // 암호화 실패 시 기본 Base64 인코딩이라도 수행
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(data));
+        }
     }
 
     // PlayerPrefs에서 데이터 로드하는 함수
@@ -448,11 +501,15 @@ public class GoogleManager : MonoBehaviour
             MonoBehaviour mb = (MonoBehaviour)saveable;
             Type componentType = mb.GetType();
             string typeName = componentType.FullName;
-            string data = PlayerPrefs.GetString(typeName, "");
 
-            if (!string.IsNullOrEmpty(data))
+            // PlayerPrefs에서 직접 암호화된 원본 데이터 가져오기
+            string rawData = PlayerPrefs.GetString(typeName, "");
+
+            if (!string.IsNullOrEmpty(rawData))
             {
-                saveable.LoadFromData(DecryptData(data));
+                // 복호화 진행
+                string decryptedData = DecryptData(rawData);
+                saveable.LoadFromData(decryptedData);
             }
         }
     }
@@ -465,11 +522,15 @@ public class GoogleManager : MonoBehaviour
         {
             MonoBehaviour mb = (MonoBehaviour)saveable;
             string typeName = mb.GetType().FullName;
-            string data = PlayerPrefs.GetString(typeName, "");
 
-            if (!string.IsNullOrEmpty(data))
+            // PlayerPrefs에서 직접 암호화된 원본 데이터 가져오기
+            string rawData = PlayerPrefs.GetString(typeName, "");
+
+            if (!string.IsNullOrEmpty(rawData))
             {
-                saveable.LoadFromData(DecryptData(data));
+                // 복호화 진행
+                string decryptedData = DecryptData(rawData);
+                saveable.LoadFromData(decryptedData);
             }
         }
     }
@@ -571,13 +632,98 @@ public class GoogleManager : MonoBehaviour
             });
     }
 
+    // 여러 ISaveable 컴포넌트를 한 번에 저장하는 함수
+    public void SaveAllSaveables(ISaveable[] saveables)
+    {
+        foreach (ISaveable saveable in saveables)
+        {
+            if (saveable == null) continue;
+
+            MonoBehaviour mb = (MonoBehaviour)saveable;
+            string typeName = mb.GetType().FullName;
+            string data = saveable.GetSaveData();
+
+            if (!string.IsNullOrEmpty(data))
+            {
+                SaveToPlayerPrefs(typeName, data);
+            }
+        }
+    }
+
+    // 즉시 클라우드 저장 실행 함수 (동기식)
+    public void SaveGameStateSyncImmediate()
+    {
+        SaveToCloudWithLocalData();
+    }
+
     #endregion
 
 
     #region Data Remove System
 
+    // 삭제 버튼 찾아서 설정하는 함수
+    private void FindAndSetupDeleteButton()
+    {
+        GameObject buttonObj = GameObject.Find("Canvas/Main UI Panel/Top Simple Button Panel/Delete Data Button");
+        if (buttonObj != null)
+        {
+            deleteDataButton = buttonObj.GetComponent<Button>();
+            if (deleteDataButton != null)
+            {
+                deleteDataButton.onClick.RemoveAllListeners();
+                deleteDataButton.onClick.AddListener(DeleteGameDataAndQuit);
+            }
+        }
+        else
+        {
+            deleteDataButton = null;
+        }
+    }
+
+    // 게임 데이터 삭제 후 앱 종료하는 함수 (버튼에 연결할 함수)
+    public void DeleteGameDataAndQuit()
+    {
+        isDeleting = true;
+        Time.timeScale = 0f;
+
+        // 먼저 현재 씬의 모든 컴포넌트 초기화
+        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
+        foreach (ISaveable saveable in saveables)
+        {
+            saveable.LoadFromData(null);
+        }
+
+        // 클라우드 및 로컬 데이터 삭제
+        StartCoroutine(DeleteDataWithConfirmation());
+    }
+
+    // 데이터 삭제 확인 코루틴
+    private IEnumerator DeleteDataWithConfirmation()
+    {
+        bool deleteCompleted = false;
+        bool deleteSuccess = false;
+
+        // 삭제 시도
+        DeleteGameData((success) => {
+            deleteCompleted = true;
+            deleteSuccess = success;
+        });
+
+        // 삭제 완료 대기 (최대 3초)
+        float waitTime = 0;
+        while (!deleteCompleted && waitTime < 3.0f)
+        {
+            waitTime += 0.1f;
+            yield return new WaitForSecondsRealtime(0.1f);
+        }
+
+        // 저장 완료 대기 후 게임 종료
+        yield return new WaitForSecondsRealtime(1.0f);
+        StartCoroutine(QuitGameAfterDelay());
+    }
+
     // 저장된 게임 데이터를 삭제하는 함수
-    public void DeleteGameData(Action<bool> onComplete = null)
+    private void DeleteGameData(Action<bool> onComplete = null)
     {
         // PlayerPrefs 데이터 삭제
         PlayerPrefs.DeleteAll();
@@ -624,67 +770,6 @@ public class GoogleManager : MonoBehaviour
                     onComplete?.Invoke(false);
                 }
             });
-    }
-
-    // 삭제 버튼 찾아서 설정하는 함수
-    private void FindAndSetupDeleteButton()
-    {
-        GameObject buttonObj = GameObject.Find("Canvas/Main UI Panel/Top Simple Button Panel/Delete Data Button");
-        if (buttonObj != null)
-        {
-            deleteDataButton = buttonObj.GetComponent<Button>();
-            if (deleteDataButton != null)
-            {
-                deleteDataButton.onClick.RemoveAllListeners();
-                deleteDataButton.onClick.AddListener(DeleteGameDataAndQuit);
-            }
-        }
-        else
-        {
-            deleteDataButton = null;
-        }
-    }
-
-    // 게임 데이터 삭제 후 앱 종료하는 함수 (버튼에 연결할 함수)
-    public void DeleteGameDataAndQuit()
-    {
-        isDeleting = true;
-        Time.timeScale = 0f;
-
-        // 먼저 현재 씬의 모든 컴포넌트 초기화
-        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
-        foreach (ISaveable saveable in saveables)
-        {
-            saveable.LoadFromData(null);
-        }
-
-        // 클라우드 및 로컬 데이터 삭제
-        StartCoroutine(DeleteDataWithConfirmation());
-    }
-
-    // 데이터 삭제 확인 코루틴 추가
-    private IEnumerator DeleteDataWithConfirmation()
-    {
-        bool deleteCompleted = false;
-        bool deleteSuccess = false;
-
-        // 삭제 시도
-        DeleteGameData((success) => {
-            deleteCompleted = true;
-            deleteSuccess = success;
-        });
-
-        // 삭제 완료 대기 (최대 3초)
-        float waitTime = 0;
-        while (!deleteCompleted && waitTime < 3.0f)
-        {
-            waitTime += 0.1f;
-            yield return new WaitForSecondsRealtime(0.1f);
-        }
-
-        // 저장 완료 대기 후 게임 종료
-        yield return new WaitForSecondsRealtime(1.0f);
-        StartCoroutine(QuitGameAfterDelay());
     }
 
     // 지연 후 앱 종료하는 코루틴

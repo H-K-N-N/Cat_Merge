@@ -643,13 +643,6 @@ public class OptionManager : MonoBehaviour, ISaveable
         informationPanelBackButton.GetComponent<CanvasGroup>().alpha = 0f;
 
         currentActivePanel = -1;
-
-        //// 저장 코루틴이 실행 중이면 중지
-        //if (saveCoroutine != null)
-        //{
-        //    StopCoroutine(saveCoroutine);
-        //    saveCoroutine = null;
-        //}
     }
 
     // 저장 프로세스 시작 함수
@@ -672,21 +665,21 @@ public class OptionManager : MonoBehaviour, ISaveable
         // 게임 일시정지
         Time.timeScale = 0f;
 
-        // 모든 컴포넌트의 데이터를 PlayerPrefs에 저장
+        // GoogleManager를 통해 암호화하여 저장
         ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
-        foreach (ISaveable saveable in saveables)
+        if (GoogleManager.Instance != null)
         {
-            MonoBehaviour mb = (MonoBehaviour)saveable;
-            string typeName = mb.GetType().FullName;
-            string data = saveable.GetSaveData();
-            PlayerPrefs.SetString(typeName, data);
-        }
-        PlayerPrefs.Save();
+            GoogleManager.Instance.SaveAllSaveables(saveables);
 
-        // 클라우드 저장 시도
-        if (GoogleManager.Instance != null && GoogleManager.Instance.isLoggedIn)
+            // 클라우드 저장 시도
+            if (GoogleManager.Instance.isLoggedIn)
+            {
+                GoogleManager.Instance.SaveGameStateSyncImmediate();
+            }
+        }
+        else
         {
-            GoogleManager.Instance.SaveToCloudWithLocalData();
+            Debug.LogError("[저장 오류] GoogleManager 인스턴스를 찾을 수 없습니다!");
         }
 
         // 2초 대기

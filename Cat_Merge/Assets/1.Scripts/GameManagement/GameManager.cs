@@ -470,46 +470,25 @@ public class GameManager : MonoBehaviour, ISaveable
         // 게임 일시정지
         Time.timeScale = 0f;
 
-        // 모든 컴포넌트의 데이터를 PlayerPrefs에 저장
+        // GoogleManager를 통해 암호화하여 저장
         ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
-        foreach (ISaveable saveable in saveables)
+        if (GoogleManager.Instance != null)
         {
-            MonoBehaviour mb = (MonoBehaviour)saveable;
-            string typeName = mb.GetType().FullName;
-            string data = saveable.GetSaveData();
-            PlayerPrefs.SetString(typeName, data);
-        }
-        PlayerPrefs.Save();
+            GoogleManager.Instance.SaveAllSaveables(saveables);
 
-        // 클라우드 저장 시도
-        if (GoogleManager.Instance != null && GoogleManager.Instance.isLoggedIn)
+            // 클라우드 저장 시도
+            if (GoogleManager.Instance.isLoggedIn)
+            {
+                GoogleManager.Instance.SaveToCloudWithLocalData();
+            }
+        }
+        else
         {
-            GoogleManager.Instance.SaveToCloudWithLocalData();
+            Debug.LogError("[저장 오류] GoogleManager 인스턴스를 찾을 수 없습니다!");
         }
 
-        // 2초 대기
+        // 1초 대기
         yield return new WaitForSecondsRealtime(1f);
-
-        //// 구글 로그인 상태인 경우에만 클라우드 저장 시도
-        //if (GoogleManager.Instance != null && GoogleManager.Instance.isLoggedIn)
-        //{
-        //    bool saveCompleted = false;
-        //    GoogleManager.Instance.SaveToCloudWithLocalData();
-
-        //    // 클라우드 저장 완료 또는 타임아웃 대기 (최대 3초)
-        //    float waitTime = 0f;
-        //    while (!saveCompleted && waitTime < 3.0f)
-        //    {
-        //        waitTime += 0.1f;
-        //        yield return new WaitForSecondsRealtime(0.1f);
-
-        //        // 3초 후에는 강제로 저장 완료 처리
-        //        if (waitTime >= 3.0f)
-        //        {
-        //            saveCompleted = true;
-        //        }
-        //    }
-        //}
 
         QuitApplication();
     }

@@ -96,7 +96,7 @@ public class MergeManager : MonoBehaviour, ISaveable
         UpdateMergeButtonColor();
         CloseMergePanel();
 
-        GoogleSave();
+        SaveToLocal();
     }
 
     #endregion
@@ -116,7 +116,7 @@ public class MergeManager : MonoBehaviour, ISaveable
             mergePanel.SetActive(false);
         }
 
-        GoogleSave();
+        SaveToLocal();
     }
 
     // 전투 종료시 버튼 및 기능 기존 상태로 되돌려놓는 함수
@@ -125,7 +125,7 @@ public class MergeManager : MonoBehaviour, ISaveable
         isMergeEnabled = previousMergeState;
         openMergePanelButton.interactable = true;
 
-        GoogleSave();
+        SaveToLocal();
     }
 
     #endregion
@@ -238,12 +238,11 @@ public class MergeManager : MonoBehaviour, ISaveable
         isDataLoaded = true;
     }
 
-    private void GoogleSave()
+    private void SaveToLocal()
     {
-        if (GoogleManager.Instance != null)
-        {
-            GoogleManager.Instance.SaveGameState();
-        }
+        string data = GetSaveData();
+        string key = this.GetType().FullName;
+        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

@@ -32,19 +32,17 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     private WaitForSeconds waitAutoMergeInterval = new WaitForSeconds(0.5f);    // 자동 머지 간격
     private WaitForSeconds waitSpawnInterval = new WaitForSeconds(0.1f);        // 소환 간격
 
-    // 변수들
     private float startTime;                        // 자동 머지 시작 시간
     private float currentAutoMergeDuration;         // 현재 자동 머지 지속 시간
     private bool isAutoMergeActive = false;         // 자동 머지 활성화 상태
     private bool isPaused = false;                  // 일시정지 상태
     private float pausedTimeRemaining = 0f;         // 일시정지 시점의 남은 시간
+    private Coroutine autoMergeCoroutine;           // 자동 머지 코루틴
 
-    // 랜덤좌표 변수
     private float panelWidth;           // Panel Width
     private float panelHeight;          // Panel Height
     private Vector2 panelHalfSize;      // Panel Size / 2
 
-    // 오브젝트 풀
     private HashSet<DragAndDropManager> mergingCats = new HashSet<DragAndDropManager>();
 
 
@@ -167,7 +165,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         GameManager.Instance.Cash -= AUTO_MERGE_COST;
         OnClickedAutoMerge();
 
-        GoogleSave();
+        SaveToLocal();
     }
 
     // 자동머지 버튼 클릭 처리 함수
@@ -179,11 +177,28 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             isAutoMergeActive = true;
             currentAutoMergeDuration = AUTO_MERGE_DURATION;
             UpdateAutoMergeTimerVisibility(true);
-            StartCoroutine(AutoMergeCoroutine());
+            StartAutoMergeCoroutine();
         }
         else
         {
             currentAutoMergeDuration += AUTO_MERGE_DURATION;
+        }
+    }
+
+    // 코루틴 시작 전 기존 코루틴 정리
+    private void StartAutoMergeCoroutine()
+    {
+        StopAutoMergeCoroutine();
+        autoMergeCoroutine = StartCoroutine(AutoMergeCoroutine());
+    }
+
+    // 코루틴 안전하게 중지
+    private void StopAutoMergeCoroutine()
+    {
+        if (autoMergeCoroutine != null)
+        {
+            StopCoroutine(autoMergeCoroutine);
+            autoMergeCoroutine = null;
         }
     }
 
@@ -394,7 +409,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         StopAllCoroutines();
         mergingCats.Clear();
 
-        GoogleSave();
+        SaveToLocal();
     }
 
     // 머지중인 고양이 정지 함수
@@ -494,7 +509,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             mergingCats.Clear();
             DisableAutoMergeUI();
 
-            GoogleSave();
+            SaveToLocal();
         }
         else
         {
@@ -511,9 +526,9 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             startTime = Time.time;
             currentAutoMergeDuration = pausedTimeRemaining;
             EnableAutoMergeUI();
-            StartCoroutine(AutoMergeCoroutine());
+            StartAutoMergeCoroutine();
 
-            GoogleSave();
+            SaveToLocal();
         }
         else
         {
@@ -580,7 +595,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             this.isPaused = false;
             UpdateAutoMergeTimerVisibility(true);
             UpdateTimerDisplay((int)savedData.remainingTime);
-            StartCoroutine(AutoMergeCoroutine());
+            StartAutoMergeCoroutine();
         }
         else
         {
@@ -595,12 +610,11 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         isDataLoaded = true;
     }
 
-    private void GoogleSave()
+    private void SaveToLocal()
     {
-        if (GoogleManager.Instance != null)
-        {
-            GoogleManager.Instance.SaveGameState();
-        }
+        string data = GetSaveData();
+        string key = this.GetType().FullName;
+        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

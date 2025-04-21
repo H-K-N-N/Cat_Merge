@@ -221,7 +221,7 @@ public class BuyCatManager : MonoBehaviour, ISaveable
 
         UpdateAllUI();
 
-        GoogleSave();
+        SaveToLocal();
     }
 
     // 버튼 인덱스 반환 함수
@@ -302,17 +302,14 @@ public class BuyCatManager : MonoBehaviour, ISaveable
         catPurchaseInfos.Clear();
         foreach (var info in savedData.purchaseInfos)
         {
-            //if (info.catGrade < 3)
+            catPurchaseInfos[info.catGrade] = new CatPurchaseInfo
             {
-                catPurchaseInfos[info.catGrade] = new CatPurchaseInfo
-                {
-                    catGrade = info.catGrade,
-                    coinPurchaseCount = info.coinPurchaseCount,
-                    cashPurchaseCount = info.cashPurchaseCount,
-                    coinPrice = info.coinPrice,
-                    cashPrice = info.cashPrice
-                };
-            }
+                catGrade = info.catGrade,
+                coinPurchaseCount = info.coinPurchaseCount,
+                cashPurchaseCount = info.cashPurchaseCount,
+                coinPrice = info.coinPrice,
+                cashPrice = info.cashPrice
+            };
         }
 
         UpdateAllUI();
@@ -320,12 +317,11 @@ public class BuyCatManager : MonoBehaviour, ISaveable
         isDataLoaded = true;
     }
 
-    private void GoogleSave()
+    private void SaveToLocal()
     {
-        if (GoogleManager.Instance != null)
-        {
-            GoogleManager.Instance.SaveGameState();
-        }
+        string data = GetSaveData();
+        string key = this.GetType().FullName;
+        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

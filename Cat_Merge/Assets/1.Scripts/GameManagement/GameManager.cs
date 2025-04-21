@@ -78,7 +78,7 @@ public class GameManager : MonoBehaviour, ISaveable
             {
                 coin = value;
                 UpdateCoinText();
-                GoogleSave();
+                SaveToLocal();
             }
         }
     }
@@ -94,13 +94,16 @@ public class GameManager : MonoBehaviour, ISaveable
             {
                 cash = value;
                 UpdateCashText();
-                GoogleSave();
+                SaveToLocal();
             }
         }
     }
 
     private bool isBackButtonPressed = false;                               // 뒤로가기 버튼이 눌렸는지 여부
     [HideInInspector] public bool isQuiting = false;                        // 종료 여부
+
+    [Header("---[First Game Panel]")]
+    [SerializeField] private GameObject firstGamePanel;                     // 첫 게임 시작 패널
 
 
     private bool isDataLoaded = false;                                      // 데이터 로드 확인
@@ -157,8 +160,19 @@ public class GameManager : MonoBehaviour, ISaveable
     {
         currentCatCount = 0;
         maxCats = 8;
-        coin = 100000000000;
+        coin = 10000000;
         cash = 1000;
+    }
+
+    // 첫 게임 시작 패널을 보여주는 코루틴
+    public IEnumerator ShowFirstGamePanel()
+    {
+        if (firstGamePanel != null)
+        {
+            firstGamePanel.SetActive(true);
+            yield return new WaitForSeconds(2f);
+            firstGamePanel.SetActive(false);
+        }
     }
 
     // 게임 데이터 초기 로드 함수
@@ -203,10 +217,7 @@ public class GameManager : MonoBehaviour, ISaveable
     // 고양이 수 증가 함수
     public void AddCatCount()
     {
-        //if (CurrentCatCount < TotalMaxCats)
-        {
-            CurrentCatCount++;
-        }
+        CurrentCatCount++;
     }
 
     // 고양이 수 감소 함수
@@ -449,45 +460,35 @@ public class GameManager : MonoBehaviour, ISaveable
         isQuiting = true;
         Time.timeScale = 0f;
 
-        if (GoogleManager.Instance != null)
-        {
-            StartCoroutine(SaveAndQuitCoroutine());
-        }
-        else
-        {
-            QuitApplication();
-        }
+        //QuitApplication();
+        StartCoroutine(SaveAndQuitCoroutine());
     }
 
     // 저장 후 종료하는 코루틴
     private IEnumerator SaveAndQuitCoroutine()
     {
-        bool saveCompleted = false;
-        GoogleManager.Instance.SaveGameStateSync((success) => saveCompleted = true);
+        // 게임 일시정지
+        Time.timeScale = 0f;
 
-        // 저장 완료 또는 타임아웃 대기 (최대 3초)
-        float waitTime = 0f;
-        while (!saveCompleted && waitTime < 3.0f)
+        // GoogleManager를 통해 암호화하여 저장
+        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
+        if (GoogleManager.Instance != null)
         {
-            waitTime += 0.1f;
-            yield return new WaitForSecondsRealtime(0.1f);
-        }
+            GoogleManager.Instance.SaveAllSaveables(saveables);
 
-        // 두 번째 저장 시도 (첫 번째가 실패했을 경우를 대비)
-        if (!saveCompleted)
-        {
-            saveCompleted = false;
-
-            GoogleManager.Instance.SaveGameStateSync((success) => saveCompleted = true);
-
-            // 두 번째 저장 완료 대기
-            waitTime = 0f;
-            while (!saveCompleted && waitTime < 3.0f)
+            // 클라우드 저장 시도
+            if (GoogleManager.Instance.isLoggedIn)
             {
-                waitTime += 0.1f;
-                yield return new WaitForSecondsRealtime(0.1f);
+                GoogleManager.Instance.SaveToCloudWithLocalData();
             }
         }
+        else
+        {
+            Debug.LogError("[저장 오류] GoogleManager 인스턴스를 찾을 수 없습니다!");
+        }
+
+        // 1초 대기
+        yield return new WaitForSecondsRealtime(1f);
 
         QuitApplication();
     }
@@ -585,12 +586,11 @@ public class GameManager : MonoBehaviour, ISaveable
         }
     }
 
-    private void GoogleSave()
+    private void SaveToLocal()
     {
-        if (GoogleManager.Instance != null)
-        {
-            GoogleManager.Instance.SaveGameState();
-        }
+        string data = GetSaveData();
+        string key = this.GetType().FullName;
+        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

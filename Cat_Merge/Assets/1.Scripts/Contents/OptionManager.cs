@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using TMPro;
+using System.Linq;
 
 // 옵션 스크립트
 public class OptionManager : MonoBehaviour, ISaveable
@@ -341,11 +342,11 @@ public class OptionManager : MonoBehaviour, ISaveable
         // 볼륨 슬라이더 값 변경 시 저장 이벤트 추가
         bgmSettings.slider.onValueChanged.AddListener(_ => {
             SetSoundToggleImage(true);
-            GoogleSave();
+            SaveToLocal();
         });
         sfxSettings.slider.onValueChanged.AddListener(_ => {
             SetSoundToggleImage(false);
-            GoogleSave();
+            SaveToLocal();
         });
     }
 
@@ -370,7 +371,7 @@ public class OptionManager : MonoBehaviour, ISaveable
         UpdateToggleUI(settings.isOn, isBgm);
         UpdateToggleButtonImage(settings.toggleButtonImage, settings.isOn);
 
-        GoogleSave();
+        SaveToLocal();
     }
 
     // 토글 버튼 이미지 업데이트 함수
@@ -477,7 +478,7 @@ public class OptionManager : MonoBehaviour, ISaveable
         UpdateToggleUI(settings.handle, settings.isOn);
         UpdateToggleButtonImage(settings.toggleButtonImage, settings.isOn);
 
-        GoogleSave();
+        SaveToLocal();
     }
 
     // 토글 UI 업데이트 함수
@@ -642,13 +643,6 @@ public class OptionManager : MonoBehaviour, ISaveable
         informationPanelBackButton.GetComponent<CanvasGroup>().alpha = 0f;
 
         currentActivePanel = -1;
-
-        //// 저장 코루틴이 실행 중이면 중지
-        //if (saveCoroutine != null)
-        //{
-        //    StopCoroutine(saveCoroutine);
-        //    saveCoroutine = null;
-        //}
     }
 
     // 저장 프로세스 시작 함수
@@ -666,29 +660,30 @@ public class OptionManager : MonoBehaviour, ISaveable
     {
         // 저장 패널 활성화
         savePanel.SetActive(true);
-        saveStatusText.text = "저장 중......";
+        saveStatusText.text = "저장 중...";
 
         // 게임 일시정지
         Time.timeScale = 0f;
 
-#if UNITY_EDITOR
-        // 에디터 환경에서는 가상의 저장 프로세스 실행
-        Debug.Log("에디터 환경에서는 저장이 실행되지 않습니다.");
-        yield return new WaitForSecondsRealtime(2f);
-#else
-        // 실제 빌드 환경에서만 GoogleManager를 통해 강제 저장
-        bool saveCompleted = false;
-        //GoogleManager.Instance.SaveGameState();
-        GoogleManager.Instance.SaveGameStateSync((success) => { saveCompleted = true; });
-
-        // 저장 완료 대기
-        float elapsedTime = 0f;
-        while (!saveCompleted && elapsedTime < SAVE_DURATION)
+        // GoogleManager를 통해 암호화하여 저장
+        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
+        if (GoogleManager.Instance != null)
         {
-            elapsedTime += Time.unscaledDeltaTime;
-            yield return null;
+            GoogleManager.Instance.SaveAllSaveables(saveables);
+
+            // 클라우드 저장 시도
+            if (GoogleManager.Instance.isLoggedIn)
+            {
+                GoogleManager.Instance.SaveGameStateSyncImmediate();
+            }
         }
-#endif
+        else
+        {
+            Debug.LogError("[저장 오류] GoogleManager 인스턴스를 찾을 수 없습니다!");
+        }
+
+        // 2초 대기
+        yield return new WaitForSecondsRealtime(2f);
 
         // 저장 상태 텍스트 업데이트
         saveStatusText.text = "저장 완료!!";
@@ -1046,12 +1041,11 @@ public class OptionManager : MonoBehaviour, ISaveable
         isDataLoaded = true;
     }
 
-    private void GoogleSave()
+    private void SaveToLocal()
     {
-        if (GoogleManager.Instance != null)
-        {
-            GoogleManager.Instance.SaveGameState();
-        }
+        string data = GetSaveData();
+        string key = this.GetType().FullName;
+        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

@@ -20,8 +20,6 @@ public class BattleManager : MonoBehaviour, ISaveable
     [SerializeField] private Transform bossUIParent;            // 보스를 배치할 부모 Transform (UI Panel 등)
     [SerializeField] private Slider respawnSlider;              // 보스 소환까지 남은 시간을 표시할 Slider UI
 
-
-
     private const float DEFAULT_SPAWN_INTERVAL = 300f;          // 보스 등장 주기 (300f)
     private float spawnInterval;                                // 보스 등장 주기
     private Coroutine respawnSliderCoroutine;                   // Slider 코루틴
@@ -39,7 +37,7 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     private GameObject currentBoss;                             // 현재 보스
     [HideInInspector] public BossHitbox bossHitbox;             // 보스 히트박스
-    public bool isBattleActive;                                // 전투 활성화 여부
+    public bool isBattleActive;                                 // 전투 활성화 여부
     public bool IsBattleActive => isBattleActive;
 
     private HashSet<int> clearedStages = new HashSet<int>();    // 클리어한 스테이지 저장
@@ -57,19 +55,19 @@ public class BattleManager : MonoBehaviour, ISaveable
 
 
     [Header("---[Boss Result UI]")]
-    [SerializeField] private GameObject battleResultPanel;              // 전투 결과 패널
-    [SerializeField] private GameObject winPanel;                       // 승리 UI 패널
-    [SerializeField] private GameObject losePanel;                      // 패배 UI 패널
-    [SerializeField] private Button battleResultCloseButton;            // 전투 결과 패널 닫기 버튼
-    [SerializeField] private TextMeshProUGUI battleResultCountdownText; // 전투 결과 패널 카운트다운 Text
-    private Coroutine resultPanelCoroutine;                             // 결과 패널 자동 닫기 코루틴
+    [SerializeField] private GameObject battleResultPanel;                  // 전투 결과 패널
+    [SerializeField] private GameObject winPanel;                           // 승리 UI 패널
+    [SerializeField] private GameObject losePanel;                          // 패배 UI 패널
+    [SerializeField] private Button battleResultCloseButton;                // 전투 결과 패널 닫기 버튼
+    [SerializeField] private TextMeshProUGUI battleResultCountdownText;     // 전투 결과 패널 카운트다운 Text
+    private Coroutine resultPanelCoroutine;                                 // 결과 패널 자동 닫기 코루틴
 
-    [SerializeField] private GameObject rewardSlotPrefab;          // Reward Slot 프리팹
-    [SerializeField] private Transform winRewardPanel;             // Win Panel의 Reward Panel
-    [SerializeField] private Transform loseRewardPanel;            // Lose Panel의 Reward Panel
-    private Sprite cashSprite;                                     // 캐시 이미지
-    private Sprite coinSprite;                                     // 코인 이미지
-    private List<GameObject> activeRewardSlots = new List<GameObject>();  // 현재 활성화된 보상 슬롯들
+    [SerializeField] private GameObject rewardSlotPrefab;                   // Reward Slot 프리팹
+    [SerializeField] private Transform winRewardPanel;                      // Win Panel의 Reward Panel
+    [SerializeField] private Transform loseRewardPanel;                     // Lose Panel의 Reward Panel
+    private Sprite cashSprite;                                              // 캐시 이미지
+    private Sprite coinSprite;                                              // 코인 이미지
+    private List<GameObject> activeRewardSlots = new List<GameObject>();    // 현재 활성화된 보상 슬롯들
 
     [Header("---[Boss AutoRetry UI]")]
     [SerializeField] private Button autoRetryPanelButton;               // 하위 단계 자동 도전 패널 버튼
@@ -458,11 +456,8 @@ public class BattleManager : MonoBehaviour, ISaveable
         CatData[] allCats = FindObjectsOfType<CatData>();
         foreach (var cat in allCats)
         {
-            AnimatorManager anim = cat.GetComponent<AnimatorManager>();
-            if (anim != null)
-            {
-                anim.ChangeState(CatState.isBattle);
-            }
+            cat.SetDragState(false);                // 드래그 상태 해제하고
+            cat.ChangeCatState(CatState.isBattle);  // 전투 상태로 변경
         }
 
         // 전투 시작시 여러 외부 기능들 비활성화
@@ -790,10 +785,9 @@ public class BattleManager : MonoBehaviour, ISaveable
             RectTransform catRectTransform = cat.GetComponent<RectTransform>();
             Vector3 catPosition = catRectTransform.anchoredPosition;
             DragAndDropManager dragManager = cat.GetComponent<DragAndDropManager>();
-            AnimatorManager anim = cat.GetComponent<AnimatorManager>();
 
             // 드래그 중이 아닐 때만 애니메이션 상태 변경
-            if (dragManager != null && !dragManager.isDragging && anim != null && !cat.isStuned)
+            if (dragManager != null && !dragManager.isDragging && !cat.isStuned)
             {
                 if (bossHitbox.IsAtBoundary(catPosition))
                 {
@@ -802,15 +796,15 @@ public class BattleManager : MonoBehaviour, ISaveable
                     TakeBossDamage(damage);
 
                     // 공격 애니메이션으로 변경
-                    anim.ChangeState(CatState.isAttack);
+                    cat.ChangeCatState(CatState.isAttack);
 
                     // 공격 후 전투 대기 상태로 돌아가는 코루틴 시작
                     StartCoroutine(ReturnToBattleStateCat(cat));
                 }
                 else
                 {
-                    // 히트박스 경계에 없는 경우 전투 대기 상태로
-                    anim.ChangeState(CatState.isBattle);
+                    // 히트박스 경계에 없는 경우 전투 대기 애니메이션으로 변경
+                    cat.ChangeCatState(CatState.isBattle);
                 }
             }
         }
@@ -826,14 +820,10 @@ public class BattleManager : MonoBehaviour, ISaveable
         if (isBattleActive && cat != null && cat.gameObject.activeSelf && !cat.isStuned)
         {
             DragAndDropManager dragManager = cat.GetComponent<DragAndDropManager>();
-            AnimatorManager anim = cat.GetComponent<AnimatorManager>();
-            if (dragManager != null && !dragManager.isDragging && anim != null)
+            if (dragManager != null && !dragManager.isDragging)
             {
-                if (anim != null)
-                {
-                    anim.ChangeState(CatState.isAttack);
-                }
-
+                // 애니메이션 상태 변경
+                cat.ChangeCatState(CatState.isBattle);
             }
         }
     }
@@ -954,7 +944,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         UpdateToggleButtonImage(autoRetryButtonImage, isAutoRetryEnabled);
         UpdateAutoRetryPanelButtonColor(isAutoRetryEnabled);
 
-        GoogleSave();
+        SaveToLocal();
     }
 
     // 자동 재도전 UI 업데이트
@@ -1071,7 +1061,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         bossHitbox = null;
         battleHPUI.SetActive(false);
 
-        GoogleSave();
+        SaveToLocal();
 
         // 전투 종료시 비활성화했던 기능들 다시 기존 상태로 복구
         SetEndFunctions();
@@ -1088,11 +1078,8 @@ public class BattleManager : MonoBehaviour, ISaveable
         {
             cat.HealCatHP();
 
-            AnimatorManager anim = cat.GetComponent<AnimatorManager>();
-            if (anim != null)
-            {
-                anim.ChangeState(CatState.isIdle);
-            }
+            // 애니메이션 상태 변경
+            cat.ChangeCatState(CatState.isIdle);
         }
 
         AutoMoveManager.Instance.EndBattleAutoMoveState();
@@ -1312,12 +1299,11 @@ public class BattleManager : MonoBehaviour, ISaveable
         isDataLoaded = true;
     }
 
-    private void GoogleSave()
+    private void SaveToLocal()
     {
-        if (GoogleManager.Instance != null)
-        {
-            GoogleManager.Instance.SaveGameState();
-        }
+        string data = GetSaveData();
+        string key = this.GetType().FullName;
+        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

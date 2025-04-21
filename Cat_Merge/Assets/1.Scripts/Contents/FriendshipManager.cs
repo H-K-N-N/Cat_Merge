@@ -316,7 +316,7 @@ public class FriendshipManager : MonoBehaviour, ISaveable
 
         UpdateFriendshipUI(catGrade);
 
-        GoogleSave();
+        SaveToLocal();
     }
 
     // 애정도 UI 업데이트 함수
@@ -607,7 +607,7 @@ public class FriendshipManager : MonoBehaviour, ISaveable
             }
         }
 
-        GoogleSave();
+        SaveToLocal();
     }
 
     // 공격력 1~5% 증가 효과 패시브 함수
@@ -748,7 +748,7 @@ public class FriendshipManager : MonoBehaviour, ISaveable
 
         UpdateFriendshipUI(catGrade);
 
-        GoogleSave();
+        SaveToLocal();
     }
 
     // 다음 레벨 필요 경험치 조회 함수
@@ -917,12 +917,11 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         isDataLoaded = true;
     }
 
-    private void GoogleSave()
+    private void SaveToLocal()
     {
-        if (GoogleManager.Instance != null)
-        {
-            GoogleManager.Instance.SaveGameState();
-        }
+        string data = GetSaveData();
+        string key = this.GetType().FullName;
+        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

@@ -7,10 +7,12 @@ public class LoadingScreen : MonoBehaviour
 {
 
 
+
+
     public static LoadingScreen Instance { get; private set; }
 
-    [SerializeField] private RectTransform circleImage;     // 중앙 원형 이미지
-    [SerializeField] private RectTransform[] borderImages;  // 8개의 테두리 이미지
+    [SerializeField] private RectTransform circleImage;         // 중앙 원형 이미지
+    [SerializeField] private RectTransform[] borderImages;      // 8개의 테두리 이미지
 
     private Canvas loadingScreenCanvas;
     private CanvasScaler canvasScaler;
@@ -19,8 +21,8 @@ public class LoadingScreen : MonoBehaviour
     private Vector2 maxMaskSize;
     private Vector2 minMaskSize = Vector2.zero;
 
-    // 테두리 이미지들의 초기 위치 오프셋 (시계방향으로 좌상단부터)
-    private Vector2[] borderOffsets = new Vector2[8];
+    
+    private Vector2[] borderOffsets = new Vector2[8];           // 테두리 이미지들의 초기 위치 오프셋 (시계방향으로 좌상단부터)
 
 
 
@@ -51,7 +53,7 @@ public class LoadingScreen : MonoBehaviour
         canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         canvasScaler.matchWidthOrHeight = 1f;
 
-        maxMaskSize = new Vector2(10000, 10000);
+        maxMaskSize = new Vector2(20000, 20000);
 
         // 중앙 원형 이미지 설정
         circleImage.anchorMin = new Vector2(0.5f, 0.5f);
@@ -214,7 +216,7 @@ public class LoadingScreen : MonoBehaviour
                 currentAnimation = StartCoroutine(ExitAnimationCoroutine());
             }
 
-            if (!GoogleManager.Instance.isDeletingData)
+            if (!GoogleManager.Instance.isDeleting)
             {
                 Time.timeScale = show ? 0f : 1f;
             }

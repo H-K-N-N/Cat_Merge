@@ -141,8 +141,8 @@ public class QuestManager : MonoBehaviour, ISaveable
     public int WeeklySpecialRewardCount { get => weeklySpecialRewardCount; set => weeklySpecialRewardCount = value; }
 
 
-    private DateTime lastDailyReset;
-    private DateTime lastWeeklyReset;
+    private long lastDailyReset;                // 일일 퀘스트 리셋을 위한 시간 변수
+    private long lastWeeklyReset;               // 주간 퀘스트 리셋을 위한 시간 변수
 
     private bool isDataLoaded = false;          // 데이터 로드 확인
 
@@ -168,8 +168,8 @@ public class QuestManager : MonoBehaviour, ISaveable
         // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
         if (!isDataLoaded)
         {
-            lastDailyReset = DateTime.Now;
-            lastWeeklyReset = DateTime.Now;
+            lastDailyReset = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            lastWeeklyReset = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
         InitializeQuestManager();
@@ -181,7 +181,8 @@ public class QuestManager : MonoBehaviour, ISaveable
     {
         AddPlayTimeCount();
 
-        if (Time.frameCount % 60 == 0)
+        // 매 초마다 체크 (60fps 대신 1초 간격으로 변경)
+        if (Time.time % 1 < Time.deltaTime)
         {
             CheckAndResetQuests();
         }
@@ -1220,14 +1221,111 @@ public class QuestManager : MonoBehaviour, ISaveable
     #endregion
 
 
+
+    #region Time Reset System
+
+    private void CheckAndResetQuests()
+    {
+        long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        DateTimeOffset currentUtc = DateTimeOffset.FromUnixTimeSeconds(currentTime);
+        DateTimeOffset lastDailyResetTime = DateTimeOffset.FromUnixTimeSeconds(lastDailyReset);
+        DateTimeOffset lastWeeklyResetTime = DateTimeOffset.FromUnixTimeSeconds(lastWeeklyReset);
+
+        // 일일 퀘스트 초기화 체크 (UTC 기준 00:00)
+        if (currentUtc.Date > lastDailyResetTime.Date)
+        {
+            // 자정(00:00)이 지났는지 확인
+            if (currentUtc.Hour == 0)
+            {
+                ResetDailyQuests();
+                lastDailyReset = currentTime;
+                SaveToLocal();
+            }
+        }
+
+        // 주간 퀘스트 초기화 체크 (UTC 기준 목요일 00:00)
+        if (currentUtc.DayOfWeek == DayOfWeek.Thursday && currentUtc.Hour == 0)
+        {
+            // 이번 주 목요일 자정을 구함
+            DateTimeOffset thisThursday = currentUtc.Date;
+
+            // 마지막 초기화가 이번 주 목요일 이전인 경우에만 초기화
+            if (lastWeeklyResetTime.Date < thisThursday)
+            {
+                ResetWeeklyQuests();
+                lastWeeklyReset = currentTime;
+                SaveToLocal();
+            }
+        }
+    }
+
+    // 일일 퀘스트 초기화 함수
+    private void ResetDailyQuests()
+    {
+        // 일일 퀘스트 초기화
+        foreach (var quest in dailyQuestDictionary)
+        {
+            quest.Value.questData.currentCount = 0;
+            quest.Value.questData.isComplete = false;
+            quest.Value.rewardText.text = "받기";
+            UpdateQuestUI(quest.Key, QuestMenuType.Daily);
+        }
+
+        // 일일 특별 보상 초기화
+        isDailySpecialRewardQuestComplete = false;
+        dailySpecialRewardCount = 0;
+        UpdateDailySpecialRewardUI();
+
+        // 카운터 초기화
+        ResetPlayTimeCount();
+        ResetMergeCount();
+        ResetSpawnCount();
+        ResetPurchaseCatsCount();
+        ResetBattleCount();
+
+        // UI 업데이트
+        UpdateAllDailyRewardButtonState();
+        UpdateNewImageStatus();
+
+        SaveToLocal();
+    }
+
+    // 주간퀘스트 초기화 함수
+    private void ResetWeeklyQuests()
+    {
+        // 주간 퀘스트 초기화
+        foreach (var quest in weeklyQuestDictionary)
+        {
+            quest.Value.questData.currentCount = 0;
+            quest.Value.questData.isComplete = false;
+            quest.Value.rewardText.text = "받기";
+            UpdateQuestUI(quest.Key, QuestMenuType.Weekly);
+        }
+
+        // 주간 특별 보상 초기화
+        isWeeklySpecialRewardQuestComplete = false;
+        weeklySpecialRewardCount = 0;
+        UpdateWeeklySpecialRewardUI();
+
+        // UI 업데이트
+        UpdateAllWeeklyRewardButtonState();
+        UpdateNewImageStatus();
+
+        SaveToLocal();
+    }
+
+    #endregion
+
+
+
     #region Save System
 
     [Serializable]
     private class SaveData
     {
-        // 리셋 시간
-        public string lastDailyReset;    // 마지막 일일 퀘스트 리셋 시간
-        public string lastWeeklyReset;   // 마지막 주간 퀘스트 리셋 시간
+        // 리셋 시간 (Unix timestamp)
+        public long lastDailyReset;     // 마지막 일일 퀘스트 리셋 시간
+        public long lastWeeklyReset;    // 마지막 주간 퀘스트 리셋 시간
 
         // 퀘스트 카운터
         public float playTimeCount;
@@ -1267,8 +1365,8 @@ public class QuestManager : MonoBehaviour, ISaveable
         SaveData data = new SaveData
         {
             // 리셋 시간
-            lastDailyReset = lastDailyReset.ToString(),
-            lastWeeklyReset = lastWeeklyReset.ToString(),
+            lastDailyReset = this.lastDailyReset,
+            lastWeeklyReset = this.lastWeeklyReset,
 
             // 퀘스트 카운터
             playTimeCount = this.playTimeCount,
@@ -1328,22 +1426,16 @@ public class QuestManager : MonoBehaviour, ISaveable
         if (string.IsNullOrEmpty(data))
         {
             // 초기 데이터 설정
-            lastDailyReset = DateTime.Now;
-            lastWeeklyReset = DateTime.Now;
+            lastDailyReset = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            lastWeeklyReset = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             return;
         }
 
         SaveData savedData = JsonUtility.FromJson<SaveData>(data);
 
         // 리셋 시간 복원
-        if (DateTime.TryParse(savedData.lastDailyReset, out DateTime dailyReset))
-        {
-            lastDailyReset = dailyReset;
-        }
-        if (DateTime.TryParse(savedData.lastWeeklyReset, out DateTime weeklyReset))
-        {
-            lastWeeklyReset = weeklyReset;
-        }
+        lastDailyReset = savedData.lastDailyReset;
+        lastWeeklyReset = savedData.lastWeeklyReset;
 
         // 퀘스트 카운터 복원
         playTimeCount = savedData.playTimeCount;
@@ -1361,7 +1453,8 @@ public class QuestManager : MonoBehaviour, ISaveable
         // 퀘스트 데이터 복원
         LoadQuestData(savedData);
 
-        // UI 업데이트
+        CheckAndResetQuests();
+
         UpdateAllUI();
 
         isDataLoaded = true;
@@ -1432,95 +1525,6 @@ public class QuestManager : MonoBehaviour, ISaveable
         string data = GetSaveData();
         string key = this.GetType().FullName;
         GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
-    }
-
-    #endregion
-
-
-    #region Time Reset System
-
-    private void CheckAndResetQuests()
-    {
-        CheckDailyReset();
-        CheckWeeklyReset();
-    }
-
-    private void CheckDailyReset()
-    {
-        DateTime now = DateTime.Now;
-
-        if (now.Date > lastDailyReset.Date)
-        {
-            ResetDailyQuests();
-            lastDailyReset = now;
-            SaveToLocal();
-        }
-    }
-
-    private void CheckWeeklyReset()
-    {
-        DateTime now = DateTime.Now;
-
-        // 현재 요일이 목요일(4)이고, 마지막 리셋 시간이 오늘보다 이전인 경우
-        if (now.DayOfWeek == DayOfWeek.Thursday && now.Date > lastWeeklyReset.Date)
-        {
-            ResetWeeklyQuests();
-            lastWeeklyReset = now;
-            SaveToLocal();
-        }
-    }
-
-    private void ResetDailyQuests()
-    {
-        // 일일 퀘스트 초기화
-        foreach (var quest in dailyQuestDictionary)
-        {
-            quest.Value.questData.currentCount = 0;
-            quest.Value.questData.isComplete = false;
-            quest.Value.rewardText.text = "받기";
-            UpdateQuestUI(quest.Key, QuestMenuType.Daily);
-        }
-
-        // 일일 특별 보상 초기화
-        isDailySpecialRewardQuestComplete = false;
-        dailySpecialRewardCount = 0;
-        UpdateDailySpecialRewardUI();
-
-        // 카운터 초기화
-        ResetPlayTimeCount();
-        ResetMergeCount();
-        ResetSpawnCount();
-        ResetPurchaseCatsCount();
-        ResetBattleCount();
-
-        // UI 업데이트
-        UpdateAllDailyRewardButtonState();
-        UpdateNewImageStatus();
-
-        SaveToLocal();
-    }
-
-    private void ResetWeeklyQuests()
-    {
-        // 주간 퀘스트 초기화
-        foreach (var quest in weeklyQuestDictionary)
-        {
-            quest.Value.questData.currentCount = 0;
-            quest.Value.questData.isComplete = false;
-            quest.Value.rewardText.text = "받기";
-            UpdateQuestUI(quest.Key, QuestMenuType.Weekly);
-        }
-
-        // 주간 특별 보상 초기화
-        isWeeklySpecialRewardQuestComplete = false;
-        weeklySpecialRewardCount = 0;
-        UpdateWeeklySpecialRewardUI();
-
-        // UI 업데이트
-        UpdateAllWeeklyRewardButtonState();
-        UpdateNewImageStatus();
-
-        SaveToLocal();
     }
 
     #endregion

@@ -9,7 +9,7 @@ public class GoogleAdsManager : MonoBehaviour
 
     #region Variables
 
-    // These ad units are configured to always serve test ads.
+    // 테스트 광고를 위한 광고 단위 ID 설정
 #if UNITY_ANDROID
     private string _adUnitId = "ca-app-pub-3940256099942544/5354046379";
 #elif UNITY_IPHONE
@@ -27,7 +27,7 @@ public class GoogleAdsManager : MonoBehaviour
 
     public void Awake()
     {
-        // Initialize the Google Mobile Ads SDK.
+        // Google Mobile Ads SDK 초기화
         MobileAds.Initialize((InitializationStatus initStatus) =>
         {
             // This callback is called once the MobileAds SDK is initialized.
@@ -46,7 +46,7 @@ public class GoogleAdsManager : MonoBehaviour
 
     public void LoadRewardedInterstitialAd()
     {
-        // Clean up the old ad before loading a new one.
+        // 새로운 광고를 로드하기 전에 이전 광고 정리
         if (rewardedInterstitialAd != null)
         {
             rewardedInterstitialAd.Destroy();

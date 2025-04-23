@@ -54,7 +54,7 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         if (catDataComponent != null)
         {
             catDataComponent.StopAllMovement();
-            catDataComponent.SetDragState(true);
+            catDataComponent.SetDragState(isDragging);
         }
 
         // 드래그 시작 위치 오프셋 계산
@@ -81,7 +81,7 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         CatData catDataComponent = GetComponent<CatData>();
         if (catDataComponent != null)
         {
-            catDataComponent.SetDragState(false);
+            catDataComponent.SetDragState(isDragging);
         }
     }
 
@@ -136,7 +136,13 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         CatData catDataComponent = GetComponent<CatData>();
         if (catDataComponent != null)
         {
-            catDataComponent.SetDragState(false);
+            catDataComponent.SetDragState(isDragging);
+
+            // 전투 상태가 아닐 때는 자동 이동 다시 활성화
+            if (!BattleManager.Instance.IsBattleActive)
+            {
+                catDataComponent.SetAutoMoveState(true);
+            }
         }
 
         if (BattleManager.Instance.IsBattleActive)

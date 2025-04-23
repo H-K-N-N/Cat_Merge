@@ -40,7 +40,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     private bool isMoveAnimating = false;               // 이동 애니메이션 진행 여부
     private Coroutine autoMoveCoroutine;                // 자동 이동 코루틴
     private Coroutine currentMoveCoroutine;             // 현재 진행 중인 이동 코루틴
-    private const float CAT_MOVE_SPEED = 100f;          // 기본 고양이 이동 속도 (단위:픽셀/초)
+    private const float CAT_MOVE_SPEED = 100f;          // 기본 고양이 이동 속도
     private const float CAT_BATTLE_MOVE_SPEED = 400f;   // 전투 중 고양이 이동 속도
 
     [Header("Coin Collection")]
@@ -558,12 +558,13 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
         // 이동 속도에 따른 이동 시간 계산
         float moveSpeed = CAT_MOVE_SPEED;
+
+        // 전투 중일 때만 거리 기반 이동 시간 계산
         if (BattleManager.Instance.isBattleActive)
         {
             moveSpeed = CAT_BATTLE_MOVE_SPEED;
         }
 
-        // 거리를 속도로 나눠 시간 계산 (최소 0.1초, 최대 5초로 제한)
         float duration = Mathf.Clamp(distance / moveSpeed, 0.1f, 5f);
 
         // 이동할 때는 무조건 walk 상태로 변경 (최우선)
@@ -572,11 +573,10 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             ChangeCatState(CatState.isWalk);
         }
 
-        // 고양이의 이동 방향에 따라 이미지만 좌우반전
+        // 고양이의 이동 방향에 따라 이미지 좌우반전
         Vector3 moveDirection = targetPosition - startPosition;
         if (moveDirection.x != 0)
         {
-            // 이동 방향에 따라 이미지의 좌우 반전만 적용
             bool isMovingRight = moveDirection.x > 0;
 
             // 이미지 오브젝트만 뒤집기 (자식 UI 요소들에 영향 없음)
@@ -594,21 +594,14 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
 
         bool wasMoving = false;
+        bool wasBattleActive = BattleManager.Instance.isBattleActive;
         while (elapsed < duration)
         {
             wasMoving = true;
 
-            // 전투가 종료되었거나 드래그 중이면 이동 중단
-            if (!BattleManager.Instance.isBattleActive || GetComponent<DragAndDropManager>().isDragging)
+            // 드래그 중이거나 전투 상태가 변경되면 이동 중단
+            if (GetComponent<DragAndDropManager>().isDragging || wasBattleActive != BattleManager.Instance.isBattleActive)
             {
-                // 전투가 종료된 경우 현재 위치에서 멈춤
-                if (!BattleManager.Instance.isBattleActive)
-                {
-                    isMoveAnimating = false;
-                    ChangeCatState(CatState.isIdle);
-                    currentMoveCoroutine = null;
-                    yield break;
-                }
                 break;
             }
 
@@ -624,11 +617,12 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             yield return null;
         }
 
-        // 전투가 진행중이고 목적지까지 도달했을 때만 최종 위치로 설정
-        if (BattleManager.Instance.isBattleActive && wasMoving)
+        // 이동이 완료되고 드래그 중이 아닐 때만 최종 위치 설정
+        if (wasMoving && !GetComponent<DragAndDropManager>().isDragging && wasBattleActive == BattleManager.Instance.isBattleActive)
         {
             rectTransform.anchoredPosition = targetPosition;
         }
+
         isMoveAnimating = false;
 
         if (!GetComponent<DragAndDropManager>().isDragging)

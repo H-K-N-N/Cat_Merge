@@ -474,7 +474,11 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     {
         while (true)
         {
-            yield return new WaitForSeconds(AutoMoveManager.Instance.AutoMoveTime());
+            // 기본 이동 시간에 0.8~1.2 사이의 랜덤 계수를 곱함
+            float randomMultiplier = UnityEngine.Random.Range(0.8f, 1.2f);
+            float moveTime = AutoMoveManager.Instance.AutoMoveTime() * randomMultiplier;
+
+            yield return new WaitForSeconds(moveTime);
 
             if (!isMoveAnimating && (catDragAndDrop == null || !catDragAndDrop.isDragging))
             {
@@ -700,7 +704,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
             // 수집 시간 업데이트
             float baseCollectingTime = ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value;
-            float newCollectingTime = baseCollectingTime - catData.PassiveCoinCollectSpeed;
+            float newCollectingTime = (baseCollectingTime - catData.PassiveCoinCollectSpeed) * UnityEngine.Random.Range(0.8f, 1.2f);
 
             if (delay == null || !Mathf.Approximately(currentDelayTime, newCollectingTime))
             {

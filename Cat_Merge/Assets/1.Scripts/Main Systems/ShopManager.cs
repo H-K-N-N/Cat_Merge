@@ -318,16 +318,7 @@ public class ShopManager : MonoBehaviour, ISaveable
         isWaitingForAd = true;
         cashForAdRewardButton.interactable = false;
 
-        //GetComponent<GoogleAdsManager>().ShowRewardedCashForAd();
-        var adsManager = GetComponent<GoogleAdsManager>();
-        if (adsManager != null)
-        {
-            adsManager.ShowRewardedCashForAd();
-        }
-        else
-        {
-            ResetAdState();
-        }
+        GetComponent<GoogleAdsManager>().ShowRewardedCashForAd();
     }
 
     // CashForAd 광고 시청 완료 시 실행되는 함수
@@ -463,16 +454,7 @@ public class ShopManager : MonoBehaviour, ISaveable
         isWaitingForAd = true;
         doubleCoinForAdButton.interactable = false;
 
-        //GetComponent<GoogleAdsManager>().ShowRewardedDoubleCoinForAd();
-        var adsManager = GetComponent<GoogleAdsManager>();
-        if (adsManager != null)
-        {
-            adsManager.ShowRewardedDoubleCoinForAd();
-        }
-        else
-        {
-            ResetAdState();
-        }
+        GetComponent<GoogleAdsManager>().ShowRewardedDoubleCoinForAd();
     }
 
     // DoubleCoinForAd 광고 시청 완료 시 실행되는 함수

@@ -115,24 +115,25 @@ public class QuestManager : MonoBehaviour, ISaveable
     // ======================================================================================================================
     // [퀘스트 변수 모음]
 
-    private float playTimeCount;                                        // 플레이타임 카운트
-    public float PlayTimeCount { get => playTimeCount; set => playTimeCount = value; }
+    // 일일 퀘스트 카운터
+    private float dailyPlayTimeCount;
+    private int dailyMergeCount;
+    private int dailySpawnCount;
+    private int dailyPurchaseCount;
+    private int dailyBattleCount;
 
-    private int mergeCount;                                             // 고양이 머지 횟수
-    public int MergeCount { get => mergeCount; set => mergeCount = value; }
+    // 주간 퀘스트 카운터
+    private float weeklyPlayTimeCount;
+    private int weeklyMergeCount;
+    private int weeklySpawnCount;
+    private int weeklyPurchaseCount;
 
-    private int spawnCount;                                             // 고양이 스폰 횟수(먹이 준 횟수)
-    public int SpawnCount { get => spawnCount; set => spawnCount = value; }
+    // 반복 퀘스트 카운터 (누적)
+    private int totalMergeCount;
+    private int totalSpawnCount;
+    private int totalPurchaseCount;
 
-    private int purchaseCatsCount;                                      // 고양이 구매 횟수
-    public int PurchaseCatsCount { get => purchaseCatsCount; set => purchaseCatsCount = value; }
-
-    private int battleCount;                                            // 전투 횟수
-    public int BattleCount { get => battleCount; set => battleCount = value; }
-
-    private int stageCount;                                             // 스테이지 단계
-    public int StageCount { get => BattleManager.Instance.BossStage; }
-
+    public int StageCount { get => BattleManager.Instance.BossStage; }  // 스테이지 단계
 
     private int dailySpecialRewardCount;                                // Daily 최종 퀘스트 진행 횟수
     public int DailySpecialRewardCount { get => dailySpecialRewardCount; set => dailySpecialRewardCount = value; }
@@ -165,6 +166,10 @@ public class QuestManager : MonoBehaviour, ISaveable
 
     private void Start()
     {
+#if UNITY_EDITOR
+        InitializeDebugControls();
+#endif
+
         // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
         if (!isDataLoaded)
         {
@@ -173,15 +178,47 @@ public class QuestManager : MonoBehaviour, ISaveable
         }
 
         InitializeQuestManager();
-        CheckAndResetQuests();
+
+        CheckAndResetQuestsOnStart();
+
         UpdateAllUI();
+    }
+
+    // 앱 시작 시 시간 체크 및 초기화
+    private void CheckAndResetQuestsOnStart()
+    {
+        DateTimeOffset currentUtc = DateTimeOffset.UtcNow;
+        DateTimeOffset lastDailyResetTime = DateTimeOffset.FromUnixTimeSeconds(lastDailyReset);
+        DateTimeOffset lastWeeklyResetTime = DateTimeOffset.FromUnixTimeSeconds(lastWeeklyReset);
+
+        // 마지막 일일 리셋 이후 지난 날짜 수 계산
+        int daysSinceLastDaily = (currentUtc.Date - lastDailyResetTime.Date).Days;
+
+        // 하루 이상 지났다면 일일 퀘스트 초기화
+        if (daysSinceLastDaily > 0)
+        {
+            Debug.Log($"[Quest] 일일 퀘스트 초기화 - 마지막 리셋: {lastDailyResetTime}, 현재: {currentUtc}, 경과일: {daysSinceLastDaily}");
+            ResetDailyQuests();
+            lastDailyReset = currentUtc.ToUnixTimeSeconds();
+            SaveToLocal();
+        }
+
+        // 주간 퀘스트 체크
+        DateTimeOffset nextThursday = GetNextThursday(lastWeeklyResetTime);
+        if (currentUtc >= nextThursday)
+        {
+            Debug.Log($"[Quest] 주간 퀘스트 초기화 - 마지막 리셋: {lastWeeklyResetTime}, 현재: {currentUtc}, 다음 목요일: {nextThursday}");
+            ResetWeeklyQuests();
+            lastWeeklyReset = currentUtc.ToUnixTimeSeconds();
+            SaveToLocal();
+        }
     }
 
     private void Update()
     {
         AddPlayTimeCount();
 
-        // 매 초마다 체크 (60fps 대신 1초 간격으로 변경)
+        // 매 초마다 체크
         if (Time.time % 1 < Time.deltaTime)
         {
             CheckAndResetQuests();
@@ -631,10 +668,12 @@ public class QuestManager : MonoBehaviour, ISaveable
     // 플레이타임 증가 함수
     public void AddPlayTimeCount()
     {
-        PlayTimeCount += Time.deltaTime;
+        float deltaTime = Time.deltaTime;
+        dailyPlayTimeCount += deltaTime;
+        weeklyPlayTimeCount += deltaTime;
 
-        dailyQuestDictionary["플레이 시간"].questData.currentCount = (int)PlayTimeCount;
-        weeklyQuestDictionary["플레이 시간"].questData.currentCount = (int)PlayTimeCount;
+        dailyQuestDictionary["플레이 시간"].questData.currentCount = (int)dailyPlayTimeCount;
+        weeklyQuestDictionary["플레이 시간"].questData.currentCount = (int)weeklyPlayTimeCount;
 
         UpdateQuestProgress("플레이 시간");
     }
@@ -642,7 +681,8 @@ public class QuestManager : MonoBehaviour, ISaveable
     // 플레이타임 리셋 함수
     public void ResetPlayTimeCount()
     {
-        PlayTimeCount = 0;
+        dailyPlayTimeCount = 0;
+        weeklyPlayTimeCount = 0;
     }
 
     #endregion
@@ -653,11 +693,13 @@ public class QuestManager : MonoBehaviour, ISaveable
     // 고양이 머지 증가 함수
     public void AddMergeCount()
     {
-        MergeCount++;
+        dailyMergeCount++;
+        weeklyMergeCount++;
+        totalMergeCount++;
 
-        dailyQuestDictionary["고양이 머지 횟수"].questData.currentCount = MergeCount;
-        weeklyQuestDictionary["고양이 머지 횟수"].questData.currentCount = MergeCount;
-        repeatQuestDictionary["고양이 머지 횟수"].questData.currentCount = MergeCount;
+        dailyQuestDictionary["고양이 머지 횟수"].questData.currentCount = dailyMergeCount;
+        weeklyQuestDictionary["고양이 머지 횟수"].questData.currentCount = weeklyMergeCount;
+        repeatQuestDictionary["고양이 머지 횟수"].questData.currentCount = totalMergeCount;
 
         UpdateQuestProgress("고양이 머지 횟수");
     }
@@ -665,7 +707,9 @@ public class QuestManager : MonoBehaviour, ISaveable
     // 고양이 머지 리셋 함수
     public void ResetMergeCount()
     {
-        MergeCount = 0;
+        dailyMergeCount = 0;
+        weeklyMergeCount = 0;
+        totalMergeCount = 0;
     }
 
     #endregion
@@ -676,11 +720,13 @@ public class QuestManager : MonoBehaviour, ISaveable
     // 고양이 스폰 증가 함수
     public void AddSpawnCount()
     {
-        SpawnCount++;
+        dailySpawnCount++;
+        weeklySpawnCount++;
+        totalSpawnCount++;
 
-        dailyQuestDictionary["고양이 소환 횟수"].questData.currentCount = SpawnCount;
-        weeklyQuestDictionary["고양이 소환 횟수"].questData.currentCount = SpawnCount;
-        repeatQuestDictionary["고양이 소환 횟수"].questData.currentCount = SpawnCount;
+        dailyQuestDictionary["고양이 소환 횟수"].questData.currentCount = dailySpawnCount;
+        weeklyQuestDictionary["고양이 소환 횟수"].questData.currentCount = weeklySpawnCount;
+        repeatQuestDictionary["고양이 소환 횟수"].questData.currentCount = totalSpawnCount;
 
         UpdateQuestProgress("고양이 소환 횟수");
     }
@@ -688,7 +734,9 @@ public class QuestManager : MonoBehaviour, ISaveable
     // 고양이 스폰 리셋 함수
     public void ResetSpawnCount()
     {
-        SpawnCount = 0;
+        dailySpawnCount = 0;
+        weeklySpawnCount = 0;
+        totalSpawnCount = 0;
     }
 
     #endregion
@@ -699,11 +747,13 @@ public class QuestManager : MonoBehaviour, ISaveable
     // 고양이 구매 증가 함수
     public void AddPurchaseCatsCount()
     {
-        PurchaseCatsCount++;
+        dailyPurchaseCount++;
+        weeklyPurchaseCount++;
+        totalPurchaseCount++;
 
-        dailyQuestDictionary["고양이 구매 횟수"].questData.currentCount = PurchaseCatsCount;
-        weeklyQuestDictionary["고양이 구매 횟수"].questData.currentCount = PurchaseCatsCount;
-        repeatQuestDictionary["고양이 구매 횟수"].questData.currentCount = PurchaseCatsCount;
+        dailyQuestDictionary["고양이 구매 횟수"].questData.currentCount = dailyPurchaseCount;
+        weeklyQuestDictionary["고양이 구매 횟수"].questData.currentCount = weeklyPurchaseCount;
+        repeatQuestDictionary["고양이 구매 횟수"].questData.currentCount = totalPurchaseCount;
 
         UpdateQuestProgress("고양이 구매 횟수");
     }
@@ -711,7 +761,9 @@ public class QuestManager : MonoBehaviour, ISaveable
     // 고양이 구매 리셋 함수
     public void ResetPurchaseCatsCount()
     {
-        PurchaseCatsCount = 0;
+        dailyPurchaseCount = 0;
+        weeklyPurchaseCount = 0;
+        totalPurchaseCount = 0;
     }
 
     #endregion
@@ -722,17 +774,15 @@ public class QuestManager : MonoBehaviour, ISaveable
     // 배틀 증가 함수
     public void AddBattleCount()
     {
-        BattleCount++;
-
-        dailyQuestDictionary["전투 횟수"].questData.currentCount = BattleCount;
-
+        dailyBattleCount++;
+        dailyQuestDictionary["전투 횟수"].questData.currentCount = dailyBattleCount;
         UpdateQuestProgress("전투 횟수");
     }
 
     // 배틀 리셋 함수
     public void ResetBattleCount()
     {
-        BattleCount = 0;
+        dailyBattleCount = 0;
     }
 
     #endregion
@@ -743,8 +793,7 @@ public class QuestManager : MonoBehaviour, ISaveable
     // 스테이지 증가 함수
     public void AddStageCount()
     {
-        repeatQuestDictionary["보스 스테이지"].questData.currentCount = StageCount;
-
+        repeatQuestDictionary["보스 스테이지"].questData.currentCount = StageCount - 1;
         UpdateQuestProgress("보스 스테이지");
     }
 
@@ -1226,37 +1275,49 @@ public class QuestManager : MonoBehaviour, ISaveable
 
     private void CheckAndResetQuests()
     {
+#if UNITY_EDITOR
+        long currentTime = useDebugTime ? debugCurrentTime.ToUnixTimeSeconds() : DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        DateTimeOffset currentUtc = DateTimeOffset.FromUnixTimeSeconds(currentTime);
+#else
         long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         DateTimeOffset currentUtc = DateTimeOffset.FromUnixTimeSeconds(currentTime);
+#endif
         DateTimeOffset lastDailyResetTime = DateTimeOffset.FromUnixTimeSeconds(lastDailyReset);
         DateTimeOffset lastWeeklyResetTime = DateTimeOffset.FromUnixTimeSeconds(lastWeeklyReset);
 
-        // 일일 퀘스트 초기화 체크 (UTC 기준 00:00)
+        // 일일 퀘스트 초기화 체크
         if (currentUtc.Date > lastDailyResetTime.Date)
         {
-            // 자정(00:00)이 지났는지 확인
-            if (currentUtc.Hour == 0)
-            {
-                ResetDailyQuests();
-                lastDailyReset = currentTime;
-                SaveToLocal();
-            }
+            Debug.Log($"[Quest] 일일 퀘스트 초기화 - 현재: {currentUtc}, 마지막 리셋: {lastDailyResetTime}");
+            ResetDailyQuests();
+            lastDailyReset = currentTime;
+            SaveToLocal();
         }
 
-        // 주간 퀘스트 초기화 체크 (UTC 기준 목요일 00:00)
-        if (currentUtc.DayOfWeek == DayOfWeek.Thursday && currentUtc.Hour == 0)
+        // 주간 퀘스트 초기화 체크 (UTC 기준 목요일)
+        DateTimeOffset nextThursday = GetNextThursday(lastWeeklyResetTime);
+        if (currentUtc >= nextThursday)
         {
-            // 이번 주 목요일 자정을 구함
-            DateTimeOffset thisThursday = currentUtc.Date;
+            Debug.Log($"[Quest] 주간 퀘스트 초기화 - 현재: {currentUtc}, 마지막 리셋: {lastWeeklyResetTime}, 다음 목요일: {nextThursday}");
+            ResetWeeklyQuests();
+            lastWeeklyReset = currentTime;
+            SaveToLocal();
+        }
+    }
 
-            // 마지막 초기화가 이번 주 목요일 이전인 경우에만 초기화
-            if (lastWeeklyResetTime.Date < thisThursday)
+    // 다음 목요일 자정 시간을 계산하는 함수
+    private DateTimeOffset GetNextThursday(DateTimeOffset fromTime)
+    {
+        int daysUntilThursday = ((int)DayOfWeek.Thursday - (int)fromTime.DayOfWeek + 7) % 7;
+        if (daysUntilThursday == 0)
+        {
+            // 이미 자정이 지났다면 다음 주 목요일
+            if (fromTime.TimeOfDay > TimeSpan.Zero)
             {
-                ResetWeeklyQuests();
-                lastWeeklyReset = currentTime;
-                SaveToLocal();
+                daysUntilThursday = 7;
             }
         }
+        return fromTime.Date.AddDays(daysUntilThursday);
     }
 
     // 일일 퀘스트 초기화 함수
@@ -1276,12 +1337,12 @@ public class QuestManager : MonoBehaviour, ISaveable
         dailySpecialRewardCount = 0;
         UpdateDailySpecialRewardUI();
 
-        // 카운터 초기화
-        ResetPlayTimeCount();
-        ResetMergeCount();
-        ResetSpawnCount();
-        ResetPurchaseCatsCount();
-        ResetBattleCount();
+        // 일일 카운터만 초기화
+        dailyPlayTimeCount = 0;
+        dailyMergeCount = 0;
+        dailySpawnCount = 0;
+        dailyPurchaseCount = 0;
+        dailyBattleCount = 0;
 
         // UI 업데이트
         UpdateAllDailyRewardButtonState();
@@ -1307,6 +1368,12 @@ public class QuestManager : MonoBehaviour, ISaveable
         weeklySpecialRewardCount = 0;
         UpdateWeeklySpecialRewardUI();
 
+        // 주간 카운터만 초기화
+        weeklyPlayTimeCount = 0;
+        weeklyMergeCount = 0;
+        weeklySpawnCount = 0;
+        weeklyPurchaseCount = 0;
+
         // UI 업데이트
         UpdateAllWeeklyRewardButtonState();
         UpdateNewImageStatus();
@@ -1327,12 +1394,23 @@ public class QuestManager : MonoBehaviour, ISaveable
         public long lastDailyReset;     // 마지막 일일 퀘스트 리셋 시간
         public long lastWeeklyReset;    // 마지막 주간 퀘스트 리셋 시간
 
-        // 퀘스트 카운터
-        public float playTimeCount;
-        public int mergeCount;
-        public int spawnCount;
-        public int purchaseCatsCount;
-        public int battleCount;
+        // 일일 퀘스트 카운터
+        public float dailyPlayTimeCount;
+        public int dailyMergeCount;
+        public int dailySpawnCount;
+        public int dailyPurchaseCount;
+        public int dailyBattleCount;
+
+        // 주간 퀘스트 카운터
+        public float weeklyPlayTimeCount;
+        public int weeklyMergeCount;
+        public int weeklySpawnCount;
+        public int weeklyPurchaseCount;
+
+        // 반복 퀘스트 카운터
+        public int totalMergeCount;
+        public int totalSpawnCount;
+        public int totalPurchaseCount;
 
         // 스페셜 보상 데이터
         public bool isDailySpecialRewardQuestComplete;
@@ -1368,12 +1446,23 @@ public class QuestManager : MonoBehaviour, ISaveable
             lastDailyReset = this.lastDailyReset,
             lastWeeklyReset = this.lastWeeklyReset,
 
-            // 퀘스트 카운터
-            playTimeCount = this.playTimeCount,
-            mergeCount = this.mergeCount,
-            spawnCount = this.spawnCount,
-            purchaseCatsCount = this.purchaseCatsCount,
-            battleCount = this.battleCount,
+            // 일일 퀘스트 카운터
+            dailyPlayTimeCount = this.dailyPlayTimeCount,
+            dailyMergeCount = this.dailyMergeCount,
+            dailySpawnCount = this.dailySpawnCount,
+            dailyPurchaseCount = this.dailyPurchaseCount,
+            dailyBattleCount = this.dailyBattleCount,
+
+            // 주간 퀘스트 카운터
+            weeklyPlayTimeCount = this.weeklyPlayTimeCount,
+            weeklyMergeCount = this.weeklyMergeCount,
+            weeklySpawnCount = this.weeklySpawnCount,
+            weeklyPurchaseCount = this.weeklyPurchaseCount,
+
+            // 반복 퀘스트 카운터
+            totalMergeCount = this.totalMergeCount,
+            totalSpawnCount = this.totalSpawnCount,
+            totalPurchaseCount = this.totalPurchaseCount,
 
             // 스페셜 보상 데이터
             isDailySpecialRewardQuestComplete = this.isDailySpecialRewardQuestComplete,
@@ -1438,11 +1527,20 @@ public class QuestManager : MonoBehaviour, ISaveable
         lastWeeklyReset = savedData.lastWeeklyReset;
 
         // 퀘스트 카운터 복원
-        playTimeCount = savedData.playTimeCount;
-        mergeCount = savedData.mergeCount;
-        spawnCount = savedData.spawnCount;
-        purchaseCatsCount = savedData.purchaseCatsCount;
-        battleCount = savedData.battleCount;
+        dailyPlayTimeCount = savedData.dailyPlayTimeCount;
+        dailyMergeCount = savedData.dailyMergeCount;
+        dailySpawnCount = savedData.dailySpawnCount;
+        dailyPurchaseCount = savedData.dailyPurchaseCount;
+        dailyBattleCount = savedData.dailyBattleCount;
+
+        weeklyPlayTimeCount = savedData.weeklyPlayTimeCount;
+        weeklyMergeCount = savedData.weeklyMergeCount;
+        weeklySpawnCount = savedData.weeklySpawnCount;
+        weeklyPurchaseCount = savedData.weeklyPurchaseCount;
+
+        totalMergeCount = savedData.totalMergeCount;
+        totalSpawnCount = savedData.totalSpawnCount;
+        totalPurchaseCount = savedData.totalPurchaseCount;
 
         // 스페셜 보상 데이터 복원
         isDailySpecialRewardQuestComplete = savedData.isDailySpecialRewardQuestComplete;
@@ -1453,7 +1551,7 @@ public class QuestManager : MonoBehaviour, ISaveable
         // 퀘스트 데이터 복원
         LoadQuestData(savedData);
 
-        CheckAndResetQuests();
+        CheckAndResetQuestsOnStart();
 
         UpdateAllUI();
 
@@ -1504,11 +1602,11 @@ public class QuestManager : MonoBehaviour, ISaveable
         {
             return questKey switch
             {
-                "플레이 시간" => (int)playTimeCount,
-                "고양이 머지 횟수" => mergeCount,
-                "고양이 소환 횟수" => spawnCount,
-                "고양이 구매 횟수" => purchaseCatsCount,
-                "전투 횟수" => battleCount,
+                "플레이 시간" => (int)dailyPlayTimeCount,
+                "고양이 머지 횟수" => dailyMergeCount,
+                "고양이 소환 횟수" => dailySpawnCount,
+                "고양이 구매 횟수" => dailyPurchaseCount,
+                "전투 횟수" => dailyBattleCount,
                 "보스 스테이지" => StageCount - 1,
                 _ => savedCount
             };
@@ -1526,6 +1624,71 @@ public class QuestManager : MonoBehaviour, ISaveable
         string key = this.GetType().FullName;
         GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
+
+    #endregion
+
+
+    #region Unity Editor Test
+
+#if UNITY_EDITOR
+    [Header("---[Debug Time Control]")]
+    [SerializeField] private bool useDebugTime = false;
+    [SerializeField] private Button skipDayButton;         // 다음날 스킵 버튼
+    [SerializeField] private Button skipWeekButton;        // 다음 주 목요일 스킵 버튼
+    private DateTimeOffset debugCurrentTime;
+
+    // 디버그 시간 설정 함수
+    public void SetDebugTime(int addDays = 0, int addHours = 0)
+    {
+        if (!useDebugTime) return;
+
+        debugCurrentTime = DateTimeOffset.UtcNow.AddDays(addDays).AddHours(addHours);
+        CheckAndResetQuests();
+    }
+
+    private void InitializeDebugControls()
+    {
+        if (skipDayButton != null)
+        {
+            skipDayButton.onClick.AddListener(SkipToNextDay);
+        }
+
+        if (skipWeekButton != null)
+        {
+            skipWeekButton.onClick.AddListener(SkipToNextThursday);
+        }
+    }
+
+    // 디버그용 다음날로 이동
+    public void SkipToNextDay()
+    {
+        if (!useDebugTime) return;
+        Debug.Log("다음날 버튼");
+
+        SetDebugTime(1);
+    }
+
+    // 디버그용 다음 주 목요일로 이동
+    public void SkipToNextThursday()
+    {
+        if (!useDebugTime) return;
+
+        Debug.Log("다음주 버튼");
+
+        DateTimeOffset current = useDebugTime ? debugCurrentTime : DateTimeOffset.UtcNow;
+        int daysUntilThursday = ((int)DayOfWeek.Thursday - (int)current.DayOfWeek + 7) % 7;
+        if (daysUntilThursday == 0) daysUntilThursday = 7;
+
+        // 다음 목요일로 시간 설정
+        debugCurrentTime = current.AddDays(daysUntilThursday);
+
+        // 마지막 주간 리셋 시간을 현재 시간보다 이전으로 설정하여 강제로 초기화 트리거
+        lastWeeklyReset = debugCurrentTime.AddDays(-7).ToUnixTimeSeconds();
+
+        // 퀘스트 체크 및 초기화 실행
+        CheckAndResetQuests();
+    }
+#endif
 
     #endregion
 

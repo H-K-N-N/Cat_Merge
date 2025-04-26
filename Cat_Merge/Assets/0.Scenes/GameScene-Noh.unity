@@ -12867,6 +12867,7 @@ MonoBehaviour:
   coinText: {fileID: 2118068271}
   cashText: {fileID: 1170366662}
   isQuiting: 0
+  firstGamePanel: {fileID: 0}
 --- !u!114 &331588642
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -53115,6 +53116,7 @@ GameObject:
   - component: {fileID: 1314603229}
   - component: {fileID: 1314603228}
   - component: {fileID: 1314603227}
+  - component: {fileID: 1314603231}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -53229,6 +53231,28 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!95 &1314603231
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1314603226}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 2ce9bf77e829cfe4db6dcc8955641568, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1327953305 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1059535332471277859, guid: f2919b5a5d8e3ee458460fc702a3b940, type: 3}

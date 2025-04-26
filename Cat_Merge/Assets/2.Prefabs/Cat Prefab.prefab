@@ -406,6 +406,30 @@ MonoBehaviour:
     overrideController: {fileID: 22100000, guid: 1abe59f8037b56a4090a4adec736ed76, type: 2}
   - grade: 3
     overrideController: {fileID: 22100000, guid: 64548e82a02c8a04a9606c63f998199d, type: 2}
+  - grade: 4
+    overrideController: {fileID: 22100000, guid: aa4eaf22d05666a42ab9249fd9e8cbba, type: 2}
+  - grade: 5
+    overrideController: {fileID: 22100000, guid: 703e54fbab364b8468a82aa4bba95c0d, type: 2}
+  - grade: 6
+    overrideController: {fileID: 22100000, guid: 469ec25a4bc06d6418824a3e3497b558, type: 2}
+  - grade: 7
+    overrideController: {fileID: 22100000, guid: 275573f95e42d64428765c7c4a950800, type: 2}
+  - grade: 8
+    overrideController: {fileID: 22100000, guid: 39f3706ef71dafa46b64f7ea946e6c5d, type: 2}
+  - grade: 9
+    overrideController: {fileID: 22100000, guid: decc8d2b6c0c56f4792a0469dccb14ca, type: 2}
+  - grade: 10
+    overrideController: {fileID: 22100000, guid: 0ce572c053799524b8b9a5879d8f425d, type: 2}
+  - grade: 11
+    overrideController: {fileID: 22100000, guid: 7755949948c6527448f791c3d519b377, type: 2}
+  - grade: 12
+    overrideController: {fileID: 22100000, guid: 1a0ee99491146f847897db4519321d58, type: 2}
+  - grade: 13
+    overrideController: {fileID: 22100000, guid: 258754e46115ade45b94f07d3c14d845, type: 2}
+  - grade: 14
+    overrideController: {fileID: 22100000, guid: 42e18588be5f6d94698052d4d7ded87b, type: 2}
+  - grade: 15
+    overrideController: {fileID: 22100000, guid: 0931226851f2a0642b6ec04b1137c524, type: 2}
 --- !u!1 &4442190507333617709
 GameObject:
   m_ObjectHideFlags: 0
@@ -419,6 +443,7 @@ GameObject:
   - component: {fileID: 4440387383682111487}
   - component: {fileID: -3185705115251794711}
   - component: {fileID: 6581758322604903725}
+  - component: {fileID: 1377021694030487119}
   m_Layer: 6
   m_Name: Cat Prefab
   m_TagString: Cat
@@ -516,6 +541,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rectTransform: {fileID: 0}
+--- !u!95 &1377021694030487119
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4442190507333617709}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 580be6e395441524d84124cee74ca565, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &7088968465046740359
 GameObject:
   m_ObjectHideFlags: 0

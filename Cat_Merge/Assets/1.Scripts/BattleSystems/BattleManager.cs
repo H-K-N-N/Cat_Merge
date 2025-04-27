@@ -32,7 +32,7 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     private const float GIVEUP_BUTTON_DELAY = 2f;               // 항복 버튼 활성화 딜레이
     private const float BOSS_ATTACK_DELAY = 2f;                 // 보스 공격 딜레이
-    private float catAttackDelay = 1f;                          // 고양이 공격 딜레이
+    private float catAttackDelay = 2f;                          // 고양이 공격 딜레이
     
 
     private GameObject currentBoss;                             // 현재 보스
@@ -40,7 +40,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     public bool isBattleActive;                                 // 전투 활성화 여부
     public bool IsBattleActive => isBattleActive;
 
-    private HashSet<int> clearedStages = new HashSet<int>();    // 클리어한 스테이지 저장
+    private HashSet<int> clearedStages = new HashSet<int>();    // 클리어한 스테이지 저장 (나중에 보상관련 정해지면 그냥 int로 바꿔도 될듯함)
 
     [Header("---[Boss UI]")]
     [SerializeField] private GameObject battleHPUI;             // Battle HP UI (활성화/비활성화 제어)
@@ -70,17 +70,17 @@ public class BattleManager : MonoBehaviour, ISaveable
     private List<GameObject> activeRewardSlots = new List<GameObject>();    // 현재 활성화된 보상 슬롯들
 
     [Header("---[Boss AutoRetry UI]")]
-    [SerializeField] private Button autoRetryPanelButton;               // 하위 단계 자동 도전 패널 버튼
-    [SerializeField] private Image autoRetryPanelButtonImage;           // 패널 버튼 이미지
-    [SerializeField] private GameObject autoRetryPanel;                 // 하위 단계 자동 도전 패널
-    [SerializeField] private Button closeAutoRetryPanelButton;          // 하위 단계 자동 도전 패널 닫기 버튼
-    [SerializeField] private Button autoRetryButton;                    // 하위 단계 자동 도전 토글 버튼
-    [SerializeField] private RectTransform autoRetryHandle;             // 토글 핸들
-    [SerializeField] private Image autoRetryButtonImage;                // 하위 단계 자동 도전 버튼 이미지
-    [SerializeField] private TextMeshProUGUI currentMaxBossStageText;   // 도전 가능한 보스 최대 스테이지 텍스트
-    private int currentMaxBossStage;                                    // 도전 가능한 보스 최대 스테이지
-    private bool isAutoRetryEnabled;                                    // 하위 단계 자동 도전 상태
-    private Coroutine autoRetryToggleCoroutine;                         // 토글 애니메이션 코루틴
+    [SerializeField] private Button autoRetryPanelButton;                   // 하위 단계 자동 도전 패널 버튼
+    [SerializeField] private Image autoRetryPanelButtonImage;               // 패널 버튼 이미지
+    [SerializeField] private GameObject autoRetryPanel;                     // 하위 단계 자동 도전 패널
+    [SerializeField] private Button closeAutoRetryPanelButton;              // 하위 단계 자동 도전 패널 닫기 버튼
+    [SerializeField] private Button autoRetryButton;                        // 하위 단계 자동 도전 토글 버튼
+    [SerializeField] private RectTransform autoRetryHandle;                 // 토글 핸들
+    [SerializeField] private Image autoRetryButtonImage;                    // 하위 단계 자동 도전 버튼 이미지
+    [SerializeField] private TextMeshProUGUI currentMaxBossStageText;       // 도전 가능한 보스 최대 스테이지 텍스트
+    private int currentMaxBossStage;                                        // 도전 가능한 보스 최대 스테이지
+    private bool isAutoRetryEnabled;                                        // 하위 단계 자동 도전 상태
+    private Coroutine autoRetryToggleCoroutine;                             // 토글 애니메이션 코루틴
 
 
     [Header("---[Warning UI]")]
@@ -561,7 +561,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         {
             elapsedTime += Time.deltaTime;
 
-            // 보스 체력이 0 이하가 되면 즉시 전투 종료
+            // 보스 체력이 0 이하가 되면 보스 기절 애니메이션 보여주고 전투 종료
             if (currentBossHP <= 0)
             {
                 MouseData mouse = FindAnyObjectByType<MouseData>();

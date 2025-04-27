@@ -269,7 +269,7 @@ public class QuestManager : MonoBehaviour, ISaveable
     private void InitializeDailyQuestManager()
     {
         InitializeQuest("플레이 시간", 10, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 머지 횟수", 1, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 합성 횟수", 1, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
         InitializeQuest("고양이 소환 횟수", 1, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
         InitializeQuest("고양이 구매 횟수", 1, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
         InitializeQuest("전투 횟수", 1, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
@@ -284,7 +284,7 @@ public class QuestManager : MonoBehaviour, ISaveable
     private void InitializeWeeklyQuestManager()
     {
         InitializeQuest("플레이 시간", 20, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 머지 횟수", 10, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 합성 횟수", 10, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
         InitializeQuest("고양이 소환 횟수", 10, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
         InitializeQuest("고양이 구매 횟수", 10, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
 
@@ -297,7 +297,7 @@ public class QuestManager : MonoBehaviour, ISaveable
     // Repeat Quest 설정 함수
     private void InitializeRepeatQuestManager()
     {
-        InitializeQuest("고양이 머지 횟수", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 합성 횟수", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
         InitializeQuest("고양이 소환 횟수", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
         InitializeQuest("고양이 구매 횟수", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
         InitializeQuest("보스 스테이지", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
@@ -697,11 +697,11 @@ public class QuestManager : MonoBehaviour, ISaveable
         weeklyMergeCount++;
         totalMergeCount++;
 
-        dailyQuestDictionary["고양이 머지 횟수"].questData.currentCount = dailyMergeCount;
-        weeklyQuestDictionary["고양이 머지 횟수"].questData.currentCount = weeklyMergeCount;
-        repeatQuestDictionary["고양이 머지 횟수"].questData.currentCount = totalMergeCount;
+        dailyQuestDictionary["고양이 합성 횟수"].questData.currentCount = dailyMergeCount;
+        weeklyQuestDictionary["고양이 합성 횟수"].questData.currentCount = weeklyMergeCount;
+        repeatQuestDictionary["고양이 합성 횟수"].questData.currentCount = totalMergeCount;
 
-        UpdateQuestProgress("고양이 머지 횟수");
+        UpdateQuestProgress("고양이 합성 횟수");
     }
 
     // 고양이 머지 리셋 함수
@@ -1603,7 +1603,7 @@ public class QuestManager : MonoBehaviour, ISaveable
             return questKey switch
             {
                 "플레이 시간" => (int)dailyPlayTimeCount,
-                "고양이 머지 횟수" => dailyMergeCount,
+                "고양이 합성 횟수" => dailyMergeCount,
                 "고양이 소환 횟수" => dailySpawnCount,
                 "고양이 구매 횟수" => dailyPurchaseCount,
                 "전투 횟수" => dailyBattleCount,

@@ -489,7 +489,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             int hours = remainingTime / 3600;
             int minutes = (remainingTime % 3600) / 60;
             int seconds = remainingTime % 60;
-            explainText.text = $"자동머지 {AUTO_MERGE_DURATION}초 증가\n (타이머 {hours:D2}:{minutes:D2}:{seconds:D2})";
+            explainText.text = $"자동합성 {AUTO_MERGE_DURATION}초 증가\n (타이머 {hours:D2}:{minutes:D2}:{seconds:D2})";
         }
     }
 

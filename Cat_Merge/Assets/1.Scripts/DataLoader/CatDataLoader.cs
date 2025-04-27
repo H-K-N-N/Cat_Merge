@@ -59,6 +59,7 @@ public class CatDataLoader : MonoBehaviour
                     startIndex = i + 1;
                 }
             }
+
             // 마지막 값 추가
             string lastValue = line.Substring(startIndex).Trim();
             lastValue = lastValue.Trim('"');
@@ -90,9 +91,10 @@ public class CatDataLoader : MonoBehaviour
                 int catAttackSpeed = int.Parse(validValues[8]);
                 int catArmor = int.Parse(validValues[9]);
                 int catMoveSpeed = int.Parse(validValues[10]);
+                int canOpener = int.Parse(validValues[11]);
 
                 // Cat 객체 생성 및 Dictionary에 추가
-                Cat newCat = new Cat(catId, catName, catGrade, catDamage, catGetCoin, catHp, catImage, catExplain, catAttackSpeed, catArmor, catMoveSpeed);
+                Cat newCat = new Cat(catId, catName, catGrade, catDamage, catGetCoin, catHp, catImage, catExplain, catAttackSpeed, catArmor, catMoveSpeed, canOpener);
                 if (!catDictionary.ContainsKey(catId))
                 {
                     catDictionary.Add(catId, newCat);

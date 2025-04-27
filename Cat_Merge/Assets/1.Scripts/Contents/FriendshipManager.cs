@@ -49,6 +49,7 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     [SerializeField] private GameObject fullStarPrefab;
     [SerializeField] private TextMeshProUGUI expRequirementText;
     [SerializeField] private Slider expGauge;
+    [SerializeField] private Transform dictionarySlotParent;
 
     private Dictionary<int, Button[]> catFriendshipButtons = new Dictionary<int, Button[]>();
     private Dictionary<int, GameObject> fullStars = new Dictionary<int, GameObject>();
@@ -378,6 +379,24 @@ public class FriendshipManager : MonoBehaviour, ISaveable
 
         // 버튼 상태 업데이트
         UpdateFriendshipButtonStates(catGrade);
+
+        // 도감 슬롯의 friendshipNewImage 업데이트
+        if (dictionarySlotParent != null)
+        {
+            Transform slot = dictionarySlotParent.GetChild(catGrade - 1);
+            if (slot != null)
+            {
+                GameObject friendshipNewImage = slot.transform.Find("Button/New Image")?.gameObject;
+                if (friendshipNewImage != null)
+                {
+                    bool hasRewards = HasUnclaimedFriendshipRewards(catGrade);
+                    friendshipNewImage.SetActive(hasRewards);
+
+                    // DictionaryManager의 New Image 상태도 업데이트
+                    DictionaryManager.Instance.UpdateNewImageStatus();
+                }
+            }
+        }
     }
 
     // 버튼 상태 업데이트 함수
@@ -713,6 +732,23 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         return (friendship.currentExp, friendship.isLevelUnlocked, friendship.rewardsClaimed);
     }
 
+    // 특정 등급의 고양이가 받을 수 있는 보상이 있는지 확인하는 함수
+    public bool HasUnclaimedFriendshipRewards(int catGrade)
+    {
+        if (!catFriendships.ContainsKey(catGrade)) return false;
+
+        var friendship = catFriendships[catGrade];
+        for (int i = 0; i < friendship.isLevelUnlocked.Length; i++)
+        {
+            // 해당 레벨이 해금되었고, 아직 보상을 받지 않은 상태라면 true 반환
+            if (friendship.isLevelUnlocked[i] && !friendship.rewardsClaimed[i])
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // 보상 수령 가능 여부 확인 함수
     private bool CanClaimLevelReward(int catGrade, int level)
     {
@@ -747,6 +783,9 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         ApplyPassiveEffect(catGrade, level);
 
         UpdateFriendshipUI(catGrade);
+
+        // DictionaryManager의 New Image 상태도 업데이트
+        DictionaryManager.Instance.UpdateNewImageStatus();
 
         SaveToLocal();
     }

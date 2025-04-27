@@ -54,6 +54,11 @@ public class BattleManager : MonoBehaviour, ISaveable
     private double maxBossHP;                                   // 보스의 최대 HP
 
 
+    [Header("---[Boss GiveUp UI]")]
+    [SerializeField] private GameObject giveUpPanel;            // 항복하기 패널
+    [SerializeField] private Button giveUpBackButton;           // 항복하기 패널의 뒤로가기 버튼
+    [SerializeField] private Button giveUpConfirmButton;        // 항복하기 패널의 항복하기 버튼
+
     [Header("---[Boss Result UI]")]
     [SerializeField] private GameObject battleResultPanel;                  // 전투 결과 패널
     [SerializeField] private GameObject winPanel;                           // 승리 UI 패널
@@ -197,12 +202,17 @@ public class BattleManager : MonoBehaviour, ISaveable
         }
     }
 
-    // Battle HP UI 초기화 함수
+    // Battle UI 초기화 함수
     private void InitializeBattleUI()
     {
         if (battleHPUI != null)
         {
             battleHPUI.SetActive(false);
+        }
+
+        if (giveUpPanel != null)
+        {
+            giveUpPanel.SetActive(false);
         }
     }
 
@@ -230,8 +240,11 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 버튼 리스너 초기화 함수
     private void InitializeButtonListeners()
     {
-        giveupButton.onClick.AddListener(GiveUpState);
+        giveupButton.onClick.AddListener(ShowGiveUpPanel);
         battleResultCloseButton.onClick.AddListener(CloseBattleResultPanel);
+
+        giveUpBackButton.onClick.AddListener(CloseGiveUpPanel);
+        giveUpConfirmButton.onClick.AddListener(ConfirmGiveUp);
 
         autoRetryPanelButton.onClick.AddListener(OpenAutoRetryPanel);
         autoRetryButton.onClick.AddListener(ToggleAutoRetry);
@@ -1019,10 +1032,28 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     #region Battle End
 
-    // 항복 버튼 함수
-    private void GiveUpState()
+    // 항복 버튼 함수 (항복하기 패널 보여주기)
+    private void ShowGiveUpPanel()
     {
-        // giveup Panel관련 추가할거면 여기에 관련 함수 추가
+        if (giveUpPanel != null)
+        {
+            giveUpPanel.SetActive(true);
+        }
+    }
+
+    // 항복하기 패널을 닫는 함수
+    private void CloseGiveUpPanel()
+    {
+        if (giveUpPanel != null)
+        {
+            giveUpPanel.SetActive(false);
+        }
+    }
+
+    // 항복을 확정하는 함수
+    private void ConfirmGiveUp()
+    {
+        CloseGiveUpPanel();
         EndBattle(false);
     }
 

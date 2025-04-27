@@ -5,65 +5,68 @@ using UnityEngine;
 public class Cat
 {
 
-    private int catId;           // 고양이 인덱스
+    private int catId;          // 고양이 인덱스
     public int CatId { get => catId; set => catId = value; }
 
-    private string catName;      // 고양이 이름
+    private string catName;     // 고양이 이름
     public string CatName { get => catName; set => catName = value; }
 
-    private int catGrade;        // 고양이 등급
+    private int catGrade;       // 고양이 등급
     public int CatGrade { get => catGrade; set => catGrade = value; }
 
 
 
-    private int baseDamage;      // 기본 공격력 (기본값 100%)
+    private int baseDamage;     // 기본 공격력 (기본값 100%)
     public int BaseDamage { get => baseDamage; set => baseDamage = value; }
 
-    private int baseHp;          // 기본 체력
+    private int baseHp;         // 기본 체력
     public int BaseHp { get => baseHp; set => baseHp = value; }
 
-    private int growthDamage;    // 성장한 공격력
+    private int growthDamage;   // 성장한 공격력
     public int GrowthDamage { get => growthDamage; set => growthDamage = value; }
 
-    private int growthHp;        // 성장한 체력
+    private int growthHp;       // 성장한 체력
     public int GrowthHp { get => growthHp; set => growthHp = value; }
 
 
 
-    private float passiveAttackDamage = 1.0f;    // 패시브 공격력 증가 배율 (기본값 1 = 100%)
+    private float passiveAttackDamage = 1.0f;       // 패시브 공격력 증가 배율 (기본값 1 = 100%)
     public float PassiveAttackDamage { get => passiveAttackDamage; set => passiveAttackDamage = value; }
 
-    private float passiveCoinCollectSpeed = 0f;    // 패시브 재화 수집 속도 증가량 (기본값 0초)
+    private float passiveCoinCollectSpeed = 0f;     // 패시브 재화 수집 속도 증가량 (기본값 0초)
     public float PassiveCoinCollectSpeed { get => passiveCoinCollectSpeed; set => passiveCoinCollectSpeed = value; }
 
 
 
-    // 최종 스탯 계산용 프로퍼티
+    // 최종 스탯 계산
     public int CatDamage => (int)((GrowthDamage * (BaseDamage * 0.01) + GrowthDamage) * PassiveAttackDamage);
     public int CatHp => (int)(GrowthHp * (BaseHp * 0.01)) + GrowthHp;
 
 
 
-    private int catGetCoin;      // 고양이 자동 재화 획득량
+    private int catGetCoin;     // 고양이 자동 재화 획득량
     public int CatGetCoin { get => catGetCoin; set => catGetCoin = value; }
 
-    private Sprite catImage;     // 고양이 이미지
+    private Sprite catImage;    // 고양이 이미지
     public Sprite CatImage { get => catImage; set => catImage = value; }
 
-    private string catExplain;   // 고양이 설명
+    private string catExplain;  // 고양이 설명
     public string CatExplain { get => catExplain; set => catExplain = value; }
 
-    private int catAttackSpeed;  // 고양이 공격속도 (1초)
+    private int catAttackSpeed; // 고양이 공격속도 (1초)
     public int CatAttackSpeed { get => catAttackSpeed; set => catAttackSpeed = value; }
 
-    private int catArmor;        // 고양이 방어력
+    private int catArmor;       // 고양이 방어력
     public int CatArmor { get => catArmor; set => catArmor = value; }
 
-    private int catMoveSpeed;    // 고양이 이동속도
+    private int catMoveSpeed;   // 고양이 이동속도
     public int CatMoveSpeed { get => catMoveSpeed; set => catMoveSpeed = value; }
 
+    private int canOpener;      // 고양이 구매 해금관련
+    public int CanOpener { get => canOpener; set => canOpener = value; }
+
     public Cat(int catId, string catName, int catGrade, int catDamage, int catGetCoin, int catHp, Sprite catImage,
-        string catExplain, int catAttackSpeed, int catArmor, int catMoveSpeed)
+        string catExplain, int catAttackSpeed, int catArmor, int catMoveSpeed, int canOpener)
     {
         CatId = catId;
         CatName = catName;
@@ -78,6 +81,7 @@ public class Cat
         CatAttackSpeed = catAttackSpeed;
         CatArmor = catArmor;
         CatMoveSpeed = catMoveSpeed;
+        CanOpener = canOpener;
     }
 
     // 성장 스탯 함수

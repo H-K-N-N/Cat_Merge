@@ -119,14 +119,13 @@ public class QuestManager : MonoBehaviour, ISaveable
     private float dailyPlayTimeCount;
     private int dailyMergeCount;
     private int dailySpawnCount;
-    private int dailyPurchaseCount;
     private int dailyBattleCount;
 
     // 주간 퀘스트 카운터
     private float weeklyPlayTimeCount;
     private int weeklyMergeCount;
     private int weeklySpawnCount;
-    private int weeklyPurchaseCount;
+    private int weeklyBattleCount;
 
     // 반복 퀘스트 카운터 (누적)
     private int totalMergeCount;
@@ -269,9 +268,8 @@ public class QuestManager : MonoBehaviour, ISaveable
     private void InitializeDailyQuestManager()
     {
         InitializeQuest("플레이 시간", 10, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 머지 횟수", 1, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 합성 횟수", 1, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
         InitializeQuest("고양이 소환 횟수", 1, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 구매 횟수", 1, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
         InitializeQuest("전투 횟수", 1, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
 
         InitializeDailySpecialReward();
@@ -284,9 +282,9 @@ public class QuestManager : MonoBehaviour, ISaveable
     private void InitializeWeeklyQuestManager()
     {
         InitializeQuest("플레이 시간", 20, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 머지 횟수", 10, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 합성 횟수", 10, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
         InitializeQuest("고양이 소환 횟수", 10, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 구매 횟수", 10, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
+        InitializeQuest("전투 횟수", 10, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
 
         InitializeWeeklySpecialReward();
 
@@ -297,16 +295,10 @@ public class QuestManager : MonoBehaviour, ISaveable
     // Repeat Quest 설정 함수
     private void InitializeRepeatQuestManager()
     {
-        InitializeQuest("고양이 머지 횟수", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 합성 횟수", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
         InitializeQuest("고양이 소환 횟수", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
         InitializeQuest("고양이 구매 횟수", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
         InitializeQuest("보스 스테이지", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
-        InitializeQuest("샘플1", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
-        InitializeQuest("샘플2", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
-        InitializeQuest("샘플3", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
-        InitializeQuest("샘플4", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
-        InitializeQuest("샘플5", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
-        InitializeQuest("샘플6", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
 
         // 초기 스크롤 위치 초기화
         InitializeScrollPosition();
@@ -697,11 +689,11 @@ public class QuestManager : MonoBehaviour, ISaveable
         weeklyMergeCount++;
         totalMergeCount++;
 
-        dailyQuestDictionary["고양이 머지 횟수"].questData.currentCount = dailyMergeCount;
-        weeklyQuestDictionary["고양이 머지 횟수"].questData.currentCount = weeklyMergeCount;
-        repeatQuestDictionary["고양이 머지 횟수"].questData.currentCount = totalMergeCount;
+        dailyQuestDictionary["고양이 합성 횟수"].questData.currentCount = dailyMergeCount;
+        weeklyQuestDictionary["고양이 합성 횟수"].questData.currentCount = weeklyMergeCount;
+        repeatQuestDictionary["고양이 합성 횟수"].questData.currentCount = totalMergeCount;
 
-        UpdateQuestProgress("고양이 머지 횟수");
+        UpdateQuestProgress("고양이 합성 횟수");
     }
 
     // 고양이 머지 리셋 함수
@@ -747,12 +739,8 @@ public class QuestManager : MonoBehaviour, ISaveable
     // 고양이 구매 증가 함수
     public void AddPurchaseCatsCount()
     {
-        dailyPurchaseCount++;
-        weeklyPurchaseCount++;
         totalPurchaseCount++;
 
-        dailyQuestDictionary["고양이 구매 횟수"].questData.currentCount = dailyPurchaseCount;
-        weeklyQuestDictionary["고양이 구매 횟수"].questData.currentCount = weeklyPurchaseCount;
         repeatQuestDictionary["고양이 구매 횟수"].questData.currentCount = totalPurchaseCount;
 
         UpdateQuestProgress("고양이 구매 횟수");
@@ -761,8 +749,6 @@ public class QuestManager : MonoBehaviour, ISaveable
     // 고양이 구매 리셋 함수
     public void ResetPurchaseCatsCount()
     {
-        dailyPurchaseCount = 0;
-        weeklyPurchaseCount = 0;
         totalPurchaseCount = 0;
     }
 
@@ -775,7 +761,11 @@ public class QuestManager : MonoBehaviour, ISaveable
     public void AddBattleCount()
     {
         dailyBattleCount++;
+        weeklyBattleCount++;
+
         dailyQuestDictionary["전투 횟수"].questData.currentCount = dailyBattleCount;
+        weeklyQuestDictionary["전투 횟수"].questData.currentCount = weeklyBattleCount;
+
         UpdateQuestProgress("전투 횟수");
     }
 
@@ -783,6 +773,7 @@ public class QuestManager : MonoBehaviour, ISaveable
     public void ResetBattleCount()
     {
         dailyBattleCount = 0;
+        weeklyBattleCount = 0;
     }
 
     #endregion
@@ -1341,7 +1332,6 @@ public class QuestManager : MonoBehaviour, ISaveable
         dailyPlayTimeCount = 0;
         dailyMergeCount = 0;
         dailySpawnCount = 0;
-        dailyPurchaseCount = 0;
         dailyBattleCount = 0;
 
         // UI 업데이트
@@ -1372,7 +1362,7 @@ public class QuestManager : MonoBehaviour, ISaveable
         weeklyPlayTimeCount = 0;
         weeklyMergeCount = 0;
         weeklySpawnCount = 0;
-        weeklyPurchaseCount = 0;
+        weeklyBattleCount = 0;
 
         // UI 업데이트
         UpdateAllWeeklyRewardButtonState();
@@ -1398,14 +1388,13 @@ public class QuestManager : MonoBehaviour, ISaveable
         public float dailyPlayTimeCount;
         public int dailyMergeCount;
         public int dailySpawnCount;
-        public int dailyPurchaseCount;
         public int dailyBattleCount;
 
         // 주간 퀘스트 카운터
         public float weeklyPlayTimeCount;
         public int weeklyMergeCount;
         public int weeklySpawnCount;
-        public int weeklyPurchaseCount;
+        public int weeklyBattleCount;
 
         // 반복 퀘스트 카운터
         public int totalMergeCount;
@@ -1450,14 +1439,13 @@ public class QuestManager : MonoBehaviour, ISaveable
             dailyPlayTimeCount = this.dailyPlayTimeCount,
             dailyMergeCount = this.dailyMergeCount,
             dailySpawnCount = this.dailySpawnCount,
-            dailyPurchaseCount = this.dailyPurchaseCount,
             dailyBattleCount = this.dailyBattleCount,
 
             // 주간 퀘스트 카운터
             weeklyPlayTimeCount = this.weeklyPlayTimeCount,
             weeklyMergeCount = this.weeklyMergeCount,
             weeklySpawnCount = this.weeklySpawnCount,
-            weeklyPurchaseCount = this.weeklyPurchaseCount,
+            weeklyBattleCount = this.weeklyBattleCount,
 
             // 반복 퀘스트 카운터
             totalMergeCount = this.totalMergeCount,
@@ -1530,13 +1518,12 @@ public class QuestManager : MonoBehaviour, ISaveable
         dailyPlayTimeCount = savedData.dailyPlayTimeCount;
         dailyMergeCount = savedData.dailyMergeCount;
         dailySpawnCount = savedData.dailySpawnCount;
-        dailyPurchaseCount = savedData.dailyPurchaseCount;
         dailyBattleCount = savedData.dailyBattleCount;
 
         weeklyPlayTimeCount = savedData.weeklyPlayTimeCount;
         weeklyMergeCount = savedData.weeklyMergeCount;
         weeklySpawnCount = savedData.weeklySpawnCount;
-        weeklyPurchaseCount = savedData.weeklyPurchaseCount;
+        weeklyBattleCount = savedData.weeklyBattleCount;
 
         totalMergeCount = savedData.totalMergeCount;
         totalSpawnCount = savedData.totalSpawnCount;
@@ -1603,9 +1590,8 @@ public class QuestManager : MonoBehaviour, ISaveable
             return questKey switch
             {
                 "플레이 시간" => (int)dailyPlayTimeCount,
-                "고양이 머지 횟수" => dailyMergeCount,
+                "고양이 합성 횟수" => dailyMergeCount,
                 "고양이 소환 횟수" => dailySpawnCount,
-                "고양이 구매 횟수" => dailyPurchaseCount,
                 "전투 횟수" => dailyBattleCount,
                 "보스 스테이지" => StageCount - 1,
                 _ => savedCount

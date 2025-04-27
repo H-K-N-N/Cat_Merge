@@ -106,6 +106,19 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -184,7 +197,7 @@ TextureImporter:
         width: 160
         height: 80
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -193,6 +206,28 @@ TextureImporter:
       bones: []
       spriteID: 2e86a81454063eb4cb342a4542ff67fd
       internalID: 708226151
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: I_UI_Book_BG_Frame_v2_Frame_2.9_4
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 2
+        width: 640
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1ec9785a57354204ca2eb19eb5c468b9
+      internalID: -806392993
       vertices: []
       indices: 
       edges: []
@@ -215,6 +250,7 @@ TextureImporter:
       I_UI_Book_BG_Frame_v2_Frame_2.9_1: -343392656
       I_UI_Book_BG_Frame_v2_Frame_2.9_2: -711019489
       I_UI_Book_BG_Frame_v2_Frame_2.9_3: 708226151
+      I_UI_Book_BG_Frame_v2_Frame_2.9_4: -806392993
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

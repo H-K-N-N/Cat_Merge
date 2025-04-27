@@ -314,6 +314,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         Image iconImage = slot.transform.Find("Button/Icon")?.GetComponent<Image>();
         Image firstOpenBG = slot.transform.Find("Button/FirstOpenBG")?.GetComponent<Image>();
         TextMeshProUGUI firstOpenCashtext = slot.transform.Find("Button/FirstOpenBG/Cash Text")?.GetComponent<TextMeshProUGUI>();
+        GameObject friendshipNewImage = slot.transform.Find("Button/New Image")?.gameObject;
 
         RectTransform textRect = text.GetComponent<RectTransform>();
 
@@ -326,6 +327,8 @@ public class DictionaryManager : MonoBehaviour, ISaveable
             text.text = $"{cat.CatGrade}. {cat.CatName}";
             iconImage.sprite = cat.CatImage;
             iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
+
+            friendshipNewImage.SetActive(FriendshipManager.Instance.HasUnclaimedFriendshipRewards(cat.CatGrade));
 
             // 첫 해금 보상 확인 시에도 인덱스 사용
             if (IsGetFirstUnlockedReward(catIndex))
@@ -367,6 +370,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
             iconImage.sprite = cat.CatImage;
             iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 0f);
             firstOpenBG.gameObject.SetActive(false);
+            friendshipNewImage.SetActive(false);
         }
     }
 
@@ -383,6 +387,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         Image iconImage = slot.transform.Find("Button/Icon")?.GetComponent<Image>();
         Image firstOpenBG = slot.transform.Find("Button/FirstOpenBG")?.GetComponent<Image>();
         TextMeshProUGUI firstOpenCashtext = slot.transform.Find("Button/FirstOpenBG/Cash Text")?.GetComponent<TextMeshProUGUI>();
+        GameObject friendshipNewImage = slot.transform.Find("Button/New Image")?.gameObject;
 
         RectTransform textRect = text.GetComponent<RectTransform>();
 
@@ -391,6 +396,8 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         Cat catData = GameManager.Instance.AllCatData[catGrade];
         iconImage.sprite = catData.CatImage;
         iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
+
+        friendshipNewImage.SetActive(FriendshipManager.Instance.HasUnclaimedFriendshipRewards(catGrade + 1));
 
         // 표시되는 등급은 1-based
         text.text = $"{catGrade + 1}. {catData.CatName}";
@@ -592,21 +599,35 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         return false;
     }
 
+    // 애정도 보상을 받을 수 있는 고양이가 있는지 확인하는 함수 (friendship New Image)
+    private bool HasUnclaimedFriendshipRewards()
+    {
+        for (int i = 1; i <= GameManager.Instance.AllCatData.Length; i++)
+        {
+            if (IsCatUnlocked(i - 1) && FriendshipManager.Instance.HasUnclaimedFriendshipRewards(i))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // New Image UI를 갱신하는 함수
-    private void UpdateNewImageStatus()
+    public void UpdateNewImageStatus()
     {
         bool hasUnclaimedRewards = HasUnclaimedRewards();
+        bool hasUnclaimedFriendshipRewards = HasUnclaimedFriendshipRewards();
 
         // 도감 Button의 New Image 활성화/비활성화
         if (dictionaryButtonNewImage != null)
         {
-            dictionaryButtonNewImage.SetActive(hasUnclaimedRewards);
+            dictionaryButtonNewImage.SetActive(hasUnclaimedRewards || hasUnclaimedFriendshipRewards);
         }
 
         // Normal Cat Button의 New Image 활성화/비활성화
         if (normalCatButtonNewImage != null)
         {
-            normalCatButtonNewImage.SetActive(hasUnclaimedRewards);
+            normalCatButtonNewImage.SetActive(hasUnclaimedRewards || hasUnclaimedFriendshipRewards);
         }
     }
 

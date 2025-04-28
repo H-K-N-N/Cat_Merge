@@ -53,7 +53,7 @@ public class Cat
     private string catExplain;  // 고양이 설명
     public string CatExplain { get => catExplain; set => catExplain = value; }
 
-    private int catAttackSpeed; // 고양이 공격속도 (1초)
+    private int catAttackSpeed; // 고양이 공격속도
     public int CatAttackSpeed { get => catAttackSpeed; set => catAttackSpeed = value; }
 
     private int catArmor;       // 고양이 방어력

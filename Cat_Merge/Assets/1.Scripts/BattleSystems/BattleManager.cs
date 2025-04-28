@@ -32,7 +32,7 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     private const float GIVEUP_BUTTON_DELAY = 2f;               // 항복 버튼 활성화 딜레이
     private const float BOSS_ATTACK_DELAY = 2f;                 // 보스 공격 딜레이
-    private float catAttackDelay = 2f;                          // 고양이 공격 딜레이
+    //private float catAttackDelay = 2f;                          // 고양이 공격 딜레이
     
 
     private GameObject currentBoss;                             // 현재 보스
@@ -113,7 +113,6 @@ public class BattleManager : MonoBehaviour, ISaveable
     private Coroutine bossBattleCoroutine;                      // BossBattleRoutine 코루틴 추적을 위한 변수 추가
     private Coroutine bossSpawnRoutine;                         // BossSpawnRoutine 코루틴 추적을 위한 변수 추가
     private Coroutine bossAttackRoutine;                        // BossAttackRoutine 코루틴 추적을 위한 변수 추가
-    private Coroutine catsAttackRoutine;                        // CatsAttackRoutine 코루틴 추적을 위한 변수 추가
 
     private bool isDataLoaded = false;                          // 데이터 로드 확인
 
@@ -274,11 +273,11 @@ public class BattleManager : MonoBehaviour, ISaveable
         }
     }
 
-    // 패시브로 인한 고양이 공격속도 증가 함수
-    public void AddPassiveCatAttackSpeedBuff(float amount)
-    {
-        catAttackDelay -= amount;
-    }
+    //// 패시브로 인한 고양이 공격속도 증가 함수
+    //public void AddPassiveCatAttackSpeedBuff(float amount)
+    //{
+    //    catAttackDelay -= amount;
+    //}
 
     #endregion
 
@@ -495,9 +494,8 @@ public class BattleManager : MonoBehaviour, ISaveable
         PushCatsAwayFromBoss();
         MoveCatsTowardBossBoundary();
 
-        // 보스 및 고양이 공격 코루틴 시작
+        // 보스 공격 코루틴 시작
         bossAttackRoutine = StartCoroutine(BossAttackRoutine());
-        catsAttackRoutine = StartCoroutine(CatsAttackRoutine());
     }
 
     // 항복 버튼 활성화 코루틴
@@ -758,86 +756,15 @@ public class BattleManager : MonoBehaviour, ISaveable
         }
     }
 
+    // (보스) 공격후 기본 상태로 변경하는 코루틴
     private IEnumerator ReturnToBattleStateMouse(MouseAnimatorManager anim)
     {
         // 공격 애니메이션이 재생되는 시간
         yield return new WaitForSeconds(1f);
 
-        if(isBattleActive && anim != null && anim.gameObject.activeSelf)
+        if (isBattleActive && anim != null && anim.gameObject.activeSelf)
         {
             anim.ChangeState(MouseState.isIdle);
-        }
-    }
-
-    // 고양이 공격 코루틴
-    private IEnumerator CatsAttackRoutine()
-    {
-        while (IsBattleActive)
-        {
-            yield return new WaitForSeconds(catAttackDelay);
-            CatsAttackBoss();
-        }
-    }
-
-    // 히트박스 내 고양이들이 보스를 공격하는 함수
-    private void CatsAttackBoss()
-    {
-        if (currentBoss == null || bossHitbox == null)
-        {
-            return;
-        }
-
-        CatData[] allCats = FindObjectsOfType<CatData>();
-        foreach (var cat in allCats)
-        {
-            if (cat.isStuned)
-            {
-                continue;
-            }
-
-            RectTransform catRectTransform = cat.GetComponent<RectTransform>();
-            Vector3 catPosition = catRectTransform.anchoredPosition;
-            DragAndDropManager dragManager = cat.GetComponent<DragAndDropManager>();
-
-            // 드래그 중이 아닐 때만 애니메이션 상태 변경
-            if (dragManager != null && !dragManager.isDragging && !cat.isStuned)
-            {
-                if (bossHitbox.IsAtBoundary(catPosition))
-                {
-                    // 공격 실행
-                    int damage = cat.catData.CatDamage;
-                    TakeBossDamage(damage);
-
-                    // 공격 애니메이션으로 변경
-                    cat.ChangeCatState(CatState.isAttack);
-
-                    // 공격 후 전투 대기 상태로 돌아가는 코루틴 시작
-                    StartCoroutine(ReturnToBattleStateCat(cat));
-                }
-                else
-                {
-                    // 히트박스 경계에 없는 경우 전투 대기 애니메이션으로 변경
-                    cat.ChangeCatState(CatState.isBattle);
-                }
-            }
-        }
-    }
-
-    // 공격 후 전투 대기 상태로 돌아가는 코루틴
-    private IEnumerator ReturnToBattleStateCat(CatData cat)
-    {
-        // 공격 애니메이션이 재생되는 시간
-        yield return new WaitForSeconds(1f);
-
-        // 전투가 아직 진행 중이고, 해당 고양이가 아직 활성화 상태일 때만 상태 변경
-        if (isBattleActive && cat != null && cat.gameObject.activeSelf && !cat.isStuned)
-        {
-            DragAndDropManager dragManager = cat.GetComponent<DragAndDropManager>();
-            if (dragManager != null && !dragManager.isDragging)
-            {
-                // 애니메이션 상태 변경
-                cat.ChangeCatState(CatState.isBattle);
-            }
         }
     }
 
@@ -1081,10 +1008,6 @@ public class BattleManager : MonoBehaviour, ISaveable
             UpdateCurrentMaxBossStageText();
             QuestManager.Instance.AddStageCount();
         }
-        else
-        {
-            
-        }
 
         Destroy(currentBoss);
         currentBossData = null;
@@ -1199,17 +1122,10 @@ public class BattleManager : MonoBehaviour, ISaveable
             bossBattleCoroutine = null;
         }
 
-        // 보스와 고양이의 공격 코루틴도 종료
         if (bossAttackRoutine != null)
         {
             StopCoroutine(bossAttackRoutine);
             bossAttackRoutine = null;
-        }
-
-        if (catsAttackRoutine != null)
-        {
-            StopCoroutine(catsAttackRoutine);
-            catsAttackRoutine = null;
         }
     }
 

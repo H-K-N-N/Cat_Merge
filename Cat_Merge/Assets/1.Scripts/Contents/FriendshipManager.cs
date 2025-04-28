@@ -657,7 +657,7 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     // 공격 속도 0.05초 증가 패시브 함수
     private void ApplyAttackSpeedBuff() 
     {
-        BattleManager.Instance.AddPassiveCatAttackSpeedBuff(0.05f);
+        //BattleManager.Instance.AddPassiveCatAttackSpeedBuff(0.05f);
     }
 
     // 젤리 획득 속도 0.05초 증가 패시브 함수

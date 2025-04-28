@@ -273,7 +273,6 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         itemMenuesValueText[index].text = $"{value}";
         itemMenuesFeeText[index].text = "구매완료";
     }
-
     
     // 일반 레벨 UI 설정 함수
     private void SetNormalLevelUI(int index, int level, List<(int step, float value, decimal fee)> itemList)
@@ -304,49 +303,6 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
 
         itemMenuesFeeText[index].text = $"{GameManager.Instance.FormatPriceNumber(itemList[level].fee)}";
     }
-
-    //public int minFoodLv = 0;
-    //public int maxFoodLv = 0;
-    //// 일반 레벨 UI 설정 함수
-    //private void SetNormalLevelUI(int index, int level, List<(int step, float value, decimal fee)> itemList)
-    //{
-    //    itemMenuesLvText[index].text = $"Lv.{itemList[level].step}";
-    //    if (index == 4)
-    //    {
-    //        itemMenuesValueText[index].text = $"{itemList[level].value - 1} → {itemList[level + 1].value - 1}";
-    //        maxFoodLv = (int)itemList[level].value - 1;
-
-    //        if (maxFoodLv >= 15)
-    //        {
-    //            if (foodUpgrade2DisabledButton.gameObject.activeSelf)
-    //            {
-    //                foodUpgrade2DisabledButton.gameObject.SetActive(false);
-    //            }
-    //            if (!foodUpgrade2Button.gameObject.activeSelf)
-    //            {
-    //                foodUpgrade2Button.gameObject.SetActive(true);
-    //            }
-    //        }
-    //    }
-    //    else if (index == 5)
-    //    {
-    //        minFoodLv = (int)itemList[level].value;
-
-    //        if (maxFoodLv < 15)
-    //        {
-    //            itemMenuesValueText[index].text = $"{minFoodLv - 1}~15 → {minFoodLv}~15";
-    //            return;
-    //        }
-
-    //        itemMenuesValueText[index].text = $"{minFoodLv-1}~{maxFoodLv} → {minFoodLv}~{maxFoodLv}";
-    //    }
-    //    else
-    //    {
-    //        itemMenuesValueText[index].text = $"{itemList[level].value} → {itemList[level + 1].value}";
-    //    }
-
-    //    itemMenuesFeeText[index].text = $"{GameManager.Instance.FormatPriceNumber(itemList[level].fee)}";
-    //}
 
     // 시스템 업데이트 함수
     private void UpdateRelatedSystems()
@@ -492,7 +448,7 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
             );
     }
 
-    // 자동 먹이주기 시간 감소 함수
+    // 먹이 업그레이드 함수 (소환할때 더 높은 등급의 고양이가 생성될 확률이 생김)
     private void FoodUpgrade()
     {
         ProcessUpgrade(
@@ -503,7 +459,7 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
             );
     }
 
-    // 자동 먹이주기 시간 감소 함수
+    // 먹이 업그레이드2 함수 (소환할때 낮은 등급의 고양이가 나오지 않게 함)
     private void FoodUpgrade2()
     {
         ProcessUpgrade(

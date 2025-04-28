@@ -359,7 +359,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         {
             while (GameManager.Instance.CanSpawnCat())
             {
-                SpawnManager.Instance.SpawnCat();
+                SpawnManager.Instance.SpawnAutoMergeCat();
                 yield return waitSpawnInterval;
             }
             yield return null;

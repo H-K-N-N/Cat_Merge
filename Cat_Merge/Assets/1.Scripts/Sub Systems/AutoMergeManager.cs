@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 
-// 자동머지 관련 스크립트
+// 자동합성 관련 스크립트
 public class AutoMergeManager : MonoBehaviour, ISaveable
 {
 
@@ -16,28 +16,28 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     public static AutoMergeManager Instance { get; private set; }
 
     [Header("---[UI]")]
-    [SerializeField] private GameObject autoMergePanel;             // 자동 머지 패널
-    [SerializeField] private Button openAutoMergePanelButton;       // 자동 머지 패널 열기 버튼
-    [SerializeField] private Button closeAutoMergePanelButton;      // 자동 머지 패널 닫기 버튼
-    [SerializeField] private Button autoMergeStateButton;           // 자동 머지 상태 버튼
-    [SerializeField] private TextMeshProUGUI autoMergeCostText;     // 자동 머지 비용 텍스트
-    [SerializeField] private TextMeshProUGUI autoMergeTimerText;    // 자동 머지 타이머 텍스트
-    [SerializeField] private TextMeshProUGUI explainText;           // 자동 머지 설명 텍스트
+    [SerializeField] private GameObject autoMergePanel;             // 자동 합성 패널
+    [SerializeField] private Button openAutoMergePanelButton;       // 자동 합성 패널 열기 버튼
+    [SerializeField] private Button closeAutoMergePanelButton;      // 자동 합성 패널 닫기 버튼
+    [SerializeField] private Button autoMergeStateButton;           // 자동 합성 상태 버튼
+    [SerializeField] private TextMeshProUGUI autoMergeCostText;     // 자동 합성 비용 텍스트
+    [SerializeField] private TextMeshProUGUI autoMergeTimerText;    // 자동 합성 타이머 텍스트
+    [SerializeField] private TextMeshProUGUI explainText;           // 자동 합성 설명 텍스트
 
     [Header("---[Auto Merge Settings]")]
-    private const float MAX_AUTO_MERGE_DURATION = 86400f;                       // 최대 자동 머지 시간 (24시간)
+    private const float MAX_AUTO_MERGE_DURATION = 86400f;                       // 최대 자동 합성 시간 (24시간)
     private const float MOVE_DURATION = 0.3f;                                   // 고양이가 이동하는 데 걸리는 시간 (이동 속도)
-    private const float AUTO_MERGE_DURATION = 10.0f;                            // 자동 머지 기본 지속 시간
-    private const int AUTO_MERGE_COST = 30;                                     // 자동 머지 비용
-    private WaitForSeconds waitAutoMergeInterval = new WaitForSeconds(0.5f);    // 자동 머지 간격
+    private const float AUTO_MERGE_DURATION = 10.0f;                            // 자동 합성 기본 지속 시간
+    private const int AUTO_MERGE_COST = 30;                                     // 자동 합성 비용
+    private WaitForSeconds waitAutoMergeInterval = new WaitForSeconds(0.5f);    // 자동 합성 간격
     private WaitForSeconds waitSpawnInterval = new WaitForSeconds(0.1f);        // 소환 간격
 
-    private float startTime;                        // 자동 머지 시작 시간
-    private float currentAutoMergeDuration;         // 현재 자동 머지 지속 시간
-    private bool isAutoMergeActive = false;         // 자동 머지 활성화 상태
+    private float startTime;                        // 자동 합성 시작 시간
+    private float currentAutoMergeDuration;         // 현재 자동 합성 지속 시간
+    private bool isAutoMergeActive = false;         // 자동 합성 활성화 상태
     private bool isPaused = false;                  // 일시정지 상태
     private float pausedTimeRemaining = 0f;         // 일시정지 시점의 남은 시간
-    private Coroutine autoMergeCoroutine;           // 자동 머지 코루틴
+    private Coroutine autoMergeCoroutine;           // 자동 합성 코루틴
 
     private float panelWidth;           // Panel Width
     private float panelHeight;          // Panel Height
@@ -147,7 +147,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
     #region Auto Merge System
 
-    // 자동머지 시작 함수
+    // 자동합성 시작 함수
     public void StartAutoMerge()
     {
         if (GameManager.Instance.Cash < AUTO_MERGE_COST)
@@ -158,7 +158,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
         if (currentAutoMergeDuration + AUTO_MERGE_DURATION > MAX_AUTO_MERGE_DURATION)
         {
-            NotificationManager.Instance.ShowNotification("자동머지는 최대 24시간까지 가능합니다!!");
+            NotificationManager.Instance.ShowNotification("자동합성은 최대 24시간까지만 가능합니다!!");
             return;
         }
 
@@ -168,7 +168,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         SaveToLocal();
     }
 
-    // 자동머지 버튼 클릭 처리 함수
+    // 자동합성 버튼 클릭 처리 함수
     public void OnClickedAutoMerge()
     {
         if (!isAutoMergeActive)
@@ -202,7 +202,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // 자동머지 코루틴
+    // 자동합성 코루틴
     private IEnumerator AutoMergeCoroutine()
     {
         StartCoroutine(SpawnCatsWhileAutoMerge());
@@ -221,7 +221,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
             bool mergeFound = false;
 
-            // 가장 낮은 등급부터 순차적으로 머지 시도
+            // 가장 낮은 등급부터 순차적으로 합성 시도
             for (int i = 0; i < allCats.Count; i++)
             {
                 if (allCats[i] == null || !allCats[i].gameObject.activeSelf) continue;
@@ -259,13 +259,13 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         EndAutoMerge();
     }
 
-    // 머지중인 고양이 정리 함수
+    // 합성중인 고양이 정리 함수
     private void CleanupMergingCats()
     {
         mergingCats.RemoveWhere(cat => cat == null || !cat.gameObject.activeSelf || cat.isDragging);
     }
 
-    // 유효한 머지인지 확인하는 함수
+    // 유효한 합성인지 확인하는 함수
     private bool IsValidMergePair(DragAndDropManager cat1, DragAndDropManager cat2)
     {
         return cat1 != null && cat2 != null &&
@@ -275,7 +275,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
                cat1.catData.CatGrade == cat2.catData.CatGrade;
     }
 
-    // 자동머지 랜덤위치 가져오는 함수
+    // 자동합성 랜덤위치 가져오는 함수
     private Vector2 GetRandomPosition()
     {
         // 활성화된 고양이만 찾도록 수정
@@ -298,7 +298,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         );
     }
 
-    // 머지 실행 코루틴
+    // 합성 실행 코루틴
     private IEnumerator ExecuteMerge(DragAndDropManager cat1, DragAndDropManager cat2, Vector2 mergePosition)
     {
         if (cat1 == null || cat2 == null) yield break;
@@ -331,7 +331,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         );
     }
 
-    // 머지 완료 처리 함수
+    // 합성 완료 처리 함수
     private void CompleteMerge(DragAndDropManager cat1, DragAndDropManager cat2)
     {
         if (cat1 == null || cat2 == null || !cat1.gameObject.activeSelf || !cat2.gameObject.activeSelf) return;
@@ -352,7 +352,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // 자동머지 중 고양이 소환하는 코루틴
+    // 자동합성 중 고양이 소환하는 코루틴
     private IEnumerator SpawnCatsWhileAutoMerge()
     {
         while (isAutoMergeActive && !isPaused)
@@ -399,7 +399,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
                GameManager.Instance.AllCatData.All(cat => cat.CatGrade != catData.CatGrade + 1);
     }
 
-    // 자동머지 종료 함수
+    // 자동합성 종료 함수
     private void EndAutoMerge()
     {
         isAutoMergeActive = false;
@@ -412,13 +412,13 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         SaveToLocal();
     }
 
-    // 머지중인 고양이 정지 함수
+    // 합성중인 고양이 정지 함수
     public void StopMerging(DragAndDropManager cat)
     {
         mergingCats.Remove(cat);
     }
 
-    // 고양이가 머지중인지 확인하는 함수
+    // 고양이가 합성중인지 확인하는 함수
     public bool IsMerging(DragAndDropManager cat)
     {
         return mergingCats.Contains(cat);
@@ -429,7 +429,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
     #region UI System
 
-    // 자동머지 비용 Text 업데이트 함수
+    // 자동합성 비용 Text 업데이트 함수
     private void UpdateAutoMergeCostText()
     {
         if (autoMergeCostText != null)
@@ -438,7 +438,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // 자동머지 패널 여는 함수
+    // 자동합성 패널 여는 함수
     private void OpenAutoMergePanel()
     {
         if (autoMergePanel != null)
@@ -447,7 +447,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // 자동머지 패널 닫는 함수
+    // 자동합성 패널 닫는 함수
     private void CloseAutoMergePanel()
     {
         if (autoMergePanel != null)
@@ -456,7 +456,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // 자동머지 상태에 따라 타이머 텍스트 가시성 업데이트 함수
+    // 자동합성 상태에 따라 타이머 텍스트 가시성 업데이트 함수
     public void UpdateAutoMergeTimerVisibility(bool isVisible)
     {
         if (autoMergeTimerText != null)
@@ -472,7 +472,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         UpdateExplainText(remainingTime);
     }
 
-    // 자동머지 타이머 업데이트 함수
+    // 자동합성 타이머 업데이트 함수
     public void UpdateAutoMergeTimerText(int remainingTime)
     {
         if (autoMergeTimerText != null)
@@ -481,7 +481,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // 자동머지 설명 텍스트 업데이트 함수
+    // 자동합성 설명 텍스트 업데이트 함수
     private void UpdateExplainText(int remainingTime)
     {
         if (explainText != null)
@@ -498,7 +498,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
     #region Battle System
 
-    // 자동 머지 일시정지 함수
+    // 자동합성 일시정지 함수
     public void PauseAutoMerge()
     {
         if (isAutoMergeActive && !isPaused)
@@ -514,10 +514,11 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         else
         {
             openAutoMergePanelButton.interactable = false;
+            DisableAutoMergeUI();
         }
     }
 
-    // 자동 머지 이어하기 함수
+    // 자동합성 이어하기 함수
     public void ResumeAutoMerge()
     {
         if (isPaused && pausedTimeRemaining > 0)
@@ -536,7 +537,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // 전투 시작시 자동머지 UI 비활성화 함수
+    // 전투 시작시 자동합성 UI 비활성화 함수
     private void DisableAutoMergeUI()
     {
         openAutoMergePanelButton.interactable = false;
@@ -546,7 +547,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // 전투 종료시 자동머지 UI 활성화 함수
+    // 전투 종료시 자동합성 UI 활성화 함수
     private void EnableAutoMergeUI()
     {
         openAutoMergePanelButton.interactable = true;
@@ -588,7 +589,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
         if (savedData.remainingTime > 0)
         {
-            // 남은 시간이 있으면 자동 머지 시작
+            // 남은 시간이 있으면 자동 합성 시작
             this.startTime = Time.time;
             this.currentAutoMergeDuration = savedData.remainingTime;
             this.isAutoMergeActive = true;
@@ -599,7 +600,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
         else
         {
-            // 남은 시간이 없으면 자동 머지 비활성화
+            // 남은 시간이 없으면 자동 합성 비활성화
             this.isAutoMergeActive = false;
             this.isPaused = false;
             this.currentAutoMergeDuration = 0f;

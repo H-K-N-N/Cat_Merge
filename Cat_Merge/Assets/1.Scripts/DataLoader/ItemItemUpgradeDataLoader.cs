@@ -23,7 +23,7 @@ public class ItemItemUpgradeDataLoader : MonoBehaviour
             Destroy(gameObject);
         }
 
-        ParseCSV("Item_Item_UpgradeDB");
+        ParseCSV("ItemUpgradeDB");
     }
 
     public void ParseCSV(string fileName)

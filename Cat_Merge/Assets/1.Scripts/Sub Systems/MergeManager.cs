@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System;
-using System.Collections.Generic;
+using TMPro;
 
 // 고양이 머지 스크립트
 [DefaultExecutionOrder(-1)]
@@ -18,12 +18,14 @@ public class MergeManager : MonoBehaviour, ISaveable
     [SerializeField] private GameObject mergePanel;                 // 머지 On/Off 패널
     [SerializeField] private Button closeMergePanelButton;          // 머지 패널 닫기 버튼
     [SerializeField] private Button mergeStateButton;               // 머지 상태 버튼
+    [SerializeField] private TextMeshProUGUI stateText;             // 현재 상태 텍스트 (활성화 or 비활성화)
+    [SerializeField] private TextMeshProUGUI mergeButtonText;       // 머지 버튼 텍스트 (활성화 or 비활성화)
     private bool isMergeEnabled;                                    // 머지 활성화 상태
     private bool previousMergeState;                                // 이전 상태 저장
 
     [Header("---[UI Color]")]
     private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
-    private const string inactiveColorCode = "#FFFFFF";             // 비활성화상태 Color
+    private const string inactiveColorCode = "#87FF3C";             // 비활성화상태 Color
 
 
     private bool isDataLoaded = false;                              // 데이터 로드 확인
@@ -144,6 +146,9 @@ public class MergeManager : MonoBehaviour, ISaveable
                 openMergePanelButton.GetComponent<Image>().color = color;
             }
         }
+
+        stateText.text = !isMergeEnabled ? "현재상태: 비활성화" : "현재상태: 활성화";
+        mergeButtonText.text = isMergeEnabled ? "비활성화" : "활성화";
     }
 
     // 머지 상태 반환 함수

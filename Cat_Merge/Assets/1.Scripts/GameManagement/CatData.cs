@@ -49,6 +49,10 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     private bool isCollectingCoins = true;          // 코인 수집 활성화 상태
     private Coroutine autoCollectCoroutine;         // 코인 수집 코루틴
 
+    [Header("Battle")]
+    private Coroutine attackCoroutine;              // 공격 코루틴
+    private float nextAttackTime = 0f;              // 다음 공격 시간
+
     #endregion
 
 
@@ -66,73 +70,6 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         StartCoroutine(SetupCatImage());
         autoCollectCoroutine = StartCoroutine(AutoCollectCoins());
         UpdateHPBar();
-    }
-
-    // 고양이 이미지 설정 코루틴 (Start 이후에 실행)
-    private IEnumerator SetupCatImage()
-    {
-        // 한 프레임 기다려서 모든 컴포넌트가 초기화되도록 함
-        yield return null;
-
-        // 원본 이미지 비활성화 (투명하게 만들되 레이캐스트는 가능하도록)
-        catImage.enabled = true;
-        Color imageColor = catImage.color;
-        imageColor.a = 0f;
-        catImage.color = imageColor;
-        catImage.sprite = catData.CatImage;
-
-        // 원본 애니메이터 참조
-        Animator originalAnimator = GetComponent<Animator>();
-        AnimatorManager originalAnimManager = GetComponent<AnimatorManager>();
-
-        if (catImageObject != null)
-        {
-            // 이미 애니메이터가 있는지 확인
-            Animator catImageAnimator = catImageObject.GetComponent<Animator>();
-            if (catImageAnimator == null && originalAnimator != null)
-            {
-                // Cat Image에 애니메이터 추가
-                catImageAnimator = catImageObject.AddComponent<Animator>();
-                catImageAnimator.runtimeAnimatorController = originalAnimator.runtimeAnimatorController;
-
-                // 원본 애니메이터 비활성화
-                originalAnimator.enabled = false;
-            }
-
-            // 이미 AnimatorManager가 있는지 확인
-            AnimatorManager catImageAnimManager = catImageObject.GetComponent<AnimatorManager>();
-            if (catImageAnimManager == null && originalAnimManager != null)
-            {
-                // Cat Image에 AnimatorManager 추가
-                catImageAnimManager = catImageObject.AddComponent<AnimatorManager>();
-
-                // AnimatorManager 데이터 복사 (다음 프레임에 수행)
-                yield return null;
-
-                // 원본 AnimatorManager에서 데이터 참조할 수 있는지 확인
-                if (originalAnimManager.overrideDataList != null)
-                {
-                    catImageAnimManager.catGrade = originalAnimManager.catGrade;
-                    catImageAnimManager.overrideDataList = originalAnimManager.overrideDataList;
-
-                    // 복사 후 원본 비활성화
-                    originalAnimManager.enabled = false;
-                }
-            }
-
-            // 고양이 이미지 업데이트
-            if (catData != null)
-            {
-                catSpriteImage.sprite = catData.CatImage;
-
-                // AnimatorManager 등급 설정
-                AnimatorManager animManager = catImageObject.GetComponent<AnimatorManager>();
-                if (animManager != null)
-                {
-                    animManager.ApplyAnim(catData.CatGrade);
-                }
-            }
-        }
     }
 
     #endregion
@@ -210,6 +147,73 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         if (catImageAnimManager != null)
         {
             catImageAnimManager.ApplyAnim(catData.CatGrade);
+        }
+    }
+
+    // 고양이 이미지 설정 코루틴
+    private IEnumerator SetupCatImage()
+    {
+        // 한 프레임 기다려서 모든 컴포넌트가 초기화되도록 함
+        yield return null;
+
+        // 원본 이미지 비활성화 (투명하게 만들되 레이캐스트는 가능하도록)
+        catImage.enabled = true;
+        Color imageColor = catImage.color;
+        imageColor.a = 0f;
+        catImage.color = imageColor;
+        catImage.sprite = catData.CatImage;
+
+        // 원본 애니메이터 참조
+        Animator originalAnimator = GetComponent<Animator>();
+        AnimatorManager originalAnimManager = GetComponent<AnimatorManager>();
+
+        if (catImageObject != null)
+        {
+            // 이미 애니메이터가 있는지 확인
+            Animator catImageAnimator = catImageObject.GetComponent<Animator>();
+            if (catImageAnimator == null && originalAnimator != null)
+            {
+                // Cat Image에 애니메이터 추가
+                catImageAnimator = catImageObject.AddComponent<Animator>();
+                catImageAnimator.runtimeAnimatorController = originalAnimator.runtimeAnimatorController;
+
+                // 원본 애니메이터 비활성화
+                originalAnimator.enabled = false;
+            }
+
+            // 이미 AnimatorManager가 있는지 확인
+            AnimatorManager catImageAnimManager = catImageObject.GetComponent<AnimatorManager>();
+            if (catImageAnimManager == null && originalAnimManager != null)
+            {
+                // Cat Image에 AnimatorManager 추가
+                catImageAnimManager = catImageObject.AddComponent<AnimatorManager>();
+
+                // AnimatorManager 데이터 복사 (다음 프레임에 수행)
+                yield return null;
+
+                // 원본 AnimatorManager에서 데이터 참조할 수 있는지 확인
+                if (originalAnimManager.overrideDataList != null)
+                {
+                    catImageAnimManager.catGrade = originalAnimManager.catGrade;
+                    catImageAnimManager.overrideDataList = originalAnimManager.overrideDataList;
+
+                    // 복사 후 원본 비활성화
+                    originalAnimManager.enabled = false;
+                }
+            }
+
+            // 고양이 이미지 업데이트
+            if (catData != null)
+            {
+                catSpriteImage.sprite = catData.CatImage;
+
+                // AnimatorManager 등급 설정
+                AnimatorManager animManager = catImageObject.GetComponent<AnimatorManager>();
+                if (animManager != null)
+                {
+                    animManager.ApplyAnim(catData.CatGrade);
+                }
+            }
         }
     }
 
@@ -342,6 +346,11 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             Vector3 targetPosition = bossHitbox.GetClosestBoundaryPoint(catPosition);
             StartCoroutine(SmoothMoveToPosition(targetPosition));
         }
+        else if (bossHitbox.IsInHitbox(catPosition) && BattleManager.Instance.isBattleActive)
+        {
+            // 히트박스에 도달하면 전투 상태로 전환
+            SetBattleState(true);
+        }
     }
 
     // 보스 히트박스 경계로 고양이 이동시키는 함수
@@ -443,10 +452,109 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         UpdateHPBar();
     }
 
+    // 전투 상태 설정 함수
+    private void SetBattleState(bool isInBattle)
+    {
+        if (isInBattle && !isStuned)
+        {
+            ChangeCatState(CatState.isBattle);
+            StartAttacking();
+        }
+        else
+        {
+            ChangeCatState(CatState.isIdle);
+            StopAttacking();
+        }
+    }
+
+    // 공격 시작 함수
+    private void StartAttacking()
+    {
+        if (attackCoroutine != null)
+        {
+            StopCoroutine(attackCoroutine);
+        }
+        attackCoroutine = StartCoroutine(AttackRoutine());
+    }
+
+    // 공격 중지 함수
+    private void StopAttacking()
+    {
+        if (attackCoroutine != null)
+        {
+            StopCoroutine(attackCoroutine);
+            attackCoroutine = null;
+        }
+    }
+
+    // 공격 코루틴
+    private IEnumerator AttackRoutine()
+    {
+        // 히트박스에 도달하자마자 즉시 첫 공격 실행
+        if (!isStuned)
+        {
+            PerformAttack();
+        }
+
+        // 첫 공격 후 다음 공격 시간 설정
+        float baseAttackSpeed = catData.CatAttackSpeed;
+        float actualAttackSpeed = baseAttackSpeed - catData.PassiveAttackSpeed;
+        nextAttackTime = Time.time + actualAttackSpeed;
+
+        while (BattleManager.Instance.IsBattleActive)
+        {
+            if (Time.time >= nextAttackTime && !isStuned)
+            {
+                RectTransform catRectTransform = GetComponent<RectTransform>();
+                Vector3 catPosition = catRectTransform.anchoredPosition;
+                DragAndDropManager dragManager = GetComponent<DragAndDropManager>();
+
+                // 드래그 중이 아니고 히트박스 경계에 있을 때만 공격
+                if (!dragManager.isDragging && BattleManager.Instance.bossHitbox.IsAtBoundary(catPosition))
+                {
+                    PerformAttack();
+
+                    // 다음 공격 시간 설정
+                    actualAttackSpeed = baseAttackSpeed - catData.PassiveAttackSpeed;
+                    nextAttackTime = Time.time + actualAttackSpeed;
+                }
+            }
+            yield return null;
+        }
+    }
+
+    // 공격 실행 함수
+    private void PerformAttack()
+    {
+        // 공격 실행
+        BattleManager.Instance.TakeBossDamage(catData.CatDamage);
+
+        // 공격 애니메이션으로 변경
+        ChangeCatState(CatState.isAttack);
+
+        // 공격 후 전투 대기 상태로 돌아가는 코루틴 시작
+        StartCoroutine(ReturnToBattleState());
+    }
+
+    // 공격 후 전투 대기 상태로 돌아가는 코루틴
+    private IEnumerator ReturnToBattleState()
+    {
+        yield return new WaitForSeconds(1f);
+
+        if (BattleManager.Instance.IsBattleActive && gameObject.activeSelf && !isStuned)
+        {
+            DragAndDropManager dragManager = GetComponent<DragAndDropManager>();
+            if (!dragManager.isDragging)
+            {
+                ChangeCatState(CatState.isBattle);
+            }
+        }
+    }
+
     #endregion
 
 
-    #region Auto Movement
+    #region Auto Movement & Move System
 
     // 자동 이동 상태 설정 함수
     public void SetAutoMoveState(bool isEnabled)
@@ -631,15 +739,15 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
         if (!GetComponent<DragAndDropManager>().isDragging)
         {
-            // 전투가 아직 진행중이고 히트박스 경계에 도착했을 때만 isBattle 상태로 변경
+            // 전투가 아직 진행중이고 히트박스 경계에 도착했을 때 전투 상태로 변경
             if (BattleManager.Instance.isBattleActive && BattleManager.Instance.bossHitbox != null &&
                 BattleManager.Instance.bossHitbox.IsAtBoundary(rectTransform.anchoredPosition))
             {
-                ChangeCatState(CatState.isBattle);
+                SetBattleState(true);
             }
             else
             {
-                ChangeCatState(CatState.isIdle);
+                SetBattleState(false);
             }
         }
 

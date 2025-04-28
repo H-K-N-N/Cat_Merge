@@ -86,7 +86,10 @@ public class BattleManager : MonoBehaviour, ISaveable
     private bool isAutoRetryEnabled;                                        // 하위 단계 자동 도전 상태
     private Coroutine autoRetryToggleCoroutine;                             // 토글 애니메이션 코루틴
 
-
+    [Header("---[UI Color]")]
+    private const string activeColorCode = "#FFCC74";           // 활성화상태 Color
+    private const string inactiveColorCode = "#87FF3C";         // 비활성화상태 Color
+    
     [Header("---[Warning UI]")]
     [SerializeField] private GameObject warningPanel;           // 전투시스템 시작시 나오는 경고 Panel (warningDuration동안 지속)
     [SerializeField] private Slider warningSlider;              // 리스폰시간이 됐을때 차오르는 Slider (warningDuration만큼 차오름)
@@ -922,9 +925,11 @@ public class BattleManager : MonoBehaviour, ISaveable
     {
         if (autoRetryPanelButtonImage != null)
         {
-            autoRetryPanelButtonImage.color = isEnabled ?
-                new Color32(130, 255, 0, 255) :
-                new Color32(255, 153, 21, 255);
+            string colorCode = !isEnabled ? activeColorCode : inactiveColorCode;
+            if (ColorUtility.TryParseHtmlString(colorCode, out Color color))
+            {
+                autoRetryPanelButtonImage.color = color;
+            }
         }
     }
 

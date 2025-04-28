@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using TMPro;
 
 // 고양이 자동이동 스크립트
 [DefaultExecutionOrder(-1)]
@@ -17,13 +18,15 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     [SerializeField] private GameObject autoMovePanel;              // 자동 이동 On/Off 패널
     [SerializeField] private Button closeAutoMovePanelButton;       // 자동 이동 패널 닫기 버튼
     [SerializeField] private Button autoMoveStateButton;            // 자동 이동 상태 버튼
+    [SerializeField] private TextMeshProUGUI stateText;             // 현재 상태 텍스트 (활성화 or 비활성화)
+    [SerializeField] private TextMeshProUGUI autoMoveButtonText;    // 자동 이동 버튼 텍스트 (활성화 or 비활성화)
     private const float autoMoveTime = 10f;                         // 자동 이동 시간
     private bool isAutoMoveEnabled;                                 // 자동 이동 활성화 상태
     private bool previousAutoMoveState;                             // 이전 상태 저장
 
     [Header("---[UI Color]")]
     private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
-    private const string inactiveColorCode = "#FFFFFF";             // 비활성화상태 Color
+    private const string inactiveColorCode = "#87FF3C";             // 비활성화상태 Color
 
 
     private bool isDataLoaded = false;                              // 데이터 로드 확인
@@ -132,6 +135,9 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
         {
             openAutoMovePanelButton.GetComponent<Image>().color = color;
         }
+
+        stateText.text = !isAutoMoveEnabled ? "현재상태: 비활성화" : "현재상태: 활성화";
+        autoMoveButtonText.text = isAutoMoveEnabled ? "비활성화" : "활성화";
     }
 
     // 현재 자동이동 상태 반환 함수

@@ -36,6 +36,9 @@ public class Cat
     private float passiveCoinCollectSpeed = 0f;     // 패시브 재화 수집 속도 증가량 (기본값 0초)
     public float PassiveCoinCollectSpeed { get => passiveCoinCollectSpeed; set => passiveCoinCollectSpeed = value; }
 
+    private float passiveAttackSpeed = 0f;          // 패시브 공격 속도 증가량 (기본값 0초)
+    public float PassiveAttackSpeed { get => passiveAttackSpeed; set => passiveAttackSpeed = value; }
+
 
 
     // 최종 스탯 계산
@@ -123,6 +126,18 @@ public class Cat
     public void ResetPassiveCoinCollectSpeedBuff()
     {
         PassiveCoinCollectSpeed = 0f;
+    }
+
+    // 패시브 공격 속도 증가 적용 함수
+    public void AddPassiveAttackSpeedBuff(float seconds)
+    {
+        PassiveAttackSpeed += seconds;
+    }
+
+    // 패시브 공격 증가 초기화 함수
+    public void ResetPassiveAttackSpeedBuff()
+    {
+        PassiveAttackSpeed = 0f;
     }
 
 

@@ -490,8 +490,16 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     // 공격 코루틴
     private IEnumerator AttackRoutine()
     {
-        // 히트박스에 도달한 시점부터 첫 공격까지 대기
-        nextAttackTime = Time.time + catData.CatAttackSpeed;
+        // 히트박스에 도달하자마자 즉시 첫 공격 실행
+        if (!isStuned)
+        {
+            PerformAttack();
+        }
+
+        // 첫 공격 후 다음 공격 시간 설정
+        float baseAttackSpeed = catData.CatAttackSpeed;
+        float actualAttackSpeed = baseAttackSpeed - catData.PassiveAttackSpeed;
+        nextAttackTime = Time.time + actualAttackSpeed;
 
         while (BattleManager.Instance.IsBattleActive)
         {
@@ -504,21 +512,28 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
                 // 드래그 중이 아니고 히트박스 경계에 있을 때만 공격
                 if (!dragManager.isDragging && BattleManager.Instance.bossHitbox.IsAtBoundary(catPosition))
                 {
-                    // 공격 실행
-                    BattleManager.Instance.TakeBossDamage(catData.CatDamage);
-
-                    // 공격 애니메이션으로 변경
-                    ChangeCatState(CatState.isAttack);
-
-                    // 공격 후 전투 대기 상태로 돌아가는 코루틴 시작
-                    StartCoroutine(ReturnToBattleState());
+                    PerformAttack();
 
                     // 다음 공격 시간 설정
-                    nextAttackTime = Time.time + catData.CatAttackSpeed;
+                    actualAttackSpeed = baseAttackSpeed - catData.PassiveAttackSpeed;
+                    nextAttackTime = Time.time + actualAttackSpeed;
                 }
             }
             yield return null;
         }
+    }
+
+    // 공격 실행 함수
+    private void PerformAttack()
+    {
+        // 공격 실행
+        BattleManager.Instance.TakeBossDamage(catData.CatDamage);
+
+        // 공격 애니메이션으로 변경
+        ChangeCatState(CatState.isAttack);
+
+        // 공격 후 전투 대기 상태로 돌아가는 코루틴 시작
+        StartCoroutine(ReturnToBattleState());
     }
 
     // 공격 후 전투 대기 상태로 돌아가는 코루틴

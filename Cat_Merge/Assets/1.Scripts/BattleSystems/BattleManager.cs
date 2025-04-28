@@ -32,7 +32,6 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     private const float GIVEUP_BUTTON_DELAY = 2f;               // 항복 버튼 활성화 딜레이
     private const float BOSS_ATTACK_DELAY = 2f;                 // 보스 공격 딜레이
-    //private float catAttackDelay = 2f;                          // 고양이 공격 딜레이
     
 
     private GameObject currentBoss;                             // 현재 보스
@@ -272,12 +271,6 @@ public class BattleManager : MonoBehaviour, ISaveable
             currentMaxBossStageText.text = $"최대 클리어 보스 스테이지 : {maxClearedStage}";
         }
     }
-
-    //// 패시브로 인한 고양이 공격속도 증가 함수
-    //public void AddPassiveCatAttackSpeedBuff(float amount)
-    //{
-    //    catAttackDelay -= amount;
-    //}
 
     #endregion
 

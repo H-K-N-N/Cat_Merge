@@ -245,6 +245,9 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         // 이벤트 발생
         OnCatDataChanged?.Invoke();
 
+        // BuyCatManager의 구매 슬롯 상태 업데이트
+        BuyCatManager.Instance?.UnlockBuySlot(CatGrade);
+
         SaveToLocal();
     }
 

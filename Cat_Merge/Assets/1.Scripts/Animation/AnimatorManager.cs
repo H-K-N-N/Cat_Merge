@@ -10,7 +10,8 @@ public enum CatState
     isGetCoin,
     isGrab,
     isBattle,
-    isAttack
+    isAttack,
+    isPick
 }
 
 [System.Serializable]
@@ -35,7 +36,10 @@ public class AnimatorManager : MonoBehaviour
     void Awake()
     {
         animator = GetComponent<Animator>();
-
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>(); // 자식에서도 찾아보기
+        }
         // 딕셔너리 초기화
         overrideDict = new Dictionary<int, AnimatorOverrideController>();
         foreach (var data in overrideDataList)
@@ -72,6 +76,7 @@ public class AnimatorManager : MonoBehaviour
         animator.SetBool("isGrab", false);
         animator.SetBool("isBattle", false);
         animator.SetBool("isAttack", false);
+        animator.SetBool("isPick", false);
     }
 
     private void SetBoolForState(CatState state)

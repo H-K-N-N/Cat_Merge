@@ -270,7 +270,7 @@ public class GameManager : MonoBehaviour, ISaveable
     {
         if (coinText != null)
         {
-            coinText.text = FormatCoinNumber(coin);
+            coinText.text = FormatNumber(coin);
         }
     }
 
@@ -279,78 +279,54 @@ public class GameManager : MonoBehaviour, ISaveable
     {
         if (cashText != null)
         {
-            cashText.text = cash.ToString("N0");
+            //cashText.text = cash.ToString("N0");
+            cashText.text = FormatNumber(cash);
         }
     }
 
-    // 재화단위 설정 함수
-    public string FormatCoinNumber(long number)
+    // 모든 단위 통일화
+    public string FormatNumber(long number)
     {
-        if (number >= 1_0000_0000_0000) // 1조 이상
+        if (number < 1000)
         {
-            long trillion = number / 1_0000_0000_0000; // 조 단위
-            long billion = (number % 1_0000_0000_0000) / 1_0000_0000; // 억 단위
-
-            if (billion == 0)
-                return $"{trillion}조";
-            return $"{trillion}조 {billion}억";
-        }
-        if (number >= 1_0000_0000) // 1억 이상
-        {
-            long billion = number / 1_0000_0000; // 억 단위
-            long tenThousand = (number % 1_0000_0000) / 10000; // 만 단위
-
-            if (tenThousand == 0)
-                return $"{billion}억";
-            return $"{billion}억 {tenThousand}만";
-        }
-        if (number >= 10000) // 1만 이상
-        {
-            long tenThousand = number / 10000; // 만 단위
-            long remainder = number % 10000; // 나머지
-
-            if (remainder == 0)
-                return $"{tenThousand}만";
-            return $"{tenThousand}만 {remainder}";
+            return number.ToString(); // 999까지는 그대로 출력
         }
 
-        return number.ToString(); // 1만 미만은 그대로 출력
-    }
+        List<string> suffixes = new List<string>();
 
-    // decimal 타입 오버로딩 추가
-    public string FormatCoinNumber(decimal number)
-    {
-        return FormatCoinNumber((long)number);
-    }
-
-    public string FormatPriceNumber(long number)
-    {
-        if (number >= 1_0000_0000_0000) // 1조 이상
+        // 1글자 단위 생성 (A-Z)
+        for (char c = 'a'; c <= 'z'; c++)
         {
-            long trillion = number / 1_0000_0000_0000; // 조 단위
-
-            return $"{trillion}조";
-        }
-        if (number >= 1_0000_0000) // 1억 이상
-        {
-            long billion = number / 1_0000_0000; // 억 단위
-
-            return $"{billion}억";
-        }
-        if (number >= 10000) // 1만 이상
-        {
-            long tenThousand = number / 10000; // 만 단위
-
-            return $"{tenThousand}만";
+            suffixes.Add(c.ToString());
         }
 
-        return number.ToString(); // 1만 미만은 그대로 출력
+        // 2글자 단위 생성 (AA-ZZ)
+        for (char c1 = 'a'; c1 <= 'z'; c1++)
+        {
+            for (char c2 = 'a'; c2 <= 'z'; c2++)
+            {
+                suffixes.Add(c1.ToString() + c2.ToString());
+            }
+        }
+
+        int suffixIndex = 0;
+        double value = number;
+
+        // 1,000씩 나누며 접미사를 선택 (접미사 A부터 시작)
+        while (value >= 1000 && suffixIndex < suffixes.Count)
+        {
+            value /= 1000;
+            suffixIndex++;
+        }
+
+        // 소수점 2자리까지 표시하며 반올림 없이 출력
+        return $"{Math.Floor(value * 100) / 100:F2}{suffixes[suffixIndex - 1]}";
     }
 
     // decimal 타입 오버로딩 추가
-    public string FormatPriceNumber(decimal number)
+    public string FormatNumber(decimal number)
     {
-        return FormatPriceNumber((long)number);
+        return FormatNumber((long)number);
     }
 
     #endregion

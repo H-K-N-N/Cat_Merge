@@ -133,8 +133,8 @@ public class BuyCatManager : MonoBehaviour, ISaveable
         {
             var info = GetCatPurchaseInfo(i);
             buyCatCountExplainTexts[i].text = $"구매 횟수 : {info.coinPurchaseCount}회 + {info.cashPurchaseCount}회";
-            buyCatCoinFeeTexts[i].text = $"{GameManager.Instance.FormatPriceNumber(info.coinPrice)}";
-            buyCatCashFeeTexts[i].text = $"{GameManager.Instance.FormatPriceNumber(info.cashPrice)}";
+            buyCatCoinFeeTexts[i].text = $"{GameManager.Instance.FormatNumber(info.coinPrice)}";
+            buyCatCashFeeTexts[i].text = $"{GameManager.Instance.FormatNumber(info.cashPrice)}";
         }
 
         isDataLoaded = shouldSave;

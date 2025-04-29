@@ -298,8 +298,8 @@ GameObject:
   - component: {fileID: 603830592081517130}
   - component: {fileID: 359584132086266209}
   - component: {fileID: 7663741558036519260}
-  - component: {fileID: 4914418154924827042}
-  - component: {fileID: 8556016598318902751}
+  - component: {fileID: 441293769898775878}
+  - component: {fileID: 3227713785830260841}
   m_Layer: 6
   m_Name: Cat Image
   m_TagString: Untagged
@@ -364,7 +364,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!95 &4914418154924827042
+--- !u!95 &441293769898775878
 Animator:
   serializedVersion: 7
   m_ObjectHideFlags: 0
@@ -386,7 +386,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &8556016598318902751
+--- !u!114 &3227713785830260841
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -443,7 +443,6 @@ GameObject:
   - component: {fileID: 4440387383682111487}
   - component: {fileID: -3185705115251794711}
   - component: {fileID: 6581758322604903725}
-  - component: {fileID: 1377021694030487119}
   m_Layer: 6
   m_Name: Cat Prefab
   m_TagString: Cat
@@ -541,28 +540,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rectTransform: {fileID: 0}
---- !u!95 &1377021694030487119
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4442190507333617709}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 580be6e395441524d84124cee74ca565, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &7088968465046740359
 GameObject:
   m_ObjectHideFlags: 0

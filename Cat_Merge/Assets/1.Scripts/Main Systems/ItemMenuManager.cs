@@ -301,7 +301,7 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
             itemMenuesValueText[index].text = $"{itemList[level].value} → {itemList[level + 1].value}";
         }
 
-        itemMenuesFeeText[index].text = $"{GameManager.Instance.FormatPriceNumber(itemList[level].fee)}";
+        itemMenuesFeeText[index].text = $"{GameManager.Instance.FormatNumber(itemList[level].fee)}";
     }
 
     // 시스템 업데이트 함수

@@ -88,6 +88,7 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
     // 드래그 진행중
     public void OnDrag(PointerEventData eventData)
     {
+        isDragging = true;
         Vector2 localPointerPosition;
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRect, eventData.position, parentCanvas.worldCamera, out localPointerPosition)) return;
 
@@ -102,6 +103,12 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         if (Time.frameCount % 3 == 0)
         {
             UpdateSiblingIndexBasedOnY();
+        }
+
+        CatData catDataComponent = GetComponent<CatData>();
+        if (catDataComponent != null)
+        {
+            catDataComponent.SetDragState(isDragging);
         }
     }
 

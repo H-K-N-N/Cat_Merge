@@ -33,6 +33,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     // 도감 해금 관련 변수
     private bool[] isCatUnlocked;                                   // 고양이 해금 여부 배열
     private bool[] isGetFirstUnlockedReward;                        // 고양이 첫 해금 보상 획득 여부 배열
+    
 
 
     private int currentSelectedCatGrade;                            // 현재 선택된 고양이 등급 추적
@@ -338,7 +339,8 @@ public class DictionaryManager : MonoBehaviour, ISaveable
             else
             {
                 firstOpenBG.gameObject.SetActive(true);
-                firstOpenCashtext.text = $"+ {cat.CatGetCoin}";
+                //firstOpenCashtext.text = $"+ {cat.CatGetCoin}";
+                firstOpenCashtext.text = $"+{GameManager.Instance.FormatNumber(cat.CatGetCoin)}";
             }
 
             // 버튼 클릭 이벤트 설정
@@ -406,7 +408,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         if (!IsGetFirstUnlockedReward(catGrade))
         {
             firstOpenBG.gameObject.SetActive(true);
-            firstOpenCashtext.text = $"+ {catData.CatGetCoin}";
+            firstOpenCashtext.text = $"+ {GameManager.Instance.FormatNumber(catData.CatGetCoin)}";
         }
         else
         {

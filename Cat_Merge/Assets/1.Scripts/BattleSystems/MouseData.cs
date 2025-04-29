@@ -87,7 +87,7 @@ public class MouseData : MonoBehaviour
         TextMeshProUGUI damageText = damageTextObj.GetComponent<TextMeshProUGUI>();
         //damageText.text = damage.ToString();
         damageText.text = GameManager.Instance.FormatNumber((decimal)damage);
-        damageText.color = Color.white;
+        //damageText.color = Color.red;
 
         StartCoroutine(AnimateDamageText(damageTextObj, textRect));
     }

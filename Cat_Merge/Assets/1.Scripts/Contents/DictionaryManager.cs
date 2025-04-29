@@ -245,6 +245,9 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         // 이벤트 발생
         OnCatDataChanged?.Invoke();
 
+        // BuyCatManager의 구매 슬롯 상태 업데이트
+        BuyCatManager.Instance?.UnlockBuySlot(CatGrade);
+
         SaveToLocal();
     }
 
@@ -263,7 +266,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         }
 
         isGetFirstUnlockedReward[catGrade] = true;
-        QuestManager.Instance.AddCash(GameManager.Instance.AllCatData[catGrade].CatGetCoin);
+        QuestManager.Instance.AddCash(GameManager.Instance.AllCatData[catGrade].CatFirstOpenCash);
 
         // 이벤트 발생
         OnCatDataChanged?.Invoke();
@@ -340,7 +343,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
             {
                 firstOpenBG.gameObject.SetActive(true);
                 //firstOpenCashtext.text = $"+ {cat.CatGetCoin}";
-                firstOpenCashtext.text = $"+{GameManager.Instance.FormatNumber(cat.CatGetCoin)}";
+                firstOpenCashtext.text = $"+{GameManager.Instance.FormatNumber(cat.CatFirstOpenCash)}";
             }
 
             // 버튼 클릭 이벤트 설정
@@ -408,7 +411,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         if (!IsGetFirstUnlockedReward(catGrade))
         {
             firstOpenBG.gameObject.SetActive(true);
-            firstOpenCashtext.text = $"+ {GameManager.Instance.FormatNumber(catData.CatGetCoin)}";
+            firstOpenCashtext.text = $"+ {GameManager.Instance.FormatNumber(catData.CatFirstOpenCash)}";
         }
         else
         {

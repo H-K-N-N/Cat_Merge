@@ -267,9 +267,9 @@ public class QuestManager : MonoBehaviour, ISaveable
     // Daily Quest 설정 함수
     private void InitializeDailyQuestManager()
     {
-        InitializeQuest("플레이 시간", 10, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 합성 횟수", 1, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 소환 횟수", 1, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
+        InitializeQuest("플레이 시간", 60, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 합성 횟수", 10, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 소환 횟수", 10, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
         InitializeQuest("전투 횟수", 1, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
 
         InitializeDailySpecialReward();
@@ -281,10 +281,10 @@ public class QuestManager : MonoBehaviour, ISaveable
     // Weekly Quest 설정 함수
     private void InitializeWeeklyQuestManager()
     {
-        InitializeQuest("플레이 시간", 20, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 합성 횟수", 10, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 소환 횟수", 10, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
-        InitializeQuest("전투 횟수", 10, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
+        InitializeQuest("플레이 시간", 600, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 합성 횟수", 100, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 소환 횟수", 100, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
+        InitializeQuest("전투 횟수", 5, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
 
         InitializeWeeklySpecialReward();
 
@@ -295,9 +295,9 @@ public class QuestManager : MonoBehaviour, ISaveable
     // Repeat Quest 설정 함수
     private void InitializeRepeatQuestManager()
     {
-        InitializeQuest("고양이 합성 횟수", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 소환 횟수", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 구매 횟수", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 합성 횟수", 20, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 소환 횟수", 30, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 구매 횟수", 20, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
         InitializeQuest("보스 스테이지", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
 
         // 초기 스크롤 위치 초기화
@@ -1077,6 +1077,29 @@ public class QuestManager : MonoBehaviour, ISaveable
     // 개별 퀘스트 보상 지급 처리 함수 - Repeat
     private void ReceiveRepeatQuestReward(string questName, int rewardCash)
     {
+        //if (questName == "고양이 구매 횟수")
+        //{
+        //    QuestUI questUI = repeatQuestDictionary[questName];
+
+        //    // 현재 목표치를 달성했을 때의 보상 계산
+        //    int currentRewardCount = (questUI.questData.targetCount - 20) / 20;  // 현재 보상 받은 횟수 계산
+        //    int totalReward = rewardCash + currentRewardCount;  // 기본 보상(5) + 보상 받은 횟수
+
+        //    // 보상 지급
+        //    AddCash(totalReward);
+
+        //    // 다음 목표치 설정
+        //    questUI.questData.targetCount += 20;
+
+        //    // 다음 보상 텍스트 업데이트 (다음 보상량 표시)
+        //    questUI.plusCashText.text = $"x {rewardCash + currentRewardCount + 1}";
+        //}
+        //else
+        //{
+        //    repeatQuestDictionary[questName].questData.targetCount += repeatQuestDictionary[questName].questData.plusTargetCount;
+        //    AddCash(rewardCash);
+        //}
+
         repeatQuestDictionary[questName].questData.targetCount += repeatQuestDictionary[questName].questData.plusTargetCount;
         AddCash(rewardCash);
 
@@ -1261,7 +1284,6 @@ public class QuestManager : MonoBehaviour, ISaveable
     #endregion
 
 
-
     #region Time Reset System
 
     private void CheckAndResetQuests()
@@ -1372,7 +1394,6 @@ public class QuestManager : MonoBehaviour, ISaveable
     }
 
     #endregion
-
 
 
     #region Save System

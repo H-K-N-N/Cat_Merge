@@ -68,8 +68,11 @@ public class Cat
     private int canOpener;      // 고양이 구매 해금관련
     public int CanOpener { get => canOpener; set => canOpener = value; }
 
+    private int catFirstOpenCash; // 고양이 첫 획득시 얻는 다이아
+    public int CatFirstOpenCash { get => catFirstOpenCash; set => catFirstOpenCash = value; }
+
     public Cat(int catId, string catName, int catGrade, int catDamage, int catGetCoin, int catHp, Sprite catImage,
-        string catExplain, int catAttackSpeed, int catArmor, int catMoveSpeed, int canOpener)
+        string catExplain, int catAttackSpeed, int catArmor, int catMoveSpeed, int canOpener, int catFirstOpenCash)
     {
         CatId = catId;
         CatName = catName;
@@ -85,6 +88,7 @@ public class Cat
         CatArmor = catArmor;
         CatMoveSpeed = catMoveSpeed;
         CanOpener = canOpener;
+        CatFirstOpenCash = catFirstOpenCash;
     }
 
     // 성장 스탯 함수

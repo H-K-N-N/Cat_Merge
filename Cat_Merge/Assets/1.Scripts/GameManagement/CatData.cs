@@ -860,7 +860,8 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     {
         if (collectCoinText != null)
         {
-            collectCoinText.text = $"+{coins}";
+            //collectCoinText.text = $"+{coins}";
+            collectCoinText.text = $"+{GameManager.Instance.FormatNumber(coins)}";
             collectCoinText.gameObject.SetActive(true);
         }
         if (collectCoinImage != null)
@@ -889,7 +890,8 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
         if (collectCoinText != null)
         {
-            collectCoinText.text = $"+{collectedCoins}";
+            //collectCoinText.text = $"+{collectedCoins}";
+            collectCoinText.text = $"+{GameManager.Instance.FormatNumber(collectedCoins)}";
             collectCoinText.gameObject.SetActive(true);
         }
         if (collectCoinImage != null)

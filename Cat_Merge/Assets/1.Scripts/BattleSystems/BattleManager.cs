@@ -20,7 +20,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     [SerializeField] private Transform bossUIParent;            // 보스를 배치할 부모 Transform (UI Panel 등)
     [SerializeField] private Slider respawnSlider;              // 보스 소환까지 남은 시간을 표시할 Slider UI
 
-    private const float DEFAULT_SPAWN_INTERVAL = 300f;          // 보스 등장 주기 (300f)
+    private const float DEFAULT_SPAWN_INTERVAL = 3f;          // 보스 등장 주기 (300f)
     private float spawnInterval;                                // 보스 등장 주기
     private Coroutine respawnSliderCoroutine;                   // Slider 코루틴
     private float bossSpawnTimer = 0f;                          // 보스 스폰 타이머
@@ -118,6 +118,8 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     private bool isDataLoaded = false;                          // 데이터 로드 확인
 
+
+    [SerializeField] public GameObject effectPrefab;
     #endregion
 
 
@@ -427,8 +429,13 @@ public class BattleManager : MonoBehaviour, ISaveable
         RectTransform bossRectTransform = currentBoss.GetComponent<RectTransform>();
         bossRectTransform.anchoredPosition = new Vector2(0f, 250f);
 
+        // 보스 생성 이팩트
+        GameObject recallEffect = Instantiate(effectPrefab, currentBoss.transform.position, Quaternion.identity);
+        recallEffect.transform.SetParent(currentBoss.transform);
+        recallEffect.transform.localScale = Vector3.one * 4;
         UpdateBossUI();
     }
+
 
     // 해당 스테이지와 동일한 등급을 갖는 보스 데이터 불러오는 함수 (MouseGrade)
     private Mouse GetBossData()
@@ -455,7 +462,8 @@ public class BattleManager : MonoBehaviour, ISaveable
         currentBossHP = maxBossHP;
         bossHPSlider.maxValue = (float)maxBossHP;
         bossHPSlider.value = (float)currentBossHP;
-        bossHPText.text = $"{100f}%";
+        double hpPercentage = (currentBossHP / maxBossHP) * 100f;
+        bossHPText.text = $"{GameManager.Instance.FormatNumber((decimal)currentBossHP)} / {GameManager.Instance.FormatNumber((decimal)maxBossHP)}\t\t{GameManager.Instance.FormatNumber((decimal)hpPercentage)}%"; ;
     } 
 
     // 전투 시작 함수
@@ -664,7 +672,16 @@ public class BattleManager : MonoBehaviour, ISaveable
 
         double hpPercentage = (currentBossHP / maxBossHP) * 100f;
         hpPercentage = Math.Max(0, hpPercentage);
-        bossHPText.text = $"{hpPercentage:F2}%";
+        //bossHPText.text = $"{hpPercentage:F2}%";
+        if(currentBossHP <= 0)
+        {
+            bossHPText.text = $"0 / {GameManager.Instance.FormatNumber((decimal)maxBossHP)}\t\t({GameManager.Instance.FormatNumber((decimal)hpPercentage)}%)";
+        }
+        else
+        {
+            bossHPText.text = $"{GameManager.Instance.FormatNumber((decimal)currentBossHP)} / {GameManager.Instance.FormatNumber((decimal)maxBossHP)}\t\t({GameManager.Instance.FormatNumber((decimal)hpPercentage)}%)";
+        }
+        
     }
 
     // 보스 공격 코루틴
@@ -945,7 +962,7 @@ public class BattleManager : MonoBehaviour, ISaveable
 
         // Reward Text 설정
         TextMeshProUGUI rewardText = rewardSlot.transform.Find("Reward Text").GetComponent<TextMeshProUGUI>();
-        rewardText.text = GameManager.Instance.FormatPriceNumber(amount);
+        rewardText.text = GameManager.Instance.FormatNumber(amount);
 
         // First Clear Image 설정
         GameObject firstClearImage = rewardSlot.transform.Find("First Clear Image").gameObject;

@@ -92,9 +92,10 @@ public class CatDataLoader : MonoBehaviour
                 int catArmor = int.Parse(validValues[9]);
                 int catMoveSpeed = int.Parse(validValues[10]);
                 int canOpener = int.Parse(validValues[11]);
+                int catFirstOpenCash = int.Parse(validValues[12]);
 
                 // Cat 객체 생성 및 Dictionary에 추가
-                Cat newCat = new Cat(catId, catName, catGrade, catDamage, catGetCoin, catHp, catImage, catExplain, catAttackSpeed, catArmor, catMoveSpeed, canOpener);
+                Cat newCat = new Cat(catId, catName, catGrade, catDamage, catGetCoin, catHp, catImage, catExplain, catAttackSpeed, catArmor, catMoveSpeed, canOpener, catFirstOpenCash);
                 if (!catDictionary.ContainsKey(catId))
                 {
                     catDictionary.Add(catId, newCat);

@@ -47,28 +47,28 @@ public class Cat
 
 
 
-    private int catGetCoin;     // 고양이 자동 재화 획득량
+    private int catGetCoin;         // 고양이 자동 재화 획득량
     public int CatGetCoin { get => catGetCoin; set => catGetCoin = value; }
 
-    private Sprite catImage;    // 고양이 이미지
+    private Sprite catImage;        // 고양이 이미지
     public Sprite CatImage { get => catImage; set => catImage = value; }
 
-    private string catExplain;  // 고양이 설명
+    private string catExplain;      // 고양이 설명
     public string CatExplain { get => catExplain; set => catExplain = value; }
 
-    private int catAttackSpeed; // 고양이 공격속도
+    private int catAttackSpeed;     // 고양이 공격속도
     public int CatAttackSpeed { get => catAttackSpeed; set => catAttackSpeed = value; }
 
-    private int catArmor;       // 고양이 방어력
+    private int catArmor;           // 고양이 방어력
     public int CatArmor { get => catArmor; set => catArmor = value; }
 
-    private int catMoveSpeed;   // 고양이 이동속도
+    private int catMoveSpeed;       // 고양이 이동속도
     public int CatMoveSpeed { get => catMoveSpeed; set => catMoveSpeed = value; }
 
-    private int canOpener;      // 고양이 구매 해금관련
+    private int canOpener;          // 고양이 구매 해금관련
     public int CanOpener { get => canOpener; set => canOpener = value; }
 
-    private int catFirstOpenCash; // 고양이 첫 획득시 얻는 다이아
+    private int catFirstOpenCash;   // 고양이 첫 획득시 얻는 다이아
     public int CatFirstOpenCash { get => catFirstOpenCash; set => catFirstOpenCash = value; }
 
     public Cat(int catId, string catName, int catGrade, int catDamage, int catGetCoin, int catHp, Sprite catImage,

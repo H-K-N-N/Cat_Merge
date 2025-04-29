@@ -20,7 +20,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     [SerializeField] private Transform bossUIParent;            // 보스를 배치할 부모 Transform (UI Panel 등)
     [SerializeField] private Slider respawnSlider;              // 보스 소환까지 남은 시간을 표시할 Slider UI
 
-    private const float DEFAULT_SPAWN_INTERVAL = 3f;          // 보스 등장 주기 (300f)
+    private const float DEFAULT_SPAWN_INTERVAL = 10f;          // 보스 등장 주기 (300f)
     private float spawnInterval;                                // 보스 등장 주기
     private Coroutine respawnSliderCoroutine;                   // Slider 코루틴
     private float bossSpawnTimer = 0f;                          // 보스 스폰 타이머
@@ -45,7 +45,8 @@ public class BattleManager : MonoBehaviour, ISaveable
     [SerializeField] private GameObject battleHPUI;             // Battle HP UI (활성화/비활성화 제어)
     [SerializeField] private TextMeshProUGUI bossStageText;     // Boss Stage Text
     [SerializeField] private Slider bossHPSlider;               // HP Slider
-    [SerializeField] private TextMeshProUGUI bossHPText;        // HP % Text
+    [SerializeField] private TextMeshProUGUI bossHPText;        // HP Text
+    [SerializeField] private TextMeshProUGUI bossHPPercentText; // HP % Text
     [SerializeField] private Button giveupButton;               // 항복 버튼
 
     private Mouse currentBossData;                              // 현재 보스 데이터
@@ -463,7 +464,8 @@ public class BattleManager : MonoBehaviour, ISaveable
         bossHPSlider.maxValue = (float)maxBossHP;
         bossHPSlider.value = (float)currentBossHP;
         double hpPercentage = (currentBossHP / maxBossHP) * 100f;
-        bossHPText.text = $"{GameManager.Instance.FormatNumber((decimal)currentBossHP)} / {GameManager.Instance.FormatNumber((decimal)maxBossHP)}\t\t{GameManager.Instance.FormatNumber((decimal)hpPercentage)}%"; ;
+        bossHPText.text = $"{GameManager.Instance.FormatNumber((decimal)currentBossHP)} / {GameManager.Instance.FormatNumber((decimal)maxBossHP)}";
+        bossHPPercentText.text = $"({GameManager.Instance.FormatNumber((decimal)hpPercentage)}%)";
     } 
 
     // 전투 시작 함수
@@ -672,16 +674,16 @@ public class BattleManager : MonoBehaviour, ISaveable
 
         double hpPercentage = (currentBossHP / maxBossHP) * 100f;
         hpPercentage = Math.Max(0, hpPercentage);
-        //bossHPText.text = $"{hpPercentage:F2}%";
-        if(currentBossHP <= 0)
+        if (currentBossHP <= 0)
         {
-            bossHPText.text = $"0 / {GameManager.Instance.FormatNumber((decimal)maxBossHP)}\t\t({GameManager.Instance.FormatNumber((decimal)hpPercentage)}%)";
+            bossHPText.text = $"0 / {GameManager.Instance.FormatNumber((decimal)maxBossHP)}";
+            bossHPPercentText.text = $"({GameManager.Instance.FormatNumber((decimal)hpPercentage)}%)";
         }
         else
         {
-            bossHPText.text = $"{GameManager.Instance.FormatNumber((decimal)currentBossHP)} / {GameManager.Instance.FormatNumber((decimal)maxBossHP)}\t\t({GameManager.Instance.FormatNumber((decimal)hpPercentage)}%)";
+            bossHPText.text = $"{GameManager.Instance.FormatNumber((decimal)currentBossHP)} / {GameManager.Instance.FormatNumber((decimal)maxBossHP)}";
+            bossHPPercentText.text = $"({GameManager.Instance.FormatNumber((decimal)hpPercentage)}%)";
         }
-        
     }
 
     // 보스 공격 코루틴

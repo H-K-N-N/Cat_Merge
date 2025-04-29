@@ -295,15 +295,15 @@ public class GameManager : MonoBehaviour, ISaveable
         List<string> suffixes = new List<string>();
 
         // 1글자 단위 생성 (A-Z)
-        for (char c = 'a'; c <= 'z'; c++)
+        for (char c = 'A'; c <= 'Z'; c++)
         {
             suffixes.Add(c.ToString());
         }
 
         // 2글자 단위 생성 (AA-ZZ)
-        for (char c1 = 'a'; c1 <= 'z'; c1++)
+        for (char c1 = 'A'; c1 <= 'Z'; c1++)
         {
-            for (char c2 = 'a'; c2 <= 'z'; c2++)
+            for (char c2 = 'A'; c2 <= 'Z'; c2++)
             {
                 suffixes.Add(c1.ToString() + c2.ToString());
             }

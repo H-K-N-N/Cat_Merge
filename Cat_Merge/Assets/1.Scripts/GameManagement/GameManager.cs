@@ -161,7 +161,7 @@ public class GameManager : MonoBehaviour, ISaveable
         currentCatCount = 0;
         maxCats = 8;
         coin = 0;
-        cash = 1000;
+        cash = 0;
     }
 
     // 첫 게임 시작 패널을 보여주는 코루틴

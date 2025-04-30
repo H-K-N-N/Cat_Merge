@@ -3,7 +3,7 @@ using System.IO;
 using UnityEngine;
 
 // ItemItemUpgradeDataLoader Script
-[DefaultExecutionOrder(-6)]
+[DefaultExecutionOrder(-10)]
 public class ItemItemUpgradeDataLoader : MonoBehaviour
 {
     public static ItemItemUpgradeDataLoader Instance { get; private set; }

@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 
 // 고양이 스폰 스크립트
-[DefaultExecutionOrder(-3)]
+[DefaultExecutionOrder(-5)]
 public class SpawnManager : MonoBehaviour, ISaveable
 {
 

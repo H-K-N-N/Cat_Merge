@@ -10,7 +10,7 @@ public class LevelData
     public string[] passiveEffects = new string[5]; // 1~5단계 패시브 효과 수치
 }
 
-[DefaultExecutionOrder(-6)]
+[DefaultExecutionOrder(-10)]
 public class FriendshipDataLoader : MonoBehaviour
 {
 

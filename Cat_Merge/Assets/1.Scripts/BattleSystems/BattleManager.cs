@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 
 // BattleManager Script
+[DefaultExecutionOrder(-1)]
 public class BattleManager : MonoBehaviour, ISaveable
 {
 

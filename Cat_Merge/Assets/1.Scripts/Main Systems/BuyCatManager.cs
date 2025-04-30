@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 
 // 고양이 구매 스크립트
-[DefaultExecutionOrder(-2)]
+[DefaultExecutionOrder(-3)]
 public class BuyCatManager : MonoBehaviour, ISaveable
 {
 

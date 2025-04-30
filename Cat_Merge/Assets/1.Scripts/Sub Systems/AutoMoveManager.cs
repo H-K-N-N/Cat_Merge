@@ -4,7 +4,7 @@ using System;
 using TMPro;
 
 // 고양이 자동이동 스크립트
-[DefaultExecutionOrder(-1)]
+[DefaultExecutionOrder(-2)]
 public class AutoMoveManager : MonoBehaviour, ISaveable
 {
 

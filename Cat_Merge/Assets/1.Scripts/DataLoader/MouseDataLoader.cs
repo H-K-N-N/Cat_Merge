@@ -3,7 +3,7 @@ using System.IO;
 using UnityEngine;
 
 // CatDataLoader Script
-[DefaultExecutionOrder(-6)]
+[DefaultExecutionOrder(-10)]
 public class MouseDataLoader : MonoBehaviour
 {
     // 쥐 데이터를 관리할 Dictionary

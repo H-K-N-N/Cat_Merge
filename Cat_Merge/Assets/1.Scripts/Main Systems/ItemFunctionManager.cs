@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-[DefaultExecutionOrder(-5)]
+[DefaultExecutionOrder(-8)]
 public class ItemFunctionManager : MonoBehaviour
 {
     // Singleton Instance

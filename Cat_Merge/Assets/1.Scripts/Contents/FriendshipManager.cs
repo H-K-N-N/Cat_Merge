@@ -25,7 +25,7 @@ public class CatFriendship
 }
 
 // 고양이 애정도 스크립트
-[DefaultExecutionOrder(1)]
+[DefaultExecutionOrder(-4)]
 public class FriendshipManager : MonoBehaviour, ISaveable
 {
 

@@ -25,8 +25,8 @@ public class ButtonEffect : MonoBehaviour
 
         foreach (Button button in allButtons)
         {
-            // Dictionary Panel의 ScrollRectContents 하위의 버튼은 제외
-            if (IsButtonInDictionaryScrollContent(button))
+            // Dictionary Panel과 Information Panel의 하위 버튼들은 제외
+            if (IsButtonInExcludedArea(button))
             {
                 continue;
             }
@@ -56,30 +56,36 @@ public class ButtonEffect : MonoBehaviour
         }
     }
 
-    // Dictionary Panel의 ScrollRectContents 하위에 있는 버튼인지 확인하는 함수
-    private bool IsButtonInDictionaryScrollContent(Button button)
+    // Normal Cat Dictionary과 Information Panel의 하위에 있는 버튼인지 확인하는 함수
+    private bool IsButtonInExcludedArea(Button button)
     {
         Transform current = button.transform;
-        bool foundScrollRectContents = false;
+
         bool foundNormalCatDictionary = false;
-        bool foundDictionaryPanel = false;
+        bool foundInformationPanel = false;
 
         while (current != null)
         {
-            if (current.name == "ScrollRectContents")
-            {
-                foundScrollRectContents = true;
-            }
-            else if (current.name == "Normal Cat Dictionary")
+            string currentName = current.name;
+
+            // Normal Cat Dictionary 관련 체크
+            if (currentName == "Normal Cat Dictionary")
             {
                 foundNormalCatDictionary = true;
             }
-            else if (current.name == "Dictionary Panel")
+            // Information Panel 체크
+            else if (currentName == "Information Panel")
             {
-                foundDictionaryPanel = true;
+                foundInformationPanel = true;
             }
 
-            if (foundScrollRectContents && foundNormalCatDictionary && foundDictionaryPanel)
+            // Normal Cat Dictionary의 하위 오브젝트인 경우
+            if (foundNormalCatDictionary)
+            {
+                return true;
+            }
+            // Information Panel의 하위 오브젝트인 경우
+            if (foundInformationPanel)
             {
                 return true;
             }

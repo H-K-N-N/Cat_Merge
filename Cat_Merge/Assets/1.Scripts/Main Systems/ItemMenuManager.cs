@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 
 // 아이템 메뉴 스크립트
-[DefaultExecutionOrder(-4)]
+[DefaultExecutionOrder(-7)]
 public class ItemMenuManager : MonoBehaviour, ISaveable
 {
 

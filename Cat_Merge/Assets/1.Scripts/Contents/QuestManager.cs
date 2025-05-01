@@ -7,6 +7,7 @@ using System.Collections;
 using System;
 
 // Quest Script
+[DefaultExecutionOrder(-1)]
 public class QuestManager : MonoBehaviour, ISaveable
 {
 

@@ -7,7 +7,7 @@ using System;
 using System.Linq;
 
 // 게임매니저 스크립트
-[DefaultExecutionOrder(-5)]
+[DefaultExecutionOrder(-8)]
 public class GameManager : MonoBehaviour, ISaveable
 {
 
@@ -160,8 +160,8 @@ public class GameManager : MonoBehaviour, ISaveable
     {
         currentCatCount = 0;
         maxCats = 8;
-        coin = 0;
-        cash = 0;
+        coin = 1000000000;
+        cash = 1000000;
     }
 
     // 첫 게임 시작 패널을 보여주는 코루틴

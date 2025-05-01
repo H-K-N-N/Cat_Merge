@@ -7,6 +7,7 @@ using TMPro;
 using System.Linq;
 
 // 옵션 스크립트
+[DefaultExecutionOrder(-1)]
 public class OptionManager : MonoBehaviour, ISaveable
 {
 

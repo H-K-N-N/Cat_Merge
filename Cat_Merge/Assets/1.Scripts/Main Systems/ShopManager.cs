@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using System.Collections;
 using TMPro;
 
+[DefaultExecutionOrder(-5)]
 public class ShopManager : MonoBehaviour, ISaveable
 {
 

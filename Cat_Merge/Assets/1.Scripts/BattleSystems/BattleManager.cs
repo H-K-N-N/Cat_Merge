@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 
 // BattleManager Script
+[DefaultExecutionOrder(-1)]
 public class BattleManager : MonoBehaviour, ISaveable
 {
 
@@ -88,8 +89,8 @@ public class BattleManager : MonoBehaviour, ISaveable
     private Coroutine autoRetryToggleCoroutine;                             // 토글 애니메이션 코루틴
 
     [Header("---[UI Color]")]
-    private const string activeColorCode = "#FFCC74";           // 활성화상태 Color
-    private const string inactiveColorCode = "#87FF3C";         // 비활성화상태 Color
+    private const string activeColorCode = "#B1FF70";           // 활성화상태 Color
+    private const string inactiveColorCode = "#FFCC74";         // 비활성화상태 Color
     
     [Header("---[Warning UI]")]
     [SerializeField] private GameObject warningPanel;           // 전투시스템 시작시 나오는 경고 Panel (warningDuration동안 지속)
@@ -944,7 +945,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     {
         if (autoRetryPanelButtonImage != null)
         {
-            string colorCode = !isEnabled ? activeColorCode : inactiveColorCode;
+            string colorCode = isEnabled ? activeColorCode : inactiveColorCode;
             if (ColorUtility.TryParseHtmlString(colorCode, out Color color))
             {
                 autoRetryPanelButtonImage.color = color;

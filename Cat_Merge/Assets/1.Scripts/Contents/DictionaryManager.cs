@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 
 // 고양이 도감 Script
+[DefaultExecutionOrder(-6)]
 public class DictionaryManager : MonoBehaviour, ISaveable
 {
 

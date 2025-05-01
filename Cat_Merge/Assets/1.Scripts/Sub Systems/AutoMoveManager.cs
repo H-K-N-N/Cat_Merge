@@ -26,7 +26,7 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
 
     [Header("---[UI Color]")]
     private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
-    private const string inactiveColorCode = "#87FF3C";             // 비활성화상태 Color
+    private const string inactiveColorCode = "#B1FF70";             // 비활성화상태 Color
 
 
     private bool isDataLoaded = false;                              // 데이터 로드 확인

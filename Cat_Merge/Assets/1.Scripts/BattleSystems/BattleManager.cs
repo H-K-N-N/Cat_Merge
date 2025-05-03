@@ -829,19 +829,17 @@ public class BattleManager : MonoBehaviour, ISaveable
         else
         {
             // 첫 번째 스테이지에서의 패배는 보상 없음
-            if (currentMaxBossStage <= 1)
+            if (currentMaxBossStage > 1)
             {
-                return;
-            }
-
-            // 패배 했을때 보상
-            int maxClearedStage = clearedStages.Count > 0 ? clearedStages.Max() : 0;
-            if (maxClearedStage > 0)
-            {
-                Mouse maxClearedBossData = GetBossDataByStage(maxClearedStage);
-                if (maxClearedBossData != null)
+                // 패배 했을때 보상
+                int maxClearedStage = clearedStages.Count > 0 ? clearedStages.Max() : 0;
+                if (maxClearedStage > 0)
                 {
-                    CreateRewardSlot(loseRewardPanel, coinSprite, maxClearedBossData.RepeatclearCoinReward, false);
+                    Mouse maxClearedBossData = GetBossDataByStage(maxClearedStage);
+                    if (maxClearedBossData != null)
+                    {
+                        CreateRewardSlot(loseRewardPanel, coinSprite, maxClearedBossData.RepeatclearCoinReward, false);
+                    }
                 }
             }
         }
@@ -1116,19 +1114,17 @@ public class BattleManager : MonoBehaviour, ISaveable
         else
         {
             // 첫 번째 스테이지에서의 패배는 보상 없음
-            if (currentMaxBossStage <= 1)
+            if (currentMaxBossStage > 1)
             {
-                return;
-            }
-
-            // 패배 시 최대 클리어 스테이지의 반복 보상 지급
-            int maxClearedStage = clearedStages.Count > 0 ? clearedStages.Max() : 0;
-            if (maxClearedStage > 0)
-            {
-                Mouse maxClearedBossData = GetBossDataByStage(maxClearedStage);
-                if (maxClearedBossData != null)
+                // 패배 시 최대 클리어 스테이지의 반복 보상 지급
+                int maxClearedStage = clearedStages.Count > 0 ? clearedStages.Max() : 0;
+                if (maxClearedStage > 0)
                 {
-                    GameManager.Instance.Coin += maxClearedBossData.RepeatclearCoinReward;
+                    Mouse maxClearedBossData = GetBossDataByStage(maxClearedStage);
+                    if (maxClearedBossData != null)
+                    {
+                        GameManager.Instance.Coin += maxClearedBossData.RepeatclearCoinReward;
+                    }
                 }
             }
         }

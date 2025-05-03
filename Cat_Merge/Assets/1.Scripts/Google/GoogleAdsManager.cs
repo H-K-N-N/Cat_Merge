@@ -19,6 +19,11 @@ public class GoogleAdsManager : MonoBehaviour
 #endif
 
     private RewardedInterstitialAd rewardedInterstitialAd;
+    private bool isAdWatched = false;       // 광고를 끝까지 시청했는지
+    private bool hasEarnedReward = false;   // 보상을 받을 자격이 있는지
+    private bool isAdShowing = false;       // 광고가 현재 보여지고 있는지
+
+    private Action onAdCompleteCallback;    // 광고 완료시 실행할 콜백
 
     #endregion
 
@@ -53,8 +58,6 @@ public class GoogleAdsManager : MonoBehaviour
             rewardedInterstitialAd = null;
         }
 
-        //Debug.Log("보상형 전면 광고를 로딩");
-
         var adRequest = new AdRequest();
         adRequest.Keywords.Add("unity-admob-sample");
 
@@ -63,14 +66,43 @@ public class GoogleAdsManager : MonoBehaviour
             {
                 if (error != null || ad == null)
                 {
-                    //Debug.Log("보상형 전면 광고 로딩 실패. 에러: " + error);
+                    Debug.LogWarning("보상형 전면 광고 로딩 실패. 에러: " + error);
                     return;
                 }
 
-                //Debug.Log("보상형 전면 광고가 성공적으로 로딩되었습니다. 응답: " + ad.GetResponseInfo());
-
                 rewardedInterstitialAd = ad;
+                RegisterEventHandlers(rewardedInterstitialAd);
             });
+    }
+
+    private void RegisterEventHandlers(RewardedInterstitialAd ad)
+    {
+        // 광고가 닫힐 때
+        ad.OnAdFullScreenContentClosed += () =>
+        {
+            HandleAdClosed();
+        };
+
+        // 광고 표시 실패시
+        ad.OnAdFullScreenContentFailed += (AdError error) =>
+        {
+            Debug.LogWarning("광고 표시 실패: " + error);
+            HandleAdFailure();
+        };
+
+        // 광고가 표시될 때
+        ad.OnAdFullScreenContentOpened += () =>
+        {
+            isAdShowing = true;
+            isAdWatched = false;
+            hasEarnedReward = false;
+        };
+
+        // 보상 획득시
+        ad.OnAdPaid += (AdValue adValue) =>
+        {
+            isAdWatched = true;
+        };
     }
 
     #endregion
@@ -81,37 +113,73 @@ public class GoogleAdsManager : MonoBehaviour
     // CashForAd 광고 (ShopManager)
     public void ShowRewardedCashForAd()
     {
-        if (rewardedInterstitialAd != null && rewardedInterstitialAd.CanShowAd())
-        {
-            rewardedInterstitialAd.Show((Reward reward) =>
-            {
-                ShopManager.Instance.OnCashForAdRewardComplete();
-
-                LoadRewardedInterstitialAd();
-            });
-        }
-        else
-        {
-            LoadRewardedInterstitialAd();
-        }
+        ShowAd(() => ShopManager.Instance.OnCashForAdRewardComplete());
     }
 
     // DoubleCoinForAd 광고 (ShopManager)
     public void ShowRewardedDoubleCoinForAd()
     {
+        ShowAd(() => ShopManager.Instance.OnDoubleCoinAdRewardComplete());
+    }
+
+    private void ShowAd(Action onComplete)
+    {
         if (rewardedInterstitialAd != null && rewardedInterstitialAd.CanShowAd())
         {
+            onAdCompleteCallback = onComplete;
+
+            // 광고 시청 전에 전체 게임 데이터 저장
+            GameManager.Instance.SaveGame();
+
             rewardedInterstitialAd.Show((Reward reward) =>
             {
-                ShopManager.Instance.OnDoubleCoinAdRewardComplete();
-
-                LoadRewardedInterstitialAd();
+                hasEarnedReward = true;
             });
         }
         else
         {
+            Debug.LogWarning("광고를 표시할 수 없습니다. 새로운 광고를 로드합니다.");
             LoadRewardedInterstitialAd();
+            ShopManager.Instance.ResetAdState();
         }
+    }
+
+    private void HandleAdClosed()
+    {
+        isAdShowing = false;
+
+        // 광고를 끝까지 보고 보상을 받을 자격이 있는 경우
+        if (isAdWatched && hasEarnedReward)
+        {
+            if (onAdCompleteCallback != null)
+            {
+                onAdCompleteCallback.Invoke();
+            }
+        }
+        // 광고를 중간에 종료했거나 보상을 받지 못한 경우
+        else
+        {
+            ShopManager.Instance.ResetAdState();
+        }
+
+        // 상태 초기화
+        isAdWatched = false;
+        hasEarnedReward = false;
+        onAdCompleteCallback = null;
+
+        // 새로운 광고 로드
+        LoadRewardedInterstitialAd();
+    }
+
+    private void HandleAdFailure()
+    {
+        isAdShowing = false;
+        isAdWatched = false;
+        hasEarnedReward = false;
+        onAdCompleteCallback = null;
+
+        ShopManager.Instance.ResetAdState();
+        LoadRewardedInterstitialAd();
     }
 
     #endregion

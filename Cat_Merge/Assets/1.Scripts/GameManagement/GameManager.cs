@@ -479,6 +479,35 @@ public class GameManager : MonoBehaviour, ISaveable
 #endif
     }
 
+    // 게임 종료 함수
+    public void SaveGame()
+    {
+        StartCoroutine(SaveCoroutine());
+    }
+
+    // 저장 후 종료하는 코루틴
+    private IEnumerator SaveCoroutine()
+    {
+        // GoogleManager를 통해 암호화하여 저장
+        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
+        if (GoogleManager.Instance != null)
+        {
+            GoogleManager.Instance.SaveAllSaveables(saveables);
+
+            // 클라우드 저장 시도
+            if (GoogleManager.Instance.isLoggedIn)
+            {
+                GoogleManager.Instance.SaveToCloudWithLocalData();
+            }
+        }
+        else
+        {
+            Debug.LogError("[저장 오류] GoogleManager 인스턴스를 찾을 수 없습니다!");
+        }
+
+        yield return null;
+    }
+
     #endregion
 
 

@@ -372,7 +372,7 @@ public class BuyCatManager : MonoBehaviour, ISaveable
     // 고양이 구매 처리 함수
     private void ProcessCatPurchase(int catGrade)
     {
-        QuestManager.Instance.AddPurchaseCatsCount();
+        //QuestManager.Instance.AddPurchaseCatsCount();
         DictionaryManager.Instance.UnlockCat(catGrade);
         GetComponent<SpawnManager>().SpawnGradeCat(catGrade);
 

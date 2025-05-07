@@ -315,11 +315,11 @@ public class ShopManager : MonoBehaviour, ISaveable
     {
         if (!IsCashForAdAvailable() || isWaitingForAd) return;
 
-        // 광고 재생
+        SaveToLocal();
         isWaitingForAd = true;
         cashForAdRewardButton.interactable = false;
 
-        GetComponent<GoogleAdsManager>().ShowRewardedCashForAd();
+        GetComponent<GoogleAdsManager>()?.ShowRewardedCashForAd();
     }
 
     // CashForAd 광고 시청 완료 시 실행되는 함수
@@ -452,10 +452,11 @@ public class ShopManager : MonoBehaviour, ISaveable
     {
         if (!IsDoubleCoinForAdAvailable() || isWaitingForAd) return;
 
+        SaveToLocal();
         isWaitingForAd = true;
         doubleCoinForAdButton.interactable = false;
 
-        GetComponent<GoogleAdsManager>().ShowRewardedDoubleCoinForAd();
+        GetComponent<GoogleAdsManager>()?.ShowRewardedDoubleCoinForAd();
     }
 
     // DoubleCoinForAd 광고 시청 완료 시 실행되는 함수

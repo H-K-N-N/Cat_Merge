@@ -269,7 +269,7 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         button.interactable = false;
         disabledBg[index].SetActive(true);
 
-        itemMenuesLvText[index].text = $"Lv.{level + 1}";
+        itemMenuesLvText[index].text = $"Lv.{level}";
         itemMenuesValueText[index].text = $"{value}";
         itemMenuesFeeText[index].text = "구매완료";
     }
@@ -277,7 +277,7 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
     // 일반 레벨 UI 설정 함수
     private void SetNormalLevelUI(int index, int level, List<(int step, float value, decimal fee)> itemList)
     {
-        itemMenuesLvText[index].text = $"Lv.{itemList[level].step}";
+        itemMenuesLvText[index].text = $"Lv.{itemList[level].step - 1}";
         if (index == 4)
         {
             itemMenuesValueText[index].text = $"{itemList[level].value - 1} → {itemList[level + 1].value - 1}"; // 1(2-1) -> 2(3-1)

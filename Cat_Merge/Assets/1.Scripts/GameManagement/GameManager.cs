@@ -160,8 +160,8 @@ public class GameManager : MonoBehaviour, ISaveable
     {
         currentCatCount = 0;
         maxCats = 8;
-        coin = 1000000000;
-        cash = 1000000;
+        coin = 0;
+        cash = 0;
     }
 
     // 첫 게임 시작 패널을 보여주는 코루틴
@@ -477,6 +477,35 @@ public class GameManager : MonoBehaviour, ISaveable
 #else
         Application.Quit();
 #endif
+    }
+
+    // 게임 종료 함수
+    public void SaveGame()
+    {
+        StartCoroutine(SaveCoroutine());
+    }
+
+    // 저장 후 종료하는 코루틴
+    private IEnumerator SaveCoroutine()
+    {
+        // GoogleManager를 통해 암호화하여 저장
+        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
+        if (GoogleManager.Instance != null)
+        {
+            GoogleManager.Instance.SaveAllSaveables(saveables);
+
+            // 클라우드 저장 시도
+            if (GoogleManager.Instance.isLoggedIn)
+            {
+                GoogleManager.Instance.SaveToCloudWithLocalData();
+            }
+        }
+        else
+        {
+            Debug.LogError("[저장 오류] GoogleManager 인스턴스를 찾을 수 없습니다!");
+        }
+
+        yield return null;
     }
 
     #endregion

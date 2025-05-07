@@ -122,6 +122,7 @@ public class BattleManager : MonoBehaviour, ISaveable
 
 
     [SerializeField] public GameObject effectPrefab;
+
     #endregion
 
 
@@ -790,7 +791,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     #region Battle Plus UI
 
     // 전투 결과 보여주는 함수
-    private void ShowBattleResult(bool isVictory)
+    private void ShowBattleResult(bool isVictory, bool isAutoRetryEnabled)
     {
         battleResultPanel.SetActive(true);
         winPanel.SetActive(isVictory);
@@ -810,15 +811,27 @@ public class BattleManager : MonoBehaviour, ISaveable
             }
             else
             {
-                // 반복 클리어 보상
-                CreateRewardSlot(winRewardPanel, coinSprite, currentBossData.RepeatclearCoinReward, false);
+                // 반복도전 상태일 때는 상위 스테이지의 반복 보상, 아닐 때는 현재 스테이지의 반복 보상
+                if (isAutoRetryEnabled)
+                {
+                    Mouse nextStageBossData = GetBossDataByStage(bossStage + 1);
+                    if (nextStageBossData != null)
+                    {
+                        CreateRewardSlot(winRewardPanel, coinSprite, nextStageBossData.RepeatclearCoinReward, false);
+                    }
+                }
+                else
+                {
+                    CreateRewardSlot(winRewardPanel, coinSprite, currentBossData.RepeatclearCoinReward, false);
+                }
             }
         }
         else
         {
-            // 패배 했을때 보상 (클리어한 최대 스테이지의 반복 클리어 보상) (첫 번째 스테이지에서의 패배는 보상 없음)
+            // 첫 번째 스테이지에서의 패배는 보상 없음
             if (currentMaxBossStage > 1)
             {
+                // 패배 했을때 보상
                 int maxClearedStage = clearedStages.Count > 0 ? clearedStages.Max() : 0;
                 if (maxClearedStage > 0)
                 {
@@ -1018,8 +1031,8 @@ public class BattleManager : MonoBehaviour, ISaveable
         // 슬라이더 초기화
         InitializeSliders();
 
-        ShowBattleResult(isVictory);
-        GiveStageReward(isVictory);
+        ShowBattleResult(isVictory, isAutoRetryEnabled);
+        GiveStageReward(isVictory, isAutoRetryEnabled);
         if (isVictory)
         {
             currentMaxBossStage = Mathf.Max(currentMaxBossStage, bossStage + 1);
@@ -1064,7 +1077,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     }
 
     // 보상 지급 함수
-    private void GiveStageReward(bool isVictory)
+    private void GiveStageReward(bool isVictory, bool isAutoRetryEnabled)
     {
         if (currentBossData == null)
         {
@@ -1083,12 +1096,24 @@ public class BattleManager : MonoBehaviour, ISaveable
             }
             else
             {
-                // 반복 클리어 보상
-                GameManager.Instance.Coin += currentBossData.RepeatclearCoinReward;
+                // 반복도전 상태일 때는 상위 스테이지의 반복 보상, 아닐 때는 현재 스테이지의 반복 보상
+                if (isAutoRetryEnabled)
+                {
+                    Mouse nextStageBossData = GetBossDataByStage(bossStage + 1);
+                    if (nextStageBossData != null)
+                    {
+                        GameManager.Instance.Coin += nextStageBossData.RepeatclearCoinReward;
+                    }
+                }
+                else
+                {
+                    GameManager.Instance.Coin += currentBossData.RepeatclearCoinReward;
+                }
             }
         }
         else
         {
+            // 첫 번째 스테이지에서의 패배는 보상 없음
             if (currentMaxBossStage > 1)
             {
                 // 패배 시 최대 클리어 스테이지의 반복 보상 지급
@@ -1099,7 +1124,6 @@ public class BattleManager : MonoBehaviour, ISaveable
                     if (maxClearedBossData != null)
                     {
                         GameManager.Instance.Coin += maxClearedBossData.RepeatclearCoinReward;
-                        Debug.Log(maxClearedBossData.RepeatclearCoinReward);
                     }
                 }
             }

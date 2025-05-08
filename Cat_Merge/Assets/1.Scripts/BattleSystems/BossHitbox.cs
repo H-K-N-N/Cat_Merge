@@ -8,8 +8,8 @@ public class BossHitbox : MonoBehaviour
 
     private RectTransform rectTransform;
 
-    // 고양이의 이미지 때문에 위치 미세 조정
-    public Vector3 Position => new Vector3(rectTransform.anchoredPosition.x + 20, rectTransform.anchoredPosition.y - 10, 0);
+    // 고양이의 이미지에 맞춰 위치 미세 조정
+    public Vector3 Position => new Vector3(rectTransform.anchoredPosition.x, rectTransform.anchoredPosition.y - 40, 0);
 
     // ======================================================================================================================
 

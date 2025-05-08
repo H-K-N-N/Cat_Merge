@@ -98,17 +98,18 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             }
         }
 
-        Transform coinTextTransform = transform.Find("CollectCoinText");
         Transform coinImageTransform = transform.Find("CollectCoinImage");
-        if (coinTextTransform != null) collectCoinText = coinTextTransform.GetComponent<TextMeshProUGUI>();
+        Transform coinTextTransform = coinImageTransform.Find("CollectCoinText");
+        
         if (coinImageTransform != null) collectCoinImage = coinImageTransform.GetComponent<Image>();
+        if (coinTextTransform != null) collectCoinText = coinTextTransform.GetComponent<TextMeshProUGUI>();
 
         hpImage = transform.Find("HP Image").gameObject;
         hpFillImage = hpImage.transform.Find("Fill Image").GetComponent<Image>();
         hpImage.SetActive(false);
 
-        if (collectCoinText != null) collectCoinText.gameObject.SetActive(false);
         if (collectCoinImage != null) collectCoinImage.gameObject.SetActive(false);
+        if (collectCoinText != null) collectCoinText.gameObject.SetActive(false);
     }
 
     // 레이캐스트를 위한 rectSize 설정 함수

@@ -1687,8 +1687,6 @@ public class QuestManager : MonoBehaviour, ISaveable
         string data = GetSaveData();
         string key = this.GetType().FullName;
         GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
-
-        Debug.Log("ÀúÀå");
     }
 
     #endregion

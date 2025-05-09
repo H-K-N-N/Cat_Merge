@@ -161,7 +161,7 @@ public class GameManager : MonoBehaviour, ISaveable
         currentCatCount = 0;
         maxCats = 8;
         coin = 0;
-        cash = 0;
+        cash = 100;
     }
 
     // 첫 게임 시작 패널을 보여주는 코루틴
@@ -479,34 +479,34 @@ public class GameManager : MonoBehaviour, ISaveable
 #endif
     }
 
-    // 게임 종료 함수
-    public void SaveGame()
-    {
-        StartCoroutine(SaveCoroutine());
-    }
+    //// 게임 종료 함수
+    //public void SaveGame()
+    //{
+    //    StartCoroutine(SaveCoroutine());
+    //}
 
-    // 저장 후 종료하는 코루틴
-    private IEnumerator SaveCoroutine()
-    {
-        // GoogleManager를 통해 암호화하여 저장
-        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
-        if (GoogleManager.Instance != null)
-        {
-            GoogleManager.Instance.SaveAllSaveables(saveables);
+    //// 저장 후 종료하는 코루틴
+    //private IEnumerator SaveCoroutine()
+    //{
+    //    // GoogleManager를 통해 암호화하여 저장
+    //    ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
+    //    if (GoogleManager.Instance != null)
+    //    {
+    //        GoogleManager.Instance.SaveAllSaveables(saveables);
 
-            // 클라우드 저장 시도
-            if (GoogleManager.Instance.isLoggedIn)
-            {
-                GoogleManager.Instance.SaveToCloudWithLocalData();
-            }
-        }
-        else
-        {
-            Debug.LogError("[저장 오류] GoogleManager 인스턴스를 찾을 수 없습니다!");
-        }
+    //        // 클라우드 저장 시도
+    //        if (GoogleManager.Instance.isLoggedIn)
+    //        {
+    //            GoogleManager.Instance.SaveToCloudWithLocalData();
+    //        }
+    //    }
+    //    else
+    //    {
+    //        Debug.LogError("[저장 오류] GoogleManager 인스턴스를 찾을 수 없습니다!");
+    //    }
 
-        yield return null;
-    }
+    //    yield return null;
+    //}
 
     #endregion
 
@@ -520,26 +520,26 @@ public class GameManager : MonoBehaviour, ISaveable
         // 기존 Cat 수치로 생성된 고양이들을 성장으로 추가된 수치가 적용된 Cat으로 업데이트하기 위함
 
         // 기존 시스템에서 오브젝트 풀링 시스템으로 변경해서 손봐줘야할듯함
-        foreach (Transform child in gamePanel)
-        {
-            if (child.TryGetComponent<CatData>(out var catData))
-            {
-                foreach (Cat cat in allCatData)
-                {
-                    if (cat.CatId == catData.catData.CatId)
-                    {
-                        catData.SetCatData(cat);
-                        break;
-                    }
-                }
-            }
-        }
+        //foreach (Transform child in gamePanel)
+        //{
+        //    if (child.TryGetComponent<CatData>(out var catData))
+        //    {
+        //        foreach (Cat cat in allCatData)
+        //        {
+        //            if (cat.CatId == catData.catData.CatId)
+        //            {
+        //                catData.SetCatData(cat);
+        //                break;
+        //            }
+        //        }
+        //    }
+        //}
     }
 
     // 모든 고양이의 훈련 데이터를 저장하는 함수
     public void SaveTrainingData(Cat[] cats)
     {
-        // 여기에 실제 저장 로직 구현
+        // 여기에 실제 저장 로직 구현 (이건 나중에 기존 저장로직을 따라서 변경할 예정)
     }
 
     #endregion

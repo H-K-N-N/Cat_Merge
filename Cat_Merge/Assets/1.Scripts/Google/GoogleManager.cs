@@ -29,6 +29,7 @@ public class ComponentData
 public class CompleteGameState
 {
     public List<ComponentData> components = new List<ComponentData>();
+    public long timestamp;  // 타임스탬프 추가
 
     public void AddComponentData(string path, string data)
     {
@@ -45,6 +46,11 @@ public class CompleteGameState
         }
         data = null;
         return false;
+    }
+
+    public void UpdateTimestamp()
+    {
+        timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
     }
 }
 
@@ -95,9 +101,7 @@ public class GoogleManager : MonoBehaviour
     private void Start()
     {
         InitializeGooglePlay();
-
         UnencryptedData();
-
         StartCoroutine(GPGS_Login());
     }
 
@@ -153,19 +157,50 @@ public class GoogleManager : MonoBehaviour
     // 구글 로그인 코루틴
     private IEnumerator GPGS_Login()
     {
-        // 로그인
+        // 구글 로그인 시도
         bool loginComplete = false;
         PlayGamesPlatform.Instance.Authenticate((status) => {
             ProcessAuthentication(status);
             loginComplete = true;
         });
 
-        // 로그인 완료 대기
+        // 로그인 완료 대기 (최대 5초)
         float waitTime = 0;
         while (!loginComplete && waitTime < 5f)
         {
             waitTime += Time.deltaTime;
             yield return null;
+        }
+
+        // 데이터 동기화 및 로드
+        if (isLoggedIn)
+        {
+            bool syncComplete = false;
+            SynchronizeData((success) => {
+                if (success)
+                {
+                    LoadFromLocalPlayerPrefs(gameObject);
+                }
+                else
+                {
+                    Debug.LogWarning("클라우드 동기화 실패. 로컬 데이터만 사용합니다.");
+                    LoadFromLocalPlayerPrefs(gameObject);
+                }
+                syncComplete = true;
+            });
+
+            // 동기화 완료 대기 (최대 5초)
+            waitTime = 0;
+            while (!syncComplete && waitTime < 5f)
+            {
+                waitTime += Time.deltaTime;
+                yield return null;
+            }
+        }
+        else
+        {
+            // 비로그인 상태: 로컬 데이터만 로드
+            LoadFromLocalPlayerPrefs(gameObject);
         }
     }
 
@@ -557,6 +592,9 @@ public class GoogleManager : MonoBehaviour
             }
         }
 
+        gameState.UpdateTimestamp();
+        SaveLocalTimestamp(gameState.timestamp);
+
         string jsonData = JsonUtility.ToJson(gameState);
         SaveToCloud(EncryptData(jsonData));
         isSaving = false;
@@ -818,5 +856,137 @@ public class GoogleManager : MonoBehaviour
 
     #endregion
 
+
+    #region Data Synchronization
+
+    private const string LOCAL_TIMESTAMP_KEY = "LocalDataTimestamp";
+    private CompleteGameState cachedLocalState;
+
+    // 로컬 데이터의 타임스탬프 저장
+    private void SaveLocalTimestamp(long timestamp)
+    {
+        PlayerPrefs.SetString(LOCAL_TIMESTAMP_KEY, timestamp.ToString());
+        PlayerPrefs.Save();
+    }
+
+    // 로컬 데이터의 타임스탬프 로드
+    private long LoadLocalTimestamp()
+    {
+        string timestampStr = PlayerPrefs.GetString(LOCAL_TIMESTAMP_KEY, "0");
+        return long.Parse(timestampStr);
+    }
+
+    // 로컬 데이터를 CompleteGameState로 변환
+    private CompleteGameState GetLocalGameState()
+    {
+        if (cachedLocalState != null)
+            return cachedLocalState;
+
+        CompleteGameState localState = new CompleteGameState();
+        var saveables = Resources.FindObjectsOfTypeAll<MonoBehaviour>().OfType<ISaveable>();
+
+        foreach (ISaveable saveable in saveables)
+        {
+            MonoBehaviour mb = (MonoBehaviour)saveable;
+            string typeName = mb.GetType().FullName;
+            string data = PlayerPrefs.GetString(typeName, "");
+
+            if (!string.IsNullOrEmpty(data))
+            {
+                localState.AddComponentData(typeName, data);
+            }
+        }
+
+        localState.timestamp = LoadLocalTimestamp();
+        cachedLocalState = localState;
+        return localState;
+    }
+
+    // 클라우드 데이터를 로컬에 적용
+    private void ApplyCloudToLocal(CompleteGameState cloudState)
+    {
+        foreach (var component in cloudState.components)
+        {
+            SaveToPlayerPrefs(component.path, component.data);
+        }
+        SaveLocalTimestamp(cloudState.timestamp);
+        cachedLocalState = null; // 캐시 무효화
+    }
+
+    // 로컬 데이터를 클라우드에 적용
+    private void ApplyLocalToCloud()
+    {
+        var localState = GetLocalGameState();
+        localState.UpdateTimestamp();
+        SaveLocalTimestamp(localState.timestamp);
+        string jsonData = JsonUtility.ToJson(localState);
+        SaveToCloud(EncryptData(jsonData));
+        cachedLocalState = null; // 캐시 무효화
+    }
+
+    // 데이터 동기화 처리
+    public void SynchronizeData(Action<bool> onComplete)
+    {
+        if (!isLoggedIn)
+        {
+            onComplete?.Invoke(true);
+            return;
+        }
+
+        ISavedGameClient saveGameClient = PlayGamesPlatform.Instance.SavedGame;
+        saveGameClient.OpenWithAutomaticConflictResolution(
+            fileName,
+            DataSource.ReadCacheOrNetwork,
+            ConflictResolutionStrategy.UseLongestPlaytime,
+            (status, game) =>
+            {
+                if (status == SavedGameRequestStatus.Success)
+                {
+                    saveGameClient.ReadBinaryData(game, (readStatus, data) =>
+                    {
+                        if (readStatus == SavedGameRequestStatus.Success && data != null && data.Length > 0)
+                        {
+                            try
+                            {
+                                string encryptedJsonData = Encoding.UTF8.GetString(data);
+                                string decryptedJsonData = DecryptData(encryptedJsonData);
+                                CompleteGameState cloudState = JsonUtility.FromJson<CompleteGameState>(decryptedJsonData);
+                                CompleteGameState localState = GetLocalGameState();
+
+                                // 타임스탬프 비교 및 동기화
+                                if (cloudState.timestamp > localState.timestamp)
+                                {
+                                    // 클라우드 데이터가 더 최신
+                                    ApplyCloudToLocal(cloudState);
+                                }
+                                else if (cloudState.timestamp < localState.timestamp)
+                                {
+                                    // 로컬 데이터가 더 최신
+                                    ApplyLocalToCloud();
+                                }
+                                onComplete?.Invoke(true);
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.LogError($"데이터 동기화 중 오류 발생: {e.Message}");
+                                onComplete?.Invoke(false);
+                            }
+                        }
+                        else
+                        {
+                            // 클라우드에 데이터가 없으면 로컬 데이터를 업로드
+                            ApplyLocalToCloud();
+                            onComplete?.Invoke(true);
+                        }
+                    });
+                }
+                else
+                {
+                    onComplete?.Invoke(false);
+                }
+            });
+    }
+
+    #endregion
 
 }

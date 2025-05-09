@@ -190,11 +190,23 @@ public class QuestManager : MonoBehaviour, ISaveable
 
     private void Update()
     {
-        AddPlayTimeCount();
+        //AddPlayTimeCount();
 
         // 매 초마다 체크
         if (Time.time % 1 < Time.deltaTime)
         {
+            // 플레이타임 퀘스트 최대치 체크
+            bool canAddDailyPlayTime = dailyQuestDictionary["플레이 시간"].questData.currentCount < dailyQuestDictionary["플레이 시간"].questData.targetCount;
+            bool canAddWeeklyPlayTime = weeklyQuestDictionary["플레이 시간"].questData.currentCount < weeklyQuestDictionary["플레이 시간"].questData.targetCount;
+
+            // 둘 중 하나라도 최대치에 도달하지 않았다면 플레이타임 추가
+            if (canAddDailyPlayTime || canAddWeeklyPlayTime)
+            {
+                AddPlayTimeCount();
+            }
+
+            //AddPlayTimeCount();
+
             CheckAndResetQuests();
         }
     }
@@ -632,6 +644,8 @@ public class QuestManager : MonoBehaviour, ISaveable
             UpdateAllRepeatRewardButtonState();
             SortRepeatQuests();
         }
+
+        SaveToLocal();
     }
 
     // 보상 버튼 클릭 시 호출되는 함수
@@ -681,12 +695,22 @@ public class QuestManager : MonoBehaviour, ISaveable
     // 플레이타임 증가 함수
     public void AddPlayTimeCount()
     {
-        float deltaTime = Time.deltaTime;
-        dailyPlayTimeCount += deltaTime;
-        weeklyPlayTimeCount += deltaTime;
+        //float deltaTime = Time.deltaTime;
+        float addTime = 1f;
 
-        dailyQuestDictionary["플레이 시간"].questData.currentCount = (int)dailyPlayTimeCount;
-        weeklyQuestDictionary["플레이 시간"].questData.currentCount = (int)weeklyPlayTimeCount;
+        // 일일 퀘스트 플레이타임
+        if (dailyQuestDictionary["플레이 시간"].questData.currentCount < dailyQuestDictionary["플레이 시간"].questData.targetCount)
+        {
+            dailyPlayTimeCount += addTime;
+            dailyQuestDictionary["플레이 시간"].questData.currentCount = (int)dailyPlayTimeCount;
+        }
+
+        // 주간 퀘스트 플레이타임
+        if (weeklyQuestDictionary["플레이 시간"].questData.currentCount < weeklyQuestDictionary["플레이 시간"].questData.targetCount)
+        {
+            weeklyPlayTimeCount += addTime;
+            weeklyQuestDictionary["플레이 시간"].questData.currentCount = (int)weeklyPlayTimeCount;
+        }
 
         UpdateQuestProgress("플레이 시간");
     }
@@ -1086,13 +1110,13 @@ public class QuestManager : MonoBehaviour, ISaveable
         {
             AddDailySpecialRewardCount();
             UpdateDailySpecialRewardUI();
-            //UpdateAllDailyRewardButtonState();      // 원래 여기서 호출이 되야하는데 PlayTime이 Update에서 늘어나서 상시 호출로인해 여기 없어도 실행이 되버림. (최적화 생각 필요)
+            UpdateAllDailyRewardButtonState();      // 원래 여기서 호출이 되야하는데 PlayTime이 Update에서 늘어나서 상시 호출로인해 여기 없어도 실행이 되버림. (최적화 생각 필요)
         }
         else if (menuType == QuestMenuType.Weekly)
         {
             AddWeeklySpecialRewardCount();
             UpdateWeeklySpecialRewardUI();
-            //UpdateAllWeeklyRewardButtonState();     // 같은 이유
+            UpdateAllWeeklyRewardButtonState();     // 같은 이유
         }
 
         // 퀘스트 UI 업데이트 호출

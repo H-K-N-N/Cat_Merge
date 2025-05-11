@@ -392,8 +392,6 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         }
 
         onSuccess?.Invoke();
-
-        SaveToLocal();
     }
 
     // 고양이 최대치 증가 함수
@@ -558,13 +556,6 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         UpdateAllUI();
 
         isDataLoaded = true;
-    }
-
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

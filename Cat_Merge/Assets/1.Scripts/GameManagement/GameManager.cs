@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using System.Collections;
 using System;
-using System.Linq;
 
 // 게임매니저 스크립트
 [DefaultExecutionOrder(-8)]
@@ -78,7 +77,6 @@ public class GameManager : MonoBehaviour, ISaveable
             {
                 coin = value;
                 UpdateCoinText();
-                SaveToLocal();
             }
         }
     }
@@ -94,7 +92,6 @@ public class GameManager : MonoBehaviour, ISaveable
             {
                 cash = value;
                 UpdateCashText();
-                SaveToLocal();
             }
         }
     }
@@ -447,21 +444,7 @@ public class GameManager : MonoBehaviour, ISaveable
         Time.timeScale = 0f;
 
         // GoogleManager를 통해 암호화하여 저장
-        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
-        if (GoogleManager.Instance != null)
-        {
-            GoogleManager.Instance.SaveAllSaveables(saveables);
-
-            // 클라우드 저장 시도
-            if (GoogleManager.Instance.isLoggedIn)
-            {
-                GoogleManager.Instance.SaveToCloudWithLocalData();
-            }
-        }
-        else
-        {
-            Debug.LogError("[저장 오류] GoogleManager 인스턴스를 찾을 수 없습니다!");
-        }
+        GoogleManager.Instance?.ForceSaveAllData();
 
         // 1초 대기
         yield return new WaitForSecondsRealtime(1f);
@@ -478,35 +461,6 @@ public class GameManager : MonoBehaviour, ISaveable
         Application.Quit();
 #endif
     }
-
-    //// 게임 종료 함수
-    //public void SaveGame()
-    //{
-    //    StartCoroutine(SaveCoroutine());
-    //}
-
-    //// 저장 후 종료하는 코루틴
-    //private IEnumerator SaveCoroutine()
-    //{
-    //    // GoogleManager를 통해 암호화하여 저장
-    //    ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
-    //    if (GoogleManager.Instance != null)
-    //    {
-    //        GoogleManager.Instance.SaveAllSaveables(saveables);
-
-    //        // 클라우드 저장 시도
-    //        if (GoogleManager.Instance.isLoggedIn)
-    //        {
-    //            GoogleManager.Instance.SaveToCloudWithLocalData();
-    //        }
-    //    }
-    //    else
-    //    {
-    //        Debug.LogError("[저장 오류] GoogleManager 인스턴스를 찾을 수 없습니다!");
-    //    }
-
-    //    yield return null;
-    //}
 
     #endregion
 
@@ -589,13 +543,6 @@ public class GameManager : MonoBehaviour, ISaveable
         {
             cash = parsedCash;
         }
-    }
-
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

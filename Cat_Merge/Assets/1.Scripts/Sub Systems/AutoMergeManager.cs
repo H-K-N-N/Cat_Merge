@@ -58,7 +58,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         if (Instance == null)
         {
             Instance = this;
-            
+
         }
         else
         {
@@ -143,7 +143,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     }
 
     #endregion
-    
+
 
     #region Auto Merge System
 
@@ -164,8 +164,6 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
         GameManager.Instance.Cash -= AUTO_MERGE_COST;
         OnClickedAutoMerge();
-
-        SaveToLocal();
     }
 
     // 자동합성 버튼 클릭 처리 함수
@@ -213,8 +211,8 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
             // 활성화된 고양이를 등급순으로 정렬하여 가져옴
             var allCats = FindObjectsOfType<DragAndDropManager>()
-                .Where(cat => cat != null && 
-                       cat.gameObject.activeSelf && 
+                .Where(cat => cat != null &&
+                       cat.gameObject.activeSelf &&
                        !cat.isDragging)
                 .OrderBy(cat => cat.catData.CatGrade)
                 .ToList();
@@ -408,8 +406,6 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         UpdateAutoMergeTimerVisibility(false);
         StopAllCoroutines();
         mergingCats.Clear();
-
-        SaveToLocal();
     }
 
     // 합성중인 고양이 정지 함수
@@ -508,8 +504,6 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             StopAllCoroutines();
             mergingCats.Clear();
             DisableAutoMergeUI();
-
-            SaveToLocal();
         }
         else
         {
@@ -528,8 +522,6 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             currentAutoMergeDuration = pausedTimeRemaining;
             EnableAutoMergeUI();
             StartAutoMergeCoroutine();
-
-            SaveToLocal();
         }
         else
         {
@@ -609,13 +601,6 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
 
         isDataLoaded = true;
-    }
-
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

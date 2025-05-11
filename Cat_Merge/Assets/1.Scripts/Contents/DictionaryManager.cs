@@ -248,8 +248,6 @@ public class DictionaryManager : MonoBehaviour, ISaveable
 
         // BuyCatManager의 구매 슬롯 상태 업데이트
         BuyCatManager.Instance?.UnlockBuySlot(CatGrade);
-
-        SaveToLocal();
     }
 
     // 특정 고양이의 해금 여부 확인 함수
@@ -271,8 +269,6 @@ public class DictionaryManager : MonoBehaviour, ISaveable
 
         // 이벤트 발생
         OnCatDataChanged?.Invoke();
-
-        SaveToLocal();
     }
 
     // 특정 고양이의 첫 해금 보상 획득 여부 확인 함수
@@ -686,13 +682,6 @@ public class DictionaryManager : MonoBehaviour, ISaveable
             isCatUnlocked[i] = savedData.isCatUnlocked[i];
             isGetFirstUnlockedReward[i] = savedData.isGetFirstUnlockedReward[i];
         }
-    }
-
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

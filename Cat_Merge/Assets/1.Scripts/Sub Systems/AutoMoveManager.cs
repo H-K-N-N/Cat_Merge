@@ -99,8 +99,6 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
         ApplyAutoMoveStateToAllCats();
         UpdateAutoMoveButtonColor();
         CloseAutoMovePanel();
-
-        SaveToLocal();
     }
 
     #endregion
@@ -162,8 +160,6 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     {
         SaveAndDisableAutoMoveState();
         DisableAutoMoveUI();
-
-        SaveToLocal();
     }
 
     // 자동이동 상태 저장 및 비활성화 함수
@@ -189,8 +185,6 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     {
         RestoreAutoMoveState();
         EnableAutoMoveUI();
-
-        SaveToLocal();
     }
 
     // 자동이동 상태 복구 함수
@@ -258,13 +252,6 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
         ApplyAutoMoveStateToAllCats();
 
         isDataLoaded = true;
-    }
-
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

@@ -967,8 +967,6 @@ public class BattleManager : MonoBehaviour, ISaveable
         UpdateAutoRetryUI(isAutoRetryEnabled);
         UpdateToggleButtonImage(autoRetryButtonImage, isAutoRetryEnabled);
         UpdateAutoRetryPanelButtonColor(isAutoRetryEnabled);
-
-        SaveToLocal();
     }
 
     // 자동 재도전 UI 업데이트
@@ -1101,8 +1099,6 @@ public class BattleManager : MonoBehaviour, ISaveable
         bossHitbox = null;
         battleHPUI.SetActive(false);
 
-        SaveToLocal();
-
         // 전투 종료시 비활성화했던 기능들 다시 기존 상태로 복구
         SetEndFunctions();
 
@@ -1129,6 +1125,9 @@ public class BattleManager : MonoBehaviour, ISaveable
 
         // DoubleCoinForAd 효과 재개
         ShopManager.Instance.GetRemainingEffectTime();
+
+        // 데이터 저장
+        GoogleManager.Instance?.ForceSaveAllData();
     }
 
     // 보상 지급 함수
@@ -1343,13 +1342,6 @@ public class BattleManager : MonoBehaviour, ISaveable
         respawnSlider.value = 0f;
 
         isDataLoaded = true;
-    }
-
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

@@ -59,6 +59,9 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
 
         InitializeButtonListeners();
         UpdateAutoMoveButtonColor();
+
+        // 패널 등록
+        ActivePanelManager.Instance.RegisterPanel("AutoMovePanel", autoMovePanel, null, ActivePanelManager.PanelPriority.Medium);
     }
 
     #endregion
@@ -69,27 +72,21 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     // 버튼 리스너 초기화 함수
     private void InitializeButtonListeners()
     {
-        openAutoMovePanelButton.onClick.AddListener(OpenAutoMovePanel);
-        closeAutoMovePanelButton.onClick.AddListener(CloseAutoMovePanel);
+        openAutoMovePanelButton.onClick.AddListener(() => ActivePanelManager.Instance.TogglePanel("AutoMovePanel"));
+        closeAutoMovePanelButton.onClick.AddListener(() => ActivePanelManager.Instance.ClosePanel("AutoMovePanel"));
         autoMoveStateButton.onClick.AddListener(ToggleAutoMoveState);
     }
 
     // 자동이동 패널 여는 함수
     private void OpenAutoMovePanel()
     {
-        if (autoMovePanel != null)
-        {
-            autoMovePanel.SetActive(true);
-        }
+        ActivePanelManager.Instance.OpenPanel("AutoMovePanel");
     }
 
     // 자동이동 패널 닫는 함수
     public void CloseAutoMovePanel()
     {
-        if (autoMovePanel != null)
-        {
-            autoMovePanel.SetActive(false);
-        }
+        ActivePanelManager.Instance.ClosePanel("AutoMovePanel");
     }
 
     // 자동이동 상태 토글 함수

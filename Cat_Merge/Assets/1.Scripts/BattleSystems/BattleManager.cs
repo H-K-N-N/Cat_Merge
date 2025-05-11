@@ -170,6 +170,10 @@ public class BattleManager : MonoBehaviour, ISaveable
 
         UpdateAutoRetryUI(isAutoRetryEnabled, true);
         bossSpawnRoutine = StartCoroutine(BossSpawnRoutine());
+
+        // AutoRetryPanel 등록
+        ActivePanelManager.Instance.RegisterPanel("AutoRetryPanel", autoRetryPanel, null, ActivePanelManager.PanelPriority.Medium);
+        ActivePanelManager.Instance.RegisterPanel("GiveUpPanel", giveUpPanel, null, ActivePanelManager.PanelPriority.High);
     }
 
     #endregion
@@ -262,15 +266,15 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 버튼 리스너 초기화 함수
     private void InitializeButtonListeners()
     {
-        giveupButton.onClick.AddListener(ShowGiveUpPanel);
+        giveupButton.onClick.AddListener(() => ActivePanelManager.Instance.OpenPanel("GiveUpPanel"));
         battleResultCloseButton.onClick.AddListener(CloseBattleResultPanel);
 
-        giveUpBackButton.onClick.AddListener(CloseGiveUpPanel);
+        giveUpBackButton.onClick.AddListener(() => ActivePanelManager.Instance.ClosePanel("GiveUpPanel"));
         giveUpConfirmButton.onClick.AddListener(ConfirmGiveUp);
 
-        autoRetryPanelButton.onClick.AddListener(OpenAutoRetryPanel);
+        autoRetryPanelButton.onClick.AddListener(() => ActivePanelManager.Instance.TogglePanel("AutoRetryPanel"));
         autoRetryButton.onClick.AddListener(ToggleAutoRetry);
-        closeAutoRetryPanelButton.onClick.AddListener(CloseAutoRetryPanel);
+        closeAutoRetryPanelButton.onClick.AddListener(() => ActivePanelManager.Instance.ClosePanel("AutoRetryPanel"));
 
         autoRetryPanelButtonImage = autoRetryPanelButton.GetComponent<Image>();
         autoRetryButtonImage = autoRetryButton.GetComponent<Image>();
@@ -941,18 +945,6 @@ public class BattleManager : MonoBehaviour, ISaveable
         CloseBattleResultPanel();
     }
 
-    // 자동 재도전 패널 열기
-    private void OpenAutoRetryPanel()
-    {
-        autoRetryPanel.SetActive(true);
-    }
-
-    // 자동 재도전 패널 닫기
-    private void CloseAutoRetryPanel()
-    {
-        autoRetryPanel.SetActive(false);
-    }
-
     // 토글 버튼 이미지 업데이트
     private void UpdateToggleButtonImage(Image buttonImage, bool isOn)
     {
@@ -1046,19 +1038,13 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 항복 버튼 함수 (항복하기 패널 보여주기)
     private void ShowGiveUpPanel()
     {
-        if (giveUpPanel != null)
-        {
-            giveUpPanel.SetActive(true);
-        }
+        ActivePanelManager.Instance.OpenPanel("GiveUpPanel");
     }
 
     // 항복하기 패널을 닫는 함수
     private void CloseGiveUpPanel()
     {
-        if (giveUpPanel != null)
-        {
-            giveUpPanel.SetActive(false);
-        }
+        ActivePanelManager.Instance.ClosePanel("GiveUpPanel");
     }
 
     // 항복을 확정하는 함수

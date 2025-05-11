@@ -1,37 +1,65 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 
 public class ActivePanelManager : MonoBehaviour
 {
-    private class PanelInfo                                 // PanelInfo Class
+
+
+    #region Variables
+
+    public static ActivePanelManager Instance { get; private set; }
+
+    // 패널 우선순위 정의
+    public enum PanelPriority
+    {
+        Low = 0,        // 일반 패널
+        Medium = 1,     // 중요 패널
+        High = 2,       // 시스템 패널
+        Critical = 3    // 필수 패널 (종료 등)
+    }
+
+    private class PanelInfo
     {
         public GameObject Panel { get; }
         public Image ButtonImage { get; }
+        public PanelPriority Priority { get; }
 
-        public PanelInfo(GameObject panel, Image buttonImage)
+        public PanelInfo(GameObject panel, Image buttonImage, PanelPriority priority)
         {
             Panel = panel;
             ButtonImage = buttonImage;
+            Priority = priority;
         }
     }
 
-    private Dictionary<string, PanelInfo> panels;           // Panel과 버튼 정보를 저장할 Dictionary
-    private string activePanelName;                         // 활성화된 Panel 이름
-    public string ActivePanelName => activePanelName;
+    private Dictionary<string, PanelInfo> panels;
+    private Stack<string> activePanelStack;
+    public string ActivePanelName => activePanelStack.Count > 0 ? activePanelStack.Peek() : null;
 
     [Header("---[UI Color]")]
-    private const float inactiveAlpha = 180f / 255f;        // 비활성화상태 Alpha값
+    private const float inactiveAlpha = 180f / 255f;
 
-    private string[] topPanels = { "DictionaryMenu", "OptionMenu", "QuestMenu" };
-    private string[] bottomPanels = { "BottomItemMenu", "BuyCatMenu" };
+    // 버튼 알파값을 조절할 특정 패널들
+    private readonly string[] alphaControlPanels = { "DictionaryMenu", "OptionMenu", "QuestMenu" };
 
-    // ======================================================================================================================
+    #endregion
+
+
+    #region Unity Methods
 
     private void Awake()
     {
-        panels = new Dictionary<string, PanelInfo>();
-        activePanelName = null;
+        if (Instance == null)
+        {
+            Instance = this;
+            InitializeManager();
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     private void Start()
@@ -41,90 +69,179 @@ public class ActivePanelManager : MonoBehaviour
             foreach (var panel in panels.Values)
             {
                 panel.Panel.SetActive(false);
-                UpdateButtonColor(panel.ButtonImage, true);
+                if (panel.ButtonImage != null && ShouldControlButtonAlpha(panel))
+                {
+                    UpdateButtonColor(panel.ButtonImage, false);
+                }
             }
         }
     }
 
-    // Panel과 버튼 등록
-    public void RegisterPanel(string panelName, GameObject panel, Image buttonImage)
+    #endregion
+
+
+    #region Initialize
+
+    private void InitializeManager()
+    {
+        panels = new Dictionary<string, PanelInfo>();
+        activePanelStack = new Stack<string>();
+    }
+
+    #endregion
+
+
+
+
+    // 해당 패널의 버튼 알파값을 조절해야 하는지 확인하는 함수
+    private bool ShouldControlButtonAlpha(PanelInfo panelInfo)
+    {
+        return alphaControlPanels.Any(panelName => panels.ContainsKey(panelName) && panels[panelName] == panelInfo);
+    }
+
+    // 패널 등록 함수
+    public void RegisterPanel(string panelName, GameObject panel, Image buttonImage = null, PanelPriority priority = PanelPriority.Low)
     {
         if (!panels.ContainsKey(panelName))
         {
-            panels.Add(panelName, new PanelInfo(panel, buttonImage));
+            panels.Add(panelName, new PanelInfo(panel, buttonImage, priority));
         }
     }
 
-    // Panel 여닫는 함수
-    public void TogglePanel(string panelName)
+    // 패널 열기 함수
+    public void OpenPanel(string panelName)
     {
-        if (panels.ContainsKey(panelName))
+        if (!panels.ContainsKey(panelName)) return;
+
+        var newPanel = panels[panelName];
+
+        // 현재 활성화된 패널이 있다면
+        if (activePanelStack.Count > 0)
         {
-            // 열려있던 Panel 버튼을 한번 더 눌렀다면
-            if (activePanelName == panelName)
-            {
-                ClosePanel(activePanelName);
-                activePanelName = null;
-                // 특별 패널만 버튼 색상 변경
-                foreach (var kvp in panels)
-                {
-                    if (System.Array.Exists(topPanels, x => x == kvp.Key))
-                    {
-                        UpdateButtonColor(kvp.Value.ButtonImage, true);
-                    }
-                }
-            }
-            else
-            {
-                // 현재 열려 있는 Panel 닫기
-                if (activePanelName != null && activePanelName != panelName && panels.ContainsKey(activePanelName))
-                {
-                    ClosePanel(activePanelName);
-                }
+            var currentPanelName = activePanelStack.Peek();
+            var currentPanel = panels[currentPanelName];
 
-                // 새로운 Panel 열기
-                PanelInfo panelInfo = panels[panelName];
-                panelInfo.Panel.SetActive(true);
-                activePanelName = panelName;
-
-                // 특별 패널만 버튼 색상 업데이트
-                foreach (var kvp in panels)
-                {
-                    if (System.Array.Exists(topPanels, x => x == kvp.Key))
-                    {
-                        UpdateButtonColor(kvp.Value.ButtonImage, kvp.Key == panelName);
-                    }
-                }
+            // 새 패널의 우선순위가 더 높거나 같으면 현재 패널을 닫음
+            if (newPanel.Priority >= currentPanel.Priority)
+            {
+                ClosePanel(currentPanelName);
             }
         }
+
+        // 새 패널 열기
+        newPanel.Panel.SetActive(true);
+        activePanelStack.Push(panelName);
+        UpdateButtonColors();
     }
 
-    // Panel 닫는 함수
+    // 패널 닫기 함수
     public void ClosePanel(string panelName)
     {
-        if (panels.ContainsKey(panelName))
-        {
-            PanelInfo panelInfo = panels[panelName];
-            activePanelName = null;
-            panelInfo.Panel.SetActive(false);
+        if (!panels.ContainsKey(panelName)) return;
 
-            // 특별 패널만 버튼 색상 변경
-            foreach (var kvp in panels)
+        PanelInfo panelInfo = panels[panelName];
+        if (panelInfo.Panel.activeSelf)
+        {
+            panelInfo.Panel.SetActive(false);
+            if (activePanelStack.Contains(panelName))
             {
-                if (System.Array.Exists(topPanels, x => x == kvp.Key))
+                var tempStack = new Stack<string>();
+                while (activePanelStack.Count > 0)
                 {
-                    UpdateButtonColor(kvp.Value.ButtonImage, true);
+                    var currentPanel = activePanelStack.Pop();
+                    if (currentPanel != panelName)
+                    {
+                        tempStack.Push(currentPanel);
+                    }
                 }
+                while (tempStack.Count > 0)
+                {
+                    activePanelStack.Push(tempStack.Pop());
+                }
+            }
+
+            // 스택의 최상위 패널 활성화
+            if (activePanelStack.Count > 0)
+            {
+                panels[activePanelStack.Peek()].Panel.SetActive(true);
+            }
+
+            UpdateButtonColors();
+        }
+    }
+
+    // 패널 토글 함수
+    public void TogglePanel(string panelName)
+    {
+        if (!panels.ContainsKey(panelName)) return;
+
+        if (IsPanelActive(panelName))
+        {
+            ClosePanel(panelName);
+        }
+        else
+        {
+            OpenPanel(panelName);
+        }
+    }
+
+    // 모든 패널 닫기 함수
+    public void CloseAllPanels()
+    {
+        while (activePanelStack.Count > 0)
+        {
+            ClosePanel(activePanelStack.Peek());
+        }
+    }
+
+    //// 특정 우선순위 이하의 모든 패널 닫는 함수
+    //public void ClosePanelsBelowPriority(PanelPriority priority)
+    //{
+    //    var panelsToClose = activePanelStack
+    //        .Where(panelName => panels[panelName].Priority < priority)
+    //        .ToList();
+
+    //    foreach (var panelName in panelsToClose)
+    //    {
+    //        ClosePanel(panelName);
+    //    }
+    //}
+
+    // 모든 버튼 색상 업데이트 함수
+    private void UpdateButtonColors()
+    {
+        foreach (var kvp in panels)
+        {
+            if (kvp.Value.ButtonImage != null && ShouldControlButtonAlpha(kvp.Value))
+            {
+                bool isActive = IsPanelActive(kvp.Key);
+                UpdateButtonColor(kvp.Value.ButtonImage, isActive);
             }
         }
     }
 
-    // 버튼 색상 업데이트하는 함수
+    // 단일 버튼 색상 업데이트 함수
     private void UpdateButtonColor(Image buttonImage, bool isActive)
     {
+        if (buttonImage == null) return;
+
         Color color = buttonImage.color;
         color.a = isActive ? 1f : inactiveAlpha;
         buttonImage.color = color;
     }
+
+    // 현재 활성화된 패널이 있는지 확인하는 함수
+    public bool HasActivePanel()
+    {
+        return activePanelStack.Count > 0;
+    }
+
+    // 특정 패널이 활성화되어 있는지 확인하는 함수
+    public bool IsPanelActive(string panelName)
+    {
+        if (!panels.ContainsKey(panelName)) return false;
+        return panels[panelName].Panel.activeSelf;
+    }
+
 
 }

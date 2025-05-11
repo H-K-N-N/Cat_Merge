@@ -391,17 +391,23 @@ public class GameManager : MonoBehaviour, ISaveable
     // 종료 입력 처리 함수
     public void HandleQuitInput()
     {
-        if (quitPanel != null && !isBackButtonPressed)
+        if (!isBackButtonPressed)
         {
             isBackButtonPressed = true;
+
             if (quitPanel.activeSelf)
             {
                 CancelQuit();
+            }
+            else if (ActivePanelManager.Instance.HasActivePanel())
+            {
+                ActivePanelManager.Instance.CloseAllPanels();
             }
             else
             {
                 ShowQuitPanel();
             }
+
             StartCoroutine(ResetBackButtonPress());
         }
     }

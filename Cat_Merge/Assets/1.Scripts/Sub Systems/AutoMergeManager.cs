@@ -75,6 +75,9 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         {
             InitializeDefaultValues();
         }
+
+        // 패널 등록
+        ActivePanelManager.Instance.RegisterPanel("AutoMergePanel", autoMergePanel, null, ActivePanelManager.PanelPriority.Medium);
     }
 
     private void Update()
@@ -137,8 +140,8 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     // UI 버튼 이벤트 리스너 설정 함수
     private void InitializeButtonListeners()
     {
-        openAutoMergePanelButton?.onClick.AddListener(OpenAutoMergePanel);
-        closeAutoMergePanelButton?.onClick.AddListener(CloseAutoMergePanel);
+        openAutoMergePanelButton?.onClick.AddListener(() => ActivePanelManager.Instance.TogglePanel("AutoMergePanel"));
+        closeAutoMergePanelButton?.onClick.AddListener(() => ActivePanelManager.Instance.ClosePanel("AutoMergePanel"));
         autoMergeStateButton?.onClick.AddListener(StartAutoMerge);
     }
 

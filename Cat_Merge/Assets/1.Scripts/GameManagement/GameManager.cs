@@ -350,13 +350,42 @@ public class GameManager : MonoBehaviour, ISaveable
         UpdateCatUIObjects();
         if (catUIObjects.Count == 0) return;
 
-        // Y축을 기준으로 정렬 (높은 Y값이 뒤로 가게 설정)
-        catUIObjects.Sort((a, b) => b.anchoredPosition.y.CompareTo(a.anchoredPosition.y));
+        const float positionThreshold = 1f; // 위치 차이 임계값
+        bool needsSort = false;
 
-        // 정렬된 순서대로 UI 계층 구조 업데이트
+        // 정렬이 필요한지 확인
+        for (int i = 1; i < catUIObjects.Count; i++)
+        {
+            var current = catUIObjects[i].anchoredPosition;
+            var prev = catUIObjects[i - 1].anchoredPosition;
+
+            if (Mathf.Abs(current.y - prev.y) > positionThreshold)
+            {
+                needsSort = true;
+                break;
+            }
+        }
+
+        if (!needsSort) return;
+
+        // Y축을 우선으로 하고, Y축이 비슷한 경우 X축으로 정렬
+        catUIObjects.Sort((a, b) =>
+        {
+            float yDiff = b.anchoredPosition.y - a.anchoredPosition.y;
+            if (Mathf.Abs(yDiff) <= positionThreshold)
+            {
+                return a.anchoredPosition.x.CompareTo(b.anchoredPosition.x);
+            }
+            return yDiff > 0 ? 1 : -1;
+        });
+
+        // 실제 순서가 변경된 경우에만 SetSiblingIndex 호출
         for (int i = 0; i < catUIObjects.Count; i++)
         {
-            catUIObjects[i].SetSiblingIndex(i);
+            if (catUIObjects[i].GetSiblingIndex() != i)
+            {
+                catUIObjects[i].SetSiblingIndex(i);
+            }
         }
     }
 

@@ -316,8 +316,6 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         friendship.currentExp += expAmount;
 
         UpdateFriendshipUI(catGrade);
-
-        SaveToLocal();
     }
 
     // 애정도 UI 업데이트 함수
@@ -625,8 +623,6 @@ public class FriendshipManager : MonoBehaviour, ISaveable
                 }
             }
         }
-
-        SaveToLocal();
     }
 
     // 공격력 1~5% 증가 효과 패시브 함수
@@ -799,8 +795,6 @@ public class FriendshipManager : MonoBehaviour, ISaveable
 
         // DictionaryManager의 New Image 상태도 업데이트
         DictionaryManager.Instance.UpdateNewImageStatus();
-
-        SaveToLocal();
     }
 
     // 다음 레벨 필요 경험치 조회 함수
@@ -967,13 +961,6 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         }
 
         isDataLoaded = true;
-    }
-
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

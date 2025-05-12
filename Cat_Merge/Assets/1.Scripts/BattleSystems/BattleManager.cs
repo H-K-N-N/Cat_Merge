@@ -16,23 +16,38 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     public static BattleManager Instance { get; private set; }
 
+    #region Constants
+    private static class BattleConstants
+    {
+        public const float DEFAULT_SPAWN_INTERVAL = 300f;       // 보스 등장 주기 (300f)
+        public const float DEFAULT_BOSS_DURATION = 30f;         // 보스 유지 시간 (30f)
+        public const float GIVEUP_BUTTON_DELAY = 2f;            // 항복 버튼 활성화 딜레이 (2f)
+        public const float BOSS_ATTACK_DELAY = 2f;              // 보스 공격 딜레이 (2f)
+        public const float WARNING_IMAGE_START_X = -640f;       // 경고 이미지 시작 좌표 (-640f)
+        public const float WARNING_IMAGE_END_X = 640f;          // 경고 이미지 끝 좌표 (640f)
+        public const float BOSS_DANGER_START_X = 1040f;         // Boss Danger 이미지 시작 좌표 (1040f)
+        public const float BOSS_DANGER_END_X = -1040f;          // Boss Danger 이미지 끝 좌표 (-1040f)
+        public const float WARNING_IMAGE_Y = 0f;                // 경고 이미지 Y 좌표 (0f)
+    }
+    #endregion
+
     [Header("---[Battle System]")]
     [SerializeField] private GameObject bossPrefab;             // 보스 프리팹
     [SerializeField] private Transform bossUIParent;            // 보스를 배치할 부모 Transform (UI Panel 등)
     [SerializeField] private Slider respawnSlider;              // 보스 소환까지 남은 시간을 표시할 Slider UI
 
-    private const float DEFAULT_SPAWN_INTERVAL = 300f;          // 보스 등장 주기 (300f)
+    //private const float DEFAULT_SPAWN_INTERVAL = 10f;          // 보스 등장 주기 (300f)
     private float spawnInterval;                                // 보스 등장 주기
     private Coroutine respawnSliderCoroutine;                   // Slider 코루틴
-    private float bossSpawnTimer = 0f;                          // 보스 스폰 타이머
+    private float bossSpawnTimer;                               // 보스 스폰 타이머
     private float sliderDuration;                               // Slider 유지 시간
-    private const float DEFAULT_BOSS_DURATION = 30f;            // 보스 유지 시간 (원래 30f)
+    //private const float DEFAULT_BOSS_DURATION = 30f;            // 보스 유지 시간 (30f)
     private float bossDuration;                                 // 보스 유지 시간
     private int bossStage = 1;                                  // 보스 스테이지
     public int BossStage => bossStage;
 
-    private const float GIVEUP_BUTTON_DELAY = 2f;               // 항복 버튼 활성화 딜레이
-    private const float BOSS_ATTACK_DELAY = 2f;                 // 보스 공격 딜레이
+    //private const float GIVEUP_BUTTON_DELAY = 2f;               // 항복 버튼 활성화 딜레이
+    //private const float BOSS_ATTACK_DELAY = 2f;                 // 보스 공격 딜레이
     
 
     private GameObject currentBoss;                             // 현재 보스
@@ -106,11 +121,11 @@ public class BattleManager : MonoBehaviour, ISaveable
     private CanvasGroup bossDangerCanvasGroup;                  // 보스 위험 이미지의 CanvasGroup  
     private CanvasGroup bottomWarningCanvasGroup;               // 하단 경고 이미지의 CanvasGroup
 
-    private const float WARNING_IMAGE_START_X = -640f;          // 경고 이미지 시작 좌표
-    private const float WARNING_IMAGE_END_X = 640f;             // 경고 이미지 끝 좌표
-    private const float BOSS_DANGER_START_X = 1040f;            // Boss Danger 이미지 시작 좌표
-    private const float BOSS_DANGER_END_X = -1040f;             // Boss Danger 이미지 끝 좌표
-    private const float WARNING_IMAGE_Y = 0f;                   // 경고 이미지 Y 좌표
+    //private const float WARNING_IMAGE_START_X = -640f;          // 경고 이미지 시작 좌표
+    //private const float WARNING_IMAGE_END_X = 640f;             // 경고 이미지 끝 좌표
+    //private const float BOSS_DANGER_START_X = 1040f;            // Boss Danger 이미지 시작 좌표
+    //private const float BOSS_DANGER_END_X = -1040f;             // Boss Danger 이미지 끝 좌표
+    //private const float WARNING_IMAGE_Y = 0f;                   // 경고 이미지 Y 좌표
 
 
     [Header("---[ETC]")]
@@ -155,6 +170,10 @@ public class BattleManager : MonoBehaviour, ISaveable
 
         UpdateAutoRetryUI(isAutoRetryEnabled, true);
         bossSpawnRoutine = StartCoroutine(BossSpawnRoutine());
+
+        // AutoRetryPanel 등록
+        ActivePanelManager.Instance.RegisterPanel("AutoRetryPanel", autoRetryPanel, null, ActivePanelManager.PanelPriority.Medium);
+        ActivePanelManager.Instance.RegisterPanel("GiveUpPanel", giveUpPanel, null, ActivePanelManager.PanelPriority.High);
     }
 
     #endregion
@@ -185,9 +204,10 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 시간 초기화 함수 (보스 리스폰, 보스 전투 시간)
     private void InitializeTimers()
     {
-        spawnInterval = DEFAULT_SPAWN_INTERVAL - warningDuration;
-        bossDuration = DEFAULT_BOSS_DURATION;
+        spawnInterval = BattleConstants.DEFAULT_SPAWN_INTERVAL - warningDuration;
+        bossDuration = BattleConstants.DEFAULT_BOSS_DURATION;
         sliderDuration = bossDuration - warningDuration;
+        bossSpawnTimer = 0f;
     }
 
     // Sliders UI 초기화 함수
@@ -246,15 +266,15 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 버튼 리스너 초기화 함수
     private void InitializeButtonListeners()
     {
-        giveupButton.onClick.AddListener(ShowGiveUpPanel);
+        giveupButton.onClick.AddListener(() => ActivePanelManager.Instance.OpenPanel("GiveUpPanel"));
         battleResultCloseButton.onClick.AddListener(CloseBattleResultPanel);
 
-        giveUpBackButton.onClick.AddListener(CloseGiveUpPanel);
+        giveUpBackButton.onClick.AddListener(() => ActivePanelManager.Instance.ClosePanel("GiveUpPanel"));
         giveUpConfirmButton.onClick.AddListener(ConfirmGiveUp);
 
-        autoRetryPanelButton.onClick.AddListener(OpenAutoRetryPanel);
+        autoRetryPanelButton.onClick.AddListener(() => ActivePanelManager.Instance.TogglePanel("AutoRetryPanel"));
         autoRetryButton.onClick.AddListener(ToggleAutoRetry);
-        closeAutoRetryPanelButton.onClick.AddListener(CloseAutoRetryPanel);
+        closeAutoRetryPanelButton.onClick.AddListener(() => ActivePanelManager.Instance.ClosePanel("AutoRetryPanel"));
 
         autoRetryPanelButtonImage = autoRetryPanelButton.GetComponent<Image>();
         autoRetryButtonImage = autoRetryButton.GetComponent<Image>();
@@ -332,9 +352,13 @@ public class BattleManager : MonoBehaviour, ISaveable
         bottomWarningCanvasGroup.alpha = 0f;
 
         // Image 초기 위치 설정
-        topWarningImage.rectTransform.anchoredPosition = new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y);
-        bossDangerImage.rectTransform.anchoredPosition = new Vector2(BOSS_DANGER_START_X, WARNING_IMAGE_Y);
-        bottomWarningImage.rectTransform.anchoredPosition = new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y);
+        //topWarningImage.rectTransform.anchoredPosition = new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y);
+        //bossDangerImage.rectTransform.anchoredPosition = new Vector2(BOSS_DANGER_START_X, WARNING_IMAGE_Y);
+        //bottomWarningImage.rectTransform.anchoredPosition = new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y);
+        topWarningImage.rectTransform.anchoredPosition = new Vector2(BattleConstants.WARNING_IMAGE_START_X, BattleConstants.WARNING_IMAGE_Y);
+        bossDangerImage.rectTransform.anchoredPosition = new Vector2(BattleConstants.BOSS_DANGER_START_X, BattleConstants.WARNING_IMAGE_Y);
+        bottomWarningImage.rectTransform.anchoredPosition = new Vector2(BattleConstants.WARNING_IMAGE_START_X, BattleConstants.WARNING_IMAGE_Y);
+
 
         // 첫 1초: 투명 -> 반투명
         while (elapsedTime < halfDuration)
@@ -352,16 +376,22 @@ public class BattleManager : MonoBehaviour, ISaveable
             // 이미지 이동
             float moveProgress = elapsedTime / warningDuration;
             topWarningImage.rectTransform.anchoredPosition = Vector2.Lerp(
-                new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y),
-                new Vector2(WARNING_IMAGE_END_X, WARNING_IMAGE_Y),
+                //new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y),
+                //new Vector2(WARNING_IMAGE_END_X, WARNING_IMAGE_Y),
+                new Vector2(BattleConstants.WARNING_IMAGE_START_X, BattleConstants.WARNING_IMAGE_Y),
+                new Vector2(BattleConstants.WARNING_IMAGE_END_X, BattleConstants.WARNING_IMAGE_Y),
                 moveProgress);
             bottomWarningImage.rectTransform.anchoredPosition = Vector2.Lerp(
-                new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y),
-                new Vector2(WARNING_IMAGE_END_X, WARNING_IMAGE_Y),
+                //new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y),
+                //new Vector2(WARNING_IMAGE_END_X, WARNING_IMAGE_Y),
+                new Vector2(BattleConstants.WARNING_IMAGE_START_X, BattleConstants.WARNING_IMAGE_Y),
+                new Vector2(BattleConstants.WARNING_IMAGE_END_X, BattleConstants.WARNING_IMAGE_Y),
                 moveProgress);
             bossDangerImage.rectTransform.anchoredPosition = Vector2.Lerp(
-                new Vector2(BOSS_DANGER_START_X, WARNING_IMAGE_Y),
-                new Vector2(BOSS_DANGER_END_X, WARNING_IMAGE_Y),
+                //new Vector2(BOSS_DANGER_START_X, WARNING_IMAGE_Y),
+                //new Vector2(BOSS_DANGER_END_X, WARNING_IMAGE_Y),
+                new Vector2(BattleConstants.BOSS_DANGER_START_X, BattleConstants.WARNING_IMAGE_Y),
+                new Vector2(BattleConstants.BOSS_DANGER_END_X, BattleConstants.WARNING_IMAGE_Y),
                 moveProgress);
 
             // slider 업데이트
@@ -385,16 +415,22 @@ public class BattleManager : MonoBehaviour, ISaveable
             // 이미지 이동
             float moveProgress = elapsedTime / warningDuration;
             topWarningImage.rectTransform.anchoredPosition = Vector2.Lerp(
-                new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y),
-                new Vector2(WARNING_IMAGE_END_X, WARNING_IMAGE_Y),
+                //new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y),
+                //new Vector2(WARNING_IMAGE_END_X, WARNING_IMAGE_Y),
+                new Vector2(BattleConstants.WARNING_IMAGE_START_X, BattleConstants.WARNING_IMAGE_Y),
+                new Vector2(BattleConstants.WARNING_IMAGE_END_X, BattleConstants.WARNING_IMAGE_Y),
                 moveProgress);
             bottomWarningImage.rectTransform.anchoredPosition = Vector2.Lerp(
-                new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y),
-                new Vector2(WARNING_IMAGE_END_X, WARNING_IMAGE_Y),
+                //new Vector2(WARNING_IMAGE_START_X, WARNING_IMAGE_Y),
+                //new Vector2(WARNING_IMAGE_END_X, WARNING_IMAGE_Y),
+                new Vector2(BattleConstants.WARNING_IMAGE_START_X, BattleConstants.WARNING_IMAGE_Y),
+                new Vector2(BattleConstants.WARNING_IMAGE_END_X, BattleConstants.WARNING_IMAGE_Y),
                 moveProgress);
             bossDangerImage.rectTransform.anchoredPosition = Vector2.Lerp(
-                new Vector2(BOSS_DANGER_START_X, WARNING_IMAGE_Y),
-                new Vector2(BOSS_DANGER_END_X, WARNING_IMAGE_Y),
+                //new Vector2(BOSS_DANGER_START_X, WARNING_IMAGE_Y),
+                //new Vector2(BOSS_DANGER_END_X, WARNING_IMAGE_Y),
+                new Vector2(BattleConstants.BOSS_DANGER_START_X, BattleConstants.WARNING_IMAGE_Y),
+                new Vector2(BattleConstants.BOSS_DANGER_END_X, BattleConstants.WARNING_IMAGE_Y),
                 moveProgress);
 
             // slider 업데이트
@@ -409,15 +445,30 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 보스 스폰 함수
     private void LoadAndDisplayBoss()
     {
+        int targetStage;
+
         // 자동 재도전 상태에 따라 도전할 스테이지 결정
         if (isAutoRetryEnabled)
         {
-            bossStage = Mathf.Max(1, currentMaxBossStage - 1);
+            targetStage = Mathf.Max(1, currentMaxBossStage - 1);
         }
         else
         {
-            bossStage = currentMaxBossStage;
+            targetStage = currentMaxBossStage;
         }
+
+        // 스테이지 유효성 검사
+        if (targetStage < 1)
+        {
+            targetStage = 1;
+        }
+        if (targetStage > GameManager.Instance.AllMouseData.Length)
+        {
+            targetStage = GameManager.Instance.AllMouseData.Length;
+        }
+
+        // bossStage 설정
+        bossStage = targetStage;
 
         // bossStage에 맞는 Mouse를 가져와서 보스를 설정
         currentBossData = GetBossData();
@@ -436,6 +487,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         GameObject recallEffect = Instantiate(effectPrefab, currentBoss.transform.position, Quaternion.identity);
         recallEffect.transform.SetParent(currentBoss.transform);
         recallEffect.transform.localScale = Vector3.one * 4;
+
         UpdateBossUI();
     }
 
@@ -443,16 +495,20 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 해당 스테이지와 동일한 등급을 갖는 보스 데이터 불러오는 함수 (MouseGrade)
     private Mouse GetBossData()
     {
-        // 모든 Mouse 데이터를 가져와서 bossStage에 맞는 MouseGrade를 찾음
-        foreach (Mouse mouse in GameManager.Instance.AllMouseData)
-        {
-            if (mouse.MouseGrade == bossStage)
-            {
-                return mouse;
-            }
-        }
+        //// 모든 Mouse 데이터를 가져와서 bossStage에 맞는 MouseGrade를 찾음
+        //foreach (Mouse mouse in GameManager.Instance.AllMouseData)
+        //{
+        //    if (mouse.MouseGrade == bossStage)
+        //    {
+        //        return mouse;
+        //    }
+        //}
 
-        return null;
+        //return null;
+
+        Mouse bossData = GameManager.Instance.AllMouseData.FirstOrDefault(mouse => mouse.MouseGrade == bossStage);
+
+        return bossData;
     }
 
     // 전투 시작할때마다 Boss UI Panel 설정 함수
@@ -463,9 +519,12 @@ public class BattleManager : MonoBehaviour, ISaveable
 
         maxBossHP = currentBossData.MouseHp;
         currentBossHP = maxBossHP;
+
         bossHPSlider.maxValue = (float)maxBossHP;
         bossHPSlider.value = (float)currentBossHP;
+
         double hpPercentage = (currentBossHP / maxBossHP) * 100f;
+
         bossHPText.text = $"{GameManager.Instance.FormatNumber((decimal)currentBossHP)} / {GameManager.Instance.FormatNumber((decimal)maxBossHP)}";
         bossHPPercentText.text = $"({GameManager.Instance.FormatNumber((decimal)hpPercentage)}%)";
     } 
@@ -509,7 +568,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 항복 버튼 활성화 코루틴
     private IEnumerator EnableGiveupButton()
     {
-        yield return new WaitForSeconds(GIVEUP_BUTTON_DELAY);
+        yield return new WaitForSeconds(BattleConstants.GIVEUP_BUTTON_DELAY);
         giveupButton.interactable = true;
     }
 
@@ -589,7 +648,7 @@ public class BattleManager : MonoBehaviour, ISaveable
                 {
                     anim.ChangeState(MouseState.isFaint);
                 }
-                yield return new WaitForSeconds(0.9f);
+                yield return new WaitForSeconds(1.5f);
                 EndBattle(true);
                 yield break;
             }
@@ -693,7 +752,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     {
         while (IsBattleActive)
         {
-            yield return new WaitForSeconds(BOSS_ATTACK_DELAY);
+            yield return new WaitForSeconds(BattleConstants.BOSS_ATTACK_DELAY);
             BossAttackCats();
         }
     }
@@ -701,7 +760,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 보스가 히트박스 내 고양이 N마리를 공격하는 함수
     private void BossAttackCats()
     {
-        if (currentBoss == null || bossHitbox == null)
+        if (currentBoss == null || bossHitbox == null || currentBossHP <= 0)
         {
             return;
         }
@@ -779,7 +838,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         // 공격 애니메이션이 재생되는 시간
         yield return new WaitForSeconds(1f);
 
-        if (isBattleActive && anim != null && anim.gameObject.activeSelf)
+        if (isBattleActive && anim != null && anim.gameObject.activeSelf && currentBossHP > 0)
         {
             anim.ChangeState(MouseState.isIdle);
         }
@@ -886,18 +945,6 @@ public class BattleManager : MonoBehaviour, ISaveable
         CloseBattleResultPanel();
     }
 
-    // 자동 재도전 패널 열기
-    private void OpenAutoRetryPanel()
-    {
-        autoRetryPanel.SetActive(true);
-    }
-
-    // 자동 재도전 패널 닫기
-    private void CloseAutoRetryPanel()
-    {
-        autoRetryPanel.SetActive(false);
-    }
-
     // 토글 버튼 이미지 업데이트
     private void UpdateToggleButtonImage(Image buttonImage, bool isOn)
     {
@@ -912,8 +959,6 @@ public class BattleManager : MonoBehaviour, ISaveable
         UpdateAutoRetryUI(isAutoRetryEnabled);
         UpdateToggleButtonImage(autoRetryButtonImage, isAutoRetryEnabled);
         UpdateAutoRetryPanelButtonColor(isAutoRetryEnabled);
-
-        SaveToLocal();
     }
 
     // 자동 재도전 UI 업데이트
@@ -993,19 +1038,13 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 항복 버튼 함수 (항복하기 패널 보여주기)
     private void ShowGiveUpPanel()
     {
-        if (giveUpPanel != null)
-        {
-            giveUpPanel.SetActive(true);
-        }
+        ActivePanelManager.Instance.OpenPanel("GiveUpPanel");
     }
 
     // 항복하기 패널을 닫는 함수
     private void CloseGiveUpPanel()
     {
-        if (giveUpPanel != null)
-        {
-            giveUpPanel.SetActive(false);
-        }
+        ActivePanelManager.Instance.ClosePanel("GiveUpPanel");
     }
 
     // 항복을 확정하는 함수
@@ -1046,8 +1085,6 @@ public class BattleManager : MonoBehaviour, ISaveable
         bossHitbox = null;
         battleHPUI.SetActive(false);
 
-        SaveToLocal();
-
         // 전투 종료시 비활성화했던 기능들 다시 기존 상태로 복구
         SetEndFunctions();
 
@@ -1074,6 +1111,9 @@ public class BattleManager : MonoBehaviour, ISaveable
 
         // DoubleCoinForAd 효과 재개
         ShopManager.Instance.GetRemainingEffectTime();
+
+        // 데이터 저장
+        GoogleManager.Instance?.ForceSaveAllData();
     }
 
     // 보상 지급 함수
@@ -1240,6 +1280,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     private class SaveData
     {
         public int bossStage;               // 현재 보스 스테이지
+        public int highestClearedStage;     // 가장 높게 클리어한 스테이지
         public bool isAutoRetryEnabled;     // 하위 단계 자동 도전 상태
         public List<int> clearedStages;     // 클리어한 스테이지들
     }
@@ -1249,6 +1290,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         SaveData data = new SaveData
         {
             bossStage = this.bossStage,
+            highestClearedStage = this.clearedStages.Count > 0 ? this.clearedStages.Max() : 0,
             isAutoRetryEnabled = this.isAutoRetryEnabled,
             clearedStages = new List<int>(this.clearedStages)
         };
@@ -1268,7 +1310,7 @@ public class BattleManager : MonoBehaviour, ISaveable
         this.bossStage = savedData.bossStage;
         this.isAutoRetryEnabled = savedData.isAutoRetryEnabled;
         this.clearedStages = new HashSet<int>(savedData.clearedStages ?? new List<int>());
-        this.currentMaxBossStage = this.clearedStages.Count > 0 ? this.clearedStages.Max() + 1 : 1;
+        this.currentMaxBossStage = savedData.highestClearedStage + 1;
 
         UpdateToggleButtonImage(autoRetryButtonImage, isAutoRetryEnabled);
         UpdateAutoRetryPanelButtonColor(isAutoRetryEnabled);
@@ -1286,13 +1328,6 @@ public class BattleManager : MonoBehaviour, ISaveable
         respawnSlider.value = 0f;
 
         isDataLoaded = true;
-    }
-
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

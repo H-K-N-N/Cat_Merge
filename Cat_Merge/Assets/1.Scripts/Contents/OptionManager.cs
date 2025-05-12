@@ -343,11 +343,9 @@ public class OptionManager : MonoBehaviour, ISaveable
         // 볼륨 슬라이더 값 변경 시 저장 이벤트 추가
         bgmSettings.slider.onValueChanged.AddListener(_ => {
             SetSoundToggleImage(true);
-            SaveToLocal();
         });
         sfxSettings.slider.onValueChanged.AddListener(_ => {
             SetSoundToggleImage(false);
-            SaveToLocal();
         });
     }
 
@@ -371,8 +369,6 @@ public class OptionManager : MonoBehaviour, ISaveable
         SetSoundToggleImage(isBgm);
         UpdateToggleUI(settings.isOn, isBgm);
         UpdateToggleButtonImage(settings.toggleButtonImage, settings.isOn);
-
-        SaveToLocal();
     }
 
     // 토글 버튼 이미지 업데이트 함수
@@ -478,8 +474,6 @@ public class OptionManager : MonoBehaviour, ISaveable
         settings.isOn = !settings.isOn;
         UpdateToggleUI(settings.handle, settings.isOn);
         UpdateToggleButtonImage(settings.toggleButtonImage, settings.isOn);
-
-        SaveToLocal();
     }
 
     // 토글 UI 업데이트 함수
@@ -667,21 +661,7 @@ public class OptionManager : MonoBehaviour, ISaveable
         Time.timeScale = 0f;
 
         // GoogleManager를 통해 암호화하여 저장
-        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
-        if (GoogleManager.Instance != null)
-        {
-            GoogleManager.Instance.SaveAllSaveables(saveables);
-
-            // 클라우드 저장 시도
-            if (GoogleManager.Instance.isLoggedIn)
-            {
-                GoogleManager.Instance.SaveGameStateSyncImmediate();
-            }
-        }
-        else
-        {
-            Debug.LogError("[저장 오류] GoogleManager 인스턴스를 찾을 수 없습니다!");
-        }
+        GoogleManager.Instance?.ForceSaveAllData();
 
         // 2초 대기
         yield return new WaitForSecondsRealtime(2f);
@@ -1040,13 +1020,6 @@ public class OptionManager : MonoBehaviour, ISaveable
         UpdateToggleButtonImage(savingSettings.toggleButtonImage, savingSettings.isOn);
 
         isDataLoaded = true;
-    }
-
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

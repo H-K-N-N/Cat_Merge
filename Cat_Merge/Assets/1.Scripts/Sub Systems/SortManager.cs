@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 
 // 고양이 정렬 관련 스크립트
 public class SortManager : MonoBehaviour
@@ -19,6 +20,9 @@ public class SortManager : MonoBehaviour
     private const float MOVE_DURATION = 0.1f;                       // 각 고양이의 이동 시간
     private const int CATS_PER_ROW = 7;                             // 한 줄에 배치될 고양이 수
     private const float SPACING = 10f;                              // 고양이 간 간격
+
+    private Dictionary<int, List<GameObject>> catsByGrade = new Dictionary<int, List<GameObject>>();  // 등급별 고양이 저장
+    private bool isSorting = false;                                 // 정렬 진행 중 여부
 
     #endregion
 
@@ -49,12 +53,15 @@ public class SortManager : MonoBehaviour
     // 고양이 정렬 시작 함수
     private void SortCats()
     {
+        if (isSorting) return;  // 이미 정렬 중이면 무시
         StartCoroutine(SortCatsCoroutine());
     }
 
     // 고양이들을 순차적으로 배치하는 코루틴
     private IEnumerator SortCatsCoroutine()
     {
+        isSorting = true;
+
         // 모든 고양이 이동 중지
         StopAllCatMovements();
         yield return new WaitForSeconds(MOVEMENT_DELAY);
@@ -64,11 +71,37 @@ public class SortManager : MonoBehaviour
 
         // 등급순 정렬 및 위치 이동
         var sortedCats = GetSortedCats();
-        yield return StartCoroutine(MoveCatsToPositions(sortedCats));
 
-        // 완료 대기 및 자동이동 상태 복구
-        yield return new WaitForSeconds(SORT_COMPLETE_DELAY);
+        // 정렬이 필요한지 확인
+        if (IsSortingNeeded(sortedCats))
+        {
+            yield return StartCoroutine(MoveCatsToPositions(sortedCats));
+            yield return new WaitForSeconds(SORT_COMPLETE_DELAY);
+        }
+
         RestoreAutoMoveState();
+        isSorting = false;
+    }
+
+    // 정렬이 필요한지 확인하는 함수
+    private bool IsSortingNeeded(List<GameObject> sortedCats)
+    {
+        if (sortedCats.Count == 0) return false;
+
+        // 현재 위치와 목표 위치를 비교하여 정렬 필요성 확인
+        for (int i = 0; i < sortedCats.Count; i++)
+        {
+            RectTransform rectTransform = sortedCats[i].GetComponent<RectTransform>();
+            Vector2 targetPosition = CalculateTargetPosition(i, rectTransform);
+
+            // 현재 위치와 목표 위치의 차이가 일정 거리 이상이면 정렬 필요
+            if (Vector2.Distance(rectTransform.anchoredPosition, targetPosition) > 1f)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // 정렬된 고양이들을 순차적으로 이동시키는 코루틴
@@ -124,6 +157,8 @@ public class SortManager : MonoBehaviour
     private List<GameObject> GetSortedCats()
     {
         List<GameObject> sortedCats = new List<GameObject>();
+        catsByGrade.Clear();
+
         foreach (Transform child in gamePanel)
         {
             if (!child.gameObject.activeSelf) continue;
@@ -133,16 +168,21 @@ public class SortManager : MonoBehaviour
             if (dragManager != null && AutoMergeManager.Instance != null &&
                 !AutoMergeManager.Instance.IsMerging(dragManager))
             {
-                sortedCats.Add(child.gameObject);
+                int grade = GetCatGrade(child.gameObject);
+
+                if (!catsByGrade.ContainsKey(grade))
+                {
+                    catsByGrade[grade] = new List<GameObject>();
+                }
+                catsByGrade[grade].Add(child.gameObject);
             }
         }
 
-        sortedCats.Sort((cat1, cat2) =>
+        // 등급별로 정렬하되, 같은 등급 내에서는 현재 순서 유지
+        foreach (var grade in catsByGrade.Keys.OrderByDescending(k => k))
         {
-            int grade1 = GetCatGrade(cat1);
-            int grade2 = GetCatGrade(cat2);
-            return grade2.CompareTo(grade1);
-        });
+            sortedCats.AddRange(catsByGrade[grade]);
+        }
 
         return sortedCats;
     }

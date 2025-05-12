@@ -232,7 +232,6 @@ public class QuestManager : MonoBehaviour, ISaveable
             Debug.Log($"[Quest] 일일 퀘스트 초기화 - 마지막 리셋: {lastDailyResetTime}, 현재: {currentUtc}, 경과일: {daysSinceLastDaily}");
             ResetDailyQuests();
             lastDailyReset = currentUtc.ToUnixTimeSeconds();
-            SaveToLocal();
         }
 
         // 주간 퀘스트 체크
@@ -242,7 +241,6 @@ public class QuestManager : MonoBehaviour, ISaveable
             Debug.Log($"[Quest] 주간 퀘스트 초기화 - 마지막 리셋: {lastWeeklyResetTime}, 현재: {currentUtc}, 다음 목요일: {nextThursday}");
             ResetWeeklyQuests();
             lastWeeklyReset = currentUtc.ToUnixTimeSeconds();
-            SaveToLocal();
         }
     }
 
@@ -644,8 +642,6 @@ public class QuestManager : MonoBehaviour, ISaveable
             UpdateAllRepeatRewardButtonState();
             SortRepeatQuests();
         }
-
-        SaveToLocal();
     }
 
     // 보상 버튼 클릭 시 호출되는 함수
@@ -1346,7 +1342,6 @@ public class QuestManager : MonoBehaviour, ISaveable
             Debug.Log($"[Quest] 일일 퀘스트 초기화 - 현재: {currentUtc}, 마지막 리셋: {lastDailyResetTime}");
             ResetDailyQuests();
             lastDailyReset = currentTime;
-            SaveToLocal();
         }
 
         // 주간 퀘스트 초기화 체크 (UTC 기준 목요일)
@@ -1356,7 +1351,6 @@ public class QuestManager : MonoBehaviour, ISaveable
             Debug.Log($"[Quest] 주간 퀘스트 초기화 - 현재: {currentUtc}, 마지막 리셋: {lastWeeklyResetTime}, 다음 목요일: {nextThursday}");
             ResetWeeklyQuests();
             lastWeeklyReset = currentTime;
-            SaveToLocal();
         }
     }
 
@@ -1401,8 +1395,6 @@ public class QuestManager : MonoBehaviour, ISaveable
         // UI 업데이트
         UpdateAllDailyRewardButtonState();
         UpdateNewImageStatus();
-
-        SaveToLocal();
     }
 
     // 주간퀘스트 초기화 함수
@@ -1431,8 +1423,6 @@ public class QuestManager : MonoBehaviour, ISaveable
         // UI 업데이트
         UpdateAllWeeklyRewardButtonState();
         UpdateNewImageStatus();
-
-        SaveToLocal();
     }
 
     #endregion
@@ -1680,13 +1670,6 @@ public class QuestManager : MonoBehaviour, ISaveable
         RestoreQuestData(dailyQuestDictionary, savedData.dailyQuestKeys, savedData.dailyQuestValues, QuestMenuType.Daily);
         RestoreQuestData(weeklyQuestDictionary, savedData.weeklyQuestKeys, savedData.weeklyQuestValues, QuestMenuType.Weekly);
         RestoreQuestData(repeatQuestDictionary, savedData.repeatQuestKeys, savedData.repeatQuestValues, QuestMenuType.Repeat);
-    }
-
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

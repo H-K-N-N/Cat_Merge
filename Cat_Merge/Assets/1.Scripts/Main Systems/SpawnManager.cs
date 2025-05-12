@@ -156,8 +156,6 @@ public class SpawnManager : MonoBehaviour, ISaveable
         NowFood--;
         SpawnBasicCat();
         RestartFoodCoroutineIfStopped();
-
-        SaveToLocal();
     }
 
     // 기본 고양이 스폰 함수
@@ -327,7 +325,6 @@ public class SpawnManager : MonoBehaviour, ISaveable
             foodFillAmountImg.fillAmount = 1f;
             NowFood++;
             elapsed = 0f;
-            SaveToLocal();
         }
     }
 
@@ -367,7 +364,6 @@ public class SpawnManager : MonoBehaviour, ISaveable
                     NowFood--;
                     SpawnBasicCat();
                     RestartFoodCoroutineIfStopped();
-                    SaveToLocal();
                 }
                 elapsed = 0f;
             }
@@ -531,13 +527,6 @@ public class SpawnManager : MonoBehaviour, ISaveable
         }
 
         return catObject;
-    }
-
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

@@ -24,6 +24,9 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     private bool isAutoMoveEnabled;                                 // 자동 이동 활성화 상태
     private bool previousAutoMoveState;                             // 이전 상태 저장
 
+    private const float STATE_CHECK_INTERVAL = 8f;                  // 상태 확인 주기
+    private float lastCheckTime;                                    // 마지막 상태 확인 시간
+
     [Header("---[UI Color]")]
     private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
     private const string inactiveColorCode = "#B1FF70";             // 비활성화상태 Color
@@ -59,6 +62,40 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
 
         InitializeButtonListeners();
         UpdateAutoMoveButtonColor();
+
+        // 패널 등록
+        ActivePanelManager.Instance.RegisterPanel("AutoMovePanel", autoMovePanel, null, ActivePanelManager.PanelPriority.Medium);
+
+        lastCheckTime = Time.time;
+    }
+
+    private void Update()
+    {
+        // 주기적으로 모든 고양이의 자동이동 상태 확인
+        if (Time.time - lastCheckTime >= STATE_CHECK_INTERVAL)
+        {
+            CheckAndSyncCatsState();
+            lastCheckTime = Time.time;
+        }
+    }
+
+    // 모든 고양이의 자동이동 상태를 확인하고 동기화하는 함수
+    private void CheckAndSyncCatsState()
+    {
+        if (BattleManager.Instance.IsBattleActive) return;
+
+        var activeCats = SpawnManager.Instance.GetActiveCats();
+        foreach (var catObject in activeCats)
+        {
+            if (catObject != null)
+            {
+                CatData catData = catObject.GetComponent<CatData>();
+                if (catData != null && !catData.isStuned)
+                {
+                    catData.SetAutoMoveState(isAutoMoveEnabled);
+                }
+            }
+        }
     }
 
     #endregion
@@ -69,27 +106,21 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     // 버튼 리스너 초기화 함수
     private void InitializeButtonListeners()
     {
-        openAutoMovePanelButton.onClick.AddListener(OpenAutoMovePanel);
-        closeAutoMovePanelButton.onClick.AddListener(CloseAutoMovePanel);
+        openAutoMovePanelButton.onClick.AddListener(() => ActivePanelManager.Instance.TogglePanel("AutoMovePanel"));
+        closeAutoMovePanelButton.onClick.AddListener(() => ActivePanelManager.Instance.ClosePanel("AutoMovePanel"));
         autoMoveStateButton.onClick.AddListener(ToggleAutoMoveState);
     }
 
     // 자동이동 패널 여는 함수
     private void OpenAutoMovePanel()
     {
-        if (autoMovePanel != null)
-        {
-            autoMovePanel.SetActive(true);
-        }
+        ActivePanelManager.Instance.OpenPanel("AutoMovePanel");
     }
 
     // 자동이동 패널 닫는 함수
     public void CloseAutoMovePanel()
     {
-        if (autoMovePanel != null)
-        {
-            autoMovePanel.SetActive(false);
-        }
+        ActivePanelManager.Instance.ClosePanel("AutoMovePanel");
     }
 
     // 자동이동 상태 토글 함수
@@ -99,8 +130,6 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
         ApplyAutoMoveStateToAllCats();
         UpdateAutoMoveButtonColor();
         CloseAutoMovePanel();
-
-        SaveToLocal();
     }
 
     #endregion
@@ -162,8 +191,6 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     {
         SaveAndDisableAutoMoveState();
         DisableAutoMoveUI();
-
-        SaveToLocal();
     }
 
     // 자동이동 상태 저장 및 비활성화 함수
@@ -189,8 +216,6 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     {
         RestoreAutoMoveState();
         EnableAutoMoveUI();
-
-        SaveToLocal();
     }
 
     // 자동이동 상태 복구 함수
@@ -258,13 +283,6 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
         ApplyAutoMoveStateToAllCats();
 
         isDataLoaded = true;
-    }
-
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

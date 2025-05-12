@@ -29,10 +29,10 @@ public class MergeManager : MonoBehaviour, ISaveable
 
 
     private bool isDataLoaded = false;                              // 데이터 로드 확인
-    
+
     #endregion
 
-    
+
     #region Unity Methods
 
     private void Awake()
@@ -58,6 +58,9 @@ public class MergeManager : MonoBehaviour, ISaveable
 
         InitializeButtonListeners();
         UpdateMergeButtonColor();
+
+        // 패널 등록
+        ActivePanelManager.Instance.RegisterPanel("MergePanel", mergePanel, null, ActivePanelManager.PanelPriority.Medium);
     }
 
     #endregion
@@ -68,27 +71,21 @@ public class MergeManager : MonoBehaviour, ISaveable
     // 버튼 리스너 초기화 함수
     private void InitializeButtonListeners()
     {
-        openMergePanelButton.onClick.AddListener(OpenMergePanel);
-        closeMergePanelButton.onClick.AddListener(CloseMergePanel);
+        openMergePanelButton.onClick.AddListener(() => ActivePanelManager.Instance.TogglePanel("MergePanel"));
+        closeMergePanelButton.onClick.AddListener(() => ActivePanelManager.Instance.ClosePanel("MergePanel"));
         mergeStateButton.onClick.AddListener(ToggleMergeState);
     }
 
     // 머지 패널 여는 함수
     private void OpenMergePanel()
     {
-        if (mergePanel != null)
-        {
-            mergePanel.SetActive(true);
-        }
+        ActivePanelManager.Instance.OpenPanel("MergePanel");
     }
 
     // 머지 패널 닫는 함수
     public void CloseMergePanel()
     {
-        if (mergePanel != null)
-        {
-            mergePanel.SetActive(false);
-        }
+        ActivePanelManager.Instance.ClosePanel("MergePanel");
     }
 
     // 머지 상태 토글 함수
@@ -97,8 +94,6 @@ public class MergeManager : MonoBehaviour, ISaveable
         isMergeEnabled = !isMergeEnabled;
         UpdateMergeButtonColor();
         CloseMergePanel();
-
-        SaveToLocal();
     }
 
     #endregion
@@ -117,8 +112,6 @@ public class MergeManager : MonoBehaviour, ISaveable
         {
             mergePanel.SetActive(false);
         }
-
-        SaveToLocal();
     }
 
     // 전투 종료시 버튼 및 기능 기존 상태로 되돌려놓는 함수
@@ -126,8 +119,6 @@ public class MergeManager : MonoBehaviour, ISaveable
     {
         isMergeEnabled = previousMergeState;
         openMergePanelButton.interactable = true;
-
-        SaveToLocal();
     }
 
     #endregion
@@ -241,13 +232,6 @@ public class MergeManager : MonoBehaviour, ISaveable
         UpdateMergeButtonColor();
 
         isDataLoaded = true;
-    }
-
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

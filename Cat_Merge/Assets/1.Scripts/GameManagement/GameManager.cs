@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using System.Collections;
 using System;
+using System.Linq;
 
 // 게임매니저 스크립트
 [DefaultExecutionOrder(-8)]
@@ -27,6 +28,10 @@ public class GameManager : MonoBehaviour, ISaveable
     public GameObject catPrefab;                                            // 고양이 UI 프리팹
     [SerializeField] private Transform gamePanel;                           // 고양이 정보를 가져올 부모 Panel
     private List<RectTransform> catUIObjects = new List<RectTransform>();   // 고양이 UI 객체 리스트
+
+    private float lastSortTime = 0f;                                        // 마지막 정렬 시간
+    private const float SORT_INTERVAL = 0.5f;                               // 정렬 간격
+    private Dictionary<int, Vector2> lastPositions = new Dictionary<int, Vector2>();  // 마지막 위치 저장
 
     [Header("---[Quit Panel]")]
     [SerializeField] private GameObject quitPanel;                          // 종료 확인 패널
@@ -142,7 +147,12 @@ public class GameManager : MonoBehaviour, ISaveable
     {
         if (!isQuiting)
         {
-            SortCatUIObjectsByYPosition();
+            if (Time.time - lastSortTime >= SORT_INTERVAL)
+            {
+                CheckAndSortCatUIObjects();
+                lastSortTime = Time.time;
+            }
+
             CheckQuitInput();
         }
     }
@@ -344,47 +354,67 @@ public class GameManager : MonoBehaviour, ISaveable
         }
     }
 
-    // Y축 기준으로 고양이 UI 정렬 함수
-    private void SortCatUIObjectsByYPosition()
+    // 정렬이 필요한지 확인하고 수행하는 함수
+    private void CheckAndSortCatUIObjects()
     {
         UpdateCatUIObjects();
         if (catUIObjects.Count == 0) return;
 
-        const float positionThreshold = 1f; // 위치 차이 임계값
         bool needsSort = false;
+        Dictionary<int, Vector2> currentPositions = new Dictionary<int, Vector2>();
 
-        // 정렬이 필요한지 확인
-        for (int i = 1; i < catUIObjects.Count; i++)
+        // 현재 위치 기록 및 변화 확인
+        foreach (var rectTransform in catUIObjects)
         {
-            var current = catUIObjects[i].anchoredPosition;
-            var prev = catUIObjects[i - 1].anchoredPosition;
+            int id = rectTransform.GetInstanceID();
+            Vector2 currentPos = rectTransform.anchoredPosition;
+            currentPositions[id] = currentPos;
 
-            if (Mathf.Abs(current.y - prev.y) > positionThreshold)
+            if (lastPositions.TryGetValue(id, out Vector2 lastPos))
+            {
+                if (Vector2.Distance(currentPos, lastPos) > 0.1f)
+                {
+                    needsSort = true;
+                }
+            }
+            else
             {
                 needsSort = true;
-                break;
             }
         }
 
-        if (!needsSort) return;
-
-        // Y축을 우선으로 하고, Y축이 비슷한 경우 X축으로 정렬
-        catUIObjects.Sort((a, b) =>
+        // 위치가 변경된 경우에만 정렬
+        if (needsSort)
         {
-            float yDiff = b.anchoredPosition.y - a.anchoredPosition.y;
-            if (Mathf.Abs(yDiff) <= positionThreshold)
-            {
-                return a.anchoredPosition.x.CompareTo(b.anchoredPosition.x);
-            }
-            return yDiff > 0 ? 1 : -1;
-        });
+            SortCatUIObjectsByPosition();
+        }
 
-        // 실제 순서가 변경된 경우에만 SetSiblingIndex 호출
-        for (int i = 0; i < catUIObjects.Count; i++)
+        lastPositions = currentPositions;
+    }
+
+    // Y축 기준으로 고양이 UI 정렬 함수
+    private void SortCatUIObjectsByPosition()
+    {
+        if (catUIObjects.Count == 0) return;
+
+        // 동일한 Y좌표에 있는 고양이들을 그룹화
+        var groups = catUIObjects.GroupBy(rt => Mathf.Round(rt.anchoredPosition.y * 10f) / 10f)
+                                .OrderByDescending(g => g.Key)
+                                .ToList();
+
+        int currentIndex = 0;
+        foreach (var group in groups)
         {
-            if (catUIObjects[i].GetSiblingIndex() != i)
+            // 각 Y좌표 그룹 내에서 X좌표로 정렬
+            var sortedGroup = group.OrderBy(rt => rt.anchoredPosition.x).ToList();
+
+            foreach (var rectTransform in sortedGroup)
             {
-                catUIObjects[i].SetSiblingIndex(i);
+                if (rectTransform.GetSiblingIndex() != currentIndex)
+                {
+                    rectTransform.SetSiblingIndex(currentIndex);
+                }
+                currentIndex++;
             }
         }
     }

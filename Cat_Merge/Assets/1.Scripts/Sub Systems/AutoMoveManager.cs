@@ -24,6 +24,9 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     private bool isAutoMoveEnabled;                                 // 자동 이동 활성화 상태
     private bool previousAutoMoveState;                             // 이전 상태 저장
 
+    private const float STATE_CHECK_INTERVAL = 8f;                  // 상태 확인 주기
+    private float lastCheckTime;                                    // 마지막 상태 확인 시간
+
     [Header("---[UI Color]")]
     private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
     private const string inactiveColorCode = "#B1FF70";             // 비활성화상태 Color
@@ -62,6 +65,37 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
 
         // 패널 등록
         ActivePanelManager.Instance.RegisterPanel("AutoMovePanel", autoMovePanel, null, ActivePanelManager.PanelPriority.Medium);
+
+        lastCheckTime = Time.time;
+    }
+
+    private void Update()
+    {
+        // 주기적으로 모든 고양이의 자동이동 상태 확인
+        if (Time.time - lastCheckTime >= STATE_CHECK_INTERVAL)
+        {
+            CheckAndSyncCatsState();
+            lastCheckTime = Time.time;
+        }
+    }
+
+    // 모든 고양이의 자동이동 상태를 확인하고 동기화하는 함수
+    private void CheckAndSyncCatsState()
+    {
+        if (BattleManager.Instance.IsBattleActive) return;
+
+        var activeCats = SpawnManager.Instance.GetActiveCats();
+        foreach (var catObject in activeCats)
+        {
+            if (catObject != null)
+            {
+                CatData catData = catObject.GetComponent<CatData>();
+                if (catData != null && !catData.isStuned)
+                {
+                    catData.SetAutoMoveState(isAutoMoveEnabled);
+                }
+            }
+        }
     }
 
     #endregion

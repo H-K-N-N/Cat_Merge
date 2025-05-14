@@ -289,14 +289,9 @@ public class GoogleManager : MonoBehaviour
             yield return null;
         }
 
-        // 첫 실행 여부만 확인
-        isPlayedGame = PlayerPrefs.HasKey(FIRST_PLAY_KEY);
-        if (!isPlayedGame)
-        {
-            PlayerPrefs.SetInt(FIRST_PLAY_KEY, 1);
-            PlayerPrefs.Save();
-        }
-        Debug.Log($"[초기화] 첫 실행 표시 저장: {isPlayedGame}");
+        //// 초기 isPlayedGame 상태를 로컬 저장소 기준으로 설정
+        //isPlayedGame = PlayerPrefs.HasKey(FIRST_PLAY_KEY);
+        //Debug.Log($"[초기화] 첫 실행 상태 확인: {!isPlayedGame}");
     }
 
     // 구글 인증 결과를 처리하는 함수
@@ -363,7 +358,7 @@ public class GoogleManager : MonoBehaviour
         CompleteGameState localState = null;
 
         // 로컬 데이터 먼저 로드
-        if (isPlayedGame)
+        if (PlayerPrefs.HasKey(FIRST_PLAY_KEY))
         {
             localState = LoadLocalStateFromPlayerPrefs();
             Debug.Log($"[로드] 로컬 데이터 타임스탬프: {localState?.timestamp}");
@@ -425,7 +420,20 @@ public class GoogleManager : MonoBehaviour
         if (finalState != null)
         {
             ApplyGameState(finalState);
+
+            // 유효한 데이터가 로드되었으므로 첫 게임이 아님을 표시
+            isPlayedGame = true;
+            if (!PlayerPrefs.HasKey(FIRST_PLAY_KEY))
+            {
+                PlayerPrefs.SetInt(FIRST_PLAY_KEY, 1);
+                PlayerPrefs.Save();
+            }
+            
             Debug.Log($"[로드] 최종 데이터 적용 완료 (타임스탬프: {finalState.timestamp})");
+        }
+        else
+        {
+            isPlayedGame = false;
         }
 
         // 잠시 대기
@@ -1085,5 +1093,5 @@ public class GoogleManager : MonoBehaviour
 
     #endregion
 
-}
 
+}

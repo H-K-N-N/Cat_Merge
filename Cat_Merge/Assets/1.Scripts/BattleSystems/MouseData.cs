@@ -4,12 +4,14 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 
-// 객체가 가지고있는 쥐의 정보를 담는 Script
 public class MouseData : MonoBehaviour
 {
+
+
+    #region Variables
+
     [HideInInspector] public Mouse mouseData;   // 쥐 데이터
     private Image mouseImage;                   // 쥐 이미지
-
     private RectTransform rectTransform;        // RectTransform 참조
 
     [Header("---[Damage Text]")]
@@ -21,7 +23,12 @@ public class MouseData : MonoBehaviour
     private const float DAMAGE_TEXT_MOVE_DISTANCE = 50f;    // 데미지 텍스트 이동 거리
     private const float DAMAGE_TEXT_DURATION = 1f;          // 데미지 텍스트 지속 시간
 
-    // ======================================================================================================================
+    private readonly Vector3 damageTextMoveOffset = Vector3.up * DAMAGE_TEXT_MOVE_DISTANCE;
+
+    #endregion
+
+
+    #region Unity Methods
 
     private void Awake()
     {
@@ -35,9 +42,12 @@ public class MouseData : MonoBehaviour
         UpdateMouseUI();
     }
 
-    // ======================================================================================================================
+    #endregion
 
-    // 데미지 텍스트 풀 초기화
+
+    #region Pool Management
+
+    // 데미지 텍스트 풀 초기화 함수
     private void InitializeDamageTextPool()
     {
         damageTextPool = new Queue<GameObject>();
@@ -48,6 +58,11 @@ public class MouseData : MonoBehaviour
             damageTextPool.Enqueue(damageTextObj);
         }
     }
+
+    #endregion
+
+
+    #region Mouse Management
 
     // MouseUI 최신화하는 함수
     public void UpdateMouseUI()
@@ -61,6 +76,11 @@ public class MouseData : MonoBehaviour
         mouseData = mouse;
         UpdateMouseUI();
     }
+
+    #endregion
+
+
+    #region Damage Text Management
 
     // 데미지 텍스트 생성 함수
     public void ShowDamageText(float damage)
@@ -85,9 +105,7 @@ public class MouseData : MonoBehaviour
         textRect.anchoredPosition = startPosition;
 
         TextMeshProUGUI damageText = damageTextObj.GetComponent<TextMeshProUGUI>();
-        //damageText.text = damage.ToString();
         damageText.text = GameManager.Instance.FormatNumber((decimal)damage);
-        //damageText.color = Color.red;
 
         StartCoroutine(AnimateDamageText(damageTextObj, textRect));
     }
@@ -97,7 +115,7 @@ public class MouseData : MonoBehaviour
     {
         float elapsedTime = 0f;
         Vector3 startPos = textRect.anchoredPosition;
-        Vector3 endPos = startPos + Vector3.up * DAMAGE_TEXT_MOVE_DISTANCE;
+        Vector3 endPos = startPos + damageTextMoveOffset;
 
         TextMeshProUGUI text = textObj.GetComponent<TextMeshProUGUI>();
         Color originalColor = text.color;
@@ -120,6 +138,7 @@ public class MouseData : MonoBehaviour
         damageTextPool.Enqueue(textObj);
     }
 
-    // ======================================================================================================================
+    #endregion
+
 
 }

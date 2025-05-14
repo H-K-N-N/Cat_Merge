@@ -2,23 +2,34 @@ using UnityEngine;
 
 public class BossHitbox : MonoBehaviour
 {
+
+
+    #region Variables
+
     [Header("---[Boss Hitbox]")]
     private float width = 260f;                                 // 히트박스의 너비 (원의 지름 계산용)
     private float height = 420f;                                // 히트박스의 높이 (원의 지름 계산용)
+    private float boundaryTolerance = 0.05f;                    // 경계 판정 여유값
 
     private RectTransform rectTransform;
+    private Vector3 positionOffset = new Vector3(0, -40, 0);   // 고양이 이미지 위치 보정값
 
-    // 고양이의 이미지에 맞춰 위치 미세 조정
-    public Vector3 Position => new Vector3(rectTransform.anchoredPosition.x, rectTransform.anchoredPosition.y - 40, 0);
+    public Vector3 Position => (Vector3)rectTransform.anchoredPosition + positionOffset;
 
-    // ======================================================================================================================
+    #endregion
+
+
+    #region Unity Methods
 
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
     }
 
-    // ======================================================================================================================
+    #endregion
+
+
+    #region Hitbox Methods
 
     // 보스의 히트박스 범위 내에 고양이가 있는지 체크하는 함수
     public bool IsInHitbox(Vector3 targetPosition)
@@ -41,9 +52,6 @@ public class BossHitbox : MonoBehaviour
         float normalizedX = dx / (width / 2f);
         float normalizedY = dy / (height / 2f);
 
-        // 경계 판정을 조금 느슨하게 하기 위한 여유값
-        float boundaryTolerance = 0.05f;
-
         float ellipseEquation = normalizedX * normalizedX + normalizedY * normalizedY;
         return Mathf.Abs(ellipseEquation - 1f) <= boundaryTolerance;
     }
@@ -61,5 +69,8 @@ public class BossHitbox : MonoBehaviour
 
         return Position + new Vector3(closestX, closestY, 0);
     }
+
+    #endregion
+
 
 }

@@ -448,7 +448,7 @@ public class GameManager : MonoBehaviour, ISaveable
     }
 
     // 종료 입력 처리 함수
-    public void HandleQuitInput()
+    private void HandleQuitInput()
     {
         if (!isBackButtonPressed)
         {
@@ -469,6 +469,12 @@ public class GameManager : MonoBehaviour, ISaveable
 
             StartCoroutine(ResetBackButtonPress());
         }
+    }
+
+    // OptionManager의 종료하기 버튼 함수
+    public void QuitButtonInput()
+    {
+        ShowQuitPanel();
     }
 
     // 뒤로가기버튼 입력 딜레이 설정 코루틴

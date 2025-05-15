@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections.Generic;
 
 // 고양이의 정보와 행동을 관리하는 스크립트
 public class CatData : MonoBehaviour, ICanvasRaycastFilter
@@ -11,7 +12,23 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     #region Variables
 
     private const float CLICK_AREA_SCALE = 0.9f;    // 클릭 영역 스케일
-    private WaitForSeconds COLLECT_ANIMATION_DELAY = new WaitForSeconds(1f);
+
+    private static readonly WaitForSeconds COLLECT_ANIMATION_DELAY = new WaitForSeconds(1f);
+    private static readonly WaitForSeconds STUN_DELAY = new WaitForSeconds(10f);
+    private static readonly WaitForSeconds ATTACK_RETURN_DELAY = new WaitForSeconds(1f);
+
+    // 고양이 자동이동 방향
+    private static readonly Vector2[] MOVE_DIRECTIONS = new Vector2[]
+    {
+        new Vector2(30f, 0f),
+        new Vector2(-30f, 0f),
+        new Vector2(0f, 30f),
+        new Vector2(0f, -30f),
+        new Vector2(30f, 30f),
+        new Vector2(30f, -30f),
+        new Vector2(-30f, 30f),
+        new Vector2(-30f, -30f)
+    };
 
     [Header("Cat Data")]
     public Cat catData;                             // 고양이 기본 데이터
@@ -100,7 +117,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
         Transform coinImageTransform = transform.Find("CollectCoinImage");
         Transform coinTextTransform = coinImageTransform.Find("CollectCoinText");
-        
+
         if (coinImageTransform != null) collectCoinImage = coinImageTransform.GetComponent<Image>();
         if (coinTextTransform != null) collectCoinText = coinTextTransform.GetComponent<TextMeshProUGUI>();
 
@@ -218,7 +235,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         }
     }
 
-    // Cat Image의 AnimatorManager를 가져오는 헬퍼 함수
+    // Cat Image의 AnimatorManager를 가져오는 함수
     private AnimatorManager GetCatImageAnimator()
     {
         // catImageObject가 있으면 사용
@@ -248,7 +265,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         return GetComponent<AnimatorManager>();
     }
 
-    // 고양이 상태 변경을 위한 헬퍼 함수
+    // 고양이 상태 변경을 위한 함수
     public void ChangeCatState(CatState state)
     {
         AnimatorManager anim = GetCatImageAnimator();
@@ -385,7 +402,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     private IEnumerator StunAndRecover(float stunTime)
     {
         SetStunState(true);
-        yield return new WaitForSeconds(stunTime);
+        yield return STUN_DELAY;
         SetStunState(false);
     }
 
@@ -540,7 +557,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     // 공격 후 전투 대기 상태로 돌아가는 코루틴
     private IEnumerator ReturnToBattleState()
     {
-        yield return new WaitForSeconds(1f);
+        yield return ATTACK_RETURN_DELAY;
 
         if (BattleManager.Instance.IsBattleActive && gameObject.activeSelf && !isStuned)
         {
@@ -608,20 +625,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     // 랜덤 이동 방향 반환 함수
     private Vector3 GetRandomDirection()
     {
-        float moveRange = 30f;
-        Vector2[] directions = new Vector2[]
-        {
-            new Vector2(moveRange, 0f),
-            new Vector2(-moveRange, 0f),
-            new Vector2(0f, moveRange),
-            new Vector2(0f, -moveRange),
-            new Vector2(moveRange, moveRange),
-            new Vector2(moveRange, -moveRange),
-            new Vector2(-moveRange, moveRange),
-            new Vector2(-moveRange, -moveRange)
-        };
-
-        return directions[Random.Range(0, directions.Length)];
+        return MOVE_DIRECTIONS[Random.Range(0, MOVE_DIRECTIONS.Length)];
     }
 
     // 이동 범위 초과 확인 함수
@@ -802,9 +806,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         if (autoCollectCoroutine != null) yield break;
 
         DragAndDropManager dragAndDropManager = GetComponent<DragAndDropManager>();
-
-        float currentDelayTime = 0f;
-        WaitForSeconds delay = null;
+        Dictionary<float, WaitForSeconds> delayCache = new Dictionary<float, WaitForSeconds>();
         WaitForSeconds defaultDelay = new WaitForSeconds(3f);
 
         while (isCollectingCoins && gameObject.activeSelf)
@@ -815,10 +817,11 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
             float baseCollectingTime = ItemFunctionManager.Instance.reduceCollectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value;
             float newCollectingTime = (baseCollectingTime - catData.PassiveCoinCollectSpeed) * UnityEngine.Random.Range(0.8f, 1.2f);
 
-            if (delay == null || !Mathf.Approximately(currentDelayTime, newCollectingTime))
+            WaitForSeconds delay;
+            if (!delayCache.TryGetValue(newCollectingTime, out delay))
             {
-                currentDelayTime = newCollectingTime;
-                delay = new WaitForSeconds(currentDelayTime);
+                delay = new WaitForSeconds(newCollectingTime);
+                delayCache[newCollectingTime] = delay;
             }
 
             if (delay != null)

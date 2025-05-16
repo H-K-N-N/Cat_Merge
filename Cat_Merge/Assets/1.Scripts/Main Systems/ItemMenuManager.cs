@@ -66,6 +66,8 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
     [Header("---[Sub Menu UI Color]")]
     private const string activeColorCode = "#FFCC74";                   // 활성화상태 Color
     private const string inactiveColorCode = "#FFFFFF";                 // 비활성화상태 Color
+    private Color activeColor;                                          // 활성화 색상
+    private Color inactiveColor;                                        // 비활성화 색상
 
     private ActivePanelManager activePanelManager;                      // ActivePanelManager
 
@@ -154,6 +156,9 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
     // 기본 ItemMenuManager 초기화 함수
     private void InitializeItemMenuManager()
     {
+        ColorUtility.TryParseHtmlString(activeColorCode, out activeColor);
+        ColorUtility.TryParseHtmlString(inactiveColorCode, out inactiveColor);
+
         InitializeActivePanel();
         InitializeMenuButtons();
         InitializeItemButtons();
@@ -346,13 +351,9 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
     // 메뉴 버튼 색상 업데이트 함수
     private void UpdateMenuButtonColors()
     {
-        if (ColorUtility.TryParseHtmlString(activeColorCode, out Color activeColor) &&
-            ColorUtility.TryParseHtmlString(inactiveColorCode, out Color inactiveColor))
+        for (int i = 0; i < itemMenuButtons.Length; i++)
         {
-            for (int i = 0; i < itemMenuButtons.Length; i++)
-            {
-                itemMenuButtons[i].GetComponent<Image>().color = isItemMenuButtonsOn[i] ? activeColor : inactiveColor;
-            }
+            itemMenuButtons[i].GetComponent<Image>().color = isItemMenuButtonsOn[i] ? activeColor : inactiveColor;
         }
     }
 

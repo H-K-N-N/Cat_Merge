@@ -47,7 +47,10 @@ public class SpawnManager : MonoBehaviour, ISaveable
     private Coroutine autoCollectCoroutine;
 
 
+    [Header("---[ETC]")]
     private bool isDataLoaded = false;                              // 데이터 로드 확인
+
+    private readonly WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
 
     #endregion
 
@@ -301,7 +304,6 @@ public class SpawnManager : MonoBehaviour, ISaveable
     private IEnumerator CreateFoodTime()
     {
         float elapsed = 0f;
-        WaitForEndOfFrame waitFrame = new WaitForEndOfFrame();
 
         while (true)
         {
@@ -319,7 +321,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
             {
                 elapsed += Time.deltaTime;
                 foodFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / producingTime);
-                yield return waitFrame;
+                yield return waitForEndOfFrame;
             }
 
             foodFillAmountImg.fillAmount = 1f;
@@ -332,14 +334,13 @@ public class SpawnManager : MonoBehaviour, ISaveable
     private IEnumerator AutoCollectingTime()
     {
         float elapsed = 0f;
-        WaitForEndOfFrame waitFrame = new WaitForEndOfFrame();
 
         while (true)
         {
             // 전투중이면 대기
             if (BattleManager.Instance.IsBattleActive)
             {
-                yield return waitFrame;
+                yield return waitForEndOfFrame;
                 continue;
             }
 
@@ -353,7 +354,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
 
                 elapsed += Time.deltaTime;
                 autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / autoTime);
-                yield return waitFrame;
+                yield return waitForEndOfFrame;
             }
 
             // 완료되면 먹이 줄이고 고양이 생성
@@ -368,7 +369,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
                 elapsed = 0f;
             }
 
-            yield return waitFrame;
+            yield return waitForEndOfFrame;
         }
     }
 

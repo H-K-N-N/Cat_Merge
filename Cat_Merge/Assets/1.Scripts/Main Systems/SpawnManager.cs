@@ -47,12 +47,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
     private Coroutine autoCollectCoroutine;
 
 
-    [Header("---[ETC]")]
     private bool isDataLoaded = false;                              // 데이터 로드 확인
-    private SaveData cachedSaveData;
-    private CatInstanceData cachedCatInstance;
-
-    private readonly WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
 
     #endregion
 
@@ -306,6 +301,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
     private IEnumerator CreateFoodTime()
     {
         float elapsed = 0f;
+        WaitForEndOfFrame waitFrame = new WaitForEndOfFrame();
 
         while (true)
         {
@@ -323,7 +319,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
             {
                 elapsed += Time.deltaTime;
                 foodFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / producingTime);
-                yield return waitForEndOfFrame;
+                yield return waitFrame;
             }
 
             foodFillAmountImg.fillAmount = 1f;
@@ -336,13 +332,14 @@ public class SpawnManager : MonoBehaviour, ISaveable
     private IEnumerator AutoCollectingTime()
     {
         float elapsed = 0f;
+        WaitForEndOfFrame waitFrame = new WaitForEndOfFrame();
 
         while (true)
         {
             // 전투중이면 대기
             if (BattleManager.Instance.IsBattleActive)
             {
-                yield return waitForEndOfFrame;
+                yield return waitFrame;
                 continue;
             }
 
@@ -356,7 +353,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
 
                 elapsed += Time.deltaTime;
                 autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / autoTime);
-                yield return waitForEndOfFrame;
+                yield return waitFrame;
             }
 
             // 완료되면 먹이 줄이고 고양이 생성
@@ -371,7 +368,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
                 elapsed = 0f;
             }
 
-            yield return waitForEndOfFrame;
+            yield return waitFrame;
         }
     }
 
@@ -452,37 +449,28 @@ public class SpawnManager : MonoBehaviour, ISaveable
 
     public string GetSaveData()
     {
-        if (cachedSaveData == null)
+        SaveData data = new SaveData
         {
-            cachedSaveData = new SaveData();
-            cachedSaveData.activeCats = new List<CatInstanceData>();
-        }
-        else
-        {
-            cachedSaveData.activeCats.Clear();
-        }
-
-        cachedSaveData.nowFood = this.nowFood;
+            nowFood = this.nowFood,
+            activeCats = new List<CatInstanceData>()
+        };
 
         // 활성화된 고양이 데이터 저장
-        if (cachedCatInstance == null)
-        {
-            cachedCatInstance = new CatInstanceData();
-        }
-
         foreach (var cat in activeCats)
         {
             if (cat.TryGetComponent<CatData>(out var catData) &&
                 cat.TryGetComponent<RectTransform>(out var rectTransform))
             {
-                cachedCatInstance.catGrade = catData.catData.CatGrade;
-                cachedCatInstance.posX = rectTransform.anchoredPosition.x;
-                cachedCatInstance.posY = rectTransform.anchoredPosition.y;
-                cachedSaveData.activeCats.Add(cachedCatInstance);
+                data.activeCats.Add(new CatInstanceData
+                {
+                    catGrade = catData.catData.CatGrade,
+                    posX = rectTransform.anchoredPosition.x,
+                    posY = rectTransform.anchoredPosition.y
+                });
             }
         }
 
-        return JsonUtility.ToJson(cachedSaveData);
+        return JsonUtility.ToJson(data);
     }
 
     public void LoadFromData(string data)

@@ -1,32 +1,19 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-// 아이템 기능 및 업그레이드 데이터 관리 스크립트
 [DefaultExecutionOrder(-8)]
 public class ItemFunctionManager : MonoBehaviour
 {
-
-
-    #region Variables
-
+    // Singleton Instance
     public static ItemFunctionManager Instance { get; private set; }
 
-    // 아이템 업그레이드 데이터 리스트들
-    public List<(int step, float value, decimal fee)> maxCatsList;
-    public List<(int step, float value, decimal fee)> reduceCollectingTimeList;
-    public List<(int step, float value, decimal fee)> maxFoodsList;
-    public List<(int step, float value, decimal fee)> reduceProducingFoodTimeList;
-    public List<(int step, float value, decimal fee)> foodUpgradeList;
-    public List<(int step, float value, decimal fee)> foodUpgrade2List;
-    public List<(int step, float value, decimal fee)> autoCollectingList;
-
-    // 리스트 초기 용량 설정
-    private const int INITIAL_LIST_CAPACITY = 50;
-
-    #endregion
-
-
-    #region Unity Methods
+    public List<(int step, float value, decimal fee)> maxCatsList = new List<(int step, float value, decimal fee)>();
+    public List<(int step, float value, decimal fee)> reduceCollectingTimeList = new List<(int step, float value, decimal fee)>();
+    public List<(int step, float value, decimal fee)> maxFoodsList = new List<(int step, float value, decimal fee)>();
+    public List<(int step, float value, decimal fee)> reduceProducingFoodTimeList = new List<(int step, float value, decimal fee)>();
+    public List<(int step, float value, decimal fee)> foodUpgradeList = new List<(int step, float value, decimal fee)>();
+    public List<(int step, float value, decimal fee)> foodUpgrade2List = new List<(int step, float value, decimal fee)>();
+    public List<(int step, float value, decimal fee)> autoCollectingList = new List<(int step, float value, decimal fee)>();
 
     private void Awake()
     {
@@ -39,53 +26,81 @@ public class ItemFunctionManager : MonoBehaviour
             Destroy(gameObject);
         }
 
-        InitializeLists();
         InitListContents();
     }
 
-    #endregion
-
-
-    #region Initialization
-
-    // 리스트들의 초기 용량을 설정하는 함수
-    private void InitializeLists()
-    {
-        maxCatsList = new List<(int, float, decimal)>(INITIAL_LIST_CAPACITY);
-        reduceCollectingTimeList = new List<(int, float, decimal)>(INITIAL_LIST_CAPACITY);
-        maxFoodsList = new List<(int, float, decimal)>(INITIAL_LIST_CAPACITY);
-        reduceProducingFoodTimeList = new List<(int, float, decimal)>(INITIAL_LIST_CAPACITY);
-        foodUpgradeList = new List<(int, float, decimal)>(INITIAL_LIST_CAPACITY);
-        foodUpgrade2List = new List<(int, float, decimal)>(INITIAL_LIST_CAPACITY);
-        autoCollectingList = new List<(int, float, decimal)>(INITIAL_LIST_CAPACITY);
-    }
-
-    // 각 아이템 업그레이드 데이터를 리스트에 로드하는 함수
     private void InitListContents()
     {
-        LoadItemData(1, maxCatsList);                      // 고양이 최대치 증가
-        LoadItemData(2, reduceCollectingTimeList);         // 재화 획득 시간 감소
-        LoadItemData(3, maxFoodsList);                     // 먹이 최대치 증가
-        LoadItemData(4, reduceProducingFoodTimeList);      // 먹이 생성 시간 감소
-        LoadItemData(5, foodUpgradeList);                  // 먹이 업그레이드
-        LoadItemData(6, foodUpgrade2List);                 // 먹이 업그레이드2
-        LoadItemData(7, autoCollectingList);               // 자동 먹이주기 시간
-    }
-
-    // 아이템 데이터를 로드하여 리스트에 추가하는 함수
-    private void LoadItemData(int dataNumber, List<(int step, float value, decimal fee)> targetList)
-    {
-        var itemData = ItemItemUpgradeDataLoader.Instance.GetDataByNumber(dataNumber);
-        if (itemData != null)
+        // 고양이 최대치 증가
+        var itemData1 = ItemItemUpgradeDataLoader.Instance.GetDataByNumber(1);
+        if (itemData1 != null)
         {
-            foreach (var item in itemData)
+            foreach (var item in itemData1)
             {
-                targetList.Add((item.step, item.value, item.fee));
+                maxCatsList.Add((item.step, item.value, item.fee));
             }
         }
+
+        // 재화 획득 시간 감소
+        var itemData2 = ItemItemUpgradeDataLoader.Instance.GetDataByNumber(2);
+        if (itemData2 != null)
+        {
+            foreach (var item in itemData2)
+            {
+                reduceCollectingTimeList.Add((item.step, item.value, item.fee));
+            }
+        }
+
+        // 먹이 최대치 증가
+        var itemData3 = ItemItemUpgradeDataLoader.Instance.GetDataByNumber(3);
+        if (itemData3 != null)
+        {
+            foreach (var item in itemData3)
+            {
+                maxFoodsList.Add((item.step, item.value, item.fee));
+            }
+        }
+
+        // 먹이 생성 시간 감소
+        var itemData4 = ItemItemUpgradeDataLoader.Instance.GetDataByNumber(4);
+        if (itemData4 != null)
+        {
+            foreach (var item in itemData4)
+            {
+                reduceProducingFoodTimeList.Add((item.step, item.value, item.fee));
+            }
+        }
+
+        // 먹이 업그레이드
+        var itemData5 = ItemItemUpgradeDataLoader.Instance.GetDataByNumber(5);
+        if (itemData5 != null)
+        {
+            foreach (var item in itemData5)
+            {
+                foodUpgradeList.Add((item.step, item.value, item.fee));
+            }
+        }
+
+        // 먹이 업그레이드2
+        var itemData6 = ItemItemUpgradeDataLoader.Instance.GetDataByNumber(6);
+        if (itemData6 != null)
+        {
+            foreach (var item in itemData6)
+            {
+                foodUpgrade2List.Add((item.step, item.value, item.fee));
+            }
+        }
+
+        // 자동 먹이주기 시간
+        var itemData7 = ItemItemUpgradeDataLoader.Instance.GetDataByNumber(7);
+        if(itemData7 != null)
+        {
+            foreach(var item in itemData7)
+            {
+                autoCollectingList.Add((item.step, item.value, item.fee));
+            }
+        }
+
+        
     }
-
-    #endregion
-
-
 }

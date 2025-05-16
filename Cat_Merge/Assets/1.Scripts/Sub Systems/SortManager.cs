@@ -24,6 +24,10 @@ public class SortManager : MonoBehaviour
     private Dictionary<int, List<GameObject>> catsByGrade = new Dictionary<int, List<GameObject>>();  // 등급별 고양이 저장
     private bool isSorting = false;                                 // 정렬 진행 중 여부
 
+    [Header("---[ETC]")]
+    private readonly WaitForSeconds waitForMovementDelay = new WaitForSeconds(MOVEMENT_DELAY);
+    private readonly WaitForSeconds waitForSortCompleteDelay = new WaitForSeconds(SORT_COMPLETE_DELAY);
+
     #endregion
 
 
@@ -54,6 +58,7 @@ public class SortManager : MonoBehaviour
     private void SortCats()
     {
         if (isSorting) return;  // 이미 정렬 중이면 무시
+
         StartCoroutine(SortCatsCoroutine());
     }
 
@@ -64,7 +69,7 @@ public class SortManager : MonoBehaviour
 
         // 모든 고양이 이동 중지
         StopAllCatMovements();
-        yield return new WaitForSeconds(MOVEMENT_DELAY);
+        yield return waitForMovementDelay;
 
         // 모든 고양이 방향 초기화 (왼쪽 보기)
         ResetAllCatDirections();
@@ -76,7 +81,7 @@ public class SortManager : MonoBehaviour
         if (IsSortingNeeded(sortedCats))
         {
             yield return StartCoroutine(MoveCatsToPositions(sortedCats));
-            yield return new WaitForSeconds(SORT_COMPLETE_DELAY);
+            yield return waitForSortCompleteDelay;
         }
 
         RestoreAutoMoveState();

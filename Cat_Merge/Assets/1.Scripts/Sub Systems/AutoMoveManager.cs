@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 using TMPro;
+using System.Collections;
 
 // 고양이 자동이동 스크립트
 [DefaultExecutionOrder(-2)]
@@ -26,12 +27,11 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     private bool isPaused = false;                                  // 일시정지 상태
 
     private const float STATE_CHECK_INTERVAL = 8f;                  // 상태 확인 주기
-    private float lastCheckTime;                                    // 마지막 상태 확인 시간
+    private readonly WaitForSeconds waitForStateCheck = new WaitForSeconds(STATE_CHECK_INTERVAL);   // 상태 체크 대기 시간
 
     [Header("---[UI Color]")]
     private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
     private const string inactiveColorCode = "#B1FF70";             // 비활성화상태 Color
-
 
     private bool isDataLoaded = false;                              // 데이터 로드 확인
 
@@ -64,19 +64,18 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
         InitializeButtonListeners();
         UpdateAutoMoveButtonColor();
 
-        // 패널 등록
         ActivePanelManager.Instance.RegisterPanel("AutoMovePanel", autoMovePanel, null, ActivePanelManager.PanelPriority.Medium);
 
-        lastCheckTime = Time.time;
+        StartCoroutine(StateCheckRoutine());
     }
 
-    private void Update()
+    // 상태 체크 코루틴
+    private IEnumerator StateCheckRoutine()
     {
-        // 주기적으로 모든 고양이의 자동이동 상태 확인
-        if (Time.time - lastCheckTime >= STATE_CHECK_INTERVAL)
+        while (true)
         {
             CheckAndSyncCatsState();
-            lastCheckTime = Time.time;
+            yield return waitForStateCheck;
         }
     }
 

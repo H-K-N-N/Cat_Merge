@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 
+// 터치 가능한 패널 관리 스크립트
 public class ActivePanelManager : MonoBehaviour
 {
 
@@ -34,8 +35,8 @@ public class ActivePanelManager : MonoBehaviour
         }
     }
 
-    private Dictionary<string, PanelInfo> panels;
-    private Stack<string> activePanelStack;
+    private readonly Dictionary<string, PanelInfo> panels = new Dictionary<string, PanelInfo>();
+    private readonly Stack<string> activePanelStack = new Stack<string>();
     public string ActivePanelName => activePanelStack.Count > 0 ? activePanelStack.Peek() : null;
 
     [Header("---[UI Color]")]
@@ -43,6 +44,9 @@ public class ActivePanelManager : MonoBehaviour
 
     // 버튼 알파값을 조절할 특정 패널들
     private readonly string[] alphaControlPanels = { "DictionaryMenu", "OptionMenu", "QuestMenu" };
+
+    // 임시 스택 재사용을 위한 객체
+    private readonly Stack<string> tempStack = new Stack<string>();
 
     #endregion
 
@@ -54,7 +58,6 @@ public class ActivePanelManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            InitializeManager();
         }
         else
         {
@@ -64,15 +67,12 @@ public class ActivePanelManager : MonoBehaviour
 
     private void Start()
     {
-        if (panels != null)
+        foreach (var panel in panels.Values)
         {
-            foreach (var panel in panels.Values)
+            panel.Panel.SetActive(false);
+            if (panel.ButtonImage != null && ShouldControlButtonAlpha(panel))
             {
-                panel.Panel.SetActive(false);
-                if (panel.ButtonImage != null && ShouldControlButtonAlpha(panel))
-                {
-                    UpdateButtonColor(panel.ButtonImage, false);
-                }
+                UpdateButtonColor(panel.ButtonImage, false);
             }
         }
     }
@@ -80,24 +80,7 @@ public class ActivePanelManager : MonoBehaviour
     #endregion
 
 
-    #region Initialize
-
-    private void InitializeManager()
-    {
-        panels = new Dictionary<string, PanelInfo>();
-        activePanelStack = new Stack<string>();
-    }
-
-    #endregion
-
-
-
-
-    // 해당 패널의 버튼 알파값을 조절해야 하는지 확인하는 함수
-    private bool ShouldControlButtonAlpha(PanelInfo panelInfo)
-    {
-        return alphaControlPanels.Any(panelName => panels.ContainsKey(panelName) && panels[panelName] == panelInfo);
-    }
+    #region Panel Registration
 
     // 패널 등록 함수
     public void RegisterPanel(string panelName, GameObject panel, Image buttonImage = null, PanelPriority priority = PanelPriority.Low)
@@ -107,6 +90,11 @@ public class ActivePanelManager : MonoBehaviour
             panels.Add(panelName, new PanelInfo(panel, buttonImage, priority));
         }
     }
+
+    #endregion
+
+
+    #region Panel Management
 
     // 패널 열기 함수
     public void OpenPanel(string panelName)
@@ -145,7 +133,7 @@ public class ActivePanelManager : MonoBehaviour
             panelInfo.Panel.SetActive(false);
             if (activePanelStack.Contains(panelName))
             {
-                var tempStack = new Stack<string>();
+                tempStack.Clear();
                 while (activePanelStack.Count > 0)
                 {
                     var currentPanel = activePanelStack.Pop();
@@ -194,18 +182,10 @@ public class ActivePanelManager : MonoBehaviour
         }
     }
 
-    //// 특정 우선순위 이하의 모든 패널 닫는 함수
-    //public void ClosePanelsBelowPriority(PanelPriority priority)
-    //{
-    //    var panelsToClose = activePanelStack
-    //        .Where(panelName => panels[panelName].Priority < priority)
-    //        .ToList();
+    #endregion
 
-    //    foreach (var panelName in panelsToClose)
-    //    {
-    //        ClosePanel(panelName);
-    //    }
-    //}
+
+    #region UI Management
 
     // 모든 버튼 색상 업데이트 함수
     private void UpdateButtonColors()
@@ -230,6 +210,17 @@ public class ActivePanelManager : MonoBehaviour
         buttonImage.color = color;
     }
 
+    #endregion
+
+
+    #region Utility Functions
+
+    // 해당 패널의 버튼 알파값을 조절해야 하는지 확인하는 함수
+    private bool ShouldControlButtonAlpha(PanelInfo panelInfo)
+    {
+        return alphaControlPanels.Any(panelName => panels.ContainsKey(panelName) && panels[panelName] == panelInfo);
+    }
+
     // 현재 활성화된 패널이 있는지 확인하는 함수
     public bool HasActivePanel()
     {
@@ -242,6 +233,8 @@ public class ActivePanelManager : MonoBehaviour
         if (!panels.ContainsKey(panelName)) return false;
         return panels[panelName].Panel.activeSelf;
     }
+
+    #endregion
 
 
 }

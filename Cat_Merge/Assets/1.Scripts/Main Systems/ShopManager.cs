@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using System.Collections;
 using TMPro;
 
+// 상점 스크립트
 [DefaultExecutionOrder(-5)]
 public class ShopManager : MonoBehaviour, ISaveable
 {
@@ -83,6 +84,9 @@ public class ShopManager : MonoBehaviour, ISaveable
 
     private float battlePauseTime = 0f;                                     // 전투 중 멈춘 시간
     private bool isBattlePaused = false;                                    // 전투 중 멈춤 상태
+
+    private SaveData cachedSaveData;                                        // 재사용할 SaveData 객체
+    private readonly WaitForSeconds oneSecondWait = new WaitForSeconds(1f);
 
     #endregion
 
@@ -255,13 +259,11 @@ public class ShopManager : MonoBehaviour, ISaveable
     // 주기적으로 보상 상태를 체크하는 코루틴
     private IEnumerator CheckRewardStatus()
     {
-        WaitForSeconds waitTime = new WaitForSeconds(1f);
-
         while (true)
         {
             UpdateAllUI();
 
-            yield return waitTime;
+            yield return oneSecondWait;
         }
     }
 
@@ -533,14 +535,17 @@ public class ShopManager : MonoBehaviour, ISaveable
     {
         float remainingTime = multiplierEndTime - Time.time;
 
-        SaveData data = new SaveData
+        if (cachedSaveData == null)
         {
-            lastAdTimeReward = this.lastAdTimeReward,
-            lastTimeReward = this.lastTimeReward,
-            lastDoubleCoinTimeReward = this.lastDoubleCoinTimeReward,
-            multiplierEndTimeOffset = remainingTime > 0 ? remainingTime : 0
-        };
-        return JsonUtility.ToJson(data);
+            cachedSaveData = new SaveData();
+        }
+
+        cachedSaveData.lastAdTimeReward = this.lastAdTimeReward;
+        cachedSaveData.lastTimeReward = this.lastTimeReward;
+        cachedSaveData.lastDoubleCoinTimeReward = this.lastDoubleCoinTimeReward;
+        cachedSaveData.multiplierEndTimeOffset = remainingTime > 0 ? remainingTime : 0;
+
+        return JsonUtility.ToJson(cachedSaveData);
     }
 
     public void LoadFromData(string data)

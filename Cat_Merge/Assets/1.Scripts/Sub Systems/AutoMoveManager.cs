@@ -23,6 +23,7 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     private const float autoMoveTime = 10f;                         // 자동 이동 시간
     private bool isAutoMoveEnabled;                                 // 자동 이동 활성화 상태
     private bool previousAutoMoveState;                             // 이전 상태 저장
+    private bool isPaused = false;                                  // 일시정지 상태
 
     private const float STATE_CHECK_INTERVAL = 8f;                  // 상태 확인 주기
     private float lastCheckTime;                                    // 마지막 상태 확인 시간
@@ -193,11 +194,12 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
         DisableAutoMoveUI();
     }
 
-    // 자동이동 상태 저장 및 비활성화 함수
+    // 자동이동 활성화 상태 저장 및 비활성화 함수
     private void SaveAndDisableAutoMoveState()
     {
         previousAutoMoveState = isAutoMoveEnabled;
         isAutoMoveEnabled = false;
+        isPaused = true;
         ApplyAutoMoveStateToAllCats();
     }
 
@@ -222,6 +224,7 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     private void RestoreAutoMoveState()
     {
         isAutoMoveEnabled = previousAutoMoveState;
+        isPaused = false;
         ApplyAutoMoveStateToAllCats();
     }
 
@@ -259,6 +262,7 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     {
         public bool isAutoMoveEnabled;          // 자동 이동 활성화 상태
         public bool previousAutoMoveState;      // 이전 상태
+        public bool isPaused;                   // 일시정지 여부(전투중에 종료했는지 확인)
     }
 
     public string GetSaveData()
@@ -267,6 +271,7 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
         {
             isAutoMoveEnabled = this.isAutoMoveEnabled,
             previousAutoMoveState = this.previousAutoMoveState,
+            isPaused = this.isPaused
         };
         return JsonUtility.ToJson(data);
     }
@@ -276,7 +281,15 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
         if (string.IsNullOrEmpty(data)) return;
 
         SaveData savedData = JsonUtility.FromJson<SaveData>(data);
-        this.isAutoMoveEnabled = savedData.isAutoMoveEnabled;
+
+        if (savedData.isPaused)
+        {
+            this.isAutoMoveEnabled = savedData.previousAutoMoveState;
+        }
+        else
+        {
+            this.isAutoMoveEnabled = savedData.isAutoMoveEnabled;
+        }
         this.previousAutoMoveState = savedData.previousAutoMoveState;
 
         UpdateAutoMoveButtonColor();

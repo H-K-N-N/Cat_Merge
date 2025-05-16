@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 
-// 자동합성 관련 스크립트
+// 자동합성 스크립트
 public class AutoMergeManager : MonoBehaviour, ISaveable
 {
 
@@ -565,7 +565,14 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
         if (isAutoMergeActive)
         {
-            remainingTime = Mathf.Max(currentAutoMergeDuration - (Time.time - startTime), 0);
+            if (isPaused)
+            {
+                remainingTime = pausedTimeRemaining;
+            }
+            else
+            {
+                remainingTime = Mathf.Max(currentAutoMergeDuration - (Time.time - startTime), 0);
+            }
         }
 
         SaveData data = new SaveData
@@ -599,6 +606,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             this.isAutoMergeActive = false;
             this.isPaused = false;
             this.currentAutoMergeDuration = 0f;
+            this.pausedTimeRemaining = 0f;
             UpdateAutoMergeTimerVisibility(false);
             UpdateTimerDisplay(0);
         }

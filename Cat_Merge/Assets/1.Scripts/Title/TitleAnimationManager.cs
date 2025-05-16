@@ -23,39 +23,42 @@ public class TitleAnimationManager : MonoBehaviour
     [SerializeField] private List<RectTransform> animationCats; // 타이틀씬 움직임용 고양이들
 
     [Header("Animation Settings")]
-    private float waitDuration = 0.5f;                          // 대기 시간
-    private float moveDuration = 2.0f;                          // 고양이 이동 시간
-    private float zoomDuration = 0.5f;                          // 카메라 줌 시간
+    private const float waitDuration = 0.5f;                    // 대기 시간
+    private const float moveDuration = 2.0f;                    // 고양이 이동 시간
+    private const float zoomDuration = 0.5f;                    // 카메라 줌 시간
 
-    private Vector2 leftStartPos = new Vector2(-130f, 0f);      // 왼쪽 고양이 시작 위치 (화면 왼쪽)
-    private Vector2 rightStartPos = new Vector2(130f, 0f);      // 오른쪽 고양이 시작 위치 (화면 오른쪽)
-    private Vector2 centerPos = Vector2.zero;                   // 중앙 위치
+    private readonly Vector2 leftStartPos = new Vector2(-130f, 0f);      // 왼쪽 고양이 시작 위치 (화면 왼쪽)
+    private readonly Vector2 rightStartPos = new Vector2(130f, 0f);      // 오른쪽 고양이 시작 위치 (화면 오른쪽)
+    private readonly Vector2 centerPos = Vector2.zero;                   // 중앙 위치
+
+    private readonly WaitForSeconds waitForInitialDelay = new WaitForSeconds(waitDuration);
+    private readonly WaitForSeconds waitForMergeDelay = new WaitForSeconds(waitDuration * 1.5f);
+    private readonly WaitForSeconds waitForRandomMove = new WaitForSeconds(2f);
 
     private Camera mainCamera;                                  // 카메라 참조
     private float originalOrthographicSize;                     // 카메라 기존 크기
-    private float zoomedOrthographicSize = 2.0f;                // 카메라 줌인 크기
+    private const float zoomedOrthographicSize = 2.0f;          // 카메라 줌인 크기
 
     [Header("Title Drop Animation Settings")]
-    private float startY = 1300f;                               // 시작 Y 좌표
-    private float endY = 500f;                                  // 최종 Y 좌표
+    private const float startY = 1300f;                         // 시작 Y 좌표
+    private const float endY = 500f;                            // 최종 Y 좌표
 
     [Header("Title Breathing Animation Settings")]
-    private float breathingDuration = 3.0f;                     // 한 번의 호흡 주기 시간
-    private float minScale = 0.95f;                             // 최소 크기 (95%)
-    private float maxScale = 1.05f;                             // 최대 크기 (105%)
+    private const float breathingDuration = 3.0f;               // 한 번의 호흡 주기 시간
+    private const float minScale = 0.95f;                       // 최소 크기 (95%)
+    private const float maxScale = 1.05f;                       // 최대 크기 (105%)
     private Coroutine breathingCoroutine;                       // 호흡 애니메이션 코루틴 참조 추가
 
     [Header("Touch To Start Text Settings")]
     [SerializeField] private TextMeshProUGUI touchToStartText;  // Touch To Start 텍스트
-    private float fadeSpeed = 2f;                               // 페이드 속도
-    private float minAlpha = 0.2f;                              // 최소 알파값
-    private float maxAlpha = 0.8f;                              // 최대 알파값
+    private const float fadeSpeed = 2f;                         // 페이드 속도
+    private const float minAlpha = 0.2f;                        // 최소 알파값
+    private const float maxAlpha = 0.8f;                        // 최대 알파값
     private Coroutine blinkCoroutine;                           // 깜빡임 코루틴 참조
 
     [Header("Cat Auto Movement Settings")]
     private bool isAnimating = false;                           // 이동 애니메이션 진행 여부
-    private float autoMoveInterval = 2f;                        // 자동 이동 간격
-    private float moveDurationCat = 1.0f;                       // 고양이 이동 시간
+    private const float moveDurationCat = 1.0f;                 // 고양이 이동 시간
 
     [Header("readonly Settings")]
     private readonly List<Coroutine> catMoveCoroutines = new List<Coroutine>();
@@ -130,7 +133,7 @@ public class TitleAnimationManager : MonoBehaviour
     private IEnumerator PlayTitleAnimation()
     {
         // 0. 잠시 대기
-        yield return new WaitForSeconds(waitDuration);
+        yield return waitForInitialDelay;
 
         // 1. 고양이 중앙으로 이동 + 카메라 줌인
         StartCoroutine(ZoomCamera(zoomedOrthographicSize));
@@ -147,7 +150,7 @@ public class TitleAnimationManager : MonoBehaviour
         level2Cat.gameObject.SetActive(true);
 
         // 4. 잠시 대기
-        yield return new WaitForSeconds(waitDuration * 1.5f);
+        yield return waitForMergeDelay;
 
         // 5. 카메라 줌아웃
         yield return StartCoroutine(ResetZoom());
@@ -398,7 +401,7 @@ public class TitleAnimationManager : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitForSeconds(Random.Range(autoMoveInterval * 0.8f, autoMoveInterval * 1.2f));
+            yield return waitForRandomMove;
 
             if (!isAnimating)
             {

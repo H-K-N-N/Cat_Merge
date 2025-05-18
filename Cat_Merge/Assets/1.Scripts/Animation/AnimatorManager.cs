@@ -23,6 +23,10 @@ public struct GradeOverrideData
 
 public class AnimatorManager : MonoBehaviour
 {
+
+
+    #region Variables
+
     private Animator animator;
     public int catGrade;
 
@@ -32,15 +36,36 @@ public class AnimatorManager : MonoBehaviour
 
     private CatState currentState;
 
+    #endregion
 
-    void Awake()
+
+    #region Unity Methods
+
+    private void Awake()
+    {
+        InitializeAnimator();
+        InitializeOverrideDict();
+        ApplyTitleSceneAnimation();
+    }
+
+    #endregion
+
+
+    #region Initialize
+
+    // 애니메이터 컴포넌트 초기화 함수
+    private void InitializeAnimator()
     {
         animator = GetComponent<Animator>();
         if (animator == null)
         {
-            animator = GetComponentInChildren<Animator>(); // 자식에서도 찾아보기
+            animator = GetComponentInChildren<Animator>();
         }
-        // 딕셔너리 초기화
+    }
+
+    // 오버라이드 딕셔너리 초기화 함수
+    private void InitializeOverrideDict()
+    {
         overrideDict = new Dictionary<int, AnimatorOverrideController>();
         foreach (var data in overrideDataList)
         {
@@ -49,14 +74,23 @@ public class AnimatorManager : MonoBehaviour
                 overrideDict.Add(data.grade, data.overrideController);
             }
         }
+    }
 
-        // TitleScene인 경우 catGrade를 사용한 등급 적용
+    // 타이틀 씬에서의 애니메이션 적용 함수
+    private void ApplyTitleSceneAnimation()
+    {
         if (SceneManager.GetActiveScene().name == "TitleScene")
         {
             ApplyAnim(catGrade);
         }
     }
 
+    #endregion
+
+
+    #region State Management
+
+    // 고양이 상태 변경 및 애니메이션 적용 함수
     public void ChangeState(CatState newState)
     {
         if (currentState == newState) return;
@@ -67,6 +101,7 @@ public class AnimatorManager : MonoBehaviour
         currentState = newState;
     }
 
+    // 모든 상태 bool 값 초기화 함수
     private void ResetAllStateBools()
     {
         animator.SetBool("isIdle", false);
@@ -79,11 +114,18 @@ public class AnimatorManager : MonoBehaviour
         animator.SetBool("isPick", false);
     }
 
+    // 특정 상태의 bool 값을 true로 설정하는 함수
     private void SetBoolForState(CatState state)
     {
         animator.SetBool(state.ToString(), true);
     }
 
+    #endregion
+
+
+    #region Animation Override
+
+    // 특정 등급의 애니메이터 오버라이드 컨트롤러 적용 함수
     public void ApplyAnimatorOverride(int grade)
     {
         if (overrideDict.ContainsKey(grade))
@@ -97,11 +139,13 @@ public class AnimatorManager : MonoBehaviour
         }
     }
 
+    // 애니메이션 적용 함수
     public void ApplyAnim(int grade)
     {
         ApplyAnimatorOverride(grade);
     }
 
+    #endregion
+
 
 }
-

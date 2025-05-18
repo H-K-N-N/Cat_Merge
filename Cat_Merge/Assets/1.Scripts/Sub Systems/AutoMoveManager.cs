@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 using TMPro;
+using System.Collections;
 
 // 고양이 자동이동 스크립트
 [DefaultExecutionOrder(-2)]
@@ -23,14 +24,14 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     private const float autoMoveTime = 10f;                         // 자동 이동 시간
     private bool isAutoMoveEnabled;                                 // 자동 이동 활성화 상태
     private bool previousAutoMoveState;                             // 이전 상태 저장
+    private bool isPaused = false;                                  // 일시정지 상태
 
     private const float STATE_CHECK_INTERVAL = 8f;                  // 상태 확인 주기
-    private float lastCheckTime;                                    // 마지막 상태 확인 시간
+    private readonly WaitForSeconds waitForStateCheck = new WaitForSeconds(STATE_CHECK_INTERVAL);   // 상태 체크 대기 시간
 
     [Header("---[UI Color]")]
     private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
     private const string inactiveColorCode = "#B1FF70";             // 비활성화상태 Color
-
 
     private bool isDataLoaded = false;                              // 데이터 로드 확인
 
@@ -63,19 +64,18 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
         InitializeButtonListeners();
         UpdateAutoMoveButtonColor();
 
-        // 패널 등록
         ActivePanelManager.Instance.RegisterPanel("AutoMovePanel", autoMovePanel, null, ActivePanelManager.PanelPriority.Medium);
 
-        lastCheckTime = Time.time;
+        StartCoroutine(StateCheckRoutine());
     }
 
-    private void Update()
+    // 상태 체크 코루틴
+    private IEnumerator StateCheckRoutine()
     {
-        // 주기적으로 모든 고양이의 자동이동 상태 확인
-        if (Time.time - lastCheckTime >= STATE_CHECK_INTERVAL)
+        while (true)
         {
             CheckAndSyncCatsState();
-            lastCheckTime = Time.time;
+            yield return waitForStateCheck;
         }
     }
 
@@ -193,11 +193,12 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
         DisableAutoMoveUI();
     }
 
-    // 자동이동 상태 저장 및 비활성화 함수
+    // 자동이동 활성화 상태 저장 및 비활성화 함수
     private void SaveAndDisableAutoMoveState()
     {
         previousAutoMoveState = isAutoMoveEnabled;
         isAutoMoveEnabled = false;
+        isPaused = true;
         ApplyAutoMoveStateToAllCats();
     }
 
@@ -222,6 +223,7 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     private void RestoreAutoMoveState()
     {
         isAutoMoveEnabled = previousAutoMoveState;
+        isPaused = false;
         ApplyAutoMoveStateToAllCats();
     }
 
@@ -259,6 +261,7 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
     {
         public bool isAutoMoveEnabled;          // 자동 이동 활성화 상태
         public bool previousAutoMoveState;      // 이전 상태
+        public bool isPaused;                   // 일시정지 여부(전투중에 종료했는지 확인)
     }
 
     public string GetSaveData()
@@ -267,6 +270,7 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
         {
             isAutoMoveEnabled = this.isAutoMoveEnabled,
             previousAutoMoveState = this.previousAutoMoveState,
+            isPaused = this.isPaused
         };
         return JsonUtility.ToJson(data);
     }
@@ -276,7 +280,15 @@ public class AutoMoveManager : MonoBehaviour, ISaveable
         if (string.IsNullOrEmpty(data)) return;
 
         SaveData savedData = JsonUtility.FromJson<SaveData>(data);
-        this.isAutoMoveEnabled = savedData.isAutoMoveEnabled;
+
+        if (savedData.isPaused)
+        {
+            this.isAutoMoveEnabled = savedData.previousAutoMoveState;
+        }
+        else
+        {
+            this.isAutoMoveEnabled = savedData.isAutoMoveEnabled;
+        }
         this.previousAutoMoveState = savedData.previousAutoMoveState;
 
         UpdateAutoMoveButtonColor();

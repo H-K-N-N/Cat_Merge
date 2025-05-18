@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 
-// 자동합성 관련 스크립트
+// 자동합성 스크립트
 public class AutoMergeManager : MonoBehaviour, ISaveable
 {
 
@@ -14,6 +14,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     #region Variables
 
     public static AutoMergeManager Instance { get; private set; }
+
 
     [Header("---[UI]")]
     [SerializeField] private GameObject autoMergePanel;             // 자동 합성 패널
@@ -24,13 +25,14 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     [SerializeField] private TextMeshProUGUI autoMergeTimerText;    // 자동 합성 타이머 텍스트
     [SerializeField] private TextMeshProUGUI explainText;           // 자동 합성 설명 텍스트
 
+
     [Header("---[Auto Merge Settings]")]
     private const float MAX_AUTO_MERGE_DURATION = 86400f;                       // 최대 자동 합성 시간 (24시간)
     private const float MOVE_DURATION = 0.3f;                                   // 고양이가 이동하는 데 걸리는 시간 (이동 속도)
     private const float AUTO_MERGE_DURATION = 30.0f;                            // 자동 합성 기본 지속 시간
     private const int AUTO_MERGE_COST = 30;                                     // 자동 합성 비용
-    private WaitForSeconds waitAutoMergeInterval = new WaitForSeconds(0.5f);    // 자동 합성 간격
-    private WaitForSeconds waitSpawnInterval = new WaitForSeconds(0.1f);        // 소환 간격
+    private readonly WaitForSeconds waitAutoMergeInterval = new WaitForSeconds(0.5f);    // 자동 합성 간격
+    private readonly WaitForSeconds waitSpawnInterval = new WaitForSeconds(0.1f);        // 소환 간격
 
     private float startTime;                        // 자동 합성 시작 시간
     private float currentAutoMergeDuration;         // 현재 자동 합성 지속 시간
@@ -46,7 +48,10 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     private HashSet<DragAndDropManager> mergingCats = new HashSet<DragAndDropManager>();
 
 
+    [Header("---[ETC]")]
     private bool isDataLoaded = false;          // 데이터 로드 확인
+
+    private readonly WaitForSeconds waitForTimerCheck = new WaitForSeconds(0.5f);
 
     #endregion
 
@@ -78,18 +83,27 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
         // 패널 등록
         ActivePanelManager.Instance.RegisterPanel("AutoMergePanel", autoMergePanel, null, ActivePanelManager.PanelPriority.Medium);
+
+        // 타이머 체크 코루틴 시작
+        StartCoroutine(TimerCheckRoutine());
     }
 
-    private void Update()
+    // 타이머 체크 코루틴
+    private IEnumerator TimerCheckRoutine()
     {
-        if (!isAutoMergeActive && !isPaused) return;
-
-        float remainingTime = isPaused ? pausedTimeRemaining : Mathf.Max(currentAutoMergeDuration - (Time.time - startTime), 0);
-        UpdateTimerDisplay((int)remainingTime);
-
-        if (!isPaused && remainingTime <= 0)
+        while (true)
         {
-            EndAutoMerge();
+            if (isAutoMergeActive || isPaused)
+            {
+                float remainingTime = isPaused ? pausedTimeRemaining : Mathf.Max(currentAutoMergeDuration - (Time.time - startTime), 0);
+                UpdateTimerDisplay((int)remainingTime);
+
+                if (!isPaused && remainingTime <= 0)
+                {
+                    EndAutoMerge();
+                }
+            }
+            yield return waitForTimerCheck;
         }
     }
 
@@ -108,7 +122,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         UpdateExplainText(0);
     }
 
-    // 컴포넌트 캐싱 및 UI 초기화
+    // 컴포넌트 캐싱 및 UI 초기화 함수
     private void InitializeAutoMergeManager()
     {
         // UI 초기화
@@ -186,14 +200,14 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // 코루틴 시작 전 기존 코루틴 정리
+    // 코루틴 시작 전 기존 코루틴 정리 함수
     private void StartAutoMergeCoroutine()
     {
         StopAutoMergeCoroutine();
         autoMergeCoroutine = StartCoroutine(AutoMergeCoroutine());
     }
 
-    // 코루틴 안전하게 중지
+    // 코루틴 안전하게 중지하는 함수
     private void StopAutoMergeCoroutine()
     {
         if (autoMergeCoroutine != null)
@@ -565,7 +579,14 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
         if (isAutoMergeActive)
         {
-            remainingTime = Mathf.Max(currentAutoMergeDuration - (Time.time - startTime), 0);
+            if (isPaused)
+            {
+                remainingTime = pausedTimeRemaining;
+            }
+            else
+            {
+                remainingTime = Mathf.Max(currentAutoMergeDuration - (Time.time - startTime), 0);
+            }
         }
 
         SaveData data = new SaveData
@@ -599,6 +620,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             this.isAutoMergeActive = false;
             this.isPaused = false;
             this.currentAutoMergeDuration = 0f;
+            this.pausedTimeRemaining = 0f;
             UpdateAutoMergeTimerVisibility(false);
             UpdateTimerDisplay(0);
         }
@@ -610,4 +632,3 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
 
 }
-

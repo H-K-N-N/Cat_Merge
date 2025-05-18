@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-// 고양이 드래그 앤 드랍 Script
+// 고양이 드래그 앤 드랍 스크립트
 public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, IPointerDownHandler, IPointerClickHandler
 {
 
@@ -22,6 +22,8 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
     private const float EDGE_THRESHOLD = 10f;           // 가장자리 감지 임계값
     private const float EDGE_PUSH = 30f;                // 가장자리에서 밀어내는 거리
     private const float MERGE_DETECTION_SCALE = 0.1f;   // 합성 감지 범위 스케일
+
+    private readonly Vector3[] cornersArray = new Vector3[4];
 
     #endregion
 
@@ -206,18 +208,17 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
     private IEnumerator SmoothMoveToPosition(Vector3 targetPosition)
     {
         Vector3 startPosition = rectTransform.localPosition;
+        
         float elapsed = 0f;
-        float duration = 0.2f;
-
-        while (elapsed < duration)
+        while (elapsed < 0.2f)
         {
             elapsed += Time.deltaTime;
-            rectTransform.localPosition = Vector3.Lerp(startPosition, targetPosition, elapsed / duration);
-
+            rectTransform.localPosition = Vector3.Lerp(startPosition, targetPosition, elapsed / 0.2f);
             yield return null;
         }
 
         rectTransform.localPosition = targetPosition;
+        yield return null;
     }
 
     #endregion
@@ -263,18 +264,19 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
 
         Vector3 startPosition = nearbyCat.rectTransform.localPosition;
         Vector3 targetPosition = rectTransform.localPosition;
+        
         float elapsed = 0f;
-        float duration = 0.1f;
-
-        while (elapsed < duration)
+        while (elapsed < 0.1f)
         {
             if (nearbyCat == null) yield break;
 
             elapsed += Time.deltaTime;
-            nearbyCat.rectTransform.localPosition = Vector3.Lerp(startPosition, targetPosition, elapsed / duration);
+            nearbyCat.rectTransform.localPosition = Vector3.Lerp(startPosition, targetPosition, elapsed / 0.1f);
 
             yield return null;
         }
+
+        yield return null;
 
         if (nearbyCat != null)
         {
@@ -336,10 +338,14 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
     // RectTransform의 월드 좌표 기반 Rect를 반환하는 함수
     private Rect GetWorldRect(RectTransform rectTransform)
     {
-        Vector3[] corners = new Vector3[4];
-        rectTransform.GetWorldCorners(corners);
+        rectTransform.GetWorldCorners(cornersArray);
 
-        return new Rect(corners[0].x, corners[0].y, corners[2].x - corners[0].x, corners[2].y - corners[0].y);
+        return new Rect(
+            cornersArray[0].x, 
+            cornersArray[0].y, 
+            cornersArray[2].x - cornersArray[0].x, 
+            cornersArray[2].y - cornersArray[0].y
+            );
     }
 
     // Rect 크기를 줄이는 함수 (고양이 드랍시 합성 범위)

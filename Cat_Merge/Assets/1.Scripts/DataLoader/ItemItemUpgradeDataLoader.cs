@@ -1,16 +1,27 @@
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 
-// ItemItemUpgradeDataLoader Script
+// 아이템 데이터를 로드하고 관리하는 스크립트
 [DefaultExecutionOrder(-10)]
 public class ItemItemUpgradeDataLoader : MonoBehaviour
 {
+
+
+    #region Variables
+
     public static ItemItemUpgradeDataLoader Instance { get; private set; }
 
     // 고양이 데이터를 관리할 Dictionary
-    public Dictionary<int, List<(string title, int type, int step, float value, decimal fee)>> dataByNumber 
+    public Dictionary<int, List<(string title, int type, int step, float value, decimal fee)>> dataByNumber
         = new Dictionary<int, List<(string title, int type, int step, float value, decimal fee)>>();
+
+    private readonly List<(string title, int type, int step, float value, decimal fee)> tempDataList =
+        new List<(string title, int type, int step, float value, decimal fee)>(10);
+
+    #endregion
+
+
+    #region Unity Methods
 
     private void Awake()
     {
@@ -26,6 +37,12 @@ public class ItemItemUpgradeDataLoader : MonoBehaviour
         ParseCSV("ItemUpgradeDB");
     }
 
+    #endregion
+
+
+    #region Data Loading
+
+    // 아이템 데이터를 파싱하고 Dictionary에 추가하는 함수
     public void ParseCSV(string fileName)
     {
         // Resources 폴더에서 파일 읽기
@@ -33,7 +50,7 @@ public class ItemItemUpgradeDataLoader : MonoBehaviour
 
         if (csvFile == null)
         {
-            Debug.LogError($"CSV file '{fileName}' not found in Resources folder!");
+            //Debug.LogError($"CSV file '{fileName}' not found in Resources folder!");
             return;
         }
 
@@ -57,37 +74,16 @@ public class ItemItemUpgradeDataLoader : MonoBehaviour
             // 번호별로 데이터 추가
             if (!dataByNumber.ContainsKey(type))
             {
+                tempDataList.Clear();
                 dataByNumber[type] = new List<(string title, int type, int step, float value, decimal fee)>();
             }
-            dataByNumber[type].Add((title, type, step, value, fee));
-        }
 
-        //// 데이터 확인 (디버깅용)
-        //foreach (var entry in dataByNumber)
-        //{
-        //    Debug.Log($"Number: {entry.Key}");
-        //    foreach (var item in entry.Value)
-        //    {
-        //        Debug.Log($"  Title: {item.title}, type: {item.type}, step: {item.step}, value: {item.value}, fee: {item.fee}");
-        //    }
-        //}
-    }
-
-    // 특정 번호에 해당하는 데이터 반환
-    public List<(string title, int type, int step, float value, decimal fee)> GetDataByNumber(int typeNum)
-    {
-        if (dataByNumber.ContainsKey(typeNum))
-        {
-            return dataByNumber[typeNum];
-        }
-        else
-        {
-            Debug.LogWarning($"No data found for number {typeNum}");
-            return null;
+            tempDataList.Add((title, type, step, value, fee));
+            dataByNumber[type] = new List<(string, int, int, float, decimal)>(tempDataList);
         }
     }
 
-    // Resources 폴더에서 스프라이트 로드 (언젠간 쓰일듯)
+    // Resources 폴더에서 스프라이트 로드하는 함수
     //private Sprite LoadSprite(string path)
     //{
     //    Sprite sprite = Resources.Load<Sprite>("Sprites/Cats/" + path);
@@ -97,4 +93,24 @@ public class ItemItemUpgradeDataLoader : MonoBehaviour
     //    }
     //    return sprite;
     //}
+
+    #endregion
+
+
+    #region Data Access
+
+    // 특정 번호에 해당하는 데이터 반환하는 함수
+    public List<(string title, int type, int step, float value, decimal fee)> GetDataByNumber(int typeNum)
+    {
+        if (dataByNumber.ContainsKey(typeNum))
+        {
+            return dataByNumber[typeNum];
+        }
+        //Debug.LogWarning($"No data found for number {typeNum}");
+        return null;
+    }
+
+    #endregion
+
+    
 }

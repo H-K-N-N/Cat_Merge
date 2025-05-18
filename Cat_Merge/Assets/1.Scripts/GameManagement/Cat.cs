@@ -1,9 +1,12 @@
 using UnityEngine;
 
-// 고양이의 정보를 담는 Script
+// 고양이의 정보를 담는 스크립트
 [System.Serializable]
 public class Cat
 {
+
+
+    #region Basic Properties
 
     private int catId;          // 고양이 인덱스
     public int CatId { get => catId; set => catId = value; }
@@ -14,7 +17,10 @@ public class Cat
     private int catGrade;       // 고양이 등급
     public int CatGrade { get => catGrade; set => catGrade = value; }
 
+    #endregion
 
+
+    #region Combat Stats
 
     private int baseDamage;     // 기본 공격력 (기본값 100%)
     public int BaseDamage { get => baseDamage; set => baseDamage = value; }
@@ -28,7 +34,19 @@ public class Cat
     private int growthHp;       // 성장한 체력
     public int GrowthHp { get => growthHp; set => growthHp = value; }
 
+    private int catAttackSpeed;     // 고양이 공격속도
+    public int CatAttackSpeed { get => catAttackSpeed; set => catAttackSpeed = value; }
 
+    private int catArmor;           // 고양이 방어력
+    public int CatArmor { get => catArmor; set => catArmor = value; }
+
+    private int catMoveSpeed;       // 고양이 이동속도
+    public int CatMoveSpeed { get => catMoveSpeed; set => catMoveSpeed = value; }
+
+    #endregion
+
+
+    #region Passive Stats
 
     private float passiveAttackDamage = 1.0f;       // 패시브 공격력 증가 배율 (기본값 1 = 100%)
     public float PassiveAttackDamage { get => passiveAttackDamage; set => passiveAttackDamage = value; }
@@ -39,13 +57,19 @@ public class Cat
     private float passiveAttackSpeed = 0f;          // 패시브 공격 속도 증가량 (기본값 0초)
     public float PassiveAttackSpeed { get => passiveAttackSpeed; set => passiveAttackSpeed = value; }
 
+    #endregion
 
+
+    #region Calculated Stats
 
     // 최종 스탯 계산
     public int CatDamage => (int)((GrowthDamage * (BaseDamage * 0.01) + GrowthDamage) * PassiveAttackDamage);
     public int CatHp => (int)(GrowthHp * (BaseHp * 0.01)) + GrowthHp;
 
+    #endregion
 
+
+    #region Additional Properties
 
     private int catGetCoin;         // 고양이 자동 재화 획득량
     public int CatGetCoin { get => catGetCoin; set => catGetCoin = value; }
@@ -56,21 +80,18 @@ public class Cat
     private string catExplain;      // 고양이 설명
     public string CatExplain { get => catExplain; set => catExplain = value; }
 
-    private int catAttackSpeed;     // 고양이 공격속도
-    public int CatAttackSpeed { get => catAttackSpeed; set => catAttackSpeed = value; }
-
-    private int catArmor;           // 고양이 방어력
-    public int CatArmor { get => catArmor; set => catArmor = value; }
-
-    private int catMoveSpeed;       // 고양이 이동속도
-    public int CatMoveSpeed { get => catMoveSpeed; set => catMoveSpeed = value; }
-
     private int canOpener;          // 고양이 구매 해금관련
     public int CanOpener { get => canOpener; set => canOpener = value; }
 
     private int catFirstOpenCash;   // 고양이 첫 획득시 얻는 다이아
     public int CatFirstOpenCash { get => catFirstOpenCash; set => catFirstOpenCash = value; }
 
+    #endregion
+
+
+    #region Constructor
+
+    // 고양이 객체 생성자
     public Cat(int catId, string catName, int catGrade, int catDamage, int catGetCoin, int catHp, Sprite catImage,
         string catExplain, int catAttackSpeed, int catArmor, int catMoveSpeed, int canOpener, int catFirstOpenCash)
     {
@@ -91,7 +112,12 @@ public class Cat
         CatFirstOpenCash = catFirstOpenCash;
     }
 
-    // 성장 스탯 함수
+    #endregion
+
+
+    #region Growth Methods
+
+    // 성장 스탯 증가 함수
     public void GrowStat(int addDamage, int addHp)
     {
         GrowthDamage += addDamage;
@@ -105,9 +131,12 @@ public class Cat
         GrowthHp = 0;
     }
 
+    #endregion
 
 
-    // 패시브 공격력 증가 적용 함수
+    #region Passive Buff Methods
+
+    // 패시브 공격력 증가 함수
     public void AddPassiveAttackDamageBuff(float percentage)
     {
         PassiveAttackDamage += percentage;
@@ -120,7 +149,7 @@ public class Cat
     }
 
 
-    // 패시브 재화 수집 속도 증가 적용 함수
+    // 패시브 재화 수집 속도 증가 함수
     public void AddPassiveCoinCollectSpeedBuff(float seconds)
     {
         PassiveCoinCollectSpeed += seconds;
@@ -132,7 +161,7 @@ public class Cat
         PassiveCoinCollectSpeed = 0f;
     }
 
-    // 패시브 공격 속도 증가 적용 함수
+    // 패시브 공격 속도 증가 함수
     public void AddPassiveAttackSpeedBuff(float seconds)
     {
         PassiveAttackSpeed += seconds;
@@ -143,6 +172,8 @@ public class Cat
     {
         PassiveAttackSpeed = 0f;
     }
+
+    #endregion
 
 
 }

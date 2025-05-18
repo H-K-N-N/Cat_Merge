@@ -1,7 +1,4 @@
-using NUnit.Framework;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public enum MouseState
 {
@@ -14,15 +11,29 @@ public enum MouseState
 
 public class MouseAnimatorManager : MonoBehaviour
 {
+
+
+    #region Variables
+
     private Animator animator;
     private MouseState currentState;
 
+    #endregion
 
-    void Awake()
+
+    #region Unity Methods
+
+    private void Awake()
     {
         animator = GetComponent<Animator>();
     }
 
+    #endregion
+
+
+    #region State Management
+
+    // 쥐 상태 변경 및 애니메이션 적용 함수
     public void ChangeState(MouseState newState)
     {
         if (currentState == newState) return;
@@ -33,6 +44,7 @@ public class MouseAnimatorManager : MonoBehaviour
         currentState = newState;
     }
 
+    // 모든 상태 bool 값 초기화 함수
     private void ResetAllStateBools()
     {
         animator.SetBool("isIdle", false);
@@ -42,10 +54,13 @@ public class MouseAnimatorManager : MonoBehaviour
         animator.SetBool("isAttack3", false);
     }
 
+    // 특정 상태의 bool 값을 true로 설정하는 함수
     private void SetBoolForState(MouseState state)
     {
         animator.SetBool(state.ToString(), true);
     }
 
-}
+    #endregion
 
+
+}

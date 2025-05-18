@@ -40,7 +40,7 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     public static FriendshipManager Instance { get; private set; }
 
     // 레벨별 보상 금액 설정
-    private int[] rewardAmounts = new int[] { 5, 10, 15, 20, 25 };
+    private readonly int[] rewardAmounts = new int[] { 5, 10, 15, 20, 25 };
 
     [Header("---[UI References]")]
     [SerializeField] private Transform friendshipButtonParent;
@@ -56,7 +56,9 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     private Button[] activeButtons;
     private bool buttonClick = false;
 
-    
+    private static readonly Vector2 defaultOffset = new Vector2(-210, 0);
+    private const float STAR_SPACING = 42f;
+
     private Dictionary<int, CatFriendship> catFriendships = new Dictionary<int, CatFriendship>();                           // 각 고양이별 애정도 정보 저장
     private Dictionary<int, List<(int exp, int reward)>> levelByGrade = new Dictionary<int, List<(int exp, int reward)>>(); // 레벨별 필요 경험치 데이터
     private Dictionary<int, int> currentLevels = new Dictionary<int, int>();                                                // 현재 레벨을 추적하기 위한 변수
@@ -84,7 +86,6 @@ public class FriendshipManager : MonoBehaviour, ISaveable
 
     private void Start()
     {
-        // 기본 데이터 초기화 (항상 필요)
         InitializeFriendshipData();
 
         // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
@@ -94,7 +95,6 @@ public class FriendshipManager : MonoBehaviour, ISaveable
             InitializeCurrentLevels();
         }
 
-        // UI 초기화 (항상 마지막에 실행)
         InitializeUI();
     }
 
@@ -265,7 +265,7 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         if (expRequirementText != null) expRequirementText.text = "";
     }
 
-    // UI 요소 정리 (OnDestroy)
+    // UI 요소 정리 함수(OnDestroy)
     private void CleanupUI()
     {
         foreach (var buttons in catFriendshipButtons.Values)
@@ -494,12 +494,9 @@ public class FriendshipManager : MonoBehaviour, ISaveable
             Transform fullStarBG = fullStar.transform.Find("fullStar");
             if (fullStarBG != null)
             {
-                Vector2 newOffsetMax = fullStar.GetComponent<RectTransform>().offsetMax;
-                newOffsetMax.x = -210;
-                newOffsetMax.y = 0;
-
+                Vector2 newOffsetMax = defaultOffset;
                 int claimedCount = friendshipInfo.isClaimed.Count(claimed => claimed);
-                newOffsetMax.x = -210 + (claimedCount * 42);
+                newOffsetMax.x = defaultOffset.x + (claimedCount * STAR_SPACING);
                 fullStarBG.GetComponent<RectTransform>().offsetMax = newOffsetMax;
             }
         }

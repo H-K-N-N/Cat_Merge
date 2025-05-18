@@ -54,6 +54,7 @@ public class CompleteGameState
     }
 }
 
+// 구글 로그인 & 저장 및 로드 관련 스크립트
 public class GoogleManager : MonoBehaviour
 {
 
@@ -138,7 +139,7 @@ public class GoogleManager : MonoBehaviour
         autoSaveTimer += Time.deltaTime;
         if (autoSaveTimer >= AUTO_SAVE_INTERVAL)
         {
-            Debug.Log($"[저장] {AUTO_SAVE_INTERVAL}초 경과로 자동 저장 시작");
+            //Debug.Log($"[저장] {AUTO_SAVE_INTERVAL}초 경과로 자동 저장 시작");
             SaveAllGameData();
             autoSaveTimer = 0f;
         }
@@ -186,11 +187,11 @@ public class GoogleManager : MonoBehaviour
             int savedVersion = PlayerPrefs.GetInt(SAVE_VERSION_KEY, 1);
             if (savedVersion < CURRENT_SAVE_VERSION)
             {
-                Debug.Log($"[마이그레이션] 이전 버전({savedVersion})의 데이터 발견. 마이그레이션 시작");
+                //Debug.Log($"[마이그레이션] 이전 버전({savedVersion})의 데이터 발견. 마이그레이션 시작");
                 MigrateOldData();
                 PlayerPrefs.SetInt(SAVE_VERSION_KEY, CURRENT_SAVE_VERSION);
                 PlayerPrefs.Save();
-                Debug.Log("[마이그레이션] 데이터 마이그레이션 완료");
+                //Debug.Log("[마이그레이션] 데이터 마이그레이션 완료");
             }
         }
         else
@@ -218,7 +219,7 @@ public class GoogleManager : MonoBehaviour
                 if (!string.IsNullOrEmpty(data))
                 {
                     oldData[typeName] = data;
-                    Debug.Log($"[마이그레이션] {typeName} 데이터 백업");
+                    //Debug.Log($"[마이그레이션] {typeName} 데이터 백업");
                 }
             }
 
@@ -239,18 +240,18 @@ public class GoogleManager : MonoBehaviour
                 if (isLoggedIn)
                 {
                     SaveToCloud(JsonUtility.ToJson(newGameState));
-                    Debug.Log("[마이그레이션] 클라우드에 새로운 형식으로 저장");
+                    //Debug.Log("[마이그레이션] 클라우드에 새로운 형식으로 저장");
                 }
                 else
                 {
                     SaveToPlayerPrefs(newGameState);
-                    Debug.Log("[마이그레이션] PlayerPrefs에 새로운 형식으로 저장");
+                    //Debug.Log("[마이그레이션] PlayerPrefs에 새로운 형식으로 저장");
                 }
             }
         }
         catch (Exception e)
         {
-            Debug.LogError($"[마이그레이션] 데이터 마이그레이션 중 오류 발생: {e.Message}");
+            //Debug.LogError($"[마이그레이션] 데이터 마이그레이션 중 오류 발생: {e.Message}");
         }
     }
 
@@ -274,12 +275,12 @@ public class GoogleManager : MonoBehaviour
     // 구글 로그인을 시도하는 코루틴
     private IEnumerator InitializeGoogleLogin()
     {
-        Debug.Log("[초기화] 구글 로그인 시도");
+        //Debug.Log("[초기화] 구글 로그인 시도");
         bool loginComplete = false;
         PlayGamesPlatform.Instance.Authenticate((status) => {
             ProcessAuthentication(status);
             loginComplete = true;
-            Debug.Log($"[초기화] 구글 로그인 결과: {status}");
+            //Debug.Log($"[초기화] 구글 로그인 결과: {status}");
         });
 
         float waitTime = 0;
@@ -289,14 +290,13 @@ public class GoogleManager : MonoBehaviour
             yield return null;
         }
 
-        // 첫 실행 여부만 확인
+        // 초기 isPlayedGame 상태를 로컬 저장소 기준으로 설정
         isPlayedGame = PlayerPrefs.HasKey(FIRST_PLAY_KEY);
         if (!isPlayedGame)
         {
             PlayerPrefs.SetInt(FIRST_PLAY_KEY, 1);
             PlayerPrefs.Save();
         }
-        Debug.Log($"[초기화] 첫 실행 표시 저장: {isPlayedGame}");
     }
 
     // 구글 인증 결과를 처리하는 함수
@@ -348,7 +348,7 @@ public class GoogleManager : MonoBehaviour
 
         if (gameManager == null)
         {
-            Debug.LogError("[로드] GameManager를 찾을 수 없음");
+            //Debug.LogError("[로드] GameManager를 찾을 수 없음");
             yield break;
         }
 
@@ -357,7 +357,7 @@ public class GoogleManager : MonoBehaviour
 
         UnencryptedData();
 
-        Debug.Log("[로드] 게임 데이터 로드 시작");
+        //Debug.Log("[로드] 게임 데이터 로드 시작");
 
         CompleteGameState cloudState = null;
         CompleteGameState localState = null;
@@ -366,20 +366,20 @@ public class GoogleManager : MonoBehaviour
         if (isPlayedGame)
         {
             localState = LoadLocalStateFromPlayerPrefs();
-            Debug.Log($"[로드] 로컬 데이터 타임스탬프: {localState?.timestamp}");
+            //Debug.Log($"[로드] 로컬 데이터 타임스탬프: {localState?.timestamp}");
         }
 
         // 구글 로그인 상태면 클라우드 데이터 로드 시도
         if (isLoggedIn)
         {
-            Debug.Log("[로드] Google Cloud 데이터 로드 시도");
+            //Debug.Log("[로드] Google Cloud 데이터 로드 시도");
             bool loadComplete = false;
 
             LoadFromCloud((success, state) => {
                 if (success)
                 {
                     cloudState = state;
-                    Debug.Log($"[로드] 클라우드 데이터 타임스탬프: {cloudState?.timestamp}");
+                    //Debug.Log($"[로드] 클라우드 데이터 타임스탬프: {cloudState?.timestamp}");
                 }
                 loadComplete = true;
             });
@@ -400,12 +400,12 @@ public class GoogleManager : MonoBehaviour
             // 둘 다 있는 경우 - 타임스탬프 비교
             if (cloudState.timestamp >= localState.timestamp)
             {
-                Debug.Log("[로드] 클라우드 데이터가 더 최신이므로 클라우드 데이터 사용");
+                //Debug.Log("[로드] 클라우드 데이터가 더 최신이므로 클라우드 데이터 사용");
                 finalState = cloudState;
             }
             else
             {
-                Debug.Log("[로드] 로컬 데이터가 더 최신이므로 로컬 데이터 사용");
+                //Debug.Log("[로드] 로컬 데이터가 더 최신이므로 로컬 데이터 사용");
                 finalState = localState;
                 // 더 최신 데이터를 클라우드에 동기화
                 if (isLoggedIn && isNetworkAvailable)
@@ -418,14 +418,27 @@ public class GoogleManager : MonoBehaviour
         {
             // 둘 중 하나만 있는 경우
             finalState = cloudState ?? localState;
-            Debug.Log($"[로드] 사용 가능한 데이터 사용: {(cloudState != null ? "클라우드" : "로컬")}");
+            //Debug.Log($"[로드] 사용 가능한 데이터 사용: {(cloudState != null ? "클라우드" : "로컬")}");
         }
 
         // 최종 선택된 데이터 적용
         if (finalState != null)
         {
             ApplyGameState(finalState);
-            Debug.Log($"[로드] 최종 데이터 적용 완료 (타임스탬프: {finalState.timestamp})");
+
+            // 유효한 데이터가 로드되었으므로 첫 게임이 아님을 표시
+            isPlayedGame = true;
+            if (!PlayerPrefs.HasKey(FIRST_PLAY_KEY))
+            {
+                PlayerPrefs.SetInt(FIRST_PLAY_KEY, 1);
+                PlayerPrefs.Save();
+            }
+
+            //Debug.Log($"[로드] 최종 데이터 적용 완료 (타임스탬프: {finalState.timestamp})");
+        }
+        else
+        {
+            isPlayedGame = false;
         }
 
         // 잠시 대기
@@ -435,12 +448,12 @@ public class GoogleManager : MonoBehaviour
         // 첫 게임 여부 확인 및 처리
         if (!isPlayedGame)
         {
-            Debug.Log("[초기화] 첫 게임 실행 - 튜토리얼 시작");
+            //Debug.Log("[초기화] 첫 게임 실행 - 튜토리얼 시작");
             StartCoroutine(gameManager.ShowFirstGamePanel());
         }
 
         isGameStarting = false;
-        Debug.Log("[로드] 게임 데이터 로드 완료");
+        //Debug.Log("[로드] 게임 데이터 로드 완료");
     }
 
     // PlayerPrefs에서 전체 게임 상태를 로드하는 함수
@@ -494,7 +507,7 @@ public class GoogleManager : MonoBehaviour
     public void ForceSaveAllData()
     {
         if (isDeleting) return;
-        Debug.Log("[저장] 강제 저장 요청됨");
+        //Debug.Log("[저장] 강제 저장 요청됨");
         SaveAllGameData();
         autoSaveTimer = 0f;
     }
@@ -504,7 +517,7 @@ public class GoogleManager : MonoBehaviour
     {
         if (isSaving)
         {
-            Debug.Log("[저장] 이미 저장 중이므로 스킵");
+            //Debug.Log("[저장] 이미 저장 중이므로 스킵");
             return;
         }
         isSaving = true;
@@ -535,10 +548,10 @@ public class GoogleManager : MonoBehaviour
             // 데이터 무결성 검증
             if (!ValidateGameState(gameState))
             {
-                Debug.LogError("[저장] 데이터 무결성 검증 실패");
+                //Debug.LogError("[저장] 데이터 무결성 검증 실패");
                 if (!RestoreFromBackup())
                 {
-                    Debug.LogError("[저장] 백업 복구 실패");
+                    //Debug.LogError("[저장] 백업 복구 실패");
                 }
                 return;
             }
@@ -549,12 +562,12 @@ public class GoogleManager : MonoBehaviour
             // 클라우드 저장
             if (isLoggedIn && isNetworkAvailable)
             {
-                Debug.Log($"[저장] Google Cloud 저장 시작 - 컴포넌트 {componentCount}개");
+                //Debug.Log($"[저장] Google Cloud 저장 시작 - 컴포넌트 {componentCount}개");
                 SaveToCloud(JsonUtility.ToJson(gameState));
             }
             else
             {
-                Debug.Log($"[저장] PlayerPrefs 저장 시작 - 컴포넌트 {componentCount}개");
+                //Debug.Log($"[저장] PlayerPrefs 저장 시작 - 컴포넌트 {componentCount}개");
                 SaveToPlayerPrefs(gameState);
             }
 
@@ -563,10 +576,10 @@ public class GoogleManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError($"[저장] 저장 중 오류 발생: {e.Message}");
+            //Debug.LogError($"[저장] 저장 중 오류 발생: {e.Message}");
             if (!RestoreFromBackup())
             {
-                Debug.LogError("[저장] 백업 복구 실패");
+                //Debug.LogError("[저장] 백업 복구 실패");
             }
         }
         finally
@@ -574,7 +587,7 @@ public class GoogleManager : MonoBehaviour
             isSaving = false;
         }
 
-        Debug.Log("[저장] 저장 완료");
+        //Debug.Log("[저장] 저장 완료");
     }
 
     // PlayerPrefs에 게임 데이터를 저장하는 함수
@@ -588,11 +601,11 @@ public class GoogleManager : MonoBehaviour
             }
             PlayerPrefs.SetString("LastSaveTime", gameState.timestamp.ToString());
             PlayerPrefs.Save();
-            Debug.Log("[저장] PlayerPrefs 저장 성공");
+            //Debug.Log("[저장] PlayerPrefs 저장 성공");
         }
         catch (Exception e)
         {
-            Debug.LogError($"[저장] PlayerPrefs 저장 실패: {e.Message}");
+            //Debug.LogError($"[저장] PlayerPrefs 저장 실패: {e.Message}");
         }
     }
 
@@ -617,12 +630,12 @@ public class GoogleManager : MonoBehaviour
 
                     saveGameClient.CommitUpdate(game, update, data, (commitStatus, savedGame) =>
                     {
-                        Debug.Log($"[저장] Google Cloud 저장 결과: {commitStatus}");
+                        //Debug.Log($"[저장] Google Cloud 저장 결과: {commitStatus}");
                     });
                 }
                 else
                 {
-                    Debug.LogError($"[저장] Google Cloud 저장 실패: {status}");
+                    //Debug.LogError($"[저장] Google Cloud 저장 실패: {status}");
                 }
             });
     }
@@ -667,7 +680,7 @@ public class GoogleManager : MonoBehaviour
                             }
                             catch (Exception e)
                             {
-                                Debug.LogError($"[로드] 클라우드 데이터 파싱 실패: {e.Message}");
+                                //Debug.LogError($"[로드] 클라우드 데이터 파싱 실패: {e.Message}");
                             }
                         }
                         onComplete?.Invoke(false, null);
@@ -705,7 +718,7 @@ public class GoogleManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError($"[암호화 오류] {e.Message}");
+            //Debug.LogError($"[암호화 오류] {e.Message}");
             return data;
         }
     }
@@ -730,7 +743,7 @@ public class GoogleManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError($"[복호화 오류] {e.Message}");
+            //Debug.LogError($"[복호화 오류] {e.Message}");
             return encryptedData;
         }
     }
@@ -955,7 +968,7 @@ public class GoogleManager : MonoBehaviour
     {
         if (!isLoggedIn || !isNetworkAvailable) yield break;
 
-        Debug.Log("[동기화] 클라우드 동기화 시작");
+        //Debug.Log("[동기화] 클라우드 동기화 시작");
         bool syncComplete = false;
 
         LoadFromCloud((success, state) => {
@@ -971,7 +984,7 @@ public class GoogleManager : MonoBehaviour
             yield return null;
         }
 
-        Debug.Log("[동기화] 클라우드 동기화 완료");
+        //Debug.Log("[동기화] 클라우드 동기화 완료");
     }
 
     #endregion
@@ -1024,7 +1037,7 @@ public class GoogleManager : MonoBehaviour
         CompleteGameState backupState = backupStates.Last();
         if (!ValidateGameState(backupState)) return false;
 
-        Debug.Log("[복구] 백업에서 데이터 복구 시작");
+        //Debug.Log("[복구] 백업에서 데이터 복구 시작");
 
         try
         {
@@ -1039,12 +1052,12 @@ public class GoogleManager : MonoBehaviour
                 }
             }
 
-            Debug.Log("[복구] 백업에서 데이터 복구 완료");
+            //Debug.Log("[복구] 백업에서 데이터 복구 완료");
             return true;
         }
         catch (Exception e)
         {
-            Debug.LogError($"[복구] 백업 복구 실패: {e.Message}");
+            //Debug.LogError($"[복구] 백업 복구 실패: {e.Message}");
             return false;
         }
     }
@@ -1085,5 +1098,5 @@ public class GoogleManager : MonoBehaviour
 
     #endregion
 
-}
 
+}

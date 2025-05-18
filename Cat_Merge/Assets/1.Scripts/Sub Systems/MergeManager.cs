@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using System;
 using TMPro;
 
-// 고양이 머지 스크립트
+// 고양이 수동합성 스크립트
 [DefaultExecutionOrder(-2)]
 public class MergeManager : MonoBehaviour, ISaveable
 {
@@ -21,7 +21,7 @@ public class MergeManager : MonoBehaviour, ISaveable
     [SerializeField] private TextMeshProUGUI stateText;             // 현재 상태 텍스트 (활성화 or 비활성화)
     [SerializeField] private TextMeshProUGUI mergeButtonText;       // 머지 버튼 텍스트 (활성화 or 비활성화)
     private bool isMergeEnabled;                                    // 머지 활성화 상태
-    private bool previousMergeState;                                // 이전 상태 저장
+    //private bool previousMergeState;                                // 이전 상태 저장
 
     [Header("---[UI Color]")]
     private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
@@ -53,7 +53,7 @@ public class MergeManager : MonoBehaviour, ISaveable
         if (!isDataLoaded)
         {
             isMergeEnabled = true;
-            previousMergeState = isMergeEnabled;
+            //previousMergeState = isMergeEnabled;
         }
 
         InitializeButtonListeners();
@@ -104,9 +104,20 @@ public class MergeManager : MonoBehaviour, ISaveable
     // 전투 시작시 버튼 및 기능 비활성화시키는 함수
     public void StartBattleMergeState()
     {
-        previousMergeState = isMergeEnabled;
-        isMergeEnabled = false;
+        SaveAndDisableMergeState();
+        DisableMergeUI();
+    }
 
+    // 합성 활성화 상태 저장 및 비활성화 함수
+    private void SaveAndDisableMergeState()
+    {
+        //previousMergeState = isMergeEnabled;
+        //isMergeEnabled = false;
+    }
+
+    // 합성 UI 비활성화 함수
+    private void DisableMergeUI()
+    {
         openMergePanelButton.interactable = false;
         if (mergePanel.activeSelf)
         {
@@ -117,7 +128,7 @@ public class MergeManager : MonoBehaviour, ISaveable
     // 전투 종료시 버튼 및 기능 기존 상태로 되돌려놓는 함수
     public void EndBattleMergeState()
     {
-        isMergeEnabled = previousMergeState;
+        //isMergeEnabled = previousMergeState;
         openMergePanelButton.interactable = true;
     }
 
@@ -208,15 +219,15 @@ public class MergeManager : MonoBehaviour, ISaveable
     private class SaveData
     {
         public bool isMergeEnabled;         // 머지 활성화 상태
-        public bool previousMergeState;     // 이전 상태
+        //public bool previousMergeState;     // 이전 상태
     }
 
     public string GetSaveData()
     {
         SaveData data = new SaveData
         {
-            isMergeEnabled = this.isMergeEnabled,
-            previousMergeState = this.previousMergeState
+            isMergeEnabled = this.isMergeEnabled
+            //previousMergeState = this.previousMergeState
         };
         return JsonUtility.ToJson(data);
     }
@@ -227,7 +238,7 @@ public class MergeManager : MonoBehaviour, ISaveable
 
         SaveData savedData = JsonUtility.FromJson<SaveData>(data);
         this.isMergeEnabled = savedData.isMergeEnabled;
-        this.previousMergeState = savedData.previousMergeState;
+        //this.previousMergeState = savedData.previousMergeState;
 
         UpdateMergeButtonColor();
 

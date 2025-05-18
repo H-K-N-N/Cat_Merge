@@ -29,6 +29,10 @@ public class GameManager : MonoBehaviour, ISaveable
     [SerializeField] private Transform gamePanel;                           // 고양이 정보를 가져올 부모 Panel
     private List<RectTransform> catUIObjects = new List<RectTransform>();   // 고양이 UI 객체 리스트
 
+    private float lastSortTime = 0f;                                        // 마지막 정렬 시간
+    private const float SORT_INTERVAL = 0.5f;                               // 정렬 간격
+    private Dictionary<int, Vector2> lastPositions = new Dictionary<int, Vector2>();  // 마지막 위치 저장
+
     [Header("---[Quit Panel]")]
     [SerializeField] private GameObject quitPanel;                          // 종료 확인 패널
     [SerializeField] private Button closeButton;                            // 종료 패널 닫기 버튼
@@ -78,7 +82,6 @@ public class GameManager : MonoBehaviour, ISaveable
             {
                 coin = value;
                 UpdateCoinText();
-                SaveToLocal();
             }
         }
     }
@@ -94,7 +97,6 @@ public class GameManager : MonoBehaviour, ISaveable
             {
                 cash = value;
                 UpdateCashText();
-                SaveToLocal();
             }
         }
     }
@@ -145,7 +147,12 @@ public class GameManager : MonoBehaviour, ISaveable
     {
         if (!isQuiting)
         {
-            SortCatUIObjectsByYPosition();
+            if (Time.time - lastSortTime >= SORT_INTERVAL)
+            {
+                CheckAndSortCatUIObjects();
+                lastSortTime = Time.time;
+            }
+
             CheckQuitInput();
         }
     }
@@ -347,19 +354,68 @@ public class GameManager : MonoBehaviour, ISaveable
         }
     }
 
-    // Y축 기준으로 고양이 UI 정렬 함수
-    private void SortCatUIObjectsByYPosition()
+    // 정렬이 필요한지 확인하고 수행하는 함수
+    private void CheckAndSortCatUIObjects()
     {
         UpdateCatUIObjects();
         if (catUIObjects.Count == 0) return;
 
-        // Y축을 기준으로 정렬 (높은 Y값이 뒤로 가게 설정)
-        catUIObjects.Sort((a, b) => b.anchoredPosition.y.CompareTo(a.anchoredPosition.y));
+        bool needsSort = false;
+        Dictionary<int, Vector2> currentPositions = new Dictionary<int, Vector2>();
 
-        // 정렬된 순서대로 UI 계층 구조 업데이트
-        for (int i = 0; i < catUIObjects.Count; i++)
+        // 현재 위치 기록 및 변화 확인
+        foreach (var rectTransform in catUIObjects)
         {
-            catUIObjects[i].SetSiblingIndex(i);
+            int id = rectTransform.GetInstanceID();
+            Vector2 currentPos = rectTransform.anchoredPosition;
+            currentPositions[id] = currentPos;
+
+            if (lastPositions.TryGetValue(id, out Vector2 lastPos))
+            {
+                if (Vector2.Distance(currentPos, lastPos) > 0.1f)
+                {
+                    needsSort = true;
+                }
+            }
+            else
+            {
+                needsSort = true;
+            }
+        }
+
+        // 위치가 변경된 경우에만 정렬
+        if (needsSort)
+        {
+            SortCatUIObjectsByPosition();
+        }
+
+        lastPositions = currentPositions;
+    }
+
+    // Y축 기준으로 고양이 UI 정렬 함수
+    private void SortCatUIObjectsByPosition()
+    {
+        if (catUIObjects.Count == 0) return;
+
+        // 동일한 Y좌표에 있는 고양이들을 그룹화
+        var groups = catUIObjects.GroupBy(rt => Mathf.Round(rt.anchoredPosition.y * 10f) / 10f)
+                                .OrderByDescending(g => g.Key)
+                                .ToList();
+
+        int currentIndex = 0;
+        foreach (var group in groups)
+        {
+            // 각 Y좌표 그룹 내에서 X좌표로 정렬
+            var sortedGroup = group.OrderBy(rt => rt.anchoredPosition.x).ToList();
+
+            foreach (var rectTransform in sortedGroup)
+            {
+                if (rectTransform.GetSiblingIndex() != currentIndex)
+                {
+                    rectTransform.SetSiblingIndex(currentIndex);
+                }
+                currentIndex++;
+            }
         }
     }
 
@@ -392,21 +448,33 @@ public class GameManager : MonoBehaviour, ISaveable
     }
 
     // 종료 입력 처리 함수
-    public void HandleQuitInput()
+    private void HandleQuitInput()
     {
-        if (quitPanel != null && !isBackButtonPressed)
+        if (!isBackButtonPressed)
         {
             isBackButtonPressed = true;
+
             if (quitPanel.activeSelf)
             {
                 CancelQuit();
+            }
+            else if (ActivePanelManager.Instance.HasActivePanel())
+            {
+                ActivePanelManager.Instance.CloseAllPanels();
             }
             else
             {
                 ShowQuitPanel();
             }
+
             StartCoroutine(ResetBackButtonPress());
         }
+    }
+
+    // OptionManager의 종료하기 버튼 함수
+    public void QuitButtonInput()
+    {
+        ShowQuitPanel();
     }
 
     // 뒤로가기버튼 입력 딜레이 설정 코루틴
@@ -447,21 +515,7 @@ public class GameManager : MonoBehaviour, ISaveable
         Time.timeScale = 0f;
 
         // GoogleManager를 통해 암호화하여 저장
-        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
-        if (GoogleManager.Instance != null)
-        {
-            GoogleManager.Instance.SaveAllSaveables(saveables);
-
-            // 클라우드 저장 시도
-            if (GoogleManager.Instance.isLoggedIn)
-            {
-                GoogleManager.Instance.SaveToCloudWithLocalData();
-            }
-        }
-        else
-        {
-            Debug.LogError("[저장 오류] GoogleManager 인스턴스를 찾을 수 없습니다!");
-        }
+        GoogleManager.Instance?.ForceSaveAllData();
 
         // 1초 대기
         yield return new WaitForSecondsRealtime(1f);
@@ -478,35 +532,6 @@ public class GameManager : MonoBehaviour, ISaveable
         Application.Quit();
 #endif
     }
-
-    //// 게임 종료 함수
-    //public void SaveGame()
-    //{
-    //    StartCoroutine(SaveCoroutine());
-    //}
-
-    //// 저장 후 종료하는 코루틴
-    //private IEnumerator SaveCoroutine()
-    //{
-    //    // GoogleManager를 통해 암호화하여 저장
-    //    ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
-    //    if (GoogleManager.Instance != null)
-    //    {
-    //        GoogleManager.Instance.SaveAllSaveables(saveables);
-
-    //        // 클라우드 저장 시도
-    //        if (GoogleManager.Instance.isLoggedIn)
-    //        {
-    //            GoogleManager.Instance.SaveToCloudWithLocalData();
-    //        }
-    //    }
-    //    else
-    //    {
-    //        Debug.LogError("[저장 오류] GoogleManager 인스턴스를 찾을 수 없습니다!");
-    //    }
-
-    //    yield return null;
-    //}
 
     #endregion
 
@@ -589,13 +614,6 @@ public class GameManager : MonoBehaviour, ISaveable
         {
             cash = parsedCash;
         }
-    }
-
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

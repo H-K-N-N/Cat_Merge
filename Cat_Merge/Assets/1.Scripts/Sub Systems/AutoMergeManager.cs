@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 
-// ÀÚµ¿ÇÕ¼º °ü·Ã ½ºÅ©¸³Æ®
+// ìë™í•©ì„± ìŠ¤í¬ë¦½íŠ¸
 public class AutoMergeManager : MonoBehaviour, ISaveable
 {
 
@@ -15,29 +15,31 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
     public static AutoMergeManager Instance { get; private set; }
 
+
     [Header("---[UI]")]
-    [SerializeField] private GameObject autoMergePanel;             // ÀÚµ¿ ÇÕ¼º ÆĞ³Î
-    [SerializeField] private Button openAutoMergePanelButton;       // ÀÚµ¿ ÇÕ¼º ÆĞ³Î ¿­±â ¹öÆ°
-    [SerializeField] private Button closeAutoMergePanelButton;      // ÀÚµ¿ ÇÕ¼º ÆĞ³Î ´İ±â ¹öÆ°
-    [SerializeField] private Button autoMergeStateButton;           // ÀÚµ¿ ÇÕ¼º »óÅÂ ¹öÆ°
-    [SerializeField] private TextMeshProUGUI autoMergeCostText;     // ÀÚµ¿ ÇÕ¼º ºñ¿ë ÅØ½ºÆ®
-    [SerializeField] private TextMeshProUGUI autoMergeTimerText;    // ÀÚµ¿ ÇÕ¼º Å¸ÀÌ¸Ó ÅØ½ºÆ®
-    [SerializeField] private TextMeshProUGUI explainText;           // ÀÚµ¿ ÇÕ¼º ¼³¸í ÅØ½ºÆ®
+    [SerializeField] private GameObject autoMergePanel;             // ìë™ í•©ì„± íŒ¨ë„
+    [SerializeField] private Button openAutoMergePanelButton;       // ìë™ í•©ì„± íŒ¨ë„ ì—´ê¸° ë²„íŠ¼
+    [SerializeField] private Button closeAutoMergePanelButton;      // ìë™ í•©ì„± íŒ¨ë„ ë‹«ê¸° ë²„íŠ¼
+    [SerializeField] private Button autoMergeStateButton;           // ìë™ í•©ì„± ìƒíƒœ ë²„íŠ¼
+    [SerializeField] private TextMeshProUGUI autoMergeCostText;     // ìë™ í•©ì„± ë¹„ìš© í…ìŠ¤íŠ¸
+    [SerializeField] private TextMeshProUGUI autoMergeTimerText;    // ìë™ í•©ì„± íƒ€ì´ë¨¸ í…ìŠ¤íŠ¸
+    [SerializeField] private TextMeshProUGUI explainText;           // ìë™ í•©ì„± ì„¤ëª… í…ìŠ¤íŠ¸
+
 
     [Header("---[Auto Merge Settings]")]
-    private const float MAX_AUTO_MERGE_DURATION = 86400f;                       // ÃÖ´ë ÀÚµ¿ ÇÕ¼º ½Ã°£ (24½Ã°£)
-    private const float MOVE_DURATION = 0.3f;                                   // °í¾çÀÌ°¡ ÀÌµ¿ÇÏ´Â µ¥ °É¸®´Â ½Ã°£ (ÀÌµ¿ ¼Óµµ)
-    private const float AUTO_MERGE_DURATION = 30.0f;                            // ÀÚµ¿ ÇÕ¼º ±âº» Áö¼Ó ½Ã°£
-    private const int AUTO_MERGE_COST = 30;                                     // ÀÚµ¿ ÇÕ¼º ºñ¿ë
-    private WaitForSeconds waitAutoMergeInterval = new WaitForSeconds(0.5f);    // ÀÚµ¿ ÇÕ¼º °£°İ
-    private WaitForSeconds waitSpawnInterval = new WaitForSeconds(0.1f);        // ¼ÒÈ¯ °£°İ
+    private const float MAX_AUTO_MERGE_DURATION = 86400f;                       // ìµœëŒ€ ìë™ í•©ì„± ì‹œê°„ (24ì‹œê°„)
+    private const float MOVE_DURATION = 0.3f;                                   // ê³ ì–‘ì´ê°€ ì´ë™í•˜ëŠ” ë° ê±¸ë¦¬ëŠ” ì‹œê°„ (ì´ë™ ì†ë„)
+    private const float AUTO_MERGE_DURATION = 30.0f;                            // ìë™ í•©ì„± ê¸°ë³¸ ì§€ì† ì‹œê°„
+    private const int AUTO_MERGE_COST = 30;                                     // ìë™ í•©ì„± ë¹„ìš©
+    private readonly WaitForSeconds waitAutoMergeInterval = new WaitForSeconds(0.5f);    // ìë™ í•©ì„± ê°„ê²©
+    private readonly WaitForSeconds waitSpawnInterval = new WaitForSeconds(0.1f);        // ì†Œí™˜ ê°„ê²©
 
-    private float startTime;                        // ÀÚµ¿ ÇÕ¼º ½ÃÀÛ ½Ã°£
-    private float currentAutoMergeDuration;         // ÇöÀç ÀÚµ¿ ÇÕ¼º Áö¼Ó ½Ã°£
-    private bool isAutoMergeActive = false;         // ÀÚµ¿ ÇÕ¼º È°¼ºÈ­ »óÅÂ
-    private bool isPaused = false;                  // ÀÏ½ÃÁ¤Áö »óÅÂ
-    private float pausedTimeRemaining = 0f;         // ÀÏ½ÃÁ¤Áö ½ÃÁ¡ÀÇ ³²Àº ½Ã°£
-    private Coroutine autoMergeCoroutine;           // ÀÚµ¿ ÇÕ¼º ÄÚ·çÆ¾
+    private float startTime;                        // ìë™ í•©ì„± ì‹œì‘ ì‹œê°„
+    private float currentAutoMergeDuration;         // í˜„ì¬ ìë™ í•©ì„± ì§€ì† ì‹œê°„
+    private bool isAutoMergeActive = false;         // ìë™ í•©ì„± í™œì„±í™” ìƒíƒœ
+    private bool isPaused = false;                  // ì¼ì‹œì •ì§€ ìƒíƒœ
+    private float pausedTimeRemaining = 0f;         // ì¼ì‹œì •ì§€ ì‹œì ì˜ ë‚¨ì€ ì‹œê°„
+    private Coroutine autoMergeCoroutine;           // ìë™ í•©ì„± ì½”ë£¨í‹´
 
     private float panelWidth;           // Panel Width
     private float panelHeight;          // Panel Height
@@ -46,7 +48,10 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     private HashSet<DragAndDropManager> mergingCats = new HashSet<DragAndDropManager>();
 
 
-    private bool isDataLoaded = false;          // µ¥ÀÌÅÍ ·Îµå È®ÀÎ
+    [Header("---[ETC]")]
+    private bool isDataLoaded = false;          // ë°ì´í„° ë¡œë“œ í™•ì¸
+
+    private readonly WaitForSeconds waitForTimerCheck = new WaitForSeconds(0.5f);
 
     #endregion
 
@@ -58,7 +63,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         if (Instance == null)
         {
             Instance = this;
-            
+
         }
         else
         {
@@ -70,25 +75,38 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     {
         InitializeAutoMergeManager();
 
-        // GoogleManager¿¡¼­ µ¥ÀÌÅÍ¸¦ ·ÎµåÇÏÁö ¸øÇÑ °æ¿ì¿¡¸¸ ÃÊ±âÈ­
+        // GoogleManagerì—ì„œ ë°ì´í„°ë¥¼ ë¡œë“œí•˜ì§€ ëª»í•œ ê²½ìš°ì—ë§Œ ì´ˆê¸°í™”
         if (!isDataLoaded)
         {
             InitializeDefaultValues();
         }
 
+        // íŒ¨ë„ ë“±ë¡
+        ActivePanelManager.Instance.RegisterPanel("AutoMergePanel", autoMergePanel, null, ActivePanelManager.PanelPriority.Medium);
+
+        // íƒ€ì´ë¨¸ ì²´í¬ ì½”ë£¨í‹´ ì‹œì‘
+        StartCoroutine(TimerCheckRoutine());
+        
+        // ë©”ì¸ ìë™ë¨¸ì§€ ì½”ë£¨í‹´ ì‹œì‘
         StartCoroutine(MainAutoMerge());
     }
 
-    private void Update()
+    // íƒ€ì´ë¨¸ ì²´í¬ ì½”ë£¨í‹´
+    private IEnumerator TimerCheckRoutine()
     {
-        if (!isAutoMergeActive && !isPaused) return;
-
-        float remainingTime = isPaused ? pausedTimeRemaining : Mathf.Max(currentAutoMergeDuration - (Time.time - startTime), 0);
-        UpdateTimerDisplay((int)remainingTime);
-
-        if (!isPaused && remainingTime <= 0)
+        while (true)
         {
-            EndAutoMerge();
+            if (isAutoMergeActive || isPaused)
+            {
+                float remainingTime = isPaused ? pausedTimeRemaining : Mathf.Max(currentAutoMergeDuration - (Time.time - startTime), 0);
+                UpdateTimerDisplay((int)remainingTime);
+
+                if (!isPaused && remainingTime <= 0)
+                {
+                    EndAutoMerge();
+                }
+            }
+            yield return waitForTimerCheck;
         }
     }
 
@@ -97,7 +115,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
     #region Initialize
 
-    // ±âº»°ª ÃÊ±âÈ­ ÇÔ¼ö
+    // ê¸°ë³¸ê°’ ì´ˆê¸°í™” í•¨ìˆ˜
     private void InitializeDefaultValues()
     {
         isAutoMergeActive = false;
@@ -107,20 +125,20 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         UpdateExplainText(0);
     }
 
-    // ÄÄÆ÷³ÍÆ® Ä³½Ì ¹× UI ÃÊ±âÈ­
+    // ì»´í¬ë„ŒíŠ¸ ìºì‹± ë° UI ì´ˆê¸°í™” í•¨ìˆ˜
     private void InitializeAutoMergeManager()
     {
-        // UI ÃÊ±âÈ­
+        // UI ì´ˆê¸°í™”
         UpdateAutoMergeCostText();
 
-        // ¹öÆ° ÀÌº¥Æ® ¸®½º³Ê ¼³Á¤
+        // ë²„íŠ¼ ì´ë²¤íŠ¸ ë¦¬ìŠ¤ë„ˆ ì„¤ì •
         InitializeButtonListeners();
 
-        // ÆĞ³Î Å©±â Ä³½Ì
+        // íŒ¨ë„ í¬ê¸° ìºì‹±
         CachePanelSize();
     }
 
-    // ÆĞ³Î Å©±â Ä³½Ì ÇÔ¼ö
+    // íŒ¨ë„ í¬ê¸° ìºì‹± í•¨ìˆ˜
     private void CachePanelSize()
     {
         DragAndDropManager anyActiveCat = FindObjectOfType<DragAndDropManager>();
@@ -136,11 +154,11 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // UI ¹öÆ° ÀÌº¥Æ® ¸®½º³Ê ¼³Á¤ ÇÔ¼ö
+    // UI ë²„íŠ¼ ì´ë²¤íŠ¸ ë¦¬ìŠ¤ë„ˆ ì„¤ì • í•¨ìˆ˜
     private void InitializeButtonListeners()
     {
-        openAutoMergePanelButton?.onClick.AddListener(OpenAutoMergePanel);
-        closeAutoMergePanelButton?.onClick.AddListener(CloseAutoMergePanel);
+        openAutoMergePanelButton?.onClick.AddListener(() => ActivePanelManager.Instance.TogglePanel("AutoMergePanel"));
+        closeAutoMergePanelButton?.onClick.AddListener(() => ActivePanelManager.Instance.ClosePanel("AutoMergePanel"));
         autoMergeStateButton?.onClick.AddListener(StartAutoMerge);
     }
 
@@ -149,14 +167,14 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
     #region Auto Merge System
 
-    // ±âº» 30ÃÊ¸¶´Ù ÀÚµ¿À¸·Î ÇÕ¼ºÇÏ´Â ÇÔ¼ö
+    // ê¸°ë³¸ 30ì´ˆë§ˆë‹¤ ìë™ìœ¼ë¡œ í•©ì„±í•˜ëŠ” í•¨ìˆ˜
     public IEnumerator MainAutoMerge()
     {
         while (true)
         {
             CleanupMergingCats();
 
-            // È°¼ºÈ­µÈ °í¾çÀÌ¸¦ µî±Ş¼øÀ¸·Î Á¤·ÄÇÏ¿© °¡Á®¿È
+            // í™œì„±í™”ëœ ê³ ì–‘ì´ë¥¼ ë“±ê¸‰ìˆœìœ¼ë¡œ ì •ë ¬í•˜ì—¬ ê°€ì ¸ì˜´
             var allCats = FindObjectsOfType<DragAndDropManager>()
                 .Where(cat => cat != null &&
                        cat.gameObject.activeSelf &&
@@ -166,12 +184,12 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
             bool mergeFound = false;
 
-            // °¡Àå ³·Àº µî±ŞºÎÅÍ ¼øÂ÷ÀûÀ¸·Î ÇÕ¼º ½Ãµµ
+            // ê°€ì¥ ë‚®ì€ ë“±ê¸‰ë¶€í„° ìˆœì°¨ì ìœ¼ë¡œ í•©ì„± ì‹œë„
             for (int i = 0; i < allCats.Count; i++)
             {
                 if (allCats[i] == null || !allCats[i].gameObject.activeSelf) continue;
 
-                // °°Àº µî±ŞÀÇ ´Ù¸¥ °í¾çÀÌ Ã£±â
+                // ê°™ì€ ë“±ê¸‰ì˜ ë‹¤ë¥¸ ê³ ì–‘ì´ ì°¾ê¸°
                 var sameLevelCats = allCats
                     .Where(cat => cat != null &&
                            cat.gameObject.activeSelf &&
@@ -206,28 +224,26 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
     }
 
-    // ÀÚµ¿ÇÕ¼º ½ÃÀÛ ÇÔ¼ö
+    // ìë™í•©ì„± ì‹œì‘ í•¨ìˆ˜
     public void StartAutoMerge()
     {
         if (GameManager.Instance.Cash < AUTO_MERGE_COST)
         {
-            NotificationManager.Instance.ShowNotification("ÀçÈ­°¡ ºÎÁ·ÇÕ´Ï´Ù!!");
+            NotificationManager.Instance.ShowNotification("ì¬í™”ê°€ ë¶€ì¡±í•©ë‹ˆë‹¤!!");
             return;
         }
 
         if (currentAutoMergeDuration + AUTO_MERGE_DURATION > MAX_AUTO_MERGE_DURATION)
         {
-            NotificationManager.Instance.ShowNotification("ÀÚµ¿ÇÕ¼ºÀº ÃÖ´ë 24½Ã°£±îÁö¸¸ °¡´ÉÇÕ´Ï´Ù!!");
+            NotificationManager.Instance.ShowNotification("ìë™í•©ì„±ì€ ìµœëŒ€ 24ì‹œê°„ê¹Œì§€ë§Œ ê°€ëŠ¥í•©ë‹ˆë‹¤!!");
             return;
         }
 
         GameManager.Instance.Cash -= AUTO_MERGE_COST;
         OnClickedAutoMerge();
-
-        SaveToLocal();
     }
 
-    // ÀÚµ¿ÇÕ¼º ¹öÆ° Å¬¸¯ Ã³¸® ÇÔ¼ö
+    // ìë™í•©ì„± ë²„íŠ¼ í´ë¦­ ì²˜ë¦¬ í•¨ìˆ˜
     public void OnClickedAutoMerge()
     {
         if (!isAutoMergeActive)
@@ -244,14 +260,15 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // ÄÚ·çÆ¾ ½ÃÀÛ Àü ±âÁ¸ ÄÚ·çÆ¾ Á¤¸®
-    public void StartAutoMergeCoroutine()
+
+    // ì½”ë£¨í‹´ ì‹œì‘ ì „ ê¸°ì¡´ ì½”ë£¨í‹´ ì •ë¦¬ í•¨ìˆ˜
+    private void StartAutoMergeCoroutine()
     {
         StopAutoMergeCoroutine();
         autoMergeCoroutine = StartCoroutine(AutoMergeCoroutine());
     }
 
-    // ÄÚ·çÆ¾ ¾ÈÀüÇÏ°Ô ÁßÁö
+    // ì½”ë£¨í‹´ ì•ˆì „í•˜ê²Œ ì¤‘ì§€í•˜ëŠ” í•¨ìˆ˜
     private void StopAutoMergeCoroutine()
     {
         if (autoMergeCoroutine != null)
@@ -261,7 +278,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // ÀÚµ¿ÇÕ¼º ÄÚ·çÆ¾
+    // ìë™í•©ì„± ì½”ë£¨í‹´
     private IEnumerator AutoMergeCoroutine()
     {
         StartCoroutine(SpawnCatsWhileAutoMerge());
@@ -270,22 +287,22 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         {
             CleanupMergingCats();
 
-            // È°¼ºÈ­µÈ °í¾çÀÌ¸¦ µî±Ş¼øÀ¸·Î Á¤·ÄÇÏ¿© °¡Á®¿È
+            // í™œì„±í™”ëœ ê³ ì–‘ì´ë¥¼ ë“±ê¸‰ìˆœìœ¼ë¡œ ì •ë ¬í•˜ì—¬ ê°€ì ¸ì˜´
             var allCats = FindObjectsOfType<DragAndDropManager>()
-                .Where(cat => cat != null && 
-                       cat.gameObject.activeSelf && 
+                .Where(cat => cat != null &&
+                       cat.gameObject.activeSelf &&
                        !cat.isDragging)
                 .OrderBy(cat => cat.catData.CatGrade)
                 .ToList();
 
             bool mergeFound = false;
 
-            // °¡Àå ³·Àº µî±ŞºÎÅÍ ¼øÂ÷ÀûÀ¸·Î ÇÕ¼º ½Ãµµ
+            // ê°€ì¥ ë‚®ì€ ë“±ê¸‰ë¶€í„° ìˆœì°¨ì ìœ¼ë¡œ í•©ì„± ì‹œë„
             for (int i = 0; i < allCats.Count; i++)
             {
                 if (allCats[i] == null || !allCats[i].gameObject.activeSelf) continue;
 
-                // °°Àº µî±ŞÀÇ ´Ù¸¥ °í¾çÀÌ Ã£±â
+                // ê°™ì€ ë“±ê¸‰ì˜ ë‹¤ë¥¸ ê³ ì–‘ì´ ì°¾ê¸°
                 var sameLevelCats = allCats
                     .Where(cat => cat != null &&
                            cat.gameObject.activeSelf &&
@@ -318,13 +335,13 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         EndAutoMerge();
     }
 
-    // ÇÕ¼ºÁßÀÎ °í¾çÀÌ Á¤¸® ÇÔ¼ö
+    // í•©ì„±ì¤‘ì¸ ê³ ì–‘ì´ ì •ë¦¬ í•¨ìˆ˜
     private void CleanupMergingCats()
     {
         mergingCats.RemoveWhere(cat => cat == null || !cat.gameObject.activeSelf || cat.isDragging);
     }
 
-    // À¯È¿ÇÑ ÇÕ¼ºÀÎÁö È®ÀÎÇÏ´Â ÇÔ¼ö
+    // ìœ íš¨í•œ í•©ì„±ì¸ì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜
     private bool IsValidMergePair(DragAndDropManager cat1, DragAndDropManager cat2)
     {
         return cat1 != null && cat2 != null &&
@@ -334,10 +351,10 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
                cat1.catData.CatGrade == cat2.catData.CatGrade;
     }
 
-    // ÀÚµ¿ÇÕ¼º ·£´ıÀ§Ä¡ °¡Á®¿À´Â ÇÔ¼ö
+    // ìë™í•©ì„± ëœë¤ìœ„ì¹˜ ê°€ì ¸ì˜¤ëŠ” í•¨ìˆ˜
     private Vector2 GetRandomPosition()
     {
-        // È°¼ºÈ­µÈ °í¾çÀÌ¸¸ Ã£µµ·Ï ¼öÁ¤
+        // í™œì„±í™”ëœ ê³ ì–‘ì´ë§Œ ì°¾ë„ë¡ ìˆ˜ì •
         DragAndDropManager anyActiveCat = FindObjectsOfType<DragAndDropManager>().FirstOrDefault(cat => cat != null && cat.gameObject.activeSelf);
 
         if (anyActiveCat != null)
@@ -357,7 +374,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         );
     }
 
-    // ÇÕ¼º ½ÇÇà ÄÚ·çÆ¾
+    // í•©ì„± ì‹¤í–‰ ì½”ë£¨í‹´
     private IEnumerator ExecuteMerge(DragAndDropManager cat1, DragAndDropManager cat2, Vector2 mergePosition)
     {
         if (cat1 == null || cat2 == null) yield break;
@@ -376,7 +393,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         mergingCats.Remove(cat2);
     }
 
-    // Á¤ÇØÁø ·£´ıÀ§Ä¡·Î °í¾çÀÌµé ÀÌµ¿ÇÏ´Â ÄÚ·çÆ¾
+    // ì •í•´ì§„ ëœë¤ìœ„ì¹˜ë¡œ ê³ ì–‘ì´ë“¤ ì´ë™í•˜ëŠ” ì½”ë£¨í‹´
     private IEnumerator MoveCatsToPosition(DragAndDropManager cat1, DragAndDropManager cat2, Vector2 targetPosition)
     {
         StartCoroutine(MoveCatSmoothly(cat1, targetPosition));
@@ -390,7 +407,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         );
     }
 
-    // ÇÕ¼º ¿Ï·á Ã³¸® ÇÔ¼ö
+    // í•©ì„± ì™„ë£Œ ì²˜ë¦¬ í•¨ìˆ˜
     private void CompleteMerge(DragAndDropManager cat1, DragAndDropManager cat2)
     {
         if (cat1 == null || cat2 == null || !cat1.gameObject.activeSelf || !cat2.gameObject.activeSelf) return;
@@ -411,7 +428,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // ÀÚµ¿ÇÕ¼º Áß °í¾çÀÌ ¼ÒÈ¯ÇÏ´Â ÄÚ·çÆ¾
+    // ìë™í•©ì„± ì¤‘ ê³ ì–‘ì´ ì†Œí™˜í•˜ëŠ” ì½”ë£¨í‹´
     private IEnumerator SpawnCatsWhileAutoMerge()
     {
         while (isAutoMergeActive && !isPaused)
@@ -425,7 +442,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // °í¾çÀÌ¸¦ ºÎµå·´°Ô ÀÌµ¿½ÃÅ°´Â ÄÚ·çÆ¾
+    // ê³ ì–‘ì´ë¥¼ ë¶€ë“œëŸ½ê²Œ ì´ë™ì‹œí‚¤ëŠ” ì½”ë£¨í‹´
     private IEnumerator MoveCatSmoothly(DragAndDropManager cat, Vector2 targetPosition)
     {
         if (cat == null) yield break;
@@ -450,7 +467,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // ÃÖ´ë·¹º§ °í¾çÀÌÀÎÁö È®ÀÎÇÏ´Â ÇÔ¼ö
+    // ìµœëŒ€ë ˆë²¨ ê³ ì–‘ì´ì¸ì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜
     private bool IsMaxLevelCat(Cat catData)
     {
         return GameManager.Instance != null &&
@@ -458,7 +475,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
                GameManager.Instance.AllCatData.All(cat => cat.CatGrade != catData.CatGrade + 1);
     }
 
-    // ÀÚµ¿ÇÕ¼º Á¾·á ÇÔ¼ö
+    // ìë™í•©ì„± ì¢…ë£Œ í•¨ìˆ˜
     private void EndAutoMerge()
     {
         isAutoMergeActive = false;
@@ -467,17 +484,15 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         UpdateAutoMergeTimerVisibility(false);
         StopAllCoroutines();
         mergingCats.Clear();
-
-        SaveToLocal();
     }
 
-    // ÇÕ¼ºÁßÀÎ °í¾çÀÌ Á¤Áö ÇÔ¼ö
+    // í•©ì„±ì¤‘ì¸ ê³ ì–‘ì´ ì •ì§€ í•¨ìˆ˜
     public void StopMerging(DragAndDropManager cat)
     {
         mergingCats.Remove(cat);
     }
 
-    // °í¾çÀÌ°¡ ÇÕ¼ºÁßÀÎÁö È®ÀÎÇÏ´Â ÇÔ¼ö
+    // ê³ ì–‘ì´ê°€ í•©ì„±ì¤‘ì¸ì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜
     public bool IsMerging(DragAndDropManager cat)
     {
         return mergingCats.Contains(cat);
@@ -488,7 +503,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
     #region UI System
 
-    // ÀÚµ¿ÇÕ¼º ºñ¿ë Text ¾÷µ¥ÀÌÆ® ÇÔ¼ö
+    // ìë™í•©ì„± ë¹„ìš© Text ì—…ë°ì´íŠ¸ í•¨ìˆ˜
     private void UpdateAutoMergeCostText()
     {
         if (autoMergeCostText != null)
@@ -497,7 +512,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // ÀÚµ¿ÇÕ¼º ÆĞ³Î ¿©´Â ÇÔ¼ö
+    // ìë™í•©ì„± íŒ¨ë„ ì—¬ëŠ” í•¨ìˆ˜
     private void OpenAutoMergePanel()
     {
         if (autoMergePanel != null)
@@ -506,7 +521,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // ÀÚµ¿ÇÕ¼º ÆĞ³Î ´İ´Â ÇÔ¼ö
+    // ìë™í•©ì„± íŒ¨ë„ ë‹«ëŠ” í•¨ìˆ˜
     private void CloseAutoMergePanel()
     {
         if (autoMergePanel != null)
@@ -515,7 +530,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // ÀÚµ¿ÇÕ¼º »óÅÂ¿¡ µû¶ó Å¸ÀÌ¸Ó ÅØ½ºÆ® °¡½Ã¼º ¾÷µ¥ÀÌÆ® ÇÔ¼ö
+    // ìë™í•©ì„± ìƒíƒœì— ë”°ë¼ íƒ€ì´ë¨¸ í…ìŠ¤íŠ¸ ê°€ì‹œì„± ì—…ë°ì´íŠ¸ í•¨ìˆ˜
     public void UpdateAutoMergeTimerVisibility(bool isVisible)
     {
         if (autoMergeTimerText != null)
@@ -524,23 +539,23 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // Å¸ÀÌ¸Ó ÅØ½ºÆ® ¾÷µ¥ÀÌÆ® ÇÔ¼ö
+    // íƒ€ì´ë¨¸ í…ìŠ¤íŠ¸ ì—…ë°ì´íŠ¸ í•¨ìˆ˜
     private void UpdateTimerDisplay(int remainingTime)
     {
         UpdateAutoMergeTimerText(remainingTime);
         UpdateExplainText(remainingTime);
     }
 
-    // ÀÚµ¿ÇÕ¼º Å¸ÀÌ¸Ó ¾÷µ¥ÀÌÆ® ÇÔ¼ö
+    // ìë™í•©ì„± íƒ€ì´ë¨¸ ì—…ë°ì´íŠ¸ í•¨ìˆ˜
     public void UpdateAutoMergeTimerText(int remainingTime)
     {
         if (autoMergeTimerText != null)
         {
-            autoMergeTimerText.text = $"{remainingTime}ÃÊ";
+            autoMergeTimerText.text = $"{remainingTime}ì´ˆ";
         }
     }
 
-    // ÀÚµ¿ÇÕ¼º ¼³¸í ÅØ½ºÆ® ¾÷µ¥ÀÌÆ® ÇÔ¼ö
+    // ìë™í•©ì„± ì„¤ëª… í…ìŠ¤íŠ¸ ì—…ë°ì´íŠ¸ í•¨ìˆ˜
     private void UpdateExplainText(int remainingTime)
     {
         if (explainText != null)
@@ -548,7 +563,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             int hours = remainingTime / 3600;
             int minutes = (remainingTime % 3600) / 60;
             int seconds = remainingTime % 60;
-            explainText.text = $"ÀÚµ¿ÇÕ¼º {AUTO_MERGE_DURATION}ÃÊ Áõ°¡\n (Å¸ÀÌ¸Ó {hours:D2}:{minutes:D2}:{seconds:D2})";
+            explainText.text = $"ìë™í•©ì„± {AUTO_MERGE_DURATION}ì´ˆ ì¦ê°€\n (íƒ€ì´ë¨¸ {hours:D2}:{minutes:D2}:{seconds:D2})";
         }
     }
 
@@ -557,7 +572,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
     #region Battle System
 
-    // ÀÚµ¿ÇÕ¼º ÀÏ½ÃÁ¤Áö ÇÔ¼ö
+    // ìë™í•©ì„± ì¼ì‹œì •ì§€ í•¨ìˆ˜
     public void PauseAutoMerge()
     {
         if (isAutoMergeActive && !isPaused)
@@ -567,8 +582,6 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             StopAllCoroutines();
             mergingCats.Clear();
             DisableAutoMergeUI();
-
-            SaveToLocal();
         }
         else
         {
@@ -577,7 +590,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // ÀÚµ¿ÇÕ¼º ÀÌ¾îÇÏ±â ÇÔ¼ö
+    // ìë™í•©ì„± ì´ì–´í•˜ê¸° í•¨ìˆ˜
     public void ResumeAutoMerge()
     {
         if (isPaused && pausedTimeRemaining > 0)
@@ -587,8 +600,6 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             currentAutoMergeDuration = pausedTimeRemaining;
             EnableAutoMergeUI();
             StartAutoMergeCoroutine();
-
-            SaveToLocal();
         }
         else
         {
@@ -596,7 +607,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // ÀüÅõ ½ÃÀÛ½Ã ÀÚµ¿ÇÕ¼º UI ºñÈ°¼ºÈ­ ÇÔ¼ö
+    // ì „íˆ¬ ì‹œì‘ì‹œ ìë™í•©ì„± UI ë¹„í™œì„±í™” í•¨ìˆ˜
     private void DisableAutoMergeUI()
     {
         openAutoMergePanelButton.interactable = false;
@@ -606,7 +617,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
     }
 
-    // ÀüÅõ Á¾·á½Ã ÀÚµ¿ÇÕ¼º UI È°¼ºÈ­ ÇÔ¼ö
+    // ì „íˆ¬ ì¢…ë£Œì‹œ ìë™í•©ì„± UI í™œì„±í™” í•¨ìˆ˜
     private void EnableAutoMergeUI()
     {
         openAutoMergePanelButton.interactable = true;
@@ -620,7 +631,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     [Serializable]
     private class SaveData
     {
-        public float remainingTime;              // ³²Àº ½Ã°£
+        public float remainingTime;              // ë‚¨ì€ ì‹œê°„
     }
 
     public string GetSaveData()
@@ -629,7 +640,14 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
         if (isAutoMergeActive)
         {
-            remainingTime = Mathf.Max(currentAutoMergeDuration - (Time.time - startTime), 0);
+            if (isPaused)
+            {
+                remainingTime = pausedTimeRemaining;
+            }
+            else
+            {
+                remainingTime = Mathf.Max(currentAutoMergeDuration - (Time.time - startTime), 0);
+            }
         }
 
         SaveData data = new SaveData
@@ -648,7 +666,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
         if (savedData.remainingTime > 0)
         {
-            // ³²Àº ½Ã°£ÀÌ ÀÖÀ¸¸é ÀÚµ¿ ÇÕ¼º ½ÃÀÛ
+            // ë‚¨ì€ ì‹œê°„ì´ ìˆìœ¼ë©´ ìë™ í•©ì„± ì‹œì‘
             this.startTime = Time.time;
             this.currentAutoMergeDuration = savedData.remainingTime;
             this.isAutoMergeActive = true;
@@ -659,10 +677,11 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
         else
         {
-            // ³²Àº ½Ã°£ÀÌ ¾øÀ¸¸é ÀÚµ¿ ÇÕ¼º ºñÈ°¼ºÈ­
+            // ë‚¨ì€ ì‹œê°„ì´ ì—†ìœ¼ë©´ ìë™ í•©ì„± ë¹„í™œì„±í™”
             this.isAutoMergeActive = false;
             this.isPaused = false;
             this.currentAutoMergeDuration = 0f;
+            this.pausedTimeRemaining = 0f;
             UpdateAutoMergeTimerVisibility(false);
             UpdateTimerDisplay(0);
         }
@@ -670,15 +689,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         isDataLoaded = true;
     }
 
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
-    }
-
     #endregion
 
 
 }
-

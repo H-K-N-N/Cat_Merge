@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using TMPro;
-using System.Linq;
 
 // 옵션 스크립트
 [DefaultExecutionOrder(-1)]
@@ -16,9 +15,7 @@ public class OptionManager : MonoBehaviour, ISaveable
 
     public static OptionManager Instance { get; private set; }
 
-    // ======================================================================================================================
     // [옵션 메뉴 UI 요소들]
-
     [Header("---[OptionManager]")]
     [SerializeField] private Button optionButton;               // 옵션 버튼
     [SerializeField] private Image optionButtonImage;           // 옵션 버튼 이미지
@@ -29,22 +26,8 @@ public class OptionManager : MonoBehaviour, ISaveable
     [SerializeField] private GameObject[] mainOptionMenus;      // 메인 옵션 메뉴 Panels
     [SerializeField] private Button[] subOptionMenuButtons;     // 서브 옵션 메뉴 버튼 배열
 
-    // ======================================================================================================================
-    // [서브 메뉴 UI 색상 설정]
 
-    [Header("---[Sub Menu UI Color]")]
-    private const string activeColorCode = "#FFCC74";           // 활성화상태 Color
-    private const string inactiveColorCode = "#FFFFFF";         // 비활성화상태 Color
-
-    // ======================================================================================================================
-    // [토글 버튼 관련 설정]
-
-    private const float onX = 65f, offX = -65f;                 // 핸들 버튼 x좌표
-    private const float moveDuration = 0.2f;                    // 토글 애니메이션 지속 시간
-
-    // ======================================================================================================================
     // [Sound]
-
     // 사운드 컨트롤 내부 클래스
     public class SoundController
     {
@@ -110,14 +93,8 @@ public class OptionManager : MonoBehaviour, ISaveable
     private Sprite sfxOnImage;                                  // SFX On 이미지
     private Sprite sfxOffImage;                                 // SFX Off 이미지
 
-    private const string BGM_ON_IMAGE_PATH = "Sprites/UI/I_UI_Option/I_UI_BGM_v1.9";
-    private const string BGM_OFF_IMAGE_PATH = "Sprites/UI/I_UI_Option/I_UI_BGM_v2.9";
-    private const string SFX_ON_IMAGE_PATH = "Sprites/UI/I_UI_Option/I_UI_SFX_v1.9";
-    private const string SFX_OFF_IMAGE_PATH = "Sprites/UI/I_UI_Option/I_UI_SFX_v2.9";
 
-    // ======================================================================================================================
     // [Display]
-
     [System.Serializable]
     private class ToggleSettings
     {
@@ -137,9 +114,8 @@ public class OptionManager : MonoBehaviour, ISaveable
     [Header("---[Saving Mode]")]
     [SerializeField] private ToggleSettings savingSettings = new ToggleSettings();
 
-    // ======================================================================================================================
-    // [System]
 
+    // [System]
     [Header("---[System]")]
     [SerializeField] private Transform slotPanel;                   // 슬롯 버튼들의 부모 패널
     [SerializeField] private Button[] slotButtons;                  // 슬롯 버튼 배열
@@ -153,15 +129,12 @@ public class OptionManager : MonoBehaviour, ISaveable
 
     private Vector2[] originalButtonPositions;                      // 버튼들의 원래 위치
     private CanvasGroup slotPanelGroup;                             // 슬롯 패널의 CanvasGroup
-    private const float systemAnimDuration = 0.5f;                  // 시스템 애니메이션 지속 시간
     private int currentActivePanel = -1;                            // 현재 활성화된 패널 인덱스
 
-    private const float SAVE_DURATION = 4f;                         // 저장 지속 시간 (3~5초)
     private Coroutine saveCoroutine;                                // 저장 코루틴
 
-    // ======================================================================================================================
-    // [옵션 메뉴 타입 정의]
 
+    // [옵션 메뉴 타입 정의]
     // Enum으로 메뉴 타입 정의 (서브 메뉴를 구분하기 위해 사용)
     private enum OptionMenuType
     {
@@ -171,6 +144,40 @@ public class OptionManager : MonoBehaviour, ISaveable
         End                                     // Enum의 끝
     }
     private OptionMenuType activeMenuType;      // 현재 활성화된 메뉴 타입
+
+
+    private const string activeColorCode = "#FFCC74";       // 활성화상태 Color
+    private const string inactiveColorCode = "#FFFFFF";     // 비활성화상태 Color
+
+    private const float onX = 65f;                          // 핸들버튼 x좌표 On
+    private const float offX = -65f;                        // 핸들버튼 x좌표 Off
+    private const float moveDuration = 0.2f;                // 토글 애니메이션 지속 시간
+    private const float systemAnimDuration = 0.5f;          // 시스템 애니메이션 지속 시간
+    private const float saveWaitTime = 2f;                  // 저장 대기
+    private const float saveCompleteWaitTime = 1f;          // 저장 완료 대기
+
+    private static readonly WaitForSeconds waitForSystemAnim;
+    private static readonly WaitForSecondsRealtime waitForSaveDelay;
+    private static readonly WaitForSecondsRealtime waitForSaveComplete;
+
+    private static readonly Vector2 expandedButtonPosition;
+
+    private const string BGM_ON_IMAGE_PATH = "Sprites/UI/I_UI_Option/I_UI_BGM_v1.9";
+    private const string BGM_OFF_IMAGE_PATH = "Sprites/UI/I_UI_Option/I_UI_BGM_v2.9";
+    private const string SFX_ON_IMAGE_PATH = "Sprites/UI/I_UI_Option/I_UI_SFX_v1.9";
+    private const string SFX_OFF_IMAGE_PATH = "Sprites/UI/I_UI_Option/I_UI_SFX_v2.9";
+
+    private readonly List<IEnumerator> animationsList = new List<IEnumerator>();
+
+    // 정적 생성자에서 상수 초기화
+    static OptionManager()
+    {
+        waitForSystemAnim = new WaitForSeconds(systemAnimDuration);
+        waitForSaveDelay = new WaitForSecondsRealtime(saveWaitTime);
+        waitForSaveComplete = new WaitForSecondsRealtime(saveCompleteWaitTime);
+
+        expandedButtonPosition = new Vector2(0, 465);
+    }
 
 
     private bool isDataLoaded = false;          // 데이터 로드 확인
@@ -343,11 +350,9 @@ public class OptionManager : MonoBehaviour, ISaveable
         // 볼륨 슬라이더 값 변경 시 저장 이벤트 추가
         bgmSettings.slider.onValueChanged.AddListener(_ => {
             SetSoundToggleImage(true);
-            SaveToLocal();
         });
         sfxSettings.slider.onValueChanged.AddListener(_ => {
             SetSoundToggleImage(false);
-            SaveToLocal();
         });
     }
 
@@ -371,8 +376,6 @@ public class OptionManager : MonoBehaviour, ISaveable
         SetSoundToggleImage(isBgm);
         UpdateToggleUI(settings.isOn, isBgm);
         UpdateToggleButtonImage(settings.toggleButtonImage, settings.isOn);
-
-        SaveToLocal();
     }
 
     // 토글 버튼 이미지 업데이트 함수
@@ -478,8 +481,6 @@ public class OptionManager : MonoBehaviour, ISaveable
         settings.isOn = !settings.isOn;
         UpdateToggleUI(settings.handle, settings.isOn);
         UpdateToggleButtonImage(settings.toggleButtonImage, settings.isOn);
-
-        SaveToLocal();
     }
 
     // 토글 UI 업데이트 함수
@@ -502,16 +503,19 @@ public class OptionManager : MonoBehaviour, ISaveable
     {
         float elapsedTime = 0f;
         float startX = handle.anchoredPosition.x;
+        Vector2 currentPos = handle.anchoredPosition;
 
         while (elapsedTime < moveDuration)
         {
             elapsedTime += Time.deltaTime;
             float t = elapsedTime / moveDuration;
-            handle.anchoredPosition = new Vector2(Mathf.Lerp(startX, targetX, t), handle.anchoredPosition.y);
+            currentPos.x = Mathf.Lerp(startX, targetX, t);
+            handle.anchoredPosition = currentPos;
             yield return null;
         }
 
-        handle.anchoredPosition = new Vector2(targetX, handle.anchoredPosition.y);
+        currentPos.x = targetX;
+        handle.anchoredPosition = currentPos;
     }
 
     #endregion
@@ -603,7 +607,7 @@ public class OptionManager : MonoBehaviour, ISaveable
         // Save 버튼 클릭 이벤트 추가
         saveButton.onClick.AddListener(() => { StartSaveProcess(); });
         // Quit 버튼 클릭 이벤트 추가
-        quitButton.onClick.AddListener(() => { GameManager.Instance.HandleQuitInput(); });
+        quitButton.onClick.AddListener(() => { GameManager.Instance.QuitButtonInput(); });
     }
 
     // 시스템 메뉴 초기화 함수
@@ -667,30 +671,16 @@ public class OptionManager : MonoBehaviour, ISaveable
         Time.timeScale = 0f;
 
         // GoogleManager를 통해 암호화하여 저장
-        ISaveable[] saveables = FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>().ToArray();
-        if (GoogleManager.Instance != null)
-        {
-            GoogleManager.Instance.SaveAllSaveables(saveables);
-
-            // 클라우드 저장 시도
-            if (GoogleManager.Instance.isLoggedIn)
-            {
-                GoogleManager.Instance.SaveGameStateSyncImmediate();
-            }
-        }
-        else
-        {
-            Debug.LogError("[저장 오류] GoogleManager 인스턴스를 찾을 수 없습니다!");
-        }
+        GoogleManager.Instance?.ForceSaveAllData();
 
         // 2초 대기
-        yield return new WaitForSecondsRealtime(2f);
+        yield return waitForSaveDelay;
 
         // 저장 상태 텍스트 업데이트
         saveStatusText.text = "저장 완료!!";
 
         // 1초 대기
-        yield return new WaitForSecondsRealtime(1f);
+        yield return waitForSaveComplete;
 
         // 저장 패널 비활성화
         savePanel.SetActive(false);
@@ -715,25 +705,25 @@ public class OptionManager : MonoBehaviour, ISaveable
     // Information Panel 펼치는 코루틴
     private IEnumerator ShowInformationPanel(int index)
     {
-        // 선택된 버튼을 제외한 다른 버튼들 페이드 아웃 및 선택된 버튼 이동 동시 실행
-        List<IEnumerator> animations = new List<IEnumerator>();
-        animations.Add(MoveButton(slotButtons[index].GetComponent<RectTransform>(), originalButtonPositions[index], new Vector2(0, 465)));
+        animationsList.Clear();
+        animationsList.Add(MoveButton(slotButtons[index].GetComponent<RectTransform>(), originalButtonPositions[index], expandedButtonPosition));
+
         for (int i = 0; i < slotButtons.Length; i++)
         {
             if (i != index)
             {
-                animations.Add(FadeButton(slotButtons[i].GetComponent<CanvasGroup>(), 1f, 0f));
+                animationsList.Add(FadeButton(slotButtons[i].GetComponent<CanvasGroup>(), 1f, 0f));
             }
         }
-        animations.Add(FadeButton(saveButton.GetComponent<CanvasGroup>(), 1f, 0f));
-        animations.Add(FadeButton(quitButton.GetComponent<CanvasGroup>(), 1f, 0f));
+        animationsList.Add(FadeButton(saveButton.GetComponent<CanvasGroup>(), 1f, 0f));
+        animationsList.Add(FadeButton(quitButton.GetComponent<CanvasGroup>(), 1f, 0f));
 
-        foreach (var anim in animations)
+        foreach (var anim in animationsList)
         {
             StartCoroutine(anim);
         }
 
-        yield return new WaitForSeconds(systemAnimDuration);
+        yield return waitForSystemAnim;
 
         // 애니메이션 완료 후 버튼들 비활성화
         for (int i = 0; i < slotButtons.Length; i++)
@@ -869,7 +859,7 @@ public class OptionManager : MonoBehaviour, ISaveable
             StartCoroutine(anim);
         }
 
-        yield return new WaitForSeconds(systemAnimDuration);
+        yield return waitForSystemAnim;
 
         currentActivePanel = -1;
     }
@@ -932,7 +922,6 @@ public class OptionManager : MonoBehaviour, ISaveable
     // 지연된 버튼 SFX 추가를 위한 코루틴
     private IEnumerator AddSFXToAllButtonsDelayed()
     {
-        // 한 프레임 대기하여 모든 오브젝트가 초기화되도록 기다림
         yield return null;
         AddSFXToAllButtons();
     }
@@ -1040,13 +1029,6 @@ public class OptionManager : MonoBehaviour, ISaveable
         UpdateToggleButtonImage(savingSettings.toggleButtonImage, savingSettings.isOn);
 
         isDataLoaded = true;
-    }
-
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

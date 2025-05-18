@@ -1,6 +1,4 @@
 using UnityEngine;
-using TMPro;
-using System.Collections;
 using UnityEngine.UI;
 
 public class TitleManager : MonoBehaviour
@@ -9,7 +7,7 @@ public class TitleManager : MonoBehaviour
 
     #region Variables
 
-    [SerializeField] private Button startButton;
+    [SerializeField] private Button startButton;    // 게임 시작 버튼
 
     #endregion
 

@@ -377,8 +377,6 @@ public class BuyCatManager : MonoBehaviour, ISaveable
         GetComponent<SpawnManager>().SpawnGradeCat(catGrade);
 
         UpdateAllUI();
-
-        SaveToLocal();
     }
 
     // 고양이 구매 정보 가져오기
@@ -479,13 +477,6 @@ public class BuyCatManager : MonoBehaviour, ISaveable
         UpdateAllUI();
 
         isDataLoaded = true;
-    }
-
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

@@ -4,6 +4,7 @@ using GoogleMobileAds.Api;
 using System;
 using System.Collections;
 
+// 구글 광고 관련 스크립트
 public class GoogleAdsManager : MonoBehaviour
 {
 

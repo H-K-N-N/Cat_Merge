@@ -1,22 +1,34 @@
 using UnityEngine;
 using TMPro;
-using UnityEngine.UI;
 using System.Collections;
 
+// 알림(예: 재화가 부족합니다!!) 스크립트
 public class NotificationManager : MonoBehaviour
 {
+
+
+    #region Variables
+
     public static NotificationManager Instance { get; private set; }
 
-    [SerializeField] private GameObject notificationPanel;      // Notification Panel
-    [SerializeField] private RectTransform panelTransform;      // Panel RectTransform
-    [SerializeField] private TextMeshProUGUI notificationText;  // Text (TMP)
-    [SerializeField] private CanvasGroup canvasGroup;           // CanvasGroup for fading
+    [Header("---[UI Components]")]
+    [SerializeField] private GameObject notificationPanel;              // Notification Panel
+    [SerializeField] private RectTransform panelTransform;              // Panel RectTransform
+    [SerializeField] private TextMeshProUGUI notificationText;          // Text (TMP)
+    [SerializeField] private CanvasGroup canvasGroup;                   // CanvasGroup for fading
 
-    private Vector2 startPosition = new Vector2(0, 144);        // Panel 시작위치
-    private Vector2 endPosition = new Vector2(0, 96);           // Panel 도착위치
+    [Header("---[Position Settings]")]
+    private readonly Vector2 startPosition = new Vector2(0, 144);       // Panel 시작위치
+    private readonly Vector2 endPosition = new Vector2(0, 96);          // Panel 도착위치
+
+    [Header("---[Animation Settings]")]
+    private readonly WaitForSeconds waitNotificationDuration = new WaitForSeconds(0.3f);    // 알림 표시 대기 시간
     private Coroutine currentCoroutine;                         // 현재 실행 중인 코루틴
 
-    // ======================================================================================================================================================================
+    #endregion
+
+
+    #region Unity Methods
 
     private void Awake()
     {
@@ -32,9 +44,12 @@ public class NotificationManager : MonoBehaviour
         canvasGroup.alpha = 0;
     }
 
-    // ======================================================================================================================================================================
+    #endregion
 
-    /// <summary> 알림 표시 함수 (string 메시지) </summary>
+
+    #region Notification Control
+
+    // 알림 표시 함수 (string 메시지)
     public void ShowNotification(string message)
     {
         notificationText.text = message;
@@ -65,7 +80,7 @@ public class NotificationManager : MonoBehaviour
         }
 
         // 도착 위치에서 유지
-        yield return new WaitForSeconds(0.3f);
+        yield return waitNotificationDuration;
 
         // 패널 투명화
         elapsedTime = 0f;
@@ -82,107 +97,8 @@ public class NotificationManager : MonoBehaviour
         notificationPanel.SetActive(false);
         currentCoroutine = null;
     }
+
+    #endregion
+
+
 }
-
-
-/*
-using UnityEngine;
-using TMPro;
-using UnityEngine.UI;
-using System.Collections;
-
-public class NotificationManager : MonoBehaviour
-{
-    public static NotificationManager Instance { get; private set; }
-
-    [SerializeField] private GameObject notificationPanel;      // Notification Panel
-    [SerializeField] private RectTransform panelTransform;      // Panel RectTransform
-    [SerializeField] private TextMeshProUGUI notificationText;  // Text (TMP)
-    [SerializeField] private CanvasGroup canvasGroup;           // CanvasGroup for fading
-
-    private Vector2 startPosition = new Vector2(0, 144);        // Panel 시작위치
-    private Vector2 endPosition = new Vector2(0, 96);           // Panel 도착위치
-    private Coroutine currentCoroutine;                         // 현재 실행 중인 코루틴
-    private string currentMessage;                              // 현재 표시 중인 메시지
-
-    // 초기화 시 패널을 비활성화
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-        notificationPanel.SetActive(false);
-        canvasGroup.alpha = 0;
-    }
-
-    /// <summary> 알림 표시 함수 (string 메시지) </summary>
-    public void ShowNotification(string message)
-    {
-        if (currentCoroutine != null)
-        {
-            StopCoroutine(currentCoroutine);
-        }
-
-        if (message == currentMessage)
-        {
-            currentCoroutine = StartCoroutine(NotificationRoutine(false));
-        }
-        else
-        {
-            notificationText.text = message;
-            currentMessage = message;
-            currentCoroutine = StartCoroutine(NotificationRoutine(true));
-        }
-    }
-
-    private IEnumerator NotificationRoutine(bool includeMoveAnimation)
-    {
-        // 알림 패널 활성화
-        notificationPanel.SetActive(true);
-        panelTransform.anchoredPosition = startPosition;
-        canvasGroup.alpha = 1;
-
-        // 패널 이동
-        float elapsedTime = 0f;
-        float moveDuration = 0.2f;
-        if (includeMoveAnimation)
-        {
-            while (elapsedTime < moveDuration)
-            {
-                elapsedTime += Time.deltaTime;
-                float t = elapsedTime / moveDuration;
-                panelTransform.anchoredPosition = Vector2.Lerp(startPosition, endPosition, t);
-                yield return null;
-            }
-        }
-        else
-        {
-            panelTransform.anchoredPosition = endPosition;
-        }
-
-        // 도착 위치에서 유지
-        yield return new WaitForSeconds(0.3f);
-
-        // 패널 투명화
-        elapsedTime = 0f;
-        float fadeDuration = 0.5f;
-        while (elapsedTime < fadeDuration)
-        {
-            elapsedTime += Time.deltaTime;
-            float t = elapsedTime / fadeDuration;
-            canvasGroup.alpha = Mathf.Lerp(1, 0, t);
-            yield return null;
-        }
-
-        // 알림 패널 비활성화
-        notificationPanel.SetActive(false);
-        currentCoroutine = null;
-        currentMessage = null;
-    }
-}
-*/

@@ -3,21 +3,30 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
+// 버튼 클릭 효과 스크립트
 public class ButtonEffect : MonoBehaviour
 {
+
+
+    #region Variables
+
     [Header("스케일 조정값")]
-    public float scaleFactor = 0.9f;
-    public float scaleSpeed = 10f; // 크기 변하는 속도 (커질수록 빠르게)
+    public float scaleFactor = 0.9f;    // 버튼 클릭시 축소될 크기 비율 (1보다 작은 값)
+    public float scaleSpeed = 10f;      // 크기 변하는 속도 (커질수록 빠르게)
 
     private class ButtonScaleData
     {
-        public Vector3 originalScale;
-        public Vector3 targetScale;
-        public Transform transform;
+        public Vector3 originalScale;   // 버튼의 원래 크기
+        public Vector3 targetScale;     // 버튼의 목표 크기
+        public Transform transform;     // 버튼의 Transform 컴포넌트
     }
 
-    private List<ButtonScaleData> buttonList = new List<ButtonScaleData>();
+    private readonly List<ButtonScaleData> buttonList = new List<ButtonScaleData>();
 
+    #endregion
+
+
+    #region Unity Methods
 
     private void Start()
     {
@@ -55,6 +64,11 @@ public class ButtonEffect : MonoBehaviour
             data.transform.localScale = Vector3.Lerp(data.transform.localScale, data.targetScale, Time.deltaTime * scaleSpeed);
         }
     }
+
+    #endregion
+
+
+    #region Button Management
 
     // Normal Cat Dictionary과 Information Panel의 하위에 있는 버튼인지 확인하는 함수
     private bool IsButtonInExcludedArea(Button button)
@@ -95,6 +109,7 @@ public class ButtonEffect : MonoBehaviour
         return false;
     }
 
+    // 버튼에 이벤트 트리거 추가하는 함수
     private void AddButtonEvents(Button button, ButtonScaleData data)
     {
         EventTrigger trigger = button.gameObject.GetComponent<EventTrigger>();
@@ -106,27 +121,35 @@ public class ButtonEffect : MonoBehaviour
         trigger.triggers = new List<EventTrigger.Entry>();
 
         // PointerDown
-        EventTrigger.Entry entryDown = new EventTrigger.Entry();
-        entryDown.eventID = EventTriggerType.PointerDown;
+        EventTrigger.Entry entryDown = new EventTrigger.Entry
+        {
+            eventID = EventTriggerType.PointerDown
+        };
         entryDown.callback.AddListener((eventData) => OnButtonDown(data));
         trigger.triggers.Add(entryDown);
 
         // PointerUp
-        EventTrigger.Entry entryUp = new EventTrigger.Entry();
-        entryUp.eventID = EventTriggerType.PointerUp;
+        EventTrigger.Entry entryUp = new EventTrigger.Entry
+        {
+            eventID = EventTriggerType.PointerUp
+        };
         entryUp.callback.AddListener((eventData) => OnButtonUp(data));
         trigger.triggers.Add(entryUp);
     }
 
+    // 버튼 눌림 상태 처리 함수
     private void OnButtonDown(ButtonScaleData data)
     {
         data.targetScale = data.originalScale * scaleFactor;
     }
 
+    // 버튼 뗌 상태 처리 함수
     private void OnButtonUp(ButtonScaleData data)
     {
         data.targetScale = data.originalScale;
     }
+
+    #endregion
 
 
 }

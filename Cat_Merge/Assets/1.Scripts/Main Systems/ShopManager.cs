@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using System.Collections;
 using TMPro;
 
+// 상점 스크립트
 [DefaultExecutionOrder(-5)]
 public class ShopManager : MonoBehaviour, ISaveable
 {
@@ -83,6 +84,8 @@ public class ShopManager : MonoBehaviour, ISaveable
 
     private float battlePauseTime = 0f;                                     // 전투 중 멈춘 시간
     private bool isBattlePaused = false;                                    // 전투 중 멈춤 상태
+
+    private readonly WaitForSeconds oneSecondWait = new WaitForSeconds(1f);
 
     #endregion
 
@@ -226,7 +229,6 @@ public class ShopManager : MonoBehaviour, ISaveable
 
         // 마지막 보상 시간 저장
         lastTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        SaveToLocal();
 
         UpdateCashForTimeUI();
     }
@@ -235,7 +237,6 @@ public class ShopManager : MonoBehaviour, ISaveable
     public void AddPassiveCashForTimeAmount(int amount)
     {
         passiveCashForTimeAmount += amount;
-        SaveToLocal();
 
         UpdateCashForTimeUI();
     }
@@ -245,7 +246,6 @@ public class ShopManager : MonoBehaviour, ISaveable
     {
         passiveCashForTimeCoolTimeReduction += seconds;
         cashForTimeCoolTime = DEFAULT_CASH_FOR_TIME_COOLTIME - passiveCashForTimeCoolTimeReduction;
-        SaveToLocal();
 
         UpdateCashForTimeUI();
     }
@@ -258,13 +258,11 @@ public class ShopManager : MonoBehaviour, ISaveable
     // 주기적으로 보상 상태를 체크하는 코루틴
     private IEnumerator CheckRewardStatus()
     {
-        WaitForSeconds waitTime = new WaitForSeconds(1f);
-
         while (true)
         {
             UpdateAllUI();
 
-            yield return waitTime;
+            yield return oneSecondWait;
         }
     }
 
@@ -315,7 +313,6 @@ public class ShopManager : MonoBehaviour, ISaveable
     {
         if (!IsCashForAdAvailable() || isWaitingForAd) return;
 
-        SaveToLocal();
         isWaitingForAd = true;
         cashForAdRewardButton.interactable = false;
 
@@ -333,8 +330,6 @@ public class ShopManager : MonoBehaviour, ISaveable
 
         isWaitingForAd = false;
 
-        SaveToLocal();
-
         UpdateCashForAdUI();
     }
 
@@ -342,7 +337,6 @@ public class ShopManager : MonoBehaviour, ISaveable
     public void AddPassiveCashForAdAmount(int amount)
     {
         passiveCashForAdAmount += amount;
-        SaveToLocal();
         UpdateCashForAdUI();
     }
 
@@ -351,7 +345,6 @@ public class ShopManager : MonoBehaviour, ISaveable
     {
         passiveCashForAdCoolTimeReduction += seconds;
         cashForAdCoolTime = DEFAULT_CASH_FOR_AD_COOLTIME - passiveCashForAdCoolTimeReduction;
-        SaveToLocal();
 
         UpdateCashForTimeUI();
     }
@@ -452,7 +445,6 @@ public class ShopManager : MonoBehaviour, ISaveable
     {
         if (!IsDoubleCoinForAdAvailable() || isWaitingForAd) return;
 
-        SaveToLocal();
         isWaitingForAd = true;
         doubleCoinForAdButton.interactable = false;
 
@@ -489,8 +481,6 @@ public class ShopManager : MonoBehaviour, ISaveable
 
             isWaitingForAd = false;
 
-            SaveToLocal();
-
             UpdateDoubleCoinForAdUI();
         }
     }
@@ -499,7 +489,6 @@ public class ShopManager : MonoBehaviour, ISaveable
     public void AddPassiveDoubleCoinDurationIncrease(float seconds)
     {
         passiveDoubleCoinDurationIncrease += seconds;
-        SaveToLocal();
 
         UpdateDoubleCoinForAdUI();
     }
@@ -509,7 +498,6 @@ public class ShopManager : MonoBehaviour, ISaveable
     {
         passiveDoubleCoinForAdCoolTimeReduction += seconds;
         doubleCoinForAdCoolTime = DEFAULT_DOUBLE_COIN_FOR_AD_COOLTIME - passiveDoubleCoinForAdCoolTimeReduction;
-        SaveToLocal();
 
         UpdateDoubleCoinForAdUI();
     }
@@ -583,13 +571,6 @@ public class ShopManager : MonoBehaviour, ISaveable
         battlePauseTime = 0f;
 
         UpdateAllUI();
-    }
-
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

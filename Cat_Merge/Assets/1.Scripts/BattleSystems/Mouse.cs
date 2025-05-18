@@ -1,9 +1,12 @@
 using UnityEngine;
 
-// 쥐의 정보를 담는 Script
 [System.Serializable]
 public class Mouse
 {
+
+
+    #region Mouse Stats
+
     private int mouseId;                // 쥐 인덱스
     public int MouseId { get => mouseId; set => mouseId = value; }
 
@@ -31,6 +34,10 @@ public class Mouse
     private int mouseArmor;             // 쥐 방어력
     public int MouseArmor { get => mouseArmor; set => mouseArmor = value; }
 
+    #endregion
+
+
+    #region Rewards
 
     private int clearCashReward;            // 첫 클리어 캐쉬 보상
     public int ClearCashReward { get => clearCashReward; set => clearCashReward = value; }
@@ -41,8 +48,15 @@ public class Mouse
     private decimal repeatclearCoinReward;  // 반복 클리어 코인 보상
     public decimal RepeatclearCoinReward { get => repeatclearCoinReward; set => repeatclearCoinReward = value; }
 
-    public Mouse(int mouseId, string mouseName, int mouseGrade, double mouseDamage, double mouseHp, Sprite mouseImage, 
-        int numOfAttack, int mouseAttackSpeed, int mouseArmor, int clearCashReward, decimal clearCoinReward, decimal repeatclearCoinReward)
+    #endregion
+
+
+    #region Constructor
+
+    // 쥐 데이터 초기화 생성자
+    public Mouse(int mouseId, string mouseName, int mouseGrade, double mouseDamage, double mouseHp,
+                Sprite mouseImage, int numOfAttack, int mouseAttackSpeed, int mouseArmor,
+                int clearCashReward, decimal clearCoinReward, decimal repeatclearCoinReward)
     {
         MouseId = mouseId;
         MouseName = mouseName;
@@ -57,5 +71,8 @@ public class Mouse
         ClearCoinReward = clearCoinReward;
         RepeatclearCoinReward = repeatclearCoinReward;
     }
+
+    #endregion
+
 
 }

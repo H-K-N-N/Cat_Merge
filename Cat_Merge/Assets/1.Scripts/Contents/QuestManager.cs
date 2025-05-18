@@ -6,7 +6,7 @@ using System.Linq;
 using System.Collections;
 using System;
 
-// Quest Script
+// 퀘스트 스크립트
 [DefaultExecutionOrder(-1)]
 public class QuestManager : MonoBehaviour, ISaveable
 {
@@ -151,6 +151,9 @@ public class QuestManager : MonoBehaviour, ISaveable
 
     private bool isDataLoaded = false;          // 데이터 로드 확인
 
+    private readonly WaitForSeconds oneSecondWait = new WaitForSeconds(1f);
+    private Coroutine questCheckCoroutine;
+
     #endregion
 
 
@@ -186,14 +189,28 @@ public class QuestManager : MonoBehaviour, ISaveable
         CheckAndResetQuestsOnStart();
 
         UpdateAllUI();
+
+        questCheckCoroutine = StartCoroutine(QuestCheckRoutine());
     }
 
-    private void Update()
+    private void OnDisable()
     {
-        //AddPlayTimeCount();
+        if (questCheckCoroutine != null)
+        {
+            StopCoroutine(questCheckCoroutine);
+            questCheckCoroutine = null;
+        }
+    }
 
-        // 매 초마다 체크
-        if (Time.time % 1 < Time.deltaTime)
+    #endregion
+
+
+    #region Daily & Weekly Quest Initialize Check
+
+    // 퀘스트 체크 코루틴
+    private IEnumerator QuestCheckRoutine()
+    {
+        while (true)
         {
             // 플레이타임 퀘스트 최대치 체크
             bool canAddDailyPlayTime = dailyQuestDictionary["플레이 시간"].questData.currentCount < dailyQuestDictionary["플레이 시간"].questData.targetCount;
@@ -205,9 +222,9 @@ public class QuestManager : MonoBehaviour, ISaveable
                 AddPlayTimeCount();
             }
 
-            //AddPlayTimeCount();
-
             CheckAndResetQuests();
+
+            yield return oneSecondWait;
         }
     }
 
@@ -229,20 +246,18 @@ public class QuestManager : MonoBehaviour, ISaveable
         // 하루 이상 지났다면 일일 퀘스트 초기화
         if (daysSinceLastDaily > 0)
         {
-            Debug.Log($"[Quest] 일일 퀘스트 초기화 - 마지막 리셋: {lastDailyResetTime}, 현재: {currentUtc}, 경과일: {daysSinceLastDaily}");
+            //Debug.Log($"[Quest] 일일 퀘스트 초기화 - 마지막 리셋: {lastDailyResetTime}, 현재: {currentUtc}, 경과일: {daysSinceLastDaily}");
             ResetDailyQuests();
             lastDailyReset = currentUtc.ToUnixTimeSeconds();
-            SaveToLocal();
         }
 
         // 주간 퀘스트 체크
         DateTimeOffset nextThursday = GetNextThursday(lastWeeklyResetTime);
         if (currentUtc >= nextThursday)
         {
-            Debug.Log($"[Quest] 주간 퀘스트 초기화 - 마지막 리셋: {lastWeeklyResetTime}, 현재: {currentUtc}, 다음 목요일: {nextThursday}");
+            //Debug.Log($"[Quest] 주간 퀘스트 초기화 - 마지막 리셋: {lastWeeklyResetTime}, 현재: {currentUtc}, 다음 목요일: {nextThursday}");
             ResetWeeklyQuests();
             lastWeeklyReset = currentUtc.ToUnixTimeSeconds();
-            SaveToLocal();
         }
     }
 
@@ -609,6 +624,18 @@ public class QuestManager : MonoBehaviour, ISaveable
             questUI.rewardText.text = "수령 완료";
         }
 
+        if (menuType == QuestMenuType.Daily)
+        {
+            UpdateAllDailyRewardButtonState();
+        }
+        else if (menuType == QuestMenuType.Weekly)
+        {
+            UpdateAllWeeklyRewardButtonState();
+        }
+        else
+        {
+            UpdateAllRepeatRewardButtonState();
+        }
         UpdateNewImageStatus();
     }
 
@@ -624,7 +651,6 @@ public class QuestManager : MonoBehaviour, ISaveable
             questData.currentCount = Mathf.Min(questData.currentCount, questData.targetCount);
 
             UpdateQuestUI(questName, QuestMenuType.Daily);
-            UpdateAllDailyRewardButtonState();
         }
         // 주간 퀘스트 업데이트
         if (weeklyQuestDictionary.ContainsKey(questName))
@@ -635,17 +661,13 @@ public class QuestManager : MonoBehaviour, ISaveable
             questData.currentCount = Mathf.Min(questData.currentCount, questData.targetCount);
 
             UpdateQuestUI(questName, QuestMenuType.Weekly);
-            UpdateAllWeeklyRewardButtonState();
         }
         // 반복 퀘스트 업데이트
         if (repeatQuestDictionary.ContainsKey(questName))
         {
             UpdateQuestUI(questName, QuestMenuType.Repeat);
-            UpdateAllRepeatRewardButtonState();
             SortRepeatQuests();
         }
-
-        SaveToLocal();
     }
 
     // 보상 버튼 클릭 시 호출되는 함수
@@ -891,6 +913,7 @@ public class QuestManager : MonoBehaviour, ISaveable
         isDailySpecialRewardQuestComplete = true;
 
         UpdateDailySpecialRewardUI();
+        UpdateAllDailyRewardButtonState();
     }
 
     // 모든 Daily 퀘스트가 완료되었는지 확인하는 함수
@@ -958,6 +981,7 @@ public class QuestManager : MonoBehaviour, ISaveable
         isWeeklySpecialRewardQuestComplete = true;
 
         UpdateWeeklySpecialRewardUI();
+        UpdateAllWeeklyRewardButtonState();
     }
 
     // 모든 Weekly 퀘스트가 완료되었는지 확인하는 함수
@@ -1000,6 +1024,8 @@ public class QuestManager : MonoBehaviour, ISaveable
                     dailyQuest.Value.rewardButton, dailyQuest.Value.rewardDisabledBG, QuestMenuType.Daily, dailyQuest.Key);
             }
         }
+
+        UpdateNewImageStatus();
     }
 
     // All Reward 버튼 상태를 업데이트하는 함수 - Daily
@@ -1007,19 +1033,24 @@ public class QuestManager : MonoBehaviour, ISaveable
     {
         // 보상을 받을 수 있는 버튼이 하나라도 활성화되어 있는지 확인
         bool isAnyRewardAvailable = false;
-        foreach (var dailyQuest in dailyQuestDictionary)
-        {
-            if (dailyQuest.Value.rewardButton.interactable && !dailyQuest.Value.questData.isComplete)
-            {
-                isAnyRewardAvailable = true;
-                break;
-            }
-        }
 
-        // 스페셜 보상도 확인
+        // 스페셜 보상 확인
         if (dailySpecialRewardButton.interactable && !isDailySpecialRewardQuestComplete)
         {
             isAnyRewardAvailable = true;
+        }
+
+        // 일반 퀘스트 확인
+        if (!isAnyRewardAvailable)
+        {
+            foreach (var dailyQuest in dailyQuestDictionary)
+            {
+                if (dailyQuest.Value.rewardButton.interactable && !dailyQuest.Value.questData.isComplete)
+                {
+                    isAnyRewardAvailable = true;
+                    break;
+                }
+            }
         }
 
         allRewardButtons[(int)QuestMenuType.Daily].interactable = isAnyRewardAvailable;
@@ -1042,6 +1073,8 @@ public class QuestManager : MonoBehaviour, ISaveable
                     weeklyQuest.Value.rewardButton, weeklyQuest.Value.rewardDisabledBG, QuestMenuType.Weekly, weeklyQuest.Key);
             }
         }
+
+        UpdateNewImageStatus();
     }
 
     // All Reward 버튼 상태를 업데이트하는 함수 - Weekly
@@ -1049,19 +1082,24 @@ public class QuestManager : MonoBehaviour, ISaveable
     {
         // 보상을 받을 수 있는 버튼이 하나라도 활성화되어 있는지 확인
         bool isAnyRewardAvailable = false;
-        foreach (var weeklyQuest in weeklyQuestDictionary)
-        {
-            if (weeklyQuest.Value.rewardButton.interactable && !weeklyQuest.Value.questData.isComplete)
-            {
-                isAnyRewardAvailable = true;
-                break;
-            }
-        }
 
-        // 스페셜 보상도 확인
+        // 스페셜 보상 확인
         if (weeklySpecialRewardButton.interactable && !isWeeklySpecialRewardQuestComplete)
         {
             isAnyRewardAvailable = true;
+        }
+
+        // 일반 퀘스트 확인
+        if (!isAnyRewardAvailable)
+        {
+            foreach (var weeklyQuest in weeklyQuestDictionary)
+            {
+                if (weeklyQuest.Value.rewardButton.interactable && !weeklyQuest.Value.questData.isComplete)
+                {
+                    isAnyRewardAvailable = true;
+                    break;
+                }
+            }
         }
 
         allRewardButtons[(int)QuestMenuType.Weekly].interactable = isAnyRewardAvailable;
@@ -1094,6 +1132,7 @@ public class QuestManager : MonoBehaviour, ISaveable
         }
 
         allRewardButtons[(int)QuestMenuType.Repeat].interactable = isAnyRewardAvailable;
+        UpdateNewImageStatus();
     }
 
 
@@ -1110,13 +1149,11 @@ public class QuestManager : MonoBehaviour, ISaveable
         {
             AddDailySpecialRewardCount();
             UpdateDailySpecialRewardUI();
-            UpdateAllDailyRewardButtonState();      // 원래 여기서 호출이 되야하는데 PlayTime이 Update에서 늘어나서 상시 호출로인해 여기 없어도 실행이 되버림. (최적화 생각 필요)
         }
         else if (menuType == QuestMenuType.Weekly)
         {
             AddWeeklySpecialRewardCount();
             UpdateWeeklySpecialRewardUI();
-            UpdateAllWeeklyRewardButtonState();     // 같은 이유
         }
 
         // 퀘스트 UI 업데이트 호출
@@ -1146,7 +1183,6 @@ public class QuestManager : MonoBehaviour, ISaveable
         AddCash(rewardCash);
 
         UpdateQuestUI(questName, QuestMenuType.Repeat);
-        UpdateAllRepeatRewardButtonState();
         SortRepeatQuests();
     }
 
@@ -1343,36 +1379,42 @@ public class QuestManager : MonoBehaviour, ISaveable
         // 일일 퀘스트 초기화 체크
         if (currentUtc.Date > lastDailyResetTime.Date)
         {
-            Debug.Log($"[Quest] 일일 퀘스트 초기화 - 현재: {currentUtc}, 마지막 리셋: {lastDailyResetTime}");
+            //Debug.Log($"[Quest] 일일 퀘스트 초기화 - 현재: {currentUtc}, 마지막 리셋: {lastDailyResetTime}");
             ResetDailyQuests();
             lastDailyReset = currentTime;
-            SaveToLocal();
         }
 
         // 주간 퀘스트 초기화 체크 (UTC 기준 목요일)
         DateTimeOffset nextThursday = GetNextThursday(lastWeeklyResetTime);
-        if (currentUtc >= nextThursday)
+        if (currentUtc.Date >= nextThursday.Date && lastWeeklyResetTime.Date < nextThursday.Date)
         {
-            Debug.Log($"[Quest] 주간 퀘스트 초기화 - 현재: {currentUtc}, 마지막 리셋: {lastWeeklyResetTime}, 다음 목요일: {nextThursday}");
+            //Debug.Log($"[Quest] 주간 퀘스트 초기화 - 현재: {currentUtc}, 마지막 리셋: {lastWeeklyResetTime}, 다음 목요일: {nextThursday}");
             ResetWeeklyQuests();
             lastWeeklyReset = currentTime;
-            SaveToLocal();
         }
     }
 
     // 다음 목요일 자정 시간을 계산하는 함수
     private DateTimeOffset GetNextThursday(DateTimeOffset fromTime)
     {
-        int daysUntilThursday = ((int)DayOfWeek.Thursday - (int)fromTime.DayOfWeek + 7) % 7;
-        if (daysUntilThursday == 0)
+        // 목요일 자정을 기준으로 계산
+        DateTimeOffset thursdayMidnight = fromTime.Date;
+
+        if (fromTime.DayOfWeek == DayOfWeek.Thursday)
         {
-            // 이미 자정이 지났다면 다음 주 목요일
+            // 목요일이면서 자정이 지난 경우
             if (fromTime.TimeOfDay > TimeSpan.Zero)
             {
-                daysUntilThursday = 7;
+                return thursdayMidnight.AddDays(7);
             }
+            // 목요일이지만 자정인 경우
+            return thursdayMidnight;
         }
-        return fromTime.Date.AddDays(daysUntilThursday);
+
+        // 다음 목요일까지 남은 일수 계산
+        int daysUntilThursday = ((int)DayOfWeek.Thursday - (int)fromTime.DayOfWeek + 7) % 7;
+
+        return thursdayMidnight.AddDays(daysUntilThursday);
     }
 
     // 일일 퀘스트 초기화 함수
@@ -1401,8 +1443,6 @@ public class QuestManager : MonoBehaviour, ISaveable
         // UI 업데이트
         UpdateAllDailyRewardButtonState();
         UpdateNewImageStatus();
-
-        SaveToLocal();
     }
 
     // 주간퀘스트 초기화 함수
@@ -1431,8 +1471,6 @@ public class QuestManager : MonoBehaviour, ISaveable
         // UI 업데이트
         UpdateAllWeeklyRewardButtonState();
         UpdateNewImageStatus();
-
-        SaveToLocal();
     }
 
     #endregion
@@ -1682,13 +1720,6 @@ public class QuestManager : MonoBehaviour, ISaveable
         RestoreQuestData(repeatQuestDictionary, savedData.repeatQuestKeys, savedData.repeatQuestValues, QuestMenuType.Repeat);
     }
 
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
-    }
-
     #endregion
 
 
@@ -1727,7 +1758,7 @@ public class QuestManager : MonoBehaviour, ISaveable
     public void SkipToNextDay()
     {
         if (!useDebugTime) return;
-        Debug.Log("다음날 버튼");
+        //Debug.Log("다음날 버튼");
 
         SetDebugTime(1);
     }
@@ -1737,7 +1768,7 @@ public class QuestManager : MonoBehaviour, ISaveable
     {
         if (!useDebugTime) return;
 
-        Debug.Log("다음주 버튼");
+        //Debug.Log("다음주 버튼");
 
         DateTimeOffset current = useDebugTime ? debugCurrentTime : DateTimeOffset.UtcNow;
         int daysUntilThursday = ((int)DayOfWeek.Thursday - (int)current.DayOfWeek + 7) % 7;

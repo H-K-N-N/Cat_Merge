@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using System;
 using System.Collections;
 
-// 고양이 도감 Script
+// 고양이 도감 스크립트
 [DefaultExecutionOrder(-6)]
 public class DictionaryManager : MonoBehaviour, ISaveable
 {
@@ -30,14 +30,16 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     [SerializeField] private GameObject normalCatButtonNewImage;    // Normal Cat Button의 New Image
     private event Action OnCatDataChanged;                          // 이벤트 정의
 
-
     // 도감 해금 관련 변수
     private bool[] isCatUnlocked;                                   // 고양이 해금 여부 배열
     private bool[] isGetFirstUnlockedReward;                        // 고양이 첫 해금 보상 획득 여부 배열
-    
-
 
     private int currentSelectedCatGrade;                            // 현재 선택된 고양이 등급 추적
+
+    private static readonly Vector2 defaultTextPosition = new Vector2(0, 0);
+    private static readonly Vector2 unlockedTextPosition = new Vector2(0, 100);
+    private static readonly Color transparentIconColor = new Color(1f, 1f, 1f, 0f);
+    private static readonly Color visibleIconColor = new Color(1f, 1f, 1f, 1f);
 
 
     [Header("---[New Cat Panel UI]")]
@@ -48,6 +50,10 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     [SerializeField] private TextMeshProUGUI newCatExplain;         // New Cat Explanation Text
     [SerializeField] private TextMeshProUGUI newCatGetCoin;         // New Cat Get Coin Text
     [SerializeField] private Button submitButton;                   // New Cat Panel Submit Button
+
+    // Highlight Image 회전에 사용할 Vector3 캐싱
+    private static readonly Vector3 rotationVector = new Vector3(0, 0, 1);
+    private static readonly float rotationSpeed = 90f;
 
     // Enum으로 메뉴 타입 정의 (서브 메뉴를 구분하기 위해 사용)
     private enum DictionaryMenuType
@@ -60,12 +66,20 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     }
     private DictionaryMenuType activeMenuType;                      // 현재 활성화된 메뉴 타입
 
+
     [Header("---[Information Panel UI]")]
     [SerializeField] private Image informationCatIcon;              // Information Cat Icon
-    private Sprite informationCatDefaultImage;                      // Information Cat Default Image
     [SerializeField] private TextMeshProUGUI informationCatDetails; // informationCatDetails Text
     [SerializeField] private GameObject catInformationPanel;        // catInformation Panel (상세정보 칸 Panel)
     [SerializeField] private RectTransform fullInformationPanel;    // fullInformation Panel (상세정보 스크롤 Panel)
+    private static readonly Vector2 defaultInformationPanelPosition = new Vector2(0, -312.5f);  // Information Panel 위치 상수
+
+
+    [Header("---[ScrollRect Transform]")]
+    private const int SPACING_Y = 30;                               // y spacing
+    private const int CELL_SIZE_Y = 280;                            // y cell size
+    private const int VIEWPORT_HEIGHT = 680;                        // viewport height
+
 
     // 임시 (다른 서브 메뉴들을 추가한다면 어떻게 정리 할까 고민)
     [Header("---[Sub Contents]")]
@@ -73,11 +87,13 @@ public class DictionaryManager : MonoBehaviour, ISaveable
                                                                     // 희귀 고양이 scrollRectContents
                                                                     // 특수 고양이 scrollRectContents
 
+
     [Header("---[Sub Menu UI Color]")]
     private const string activeColorCode = "#FFCC74";               // 활성화상태 Color
     private const string inactiveColorCode = "#FFFFFF";             // 비활성화상태 Color
 
 
+    [Header("---[ETC]")]
     private bool isDataLoaded = false;                              // 데이터 로드 확인
 
     #endregion
@@ -248,8 +264,6 @@ public class DictionaryManager : MonoBehaviour, ISaveable
 
         // BuyCatManager의 구매 슬롯 상태 업데이트
         BuyCatManager.Instance?.UnlockBuySlot(CatGrade);
-
-        SaveToLocal();
     }
 
     // 특정 고양이의 해금 여부 확인 함수
@@ -271,8 +285,6 @@ public class DictionaryManager : MonoBehaviour, ISaveable
 
         // 이벤트 발생
         OnCatDataChanged?.Invoke();
-
-        SaveToLocal();
     }
 
     // 특정 고양이의 첫 해금 보상 획득 여부 확인 함수
@@ -331,7 +343,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
             button.interactable = true;
             text.text = $"{cat.CatGrade}. {cat.CatName}";
             iconImage.sprite = cat.CatImage;
-            iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
+            iconImage.color = visibleIconColor;
 
             friendshipNewImage.SetActive(FriendshipManager.Instance.HasUnclaimedFriendshipRewards(cat.CatGrade));
 
@@ -343,7 +355,6 @@ public class DictionaryManager : MonoBehaviour, ISaveable
             else
             {
                 firstOpenBG.gameObject.SetActive(true);
-                //firstOpenCashtext.text = $"+ {cat.CatGetCoin}";
                 firstOpenCashtext.text = $"+{GameManager.Instance.FormatNumber(cat.CatFirstOpenCash)}";
             }
 
@@ -372,9 +383,9 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         {
             button.interactable = false;
             text.text = "???";
-            textRect.anchoredPosition = new Vector2(textRect.anchoredPosition.x, 0);
+            textRect.anchoredPosition = defaultTextPosition;
             iconImage.sprite = cat.CatImage;
-            iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 0f);
+            iconImage.color = transparentIconColor;
             firstOpenBG.gameObject.SetActive(false);
             friendshipNewImage.SetActive(false);
         }
@@ -401,13 +412,13 @@ public class DictionaryManager : MonoBehaviour, ISaveable
 
         Cat catData = GameManager.Instance.AllCatData[catGrade];
         iconImage.sprite = catData.CatImage;
-        iconImage.color = new Color(iconImage.color.r, iconImage.color.g, iconImage.color.b, 1f);
+        iconImage.color = visibleIconColor;
 
         friendshipNewImage.SetActive(FriendshipManager.Instance.HasUnclaimedFriendshipRewards(catGrade + 1));
 
         // 표시되는 등급은 1-based
         text.text = $"{catGrade + 1}. {catData.CatName}";
-        textRect.anchoredPosition = new Vector2(textRect.anchoredPosition.x, 100);
+        textRect.anchoredPosition = unlockedTextPosition;
 
         if (!IsGetFirstUnlockedReward(catGrade))
         {
@@ -458,7 +469,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         catInformationPanel.GetComponent<Mask>().enabled = true;
 
         // fullInformationPanel의 Y좌표를 -312.5f로 고정
-        fullInformationPanel.anchoredPosition = new Vector2(0, -312.5f);
+        fullInformationPanel.anchoredPosition = defaultInformationPanelPosition;
 
         // 애정도 UI 초기화
         FriendshipManager.Instance.ResetUI();
@@ -485,7 +496,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         // 스크롤 설정
         catInformationPanel.GetComponent<ScrollRect>().enabled = true;
         catInformationPanel.GetComponent<ScrollRect>().velocity = Vector2.zero;
-        fullInformationPanel.anchoredPosition = new Vector2(0, -312.5f);
+        fullInformationPanel.anchoredPosition = defaultInformationPanelPosition;
 
         // 애정도 시스템 업데이트 호출
         FriendshipManager.Instance.OnCatSelected(currentSelectedCatGrade);
@@ -526,7 +537,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     {
         while (newCatPanel.activeSelf)
         {
-            newCatHighlightImage.transform.Rotate(new Vector3(0, 0, 1), 90 * Time.deltaTime);
+            newCatHighlightImage.transform.Rotate(rotationVector, rotationSpeed * Time.deltaTime);
             yield return null;
         }
     }
@@ -686,13 +697,6 @@ public class DictionaryManager : MonoBehaviour, ISaveable
             isCatUnlocked[i] = savedData.isCatUnlocked[i];
             isGetFirstUnlockedReward[i] = savedData.isGetFirstUnlockedReward[i];
         }
-    }
-
-    private void SaveToLocal()
-    {
-        string data = GetSaveData();
-        string key = this.GetType().FullName;
-        GoogleManager.Instance?.SaveToPlayerPrefs(key, data);
     }
 
     #endregion

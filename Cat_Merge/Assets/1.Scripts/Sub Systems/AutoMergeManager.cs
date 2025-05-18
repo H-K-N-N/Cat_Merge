@@ -75,6 +75,8 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         {
             InitializeDefaultValues();
         }
+
+        StartCoroutine(MainAutoMerge());
     }
 
     private void Update()
@@ -143,9 +145,66 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     }
 
     #endregion
-    
+
 
     #region Auto Merge System
+
+    // 기본 30초마다 자동으로 합성하는 함수
+    public IEnumerator MainAutoMerge()
+    {
+        while (true)
+        {
+            CleanupMergingCats();
+
+            // 활성화된 고양이를 등급순으로 정렬하여 가져옴
+            var allCats = FindObjectsOfType<DragAndDropManager>()
+                .Where(cat => cat != null &&
+                       cat.gameObject.activeSelf &&
+                       !cat.isDragging)
+                .OrderBy(cat => cat.catData.CatGrade)
+                .ToList();
+
+            bool mergeFound = false;
+
+            // 가장 낮은 등급부터 순차적으로 합성 시도
+            for (int i = 0; i < allCats.Count; i++)
+            {
+                if (allCats[i] == null || !allCats[i].gameObject.activeSelf) continue;
+
+                // 같은 등급의 다른 고양이 찾기
+                var sameLevelCats = allCats
+                    .Where(cat => cat != null &&
+                           cat.gameObject.activeSelf &&
+                           cat != allCats[i] &&
+                           cat.catData.CatGrade == allCats[i].catData.CatGrade)
+                    .ToList();
+
+                if (sameLevelCats.Count > 0)
+                {
+                    var cat1 = allCats[i];
+                    var cat2 = sameLevelCats[0];
+
+                    if (IsValidMergePair(cat1, cat2))
+                    {
+                        Vector2 mergePosition = GetRandomPosition();
+                        yield return ExecuteMerge(cat1, cat2, mergePosition);
+                        mergeFound = true;
+                        yield return waitAutoMergeInterval;
+                        break;
+                    }
+                }
+            }
+
+            if (!mergeFound)
+            {
+                yield return waitAutoMergeInterval;
+            }
+
+            yield return new WaitForSeconds(30f);
+        }
+
+
+    }
 
     // 자동합성 시작 함수
     public void StartAutoMerge()
@@ -186,7 +245,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     }
 
     // 코루틴 시작 전 기존 코루틴 정리
-    private void StartAutoMergeCoroutine()
+    public void StartAutoMergeCoroutine()
     {
         StopAutoMergeCoroutine();
         autoMergeCoroutine = StartCoroutine(AutoMergeCoroutine());

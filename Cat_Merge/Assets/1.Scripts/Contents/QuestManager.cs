@@ -34,7 +34,6 @@ public class QuestManager : MonoBehaviour, ISaveable
             public int currentCount;                // 현재 수치
             public int targetCount;                 // 목표 수치
             public int baseTargetCount;             // 기본 목표 수치 (초기값)
-            public int maxTargetCount;              // 최대 목표 수치
             public int rewardCount;                 // 보상 받은 횟수
             public int rewardCash;                  // 보상 캐쉬
             public bool isComplete;                 // 완료 여부
@@ -135,7 +134,6 @@ public class QuestManager : MonoBehaviour, ISaveable
     private int totalSpawnCount;
     private int totalBattleCount;
     //private int totalPurchaseCount;
-    //private int totalStageCount;
 
     public int StageCount { get => BattleManager.Instance.BossStage; }  // 스테이지 단계
 
@@ -299,9 +297,9 @@ public class QuestManager : MonoBehaviour, ISaveable
     // Daily Quest 설정 함수
     private void InitializeDailyQuestManager()
     {
-        InitializeQuest("플레이 시간", 900, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 합성 횟수", 30, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 소환 횟수", 30, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
+        InitializeQuest("플레이 시간", 600, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 합성 횟수", 60, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 소환 횟수", 60, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
         InitializeQuest("전투 횟수", 1, 5, QuestMenuType.Daily, "I_UI_Mission_Daily.9");
 
         InitializeDailySpecialReward();
@@ -313,9 +311,9 @@ public class QuestManager : MonoBehaviour, ISaveable
     // Weekly Quest 설정 함수
     private void InitializeWeeklyQuestManager()
     {
-        InitializeQuest("플레이 시간", 4500, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 합성 횟수", 300, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 소환 횟수", 300, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
+        InitializeQuest("플레이 시간", 3000, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 합성 횟수", 600, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 소환 횟수", 600, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
         InitializeQuest("전투 횟수", 5, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
 
         InitializeWeeklySpecialReward();
@@ -327,11 +325,10 @@ public class QuestManager : MonoBehaviour, ISaveable
     // Repeat Quest 설정 함수
     private void InitializeRepeatQuestManager()
     {
-        InitializeQuest("고양이 합성 횟수", 30, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 소환 횟수", 30, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 합성 횟수", 150, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 소환 횟수", 150, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
         //InitializeQuest("고양이 구매 횟수", 20, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
-        //InitializeQuest("보스 스테이지", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
-        InitializeQuest("전투 횟수", 1, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
+        InitializeQuest("전투 횟수", 3, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
 
         // 초기 스크롤 위치 초기화
         InitializeScrollPosition();
@@ -489,19 +486,6 @@ public class QuestManager : MonoBehaviour, ISaveable
 
     #region Initialize and Update Quests
 
-    // 퀘스트별 최대 목표 수치 설정 함수 (반복퀘스트)
-    private int GetMaxTargetCount(string questName)
-    {
-        return questName switch
-        {
-            "고양이 합성 횟수" => 2400,
-            "고양이 소환 횟수" => 2400,
-            //"고양이 구매 횟수" => 2400,
-            "전투 횟수" => 12,
-            _ => 2400
-        };
-    }
-
     // 퀘스트 초기화
     private void InitializeQuest(string questName, int targetCount, int rewardCash, QuestMenuType menuType, string imageName)
     {
@@ -526,7 +510,6 @@ public class QuestManager : MonoBehaviour, ISaveable
                 currentCount = 0,
                 targetCount = targetCount,
                 baseTargetCount = targetCount,
-                maxTargetCount = GetMaxTargetCount(questName),
                 rewardCount = 1,
                 rewardCash = rewardCash,
                 isComplete = false
@@ -717,7 +700,6 @@ public class QuestManager : MonoBehaviour, ISaveable
     // 플레이타임 증가 함수
     public void AddPlayTimeCount()
     {
-        //float deltaTime = Time.deltaTime;
         float addTime = 1f;
 
         // 일일 퀘스트 플레이타임
@@ -845,19 +827,6 @@ public class QuestManager : MonoBehaviour, ISaveable
         weeklyBattleCount = 0;
         totalBattleCount = 0;
     }
-
-    #endregion
-
-
-    #region Stage Count Quest
-
-    //// 스테이지 증가 함수
-    //public void AddStageCount()
-    //{
-    //    repeatQuestDictionary["보스 스테이지"].questData.currentCount = StageCount - 1;
-
-    //    UpdateQuestProgress("보스 스테이지");
-    //}
 
     #endregion
 
@@ -1165,20 +1134,11 @@ public class QuestManager : MonoBehaviour, ISaveable
     {
         var questData = repeatQuestDictionary[questName].questData;
 
-        // 보상 받은 횟수 증가
         questData.rewardCount++;
 
-        // 퀘스트 난이도 상승량 최대치 관련
-        int nextTargetCount;
-        if (questData.rewardCount > questData.maxTargetCount)
-        {
-            nextTargetCount = questData.targetCount + questData.maxTargetCount;
-        }
-        else
-        {
-            nextTargetCount = questData.targetCount + (questData.baseTargetCount * questData.rewardCount);
-        }
-        questData.targetCount = nextTargetCount;
+        int additionalMultiplier = (questData.rewardCount - 1) / 10;                    // 0부터 시작하여 10회마다 1씩 증가
+        int currentIncrease = questData.baseTargetCount * (additionalMultiplier + 1);   // 기본값 + 추가 증가량
+        questData.targetCount += currentIncrease;
 
         AddCash(rewardCash);
 
@@ -1501,7 +1461,6 @@ public class QuestManager : MonoBehaviour, ISaveable
         public int totalMergeCount;
         public int totalSpawnCount;
         //public int totalPurchaseCount;
-        //public int totalStageCount;
         public int totalBattleCount;
 
         // 스페셜 보상 데이터
@@ -1517,7 +1476,6 @@ public class QuestManager : MonoBehaviour, ISaveable
             public int currentCount;
             public int targetCount;
             public int baseTargetCount;
-            public int maxTargetCount;
             public int rewardCount;
             public bool isComplete;
         }
@@ -1557,7 +1515,6 @@ public class QuestManager : MonoBehaviour, ISaveable
             totalMergeCount = this.totalMergeCount,
             totalSpawnCount = this.totalSpawnCount,
             //totalPurchaseCount = this.totalPurchaseCount,
-            //totalStageCount = this.totalStageCount,
             totalBattleCount = this.totalBattleCount,
 
             // 스페셜 보상 데이터
@@ -1600,7 +1557,6 @@ public class QuestManager : MonoBehaviour, ISaveable
                 currentCount = quest.Value.questData.currentCount,
                 targetCount = quest.Value.questData.targetCount,
                 baseTargetCount = quest.Value.questData.baseTargetCount,
-                maxTargetCount = quest.Value.questData.maxTargetCount,
                 rewardCount = quest.Value.questData.rewardCount,
                 isComplete = quest.Value.questData.isComplete
             });
@@ -1639,7 +1595,6 @@ public class QuestManager : MonoBehaviour, ISaveable
         totalMergeCount = savedData.totalMergeCount;
         totalSpawnCount = savedData.totalSpawnCount;
         //totalPurchaseCount = savedData.totalPurchaseCount;
-        //totalStageCount = savedData.totalStageCount;
         totalBattleCount = savedData.totalBattleCount;
 
         // 스페셜 보상 데이터 복원
@@ -1679,7 +1634,6 @@ public class QuestManager : MonoBehaviour, ISaveable
                     {
                         questData.targetCount = savedQuestData.targetCount;
                         questData.baseTargetCount = savedQuestData.baseTargetCount;
-                        questData.maxTargetCount = savedQuestData.maxTargetCount;
                         questData.rewardCount = savedQuestData.rewardCount;
                     }
                     else
@@ -1709,7 +1663,6 @@ public class QuestManager : MonoBehaviour, ISaveable
                 "고양이 합성 횟수" => dailyMergeCount,
                 "고양이 소환 횟수" => dailySpawnCount,
                 "전투 횟수" => dailyBattleCount,
-                //"보스 스테이지" => StageCount - 1,
                 _ => savedCount
             };
         }

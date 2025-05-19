@@ -44,7 +44,7 @@ public class BuyCatManager : MonoBehaviour, ISaveable
         {
             Cat catData = GameManager.Instance.AllCatData[catGrade];
             int effectivePurchaseCount = Mathf.Min(coinPurchaseCount, 100); // 최대 100회까지만 계산
-            double basePrice = catData.CatGetCoin * 3600.0;
+            double basePrice = catData.CatGetCoin * 999.0;
             double multiplier = Math.Pow(1.128, effectivePurchaseCount);
             double exactPrice = basePrice * multiplier;
 
@@ -55,7 +55,7 @@ public class BuyCatManager : MonoBehaviour, ISaveable
         public long CalculateCashPrice()
         {
             Cat catData = GameManager.Instance.AllCatData[catGrade];
-            return (catData.CatGrade * 10) + (5 * cashPurchaseCount);
+            return (catData.CatGrade * 5) + (5 * cashPurchaseCount);
         }
     }
 

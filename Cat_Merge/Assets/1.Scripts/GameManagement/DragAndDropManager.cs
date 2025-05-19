@@ -150,7 +150,7 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
             // 전투 상태가 아닐 때는 자동 이동 다시 활성화
             if (!BattleManager.Instance.IsBattleActive)
             {
-                catDataComponent.SetAutoMoveState(true);
+                catDataComponent.SetAutoMoveState(AutoMoveManager.Instance.IsAutoMoveEnabled());
             }
         }
 

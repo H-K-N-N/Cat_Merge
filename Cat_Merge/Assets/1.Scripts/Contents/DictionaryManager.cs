@@ -50,6 +50,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     [SerializeField] private TextMeshProUGUI newCatExplain;         // New Cat Explanation Text
     [SerializeField] private TextMeshProUGUI newCatGetCoin;         // New Cat Get Coin Text
     [SerializeField] private Button submitButton;                   // New Cat Panel Submit Button
+    private Coroutine highlightRotationCoroutine;                   // Highlight 회전 코루틴 관리용 변수
 
     // Highlight Image 회전에 사용할 Vector3 캐싱
     private static readonly Vector3 rotationVector = new Vector3(0, 0, 1);
@@ -516,6 +517,13 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     // 새로운 고양이 해금 효과 함수
     public void ShowNewCatPanel(int catGrade)
     {
+        // 기존 회전 코루틴이 있다면 중지
+        if (highlightRotationCoroutine != null)
+        {
+            StopCoroutine(highlightRotationCoroutine);
+            highlightRotationCoroutine = null;
+        }
+
         Cat newCat = GameManager.Instance.AllCatData[catGrade];
 
         newCatPanel.SetActive(true);
@@ -526,7 +534,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         newCatGetCoin.text = "재화 획득량: " + newCat.CatGetCoin.ToString();
 
         // Highlight Image 회전 애니메이션 시작
-        StartCoroutine(RotateHighlightImage());
+        highlightRotationCoroutine = StartCoroutine(RotateHighlightImage());
 
         // 확인 버튼을 누르면 패널을 비활성화
         submitButton.onClick.AddListener(CloseNewCatPanel);
@@ -535,16 +543,33 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     // Highlight Image 회전 애니메이션 코루틴
     private IEnumerator RotateHighlightImage()
     {
+        // 회전 각도 초기화
+        if (newCatHighlightImage != null)
+        {
+            newCatHighlightImage.transform.rotation = Quaternion.identity;
+        }
+
         while (newCatPanel.activeSelf)
         {
-            newCatHighlightImage.transform.Rotate(rotationVector, rotationSpeed * Time.deltaTime);
+            if (newCatHighlightImage != null)
+            {
+                newCatHighlightImage.transform.Rotate(rotationVector, rotationSpeed * Time.deltaTime);
+            }
             yield return null;
         }
+
+        highlightRotationCoroutine = null;
     }
 
     // New Cat Panel을 닫는 함수
     private void CloseNewCatPanel()
     {
+        if (highlightRotationCoroutine != null)
+        {
+            StopCoroutine(highlightRotationCoroutine);
+            highlightRotationCoroutine = null;
+        }
+
         newCatPanel.SetActive(false);
     }
 

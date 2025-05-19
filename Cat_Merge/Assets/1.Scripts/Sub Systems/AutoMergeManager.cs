@@ -454,7 +454,6 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
         while (true)
         {
-            Debug.Log("시작");
             if (BattleManager.Instance.IsBattleActive)
             {
                 yield return waitForEndOfFrame;
@@ -471,8 +470,6 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
                 elapsed += Time.deltaTime;
                 yield return waitForEndOfFrame;
             }
-
-            Debug.Log("합성 실행");
 
             // 완료되면 자동 합성 실행
             if (!BattleManager.Instance.IsBattleActive && elapsed >= autoTime)
@@ -514,8 +511,6 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
                 elapsed = 0f;
             }
-
-            Debug.Log("완료");
 
             yield return waitForEndOfFrame;
         }

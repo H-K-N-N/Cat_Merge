@@ -330,14 +330,13 @@ public class SpawnManager : MonoBehaviour, ISaveable
         }
     }
 
-    // 자동 스폰 코루틴
+    // 기본 N초마다 자동으로 스폰하는 기능 코루틴
     private IEnumerator AutoCollectingTime()
     {
         float elapsed = 0f;
 
         while (true)
         {
-            // 전투중이면 대기
             if (BattleManager.Instance.IsBattleActive)
             {
                 yield return waitForEndOfFrame;
@@ -347,7 +346,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
             float autoTime = ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value;
             autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / autoTime);
 
-            // 수집 시간 완료될때까지 대기
+            // 시간 완료될때까지 대기
             while (elapsed < autoTime)
             {
                 if (BattleManager.Instance.IsBattleActive) break;

@@ -55,6 +55,7 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
     [SerializeField] private Button foodUpgrade2Button;                 // 먹이 업그레이드2 버튼
     [SerializeField] private Button foodUpgrade2DisabledButton;         // 먹이 업그레이드2 잠김버튼
     [SerializeField] private Button autoCollectingButton;               // 자동 먹이주기 버튼
+    [SerializeField] private Button autoMergeButton;                    // 자동 합성 버튼
 
     [SerializeField] private GameObject[] disabledBg;                   // 버튼 클릭 못할 때의 배경
 
@@ -99,11 +100,16 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
     private int autoCollectingLv = 0;
     public int AutoCollectingLv { get => autoCollectingLv; set => autoCollectingLv = value; }
 
+    // 자동 합성 시간
+    private int autoMergeLv = 0;
+    public int AutoMergeLv { get => autoMergeLv; set => autoMergeLv = value; }
 
+
+    [Header("---[ETC]")]
     private bool isDataLoaded = false;              // 데이터 로드 확인
 
-    public int minFoodLv = 2;
-    public int maxFoodLv = 0;
+    [HideInInspector] public int minFoodLv = 2;
+    [HideInInspector] public int maxFoodLv = 0;
 
     #endregion
 
@@ -149,6 +155,8 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         foodUpgradeLv = 0;
         foodUpgrade2Lv = 0;
         autoCollectingLv = 0;
+        autoMergeLv = 0;
+
         minFoodLv = 2;
         maxFoodLv = 0;
     }
@@ -209,6 +217,9 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
 
         autoCollectingButton.onClick.RemoveAllListeners();
         autoCollectingButton.onClick.AddListener(AutoCollecting);
+
+        autoMergeButton.onClick.RemoveAllListeners();
+        autoMergeButton.onClick.AddListener(AutoMerge);
     }
 
     // 초기 메뉴 상태 설정 함수
@@ -246,6 +257,7 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         UpdateItemUI(4, foodUpgradeLv, foodUpgradeButton, ItemFunctionManager.Instance.foodUpgradeList);
         UpdateItemUI(5, foodUpgrade2Lv, foodUpgrade2Button, ItemFunctionManager.Instance.foodUpgrade2List);
         UpdateItemUI(6, autoCollectingLv, autoCollectingButton, ItemFunctionManager.Instance.autoCollectingList);
+        UpdateItemUI(7, autoMergeLv, autoMergeButton, ItemFunctionManager.Instance.autoMergeList);
 
         UpdateRelatedSystems();
 
@@ -480,6 +492,17 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
             );
     }
 
+    // 자동 합성 시간 감소 함수
+    private void AutoMerge()
+    {
+        ProcessUpgrade(
+            7,
+            ref autoMergeLv,
+            ItemFunctionManager.Instance.autoMergeList,
+            autoMergeButton
+            );
+    }
+
     #endregion
 
 
@@ -517,6 +540,7 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         public int foodUpgradeLv;                   // 먹이 업그레이드1 레벨
         public int foodUpgrade2Lv;                  // 먹이 업그레이드2 레벨
         public int autoCollectingLv;                // 자동 먹이주기 레벨
+        public int autoMergeLv;                     // 자동 합성 레벨
 
         public int minFoodLv;                       // 먹이 최소 레벨
         public int maxFoodLv;                       // 먹이 최대 레벨
@@ -533,6 +557,7 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
             foodUpgradeLv = this.foodUpgradeLv,
             foodUpgrade2Lv = this.foodUpgrade2Lv,
             autoCollectingLv = this.autoCollectingLv,
+            autoMergeLv = this.autoMergeLv,
             minFoodLv = this.minFoodLv,
             maxFoodLv = this.maxFoodLv
         };
@@ -551,6 +576,7 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         this.foodUpgradeLv = savedData.foodUpgradeLv;
         this.foodUpgrade2Lv = savedData.foodUpgrade2Lv;
         this.autoCollectingLv = savedData.autoCollectingLv;
+        this.autoMergeLv = savedData.autoMergeLv;
         this.minFoodLv = savedData.minFoodLv;
         this.maxFoodLv = savedData.maxFoodLv;
 

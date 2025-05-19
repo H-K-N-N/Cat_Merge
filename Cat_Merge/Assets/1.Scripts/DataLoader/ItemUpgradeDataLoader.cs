@@ -3,13 +3,13 @@ using UnityEngine;
 
 // 아이템 데이터를 로드하고 관리하는 스크립트
 [DefaultExecutionOrder(-10)]
-public class ItemItemUpgradeDataLoader : MonoBehaviour
+public class ItemUpgradeDataLoader : MonoBehaviour
 {
 
 
     #region Variables
 
-    public static ItemItemUpgradeDataLoader Instance { get; private set; }
+    public static ItemUpgradeDataLoader Instance { get; private set; }
 
     // 고양이 데이터를 관리할 Dictionary
     public Dictionary<int, List<(string title, int type, int step, float value, decimal fee)>> dataByNumber

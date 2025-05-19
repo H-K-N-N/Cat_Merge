@@ -167,7 +167,7 @@ public class GameManager : MonoBehaviour, ISaveable
     {
         currentCatCount = 0;
         maxCats = 8;
-        coin = 0;
+        coin = 250;
         cash = 100;
     }
 

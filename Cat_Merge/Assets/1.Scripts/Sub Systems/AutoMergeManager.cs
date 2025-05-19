@@ -31,8 +31,8 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     private const float MOVE_DURATION = 0.3f;                                   // 고양이가 이동하는 데 걸리는 시간 (이동 속도)
     private const float AUTO_MERGE_DURATION = 30.0f;                            // 자동 합성 기본 지속 시간
     private const int AUTO_MERGE_COST = 30;                                     // 자동 합성 비용
-    private readonly WaitForSeconds waitAutoMergeInterval = new WaitForSeconds(0.5f);    // 자동 합성 간격
-    private readonly WaitForSeconds waitSpawnInterval = new WaitForSeconds(0.1f);        // 소환 간격
+    private readonly WaitForSeconds waitAutoMergeInterval = new WaitForSeconds(0.25f);   // 자동 합성 간격
+    private readonly WaitForSeconds waitSpawnInterval = new WaitForSeconds(0.05f);       // 소환 간격
 
     private float startTime;                        // 자동 합성 시작 시간
     private float currentAutoMergeDuration;         // 현재 자동 합성 지속 시간

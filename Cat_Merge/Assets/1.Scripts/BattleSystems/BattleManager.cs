@@ -17,8 +17,8 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     private static class BattleConstants
     {
-        public const float DEFAULT_SPAWN_INTERVAL = 300f;       // 보스 등장 주기 (300f)
-        public const float DEFAULT_BOSS_DURATION = 30f;         // 보스 유지 시간 (30f)
+        public const float DEFAULT_SPAWN_INTERVAL = 240f;       // 보스 등장 주기 (240f)
+        public const float DEFAULT_BOSS_DURATION = 24f;         // 보스 유지 시간 (24f)
         public const float GIVEUP_BUTTON_DELAY = 2f;            // 항복 버튼 활성화 딜레이 (2f)
         public const float BOSS_ATTACK_DELAY = 2f;              // 보스 공격 딜레이 (2f)
         public const float WARNING_IMAGE_START_X = -640f;       // 경고 이미지 시작 좌표 (-640f)

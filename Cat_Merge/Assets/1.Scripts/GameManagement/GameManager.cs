@@ -128,6 +128,9 @@ public class GameManager : MonoBehaviour, ISaveable
             return;
         }
 
+        // 화면 절전 모드 비활성화
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
+
         InitializeGameData();
     }
 

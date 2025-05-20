@@ -1642,16 +1642,23 @@ public class QuestManager : MonoBehaviour, ISaveable
                         if (questData.isComplete)
                         {
                             questDict[questKey].rewardText.text = "수령 완료";
+                            questDict[questKey].rewardButton.interactable = false;
+                            questDict[questKey].rewardDisabledBG.SetActive(true);
                         }
                     }
+
+                    // UI 초기화
+                    questDict[questKey].questSlider.maxValue = questData.targetCount;
+                    questDict[questKey].questSlider.value = Mathf.Min(questData.currentCount, questData.targetCount);
+                    questDict[questKey].countText.text = $"{Mathf.Min(questData.currentCount, questData.targetCount)} / {questData.targetCount}";
                 }
             }
 
-            // UI 업데이트
-            foreach (var quest in questDict)
-            {
-                UpdateQuestUI(quest.Key, menuType);
-            }
+            //// UI 업데이트
+            //foreach (var quest in questDict)
+            //{
+            //    UpdateQuestUI(quest.Key, menuType);
+            //}
         }
 
         // 현재 카운트 값을 가져오는 함수 (일일)
@@ -1671,6 +1678,10 @@ public class QuestManager : MonoBehaviour, ISaveable
         RestoreQuestData(dailyQuestDictionary, savedData.dailyQuestKeys, savedData.dailyQuestValues, QuestMenuType.Daily);
         RestoreQuestData(weeklyQuestDictionary, savedData.weeklyQuestKeys, savedData.weeklyQuestValues, QuestMenuType.Weekly);
         RestoreQuestData(repeatQuestDictionary, savedData.repeatQuestKeys, savedData.repeatQuestValues, QuestMenuType.Repeat);
+
+        // 스페셜 보상 UI 초기화
+        UpdateDailySpecialRewardUI();
+        UpdateWeeklySpecialRewardUI();
     }
 
     #endregion

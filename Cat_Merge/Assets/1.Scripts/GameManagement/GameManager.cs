@@ -104,10 +104,7 @@ public class GameManager : MonoBehaviour, ISaveable
     private bool isBackButtonPressed = false;                               // 뒤로가기 버튼이 눌렸는지 여부
     [HideInInspector] public bool isQuiting = false;                        // 종료 여부
 
-    [Header("---[First Game Panel]")]
-    [SerializeField] private GameObject firstGamePanel;                     // 첫 게임 시작 패널
-
-
+    [Header("---[ETC]")]
     private bool isDataLoaded = false;                                      // 데이터 로드 확인
 
     #endregion
@@ -172,17 +169,6 @@ public class GameManager : MonoBehaviour, ISaveable
         maxCats = 8;
         coin = 250;
         cash = 100;
-    }
-
-    // 첫 게임 시작 패널을 보여주는 코루틴
-    public IEnumerator ShowFirstGamePanel()
-    {
-        if (firstGamePanel != null)
-        {
-            firstGamePanel.SetActive(true);
-            yield return new WaitForSeconds(2f);
-            firstGamePanel.SetActive(false);
-        }
     }
 
     // 게임 데이터 초기 로드 함수

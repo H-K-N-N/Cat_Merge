@@ -179,7 +179,13 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         activePanelManager = FindObjectOfType<ActivePanelManager>();
         activePanelManager.RegisterPanel("BottomItemMenu", itemMenuPanel, bottomItemButtonImg);
 
-        bottomItemButton.onClick.AddListener(() => activePanelManager.TogglePanel("BottomItemMenu"));
+        bottomItemButton.onClick.AddListener(() => {
+            activePanelManager.TogglePanel("BottomItemMenu");
+            if (activePanelManager.IsPanelActive("BottomItemMenu") && TutorialManager.Instance != null)
+            {
+                TutorialManager.Instance.OnOpenItemMenu();
+            }
+        });
         itemBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("BottomItemMenu"));
     }
 
@@ -418,6 +424,12 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
             () =>
             {
                 GameManager.Instance.MaxCats = (int)ItemFunctionManager.Instance.maxCatsList[maxCatsLv].value;
+
+                // 튜토리얼 중이라면 아이템 구매 이벤트 알림
+                if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive)
+                {
+                    TutorialManager.Instance.OnMaxCatItemPurchased();
+                }
             });
 
     }

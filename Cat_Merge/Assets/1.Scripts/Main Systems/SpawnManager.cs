@@ -159,6 +159,12 @@ public class SpawnManager : MonoBehaviour, ISaveable
         NowFood--;
         SpawnBasicCat();
         RestartFoodCoroutineIfStopped();
+
+        // 튜토리얼 중이라면 스폰 이벤트 알림
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive)
+        {
+            TutorialManager.Instance.OnCatSpawned();
+        }
     }
 
     // 기본 고양이 스폰 함수
@@ -337,7 +343,9 @@ public class SpawnManager : MonoBehaviour, ISaveable
 
         while (true)
         {
-            if (BattleManager.Instance.IsBattleActive)
+            // 전투중이거나 튜토리얼 중이면 스킵
+            if (BattleManager.Instance.IsBattleActive ||
+                (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive))
             {
                 yield return waitForEndOfFrame;
                 continue;
@@ -349,7 +357,8 @@ public class SpawnManager : MonoBehaviour, ISaveable
             // 시간 완료될때까지 대기
             while (elapsed < autoTime)
             {
-                if (BattleManager.Instance.IsBattleActive) break;
+                if (BattleManager.Instance.IsBattleActive ||
+                    (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive)) break;
 
                 elapsed += Time.deltaTime;
                 autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / autoTime);
@@ -357,7 +366,8 @@ public class SpawnManager : MonoBehaviour, ISaveable
             }
 
             // 완료되면 먹이 줄이고 고양이 생성
-            if (NowFood > 0 && !BattleManager.Instance.IsBattleActive && elapsed >= autoTime)
+            if (NowFood > 0 && !BattleManager.Instance.IsBattleActive && elapsed >= autoTime &&
+                (TutorialManager.Instance == null || !TutorialManager.Instance.IsTutorialActive))
             {
                 if (GameManager.Instance.CanSpawnCat())
                 {

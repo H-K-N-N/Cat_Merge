@@ -318,11 +318,19 @@ public class BattleManager : MonoBehaviour, ISaveable
             // 보스가 없을 때만 게이지를 충전
             if (currentBoss == null)
             {
-                bossSpawnTimer += Time.deltaTime;
+                // 튜토리얼 중이고 타이머가 180초 이상이면 180초에서 멈춤
+                if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive && bossSpawnTimer >= 180)
+                {
+                    bossSpawnTimer = 180;
+                }
+                else
+                {
+                    bossSpawnTimer += Time.deltaTime;
+                }
                 respawnSlider.value = bossSpawnTimer;
 
                 // 게이지가 꽉 차면 보스 소환
-                if (bossSpawnTimer >= spawnInterval)
+                if (bossSpawnTimer >= spawnInterval && (!TutorialManager.Instance.IsTutorialActive || !TutorialManager.Instance))
                 {
                     bossSpawnTimer = 0f;
 

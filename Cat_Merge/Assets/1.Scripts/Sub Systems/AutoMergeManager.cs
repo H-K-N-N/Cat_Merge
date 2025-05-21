@@ -454,7 +454,9 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
         while (true)
         {
-            if (BattleManager.Instance.IsBattleActive)
+            // 전투중이거나 튜토리얼 중이면 스킵
+            if (BattleManager.Instance.IsBattleActive ||
+                (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive))
             {
                 yield return waitForEndOfFrame;
                 continue;
@@ -465,54 +467,64 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             // 시간 완료될때까지 대기
             while (elapsed < autoTime)
             {
-                if (BattleManager.Instance.IsBattleActive) break;
+                if (BattleManager.Instance.IsBattleActive ||
+                    (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive)) break;
 
                 elapsed += Time.deltaTime;
                 yield return waitForEndOfFrame;
             }
 
             // 완료되면 자동 합성 실행
-            if (!BattleManager.Instance.IsBattleActive && elapsed >= autoTime)
+            if (!BattleManager.Instance.IsBattleActive && elapsed >= autoTime &&
+                (TutorialManager.Instance == null || !TutorialManager.Instance.IsTutorialActive))
             {
-                // 활성화된 고양이를 등급순으로 정렬하여 가져옴
-                var allCats = FindObjectsOfType<DragAndDropManager>()
-                    .Where(cat => cat != null &&
-                           cat.gameObject.activeSelf &&
-                           !cat.isDragging)
-                    .OrderBy(cat => cat.catData.CatGrade)
-                    .ToList();
-
-                // 가장 낮은 등급부터 순차적으로 합성 시도
-                for (int i = 0; i < allCats.Count; i++)
-                {
-                    if (allCats[i] == null || !allCats[i].gameObject.activeSelf) continue;
-
-                    // 같은 등급의 다른 고양이 찾기
-                    var sameLevelCats = allCats
-                        .Where(cat => cat != null &&
-                               cat.gameObject.activeSelf &&
-                               cat != allCats[i] &&
-                               cat.catData.CatGrade == allCats[i].catData.CatGrade)
-                        .ToList();
-
-                    if (sameLevelCats.Count > 0)
-                    {
-                        var cat1 = allCats[i];
-                        var cat2 = sameLevelCats[0];
-
-                        if (IsValidMergePair(cat1, cat2))
-                        {
-                            Vector2 mergePosition = GetRandomPosition();
-                            StartCoroutine(ExecuteMerge(cat1, cat2, mergePosition));
-                            break;
-                        }
-                    }
-                }
-
+                TryAutoMerge();
                 elapsed = 0f;
+
             }
 
             yield return waitForEndOfFrame;
+        }
+    }
+
+    // 자동 합성 시도 함수 (아이템 기능)
+    private void TryAutoMerge()
+    {
+        //CleanupMergingCats();
+
+        // 활성화된 고양이를 등급순으로 정렬하여 가져옴
+        var allCats = FindObjectsOfType<DragAndDropManager>()
+            .Where(cat => cat != null &&
+                   cat.gameObject.activeSelf &&
+                   !cat.isDragging)
+            .OrderBy(cat => cat.catData.CatGrade)
+            .ToList();
+
+        // 가장 낮은 등급부터 순차적으로 합성 시도
+        for (int i = 0; i < allCats.Count; i++)
+        {
+            if (allCats[i] == null || !allCats[i].gameObject.activeSelf) continue;
+
+            // 같은 등급의 다른 고양이 찾기
+            var sameLevelCats = allCats
+                .Where(cat => cat != null &&
+                       cat.gameObject.activeSelf &&
+                       cat != allCats[i] &&
+                       cat.catData.CatGrade == allCats[i].catData.CatGrade)
+                .ToList();
+
+            if (sameLevelCats.Count > 0)
+            {
+                var cat1 = allCats[i];
+                var cat2 = sameLevelCats[0];
+
+                if (IsValidMergePair(cat1, cat2))
+                {
+                    Vector2 mergePosition = GetRandomPosition();
+                    StartCoroutine(ExecuteMerge(cat1, cat2, mergePosition));
+                    break;
+                }
+            }
         }
     }
 

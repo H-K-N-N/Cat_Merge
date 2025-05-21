@@ -77,6 +77,7 @@ public class ButtonEffect : MonoBehaviour
 
         bool foundNormalCatDictionary = false;
         bool foundInformationPanel = false;
+        bool foundTutorialPanel = false;
 
         while (current != null)
         {
@@ -92,6 +93,11 @@ public class ButtonEffect : MonoBehaviour
             {
                 foundInformationPanel = true;
             }
+            // Tutorial Panel 체크
+            else if (currentName == "Tutorial Panel")
+            {
+                foundTutorialPanel = true;
+            }
 
             // Normal Cat Dictionary의 하위 오브젝트인 경우
             if (foundNormalCatDictionary)
@@ -100,6 +106,11 @@ public class ButtonEffect : MonoBehaviour
             }
             // Information Panel의 하위 오브젝트인 경우
             if (foundInformationPanel)
+            {
+                return true;
+            }
+            // Tutorial Panel의 하위 오브젝트인 경우
+            if (foundTutorialPanel)
             {
                 return true;
             }

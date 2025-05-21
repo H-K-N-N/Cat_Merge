@@ -445,11 +445,12 @@ public class GoogleManager : MonoBehaviour
         yield return new WaitForSecondsRealtime(0.5f);
         LoadingScreen.Instance.Show(false, gameStartPosition);
 
-        // 첫 게임 여부 확인 및 처리
-        if (!isPlayedGame)
+        //// 첫 게임 여부 확인 및 처리
+        //if (!isPlayedGame)
         {
             //Debug.Log("[초기화] 첫 게임 실행 - 튜토리얼 시작");
-            StartCoroutine(gameManager.ShowFirstGamePanel());
+            // 튜토리얼 시작
+            TutorialManager.Instance.StartTutorial();
         }
 
         isGameStarting = false;

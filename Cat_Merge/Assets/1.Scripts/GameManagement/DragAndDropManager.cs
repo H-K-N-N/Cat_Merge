@@ -302,6 +302,12 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
             cat1.catData = mergedCat;
             cat1.UpdateCatUI();
             SpawnManager.Instance.RecallEffect(cat1.gameObject);
+
+            // 튜토리얼 중이라면 합성 이벤트 알림
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive)
+            {
+                TutorialManager.Instance.OnCatMerged();
+            }
         }
     }
 
@@ -341,9 +347,9 @@ public class DragAndDropManager : MonoBehaviour, IDragHandler, IEndDragHandler, 
         rectTransform.GetWorldCorners(cornersArray);
 
         return new Rect(
-            cornersArray[0].x, 
-            cornersArray[0].y, 
-            cornersArray[2].x - cornersArray[0].x, 
+            cornersArray[0].x,
+            cornersArray[0].y,
+            cornersArray[2].x - cornersArray[0].x,
             cornersArray[2].y - cornersArray[0].y
             );
     }

@@ -460,6 +460,13 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         // 이미지 설정
         informationCatIcon.gameObject.SetActive(false);
 
+        // 버튼 이벤트 초기화
+        Button iconButton = informationCatIcon.GetComponent<Button>();
+        if (iconButton != null)
+        {
+            iconButton.onClick.RemoveAllListeners();
+        }
+
         // 텍스트 설정
         informationCatDetails.text = $"고양이를 선택하세요\n";
 
@@ -486,6 +493,20 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         // 기존 정보 표시 코드
         informationCatIcon.gameObject.SetActive(true);
         informationCatIcon.sprite = catData.CatImage;
+
+        // 아이콘 버튼 클릭 이벤트 설정
+        Button iconButton = informationCatIcon.GetComponent<Button>();
+        if (iconButton != null)
+        {
+            iconButton.onClick.RemoveAllListeners();
+            iconButton.onClick.AddListener(() => ShowNewCatPanel(catGrade));
+
+            // 버튼 SFX 등록
+            if (OptionManager.Instance != null)
+            {
+                iconButton.onClick.AddListener(OptionManager.Instance.PlayButtonClickSound);
+            }
+        }
 
         string catInfo = $"이름: {catData.CatName}\n" +
                          $"등급: {catData.CatGrade}\n" +

@@ -216,9 +216,14 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         {
             activePanelManager.TogglePanel("DictionaryMenu");
 
-            // DictionaryMenu가 활성화될 때 InformationPanel 업데이트
+            // DictionaryMenu가 활성화될 때만 실행
             if (activePanelManager.ActivePanelName == "DictionaryMenu")
             {
+                // 도감 패널이 처음 열렸을 때 튜토리얼 실행
+                if (TutorialManager.Instance != null && !TutorialManager.Instance.isDictionaryTutorialEnd)
+                {
+                    TutorialManager.Instance.StartDictionaryTutorial();
+                }
                 UpdateInformationPanel();
             }
         });

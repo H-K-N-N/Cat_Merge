@@ -114,9 +114,12 @@ public class TutorialManager : MonoBehaviour, ISaveable
         "고양이를 선택하고\n우측에 '고양이 정보' 쪽을 위아래로\n스크롤해보면 애정도를 볼 수 있다옹~",
         "애정도는 고양이를 모을수록 증가하고\n고양이들이 더 힘을 내서 강해지거나\n집사에게 좋은 효과를 줄거다옹~",
         "마지막으로 소파 위에 있는\n고양이를 터치하면 더 크게 구경할 수 있으니\n눌러보라옹!!"
-    };
+    };  
+    [HideInInspector] public bool isDictionaryTutorialActive = false;   // 도감 튜토리얼 활성화 여부
     private bool isDictionaryTutorialEnd = false;               // 도감 튜토리얼 완료 여부
     public bool IsDictionaryTutorialEnd => isDictionaryTutorialEnd;
+
+    
 
     #endregion
 
@@ -611,6 +614,7 @@ public class TutorialManager : MonoBehaviour, ISaveable
         if (isDictionaryTutorialEnd) return;
         if (isTutorialActive) return;
 
+        isDictionaryTutorialActive = true;
         tutorialPanel.SetActive(true);
         currentDictionaryMessageIndex = 0;
         StartEnterImageBlink();
@@ -657,6 +661,7 @@ public class TutorialManager : MonoBehaviour, ISaveable
     // 도감 튜토리얼 종료
     private void EndDictionaryTutorial()
     {
+        isDictionaryTutorialActive = false;
         isDictionaryTutorialEnd = true;
         tutorialPanel.SetActive(false);
         StopEnterImageBlink();

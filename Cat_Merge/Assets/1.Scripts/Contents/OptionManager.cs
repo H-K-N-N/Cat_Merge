@@ -122,6 +122,9 @@ public class OptionManager : MonoBehaviour, ISaveable
     [SerializeField] private Button saveButton;                     // 저장 버튼
     [SerializeField] private GameObject savePanel;                  // 저장 패널
     [SerializeField] private TextMeshProUGUI saveStatusText;        // 저장 상태 텍스트
+    [SerializeField] private Button deleteButton;                   // 삭제 버튼
+    [SerializeField] private GameObject deletePanel;                // 삭제 패널
+    [SerializeField] private TextMeshProUGUI deleteStatusText;      // 삭제 상태 텍스트
     [SerializeField] private Button quitButton;                     // 나가기 버튼
     [SerializeField] private GameObject informationPanel;           // 정보 패널들의 부모 패널
     [SerializeField] private GameObject[] informationPanels;        // 정보 패널 배열
@@ -132,7 +135,12 @@ public class OptionManager : MonoBehaviour, ISaveable
     private int currentActivePanel = -1;                            // 현재 활성화된 패널 인덱스
 
     private Coroutine saveCoroutine;                                // 저장 코루틴
+    private Coroutine deleteCoroutine;                              // 삭제 코루틴
 
+    [Header("---[Delete Confirmation]")]
+    [SerializeField] private GameObject deleteConfirmPanel;         // 삭제 확인 패널
+    [SerializeField] private Button deleteConfirmYesButton;         // 삭제 확인 '삭제하기' 버튼
+    [SerializeField] private Button deleteConfirmNoButton;          // 삭제 확인 '뒤로가기' 버튼
 
     // [옵션 메뉴 타입 정의]
     // Enum으로 메뉴 타입 정의 (서브 메뉴를 구분하기 위해 사용)
@@ -153,12 +161,12 @@ public class OptionManager : MonoBehaviour, ISaveable
     private const float offX = -65f;                        // 핸들버튼 x좌표 Off
     private const float moveDuration = 0.2f;                // 토글 애니메이션 지속 시간
     private const float systemAnimDuration = 0.5f;          // 시스템 애니메이션 지속 시간
-    private const float saveWaitTime = 2f;                  // 저장 대기
-    private const float saveCompleteWaitTime = 1f;          // 저장 완료 대기
+    private const float WaitTime = 2f;                      // 대기 시간
+    private const float CompleteWaitTime = 1f;              // 완료 대기 시간
 
     private static readonly WaitForSeconds waitForSystemAnim;
-    private static readonly WaitForSecondsRealtime waitForSaveDelay;
-    private static readonly WaitForSecondsRealtime waitForSaveComplete;
+    private static readonly WaitForSecondsRealtime waitForDelay;
+    private static readonly WaitForSecondsRealtime waitForComplete;
 
     private static readonly Vector2 expandedButtonPosition;
 
@@ -173,8 +181,8 @@ public class OptionManager : MonoBehaviour, ISaveable
     static OptionManager()
     {
         waitForSystemAnim = new WaitForSeconds(systemAnimDuration);
-        waitForSaveDelay = new WaitForSecondsRealtime(saveWaitTime);
-        waitForSaveComplete = new WaitForSecondsRealtime(saveCompleteWaitTime);
+        waitForDelay = new WaitForSecondsRealtime(WaitTime);
+        waitForComplete = new WaitForSecondsRealtime(CompleteWaitTime);
 
         expandedButtonPosition = new Vector2(0, 465);
     }
@@ -558,6 +566,7 @@ public class OptionManager : MonoBehaviour, ISaveable
         // InformationPanel 초기 설정
         informationPanel.SetActive(false);
         savePanel.SetActive(false);
+        deletePanel.SetActive(false);
 
         // 버튼 및 패널 초기화
         originalButtonPositions = new Vector2[slotButtons.Length];
@@ -604,6 +613,13 @@ public class OptionManager : MonoBehaviour, ISaveable
             saveButtonGroup = saveButton.gameObject.AddComponent<CanvasGroup>();
         }
 
+        // deleteButton에 CanvasGroup 추가
+        CanvasGroup deleteButtonGroup = deleteButton.gameObject.GetComponent<CanvasGroup>();
+        if (deleteButtonGroup == null)
+        {
+            deleteButtonGroup = deleteButton.gameObject.AddComponent<CanvasGroup>();
+        }
+
         // quitButton에 CanvasGroup 추가
         CanvasGroup exitButtonGroup = quitButton.gameObject.GetComponent<CanvasGroup>();
         if (exitButtonGroup == null)
@@ -628,8 +644,36 @@ public class OptionManager : MonoBehaviour, ISaveable
 
         // Save 버튼 클릭 이벤트 추가
         saveButton.onClick.AddListener(() => { StartSaveProcess(); });
+        // Delete 버튼 클릭 이벤트 추가
+        deleteButton.onClick.AddListener(() => { OnDeleteButtonClick(); });
         // Quit 버튼 클릭 이벤트 추가
         quitButton.onClick.AddListener(() => { GameManager.Instance.QuitButtonInput(); });
+
+        // 삭제 확인 패널 초기화
+        if (deleteConfirmPanel != null)
+        {
+            deleteConfirmPanel.SetActive(false);
+            ActivePanelManager.Instance.RegisterPanel("DeleteConfirmPanel", deleteConfirmPanel, null, ActivePanelManager.PanelPriority.High);
+
+
+            // 삭제 확인 버튼 이벤트 설정
+            if (deleteConfirmYesButton != null)
+            {
+                deleteConfirmYesButton.onClick.RemoveAllListeners();
+                deleteConfirmYesButton.onClick.AddListener(() => {
+                    ActivePanelManager.Instance.ClosePanel("DeleteConfirmPanel");
+                    StartDeleteProcess();
+                });
+            }
+
+            if (deleteConfirmNoButton != null)
+            {
+                deleteConfirmNoButton.onClick.RemoveAllListeners();
+                deleteConfirmNoButton.onClick.AddListener(() => {
+                    ActivePanelManager.Instance.ClosePanel("DeleteConfirmPanel");
+                });
+            }
+        }
     }
 
     // 시스템 메뉴 초기화 함수
@@ -647,6 +691,8 @@ public class OptionManager : MonoBehaviour, ISaveable
         slotPanel.gameObject.SetActive(true);
         informationPanel.SetActive(false);
         savePanel.SetActive(false);
+        deletePanel.SetActive(false);
+        ActivePanelManager.Instance.ClosePanel("DeleteConfirmPanel");
 
         // 모든 버튼 초기화
         for (int i = 0; i < slotButtons.Length; i++)
@@ -662,6 +708,10 @@ public class OptionManager : MonoBehaviour, ISaveable
         saveButton.gameObject.SetActive(true);
         saveButton.GetComponent<CanvasGroup>().alpha = 1f;
 
+        // Delete 버튼 초기화
+        deleteButton.gameObject.SetActive(true);
+        deleteButton.GetComponent<CanvasGroup>().alpha = 1f;
+
         // Quit 버튼 초기화
         quitButton.gameObject.SetActive(true);
         quitButton.GetComponent<CanvasGroup>().alpha = 1f;
@@ -670,6 +720,15 @@ public class OptionManager : MonoBehaviour, ISaveable
         informationPanelBackButton.GetComponent<CanvasGroup>().alpha = 0f;
 
         currentActivePanel = -1;
+    }
+
+    // 삭제 버튼 클릭 시 호출되는 함수
+    private void OnDeleteButtonClick()
+    {
+        if (deleteConfirmPanel != null)
+        {
+            ActivePanelManager.Instance.OpenPanel("DeleteConfirmPanel");
+        }
     }
 
     // 저장 프로세스 시작 함수
@@ -696,13 +755,13 @@ public class OptionManager : MonoBehaviour, ISaveable
         GoogleManager.Instance?.ForceSaveAllData();
 
         // 2초 대기
-        yield return waitForSaveDelay;
+        yield return waitForDelay;
 
         // 저장 상태 텍스트 업데이트
         saveStatusText.text = "저장 완료!!";
 
         // 1초 대기
-        yield return waitForSaveComplete;
+        yield return waitForComplete;
 
         // 저장 패널 비활성화
         savePanel.SetActive(false);
@@ -711,6 +770,53 @@ public class OptionManager : MonoBehaviour, ISaveable
         Time.timeScale = 1f;
 
         saveCoroutine = null;
+    }
+
+    // 삭제 프로세스 시작 함수
+    private void StartDeleteProcess()
+    {
+        if (deleteCoroutine != null)
+        {
+            StopCoroutine(deleteCoroutine);
+        }
+        deleteCoroutine = StartCoroutine(DeleteProcess());
+    }
+
+    // 삭제 프로세스 코루틴
+    private IEnumerator DeleteProcess()
+    {
+        // 삭제 패널 활성화
+        deletePanel.SetActive(true);
+        deleteStatusText.text = "삭제 중...";
+
+        // 게임 일시정지
+        Time.timeScale = 0f;
+
+        // GoogleManager를 통해 삭제
+        GoogleManager.Instance.DeleteGameData();
+
+        // 2초 대기
+        yield return waitForDelay;
+
+        // 삭제 상태 텍스트 업데이트
+        deleteStatusText.text = "삭제 완료!!\n게임을 재접속하세요!!";
+
+        // 1초 대기
+        yield return waitForComplete;
+
+        // 게임 종료
+        StartCoroutine(QuitGameAfterDelay());
+    }
+
+    // 지연 후 게임을 종료하는 코루틴
+    private IEnumerator QuitGameAfterDelay()
+    {
+        yield return new WaitForSecondsRealtime(1f);
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 
     // 슬롯 버튼 클릭 이벤트 처리 함수
@@ -738,6 +844,7 @@ public class OptionManager : MonoBehaviour, ISaveable
             }
         }
         animationsList.Add(FadeButton(saveButton.GetComponent<CanvasGroup>(), 1f, 0f));
+        animationsList.Add(FadeButton(deleteButton.GetComponent<CanvasGroup>(), 1f, 0f));
         animationsList.Add(FadeButton(quitButton.GetComponent<CanvasGroup>(), 1f, 0f));
 
         foreach (var anim in animationsList)
@@ -756,6 +863,7 @@ public class OptionManager : MonoBehaviour, ISaveable
             }
         }
         saveButton.gameObject.SetActive(false);
+        deleteButton.gameObject.SetActive(false);
         quitButton.gameObject.SetActive(false);
 
         // 정보 패널 활성화 및 펼치기 애니메이션
@@ -861,6 +969,7 @@ public class OptionManager : MonoBehaviour, ISaveable
             slotButtons[i].gameObject.SetActive(true);
         }
         saveButton.gameObject.SetActive(true);
+        deleteButton.gameObject.SetActive(true);
         quitButton.gameObject.SetActive(true);
 
         // 버튼 이동 및 페이드 인 동시 실행
@@ -874,6 +983,7 @@ public class OptionManager : MonoBehaviour, ISaveable
             }
         }
         animations.Add(FadeButton(saveButton.GetComponent<CanvasGroup>(), 0f, 1f));
+        animations.Add(FadeButton(deleteButton.GetComponent<CanvasGroup>(), 0f, 1f));
         animations.Add(FadeButton(quitButton.GetComponent<CanvasGroup>(), 0f, 1f));
 
         foreach (var anim in animations)

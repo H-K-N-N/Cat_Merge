@@ -434,7 +434,7 @@ public class GameManager : MonoBehaviour, ISaveable
             return;
         }
 
-        //// 도감 튜토리얼이 진행 중이면 뒤로가기 버튼 무시
+        // 도감 튜토리얼이 진행 중이면 뒤로가기 버튼 무시
         if (TutorialManager.Instance != null && TutorialManager.Instance.isDictionaryTutorialActive)
         {
             return;

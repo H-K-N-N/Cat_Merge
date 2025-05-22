@@ -63,7 +63,6 @@ public class GoogleManager : MonoBehaviour
 
     public static GoogleManager Instance { get; private set; }
 
-    private Button deleteDataButton;                                // 게임 데이터 삭제 버튼 (나중에 삭제 예정)
     private const string SAVE_FILE_NAME = "GoogleCloudSaveState";   // 파일 이름
     private const string GAME_SCENE = "GameScene-Han";              // GameScene 이름
     private const float AUTO_SAVE_INTERVAL = 30f;                   // 자동 저장 간격
@@ -263,7 +262,6 @@ public class GoogleManager : MonoBehaviour
     // 씬 로드 시 필요한 설정을 하는 함수
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        FindAndSetupDeleteButton();
         LoadingScreen.Instance?.UpdateLoadingScreenCamera();
     }
 
@@ -825,27 +823,8 @@ public class GoogleManager : MonoBehaviour
 
     #region Delete System
 
-    // 삭제 버튼을 찾고 설정하는 함수
-    private void FindAndSetupDeleteButton()
-    {
-        GameObject buttonObj = GameObject.Find("Canvas/Main UI Panel/Top Simple Button Panel/Delete Data Button");
-        if (buttonObj != null)
-        {
-            deleteDataButton = buttonObj.GetComponent<Button>();
-            if (deleteDataButton != null)
-            {
-                deleteDataButton.onClick.RemoveAllListeners();
-                deleteDataButton.onClick.AddListener(DeleteGameDataAndQuit);
-            }
-        }
-        else
-        {
-            deleteDataButton = null;
-        }
-    }
-
     // 게임 데이터를 삭제하고 게임을 종료하는 함수
-    public void DeleteGameDataAndQuit()
+    public void DeleteGameData()
     {
         isDeleting = true;
         Time.timeScale = 0f;
@@ -878,7 +857,6 @@ public class GoogleManager : MonoBehaviour
         }
 
         yield return new WaitForSecondsRealtime(1.0f);
-        StartCoroutine(QuitGameAfterDelay());
     }
 
     // 게임 데이터를 삭제하는 함수
@@ -920,17 +898,6 @@ public class GoogleManager : MonoBehaviour
                     onComplete?.Invoke(false);
                 }
             });
-    }
-
-    // 지연 후 게임을 종료하는 코루틴
-    private IEnumerator QuitGameAfterDelay()
-    {
-        yield return new WaitForSecondsRealtime(1f);
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
     }
 
     #endregion

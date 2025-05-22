@@ -84,7 +84,7 @@ public class QuestManager : MonoBehaviour, ISaveable
     [SerializeField] private TextMeshProUGUI weeklySpecialRewardText;           // Weekly Special Reward 보상 획득 Text
     [SerializeField] private GameObject weeklySpecialRewardDisabledBG;          // Weekly Special Reward 보상 버튼 비활성화 BG
     private int weeklySpecialRewardTargetCount;                                 // Weekly 목표 횟수
-    private int weeklySpecialRewardQuestRewardCash = 5000;                      // Weekly Special Reward 퀘스트 보상 캐쉬 재화 개수
+    private int weeklySpecialRewardQuestRewardCash = 2500;                      // Weekly Special Reward 퀘스트 보상 캐쉬 재화 개수
     private bool isWeeklySpecialRewardQuestComplete;                            // Weekly Special Reward 퀘스트 완료 여부 상태
 
     // ======================================================================================================================
@@ -325,10 +325,10 @@ public class QuestManager : MonoBehaviour, ISaveable
     // Repeat Quest 설정 함수
     private void InitializeRepeatQuestManager()
     {
-        InitializeQuest("고양이 합성 횟수", 150, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 소환 횟수", 150, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 합성 횟수", 160, 4, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
+        InitializeQuest("고양이 소환 횟수", 160, 4, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
         //InitializeQuest("고양이 구매 횟수", 20, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
-        InitializeQuest("전투 횟수", 3, 5, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
+        InitializeQuest("전투 횟수", 3, 4, QuestMenuType.Repeat, "I_UI_Mission_Daily.9");
 
         // 초기 스크롤 위치 초기화
         InitializeScrollPosition();

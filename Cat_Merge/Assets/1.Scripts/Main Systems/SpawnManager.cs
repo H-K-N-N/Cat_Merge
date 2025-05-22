@@ -46,10 +46,6 @@ public class SpawnManager : MonoBehaviour, ISaveable
     private Coroutine createFoodCoroutine;
     private Coroutine autoCollectCoroutine;
 
-
-    [Header("---[ETC]")]
-    private bool isDataLoaded = false;                              // 데이터 로드 확인
-
     private readonly WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
 
     #endregion
@@ -72,12 +68,6 @@ public class SpawnManager : MonoBehaviour, ISaveable
     private void Start()
     {
         panelRectTransform = catUIParent.GetComponent<RectTransform>();
-
-        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
-        if (!isDataLoaded)
-        {
-            NowFood = 5;
-        }
 
         InitializeObjectPool();
         InitializeSpawnSystem();
@@ -454,6 +444,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
     private class SaveData
     {
         public int nowFood;                                                     // 현재 음식
+        public long savedTimeStamp;                                             // 저장 시점의 타임스탬프
         public List<CatInstanceData> activeCats = new List<CatInstanceData>();  // 활성화된 고양이 데이터
     }
 
@@ -470,6 +461,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
         SaveData data = new SaveData
         {
             nowFood = this.nowFood,
+            savedTimeStamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             activeCats = new List<CatInstanceData>()
         };
 
@@ -519,8 +511,29 @@ public class SpawnManager : MonoBehaviour, ISaveable
 
         GameManager.Instance.CurrentCatCount = activeCats.Count;
 
+        StartCoroutine(CalculateFoodAfterDelay(savedData.savedTimeStamp));
+    }
+
+    private IEnumerator CalculateFoodAfterDelay(long savedTimeStamp)
+    {
+        yield return null;
+
+        // 저장 시점과 현재 시점의 시간 차이 계산
+        long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        long timeDiff = currentTime - savedTimeStamp;
+
+        // 먹이 생성 시간과 최대 보유 가능 수량 가져오기
+        float producingTime = ItemFunctionManager.Instance.reduceProducingFoodTimeList[ItemMenuManager.Instance.ReduceProducingFoodTimeLv].value;
         int maxFood = (int)ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value;
-        if (this.nowFood < maxFood)
+
+        // 시간 차이동안 생성된 먹이 수 계산
+        int additionalFood = (int)(timeDiff / producingTime);
+        int totalFood = nowFood + additionalFood;
+        nowFood = Mathf.Min(totalFood, maxFood);
+        UpdateFoodText();
+
+        // 먹이가 최대치가 아닐 때만 코루틴 시작
+        if (nowFood < maxFood)
         {
             if (createFoodCoroutine != null)
             {
@@ -530,8 +543,14 @@ public class SpawnManager : MonoBehaviour, ISaveable
             isStoppedReduceCoroutine = false;
             createFoodCoroutine = StartCoroutine(CreateFoodTime());
         }
-
-        isDataLoaded = true;
+        else
+        {
+            isStoppedReduceCoroutine = true;
+            if (foodFillAmountImg != null)
+            {
+                foodFillAmountImg.fillAmount = 1f;
+            }
+        }
     }
 
     private GameObject LoadAndDisplayCatsRestartGame(Cat cat)

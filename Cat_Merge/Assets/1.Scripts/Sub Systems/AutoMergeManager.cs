@@ -97,9 +97,17 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     {
         while (true)
         {
-            if (isAutoMergeActive || isPaused)
+            if (isAutoMergeActive)
             {
-                float remainingTime = isPaused ? pausedTimeRemaining : Mathf.Max(currentAutoMergeDuration - (Time.time - startTime), 0);
+                float remainingTime;
+                if (isPaused)
+                {
+                    remainingTime = pausedTimeRemaining;
+                }
+                else
+                {
+                    remainingTime = Mathf.Max(currentAutoMergeDuration - (Time.time - startTime), 0);
+                }
                 UpdateTimerDisplay((int)remainingTime);
 
                 if (!isPaused && remainingTime <= 0)
@@ -612,6 +620,8 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             StopAllCoroutines();
             mergingCats.Clear();
             DisableAutoMergeUI();
+
+            StartCoroutine(TimerCheckRoutine());
         }
         else
         {

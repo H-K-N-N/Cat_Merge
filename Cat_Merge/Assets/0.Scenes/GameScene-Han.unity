@@ -11092,6 +11092,7 @@ MonoBehaviour:
   newCatExplain: {fileID: 775198912}
   newCatGetCoin: {fileID: 65192551}
   submitButton: {fileID: 122737563}
+  touchText: {fileID: 1472782626}
   informationCatIcon: {fileID: 1845267676}
   informationCatDetails: {fileID: 5958752624957958901}
   catInformationPanel: {fileID: 245921775097064851}
@@ -11421,6 +11422,7 @@ MonoBehaviour:
   slotButtons:
   - {fileID: 1281227372}
   - {fileID: 2073409315}
+  - {fileID: 1737706394}
   - {fileID: 2136917526}
   saveButton: {fileID: 936900541}
   savePanel: {fileID: 874342225}
@@ -11430,6 +11432,7 @@ MonoBehaviour:
   informationPanels:
   - {fileID: 2087267467}
   - {fileID: 1199680685}
+  - {fileID: 680211057}
   - {fileID: 1435090875}
   informationPanelBackButton: {fileID: 1875026450}
 --- !u!114 &331588659
@@ -11627,6 +11630,7 @@ MonoBehaviour:
   tutorialTopArrow: {fileID: 1987456227}
   tutorialBottomArrow: {fileID: 247563739}
   tutorialLeftArrow: {fileID: 1105339397}
+  isDictionaryTutorialActive: 0
 --- !u!1 &335877571
 GameObject:
   m_ObjectHideFlags: 0
@@ -30594,7 +30598,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2986493045968706962, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 75
+      value: -55
       objectReference: {fileID: 0}
     - target: {fileID: 2986493045968706962, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -30667,7 +30671,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &941503912
 RectTransform:
   m_ObjectHideFlags: 0
@@ -45876,11 +45880,11 @@ RectTransform:
   - {fileID: 1787970633}
   - {fileID: 789463938}
   - {fileID: 1413239665}
-  - {fileID: 874342226}
   - {fileID: 187271676}
   - {fileID: 1422627396}
   - {fileID: 1631532502}
   - {fileID: 858522841}
+  - {fileID: 874342226}
   - {fileID: 1439232309}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -59176,7 +59180,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3931628336585984256, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4550343725620668361, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
       propertyPath: m_Sprite
@@ -59196,6 +59200,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2986493045968706962, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
   m_PrefabInstance: {fileID: 1737706392}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1737706394 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5945003218127755203, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
+  m_PrefabInstance: {fileID: 1737706392}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1739497693
 GameObject:
   m_ObjectHideFlags: 0
@@ -71251,7 +71266,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2986493045968706962, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 205
+      value: 75
       objectReference: {fileID: 0}
     - target: {fileID: 2986493045968706962, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

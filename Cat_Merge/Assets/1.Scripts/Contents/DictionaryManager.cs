@@ -49,12 +49,19 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     [SerializeField] private TextMeshProUGUI newCatName;            // New Cat Name Text
     [SerializeField] private TextMeshProUGUI newCatExplain;         // New Cat Explanation Text
     [SerializeField] private TextMeshProUGUI newCatGetCoin;         // New Cat Get Coin Text
+    [SerializeField] private TextMeshProUGUI touchText;             // New Cat Panel Touch Text
     [SerializeField] private Button submitButton;                   // New Cat Panel Submit Button
     private Coroutine highlightRotationCoroutine;                   // Highlight 회전 코루틴 관리용 변수
+    private Coroutine touchTextBlinkCoroutine;                      // Touch Text 깜빡임 코루틴 관리용 변수
 
     // Highlight Image 회전에 사용할 Vector3 캐싱
     private static readonly Vector3 rotationVector = new Vector3(0, 0, 1);
     private static readonly float rotationSpeed = 90f;
+
+    // Touch Text 깜빡임에 사용할 상수
+    private const float BLINK_SPEED = 2f;              // 깜빡임 속도
+    private const float MIN_ALPHA = 0.2f;              // 최소 투명도
+    private const float MAX_ALPHA = 1f;                // 최대 투명도
 
     // Enum으로 메뉴 타입 정의 (서브 메뉴를 구분하기 위해 사용)
     private enum DictionaryMenuType
@@ -565,6 +572,13 @@ public class DictionaryManager : MonoBehaviour, ISaveable
             highlightRotationCoroutine = null;
         }
 
+        // 기존 깜빡임 코루틴이 있다면 중지
+        if (touchTextBlinkCoroutine != null)
+        {
+            StopCoroutine(touchTextBlinkCoroutine);
+            touchTextBlinkCoroutine = null;
+        }
+
         Cat newCat = GameManager.Instance.AllCatData[catGrade];
 
         newCatPanel.SetActive(true);
@@ -576,6 +590,9 @@ public class DictionaryManager : MonoBehaviour, ISaveable
 
         // Highlight Image 회전 애니메이션 시작
         highlightRotationCoroutine = StartCoroutine(RotateHighlightImage());
+
+        // Touch Text 깜빡임 애니메이션 시작
+        touchTextBlinkCoroutine = StartCoroutine(BlinkTouchText());
 
         // 확인 버튼을 누르면 패널을 비활성화
         submitButton.onClick.AddListener(CloseNewCatPanel);
@@ -602,6 +619,40 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         highlightRotationCoroutine = null;
     }
 
+    // Touch Text 깜빡임 애니메이션 코루틴
+    private IEnumerator BlinkTouchText()
+    {
+        if (touchText == null) yield break;
+
+        float currentAlpha = MAX_ALPHA;
+        bool fadeOut = true;
+
+        while (newCatPanel.activeSelf)
+        {
+            if (fadeOut)
+            {
+                currentAlpha = Mathf.MoveTowards(currentAlpha, MIN_ALPHA, BLINK_SPEED * Time.deltaTime);
+                if (currentAlpha <= MIN_ALPHA)
+                {
+                    fadeOut = false;
+                }
+            }
+            else
+            {
+                currentAlpha = Mathf.MoveTowards(currentAlpha, MAX_ALPHA, BLINK_SPEED * Time.deltaTime);
+                if (currentAlpha >= MAX_ALPHA)
+                {
+                    fadeOut = true;
+                }
+            }
+
+            touchText.alpha = currentAlpha;
+            yield return null;
+        }
+
+        touchTextBlinkCoroutine = null;
+    }
+
     // New Cat Panel을 닫는 함수
     private void CloseNewCatPanel()
     {
@@ -609,6 +660,12 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         {
             StopCoroutine(highlightRotationCoroutine);
             highlightRotationCoroutine = null;
+        }
+
+        if (touchTextBlinkCoroutine != null)
+        {
+            StopCoroutine(touchTextBlinkCoroutine);
+            touchTextBlinkCoroutine = null;
         }
 
         newCatPanel.SetActive(false);

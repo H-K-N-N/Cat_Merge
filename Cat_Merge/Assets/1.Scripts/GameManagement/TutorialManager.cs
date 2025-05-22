@@ -19,6 +19,7 @@ public class TutorialManager : MonoBehaviour, ISaveable
     [SerializeField] private Image enterImage;                  // 엔터(터치) 버튼
 
     [SerializeField] private GameObject spawnBlockingPanel;     // 유저 입력 차단용 패널 ([USER_ACTION]SpawnCat)
+    [SerializeField] private GameObject mergeBlockingPanel;     // 유저 입력 차단용 패널 ([USER_ACTION]MergeCat)
     [SerializeField] private GameObject openItemBlockingPanel;  // 유저 입력 차단용 패널 ([USER_ACTION]OpenItemMenu)
     [SerializeField] private GameObject buyItemBlockingPanel;   // 유저 입력 차단용 패널 ([USER_ACTION]BuyMaxCatItem)
     [SerializeField] private GameObject mainBlockingPanel;      // 유저 입력 차단용 패널 ([USER_ACTION]ShowCatCount, [USER_ACTION]ShowGaugeBar, [USER_ACTION]ShowAutoMerge)
@@ -70,6 +71,7 @@ public class TutorialManager : MonoBehaviour, ISaveable
 
     // 현재 튜토리얼 단계
     private TutorialStep currentTutorialStep = TutorialStep.None;
+    public TutorialStep CurrentTutorialStep => currentTutorialStep;
 
     // 각 단계별 완료 조건 카운트
     private int spawnCount = 0;
@@ -154,6 +156,10 @@ public class TutorialManager : MonoBehaviour, ISaveable
         if (spawnBlockingPanel != null)
         {
             spawnBlockingPanel.SetActive(false);
+        }
+        if (mergeBlockingPanel != null)
+        {
+            mergeBlockingPanel.SetActive(false);
         }
         if (openItemBlockingPanel != null)
         {
@@ -287,6 +293,7 @@ public class TutorialManager : MonoBehaviour, ISaveable
 
             case TutorialStep.MergeCat:
                 // 고양이 합성 1회 대기
+                mergeBlockingPanel.SetActive(true);
                 isMergeTutorialActive = true;
                 tutorialTopArrow.SetActive(true);
                 StartMergeArrowMove();
@@ -409,16 +416,17 @@ public class TutorialManager : MonoBehaviour, ISaveable
                 spawnBlockingPanel.SetActive(false);
                 break;
 
+            case TutorialStep.MergeCat:
+                mergeBlockingPanel.SetActive(false);
+                isMergeTutorialActive = false;
+                break;
+
             case TutorialStep.OpenItemMenu:
                 openItemBlockingPanel.SetActive(false);
                 break;
 
             case TutorialStep.BuyMaxCatItem:
                 buyItemBlockingPanel.SetActive(false);
-                break;
-
-            case TutorialStep.MergeCat:
-                isMergeTutorialActive = false;
                 break;
         }
 
@@ -520,6 +528,11 @@ public class TutorialManager : MonoBehaviour, ISaveable
         {
             case TutorialStep.SpawnCat:
                 // spawnBlockingPanel이 있으므로 항상 화살표 표시
+                shouldShowArrow = true;
+                break;
+
+            case TutorialStep.MergeCat:
+                // mergeBlockingPanel이 있으므로 항상 화살표 표시
                 shouldShowArrow = true;
                 break;
 

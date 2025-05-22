@@ -300,6 +300,14 @@ public class SpawnManager : MonoBehaviour, ISaveable
         float halfWidth = panelRectTransform.rect.width * 0.5f;
         float halfHeight = panelRectTransform.rect.height * 0.5f;
 
+        // 튜토리얼의 SpawnCat 상태일 때는 제한된 범위 사용
+        if (TutorialManager.Instance != null &&
+            TutorialManager.Instance.IsTutorialActive &&
+            TutorialManager.Instance.CurrentTutorialStep == TutorialManager.TutorialStep.SpawnCat)
+        {
+            halfHeight = 500f; // 제한된 높이 사용
+        }
+
         return new Vector2(
             UnityEngine.Random.Range(-halfWidth, halfWidth),
             UnityEngine.Random.Range(-halfHeight, halfHeight)

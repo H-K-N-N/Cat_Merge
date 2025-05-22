@@ -428,6 +428,18 @@ public class GameManager : MonoBehaviour, ISaveable
     // 종료 입력 체크 함수
     private void CheckQuitInput()
     {
+        // 메인 튜토리얼이 진행 중이면 뒤로가기 버튼 무시
+        if (TutorialManager.Instance != null && !TutorialManager.Instance.IsMainTutorialEnd)
+        {
+            return;
+        }
+
+        // 도감 튜토리얼이 진행 중이면 뒤로가기 버튼 무시
+        if (TutorialManager.Instance != null && !TutorialManager.Instance.IsDictionaryTutorialEnd)
+        {
+            return;
+        }
+
         // 유니티 에디터 및 안드로이드에서 뒤로가기 버튼
         if ((Application.platform == RuntimePlatform.Android && Input.GetKey(KeyCode.Escape)) ||
             (Application.platform == RuntimePlatform.WindowsEditor && Input.GetKeyDown(KeyCode.Escape)))

@@ -212,6 +212,12 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         activePanelManager = FindObjectOfType<ActivePanelManager>();
         activePanelManager.RegisterPanel("DictionaryMenu", dictionaryMenuPanel, dictionaryButtonImage);
 
+        // 메인 튜토리얼 완료 여부에 따라 버튼 상호작용 설정
+        if (TutorialManager.Instance != null)
+        {
+            dictionaryButton.interactable = TutorialManager.Instance.IsMainTutorialEnd;
+        }
+
         dictionaryButton.onClick.AddListener(() =>
         {
             activePanelManager.TogglePanel("DictionaryMenu");
@@ -220,7 +226,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
             if (activePanelManager.ActivePanelName == "DictionaryMenu")
             {
                 // 도감 패널이 처음 열렸을 때 튜토리얼 실행
-                if (TutorialManager.Instance != null && !TutorialManager.Instance.isDictionaryTutorialEnd)
+                if (TutorialManager.Instance != null && !TutorialManager.Instance.IsDictionaryTutorialEnd)
                 {
                     TutorialManager.Instance.StartDictionaryTutorial();
                 }
@@ -228,6 +234,15 @@ public class DictionaryManager : MonoBehaviour, ISaveable
             }
         });
         dictionaryBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("DictionaryMenu"));
+    }
+
+    // 도감 버튼 상호작용 업데이트 함수 추가
+    public void UpdateDictionaryButtonInteractable()
+    {
+        if (TutorialManager.Instance != null && dictionaryButton != null)
+        {
+            dictionaryButton.interactable = TutorialManager.Instance.IsMainTutorialEnd;
+        }
     }
 
     // DictionaryButton 초기화 함수

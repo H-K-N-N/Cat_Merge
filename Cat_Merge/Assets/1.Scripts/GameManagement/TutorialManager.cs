@@ -212,6 +212,22 @@ public class TutorialManager : MonoBehaviour, ISaveable
         if (tutorialPanel == null || tutorialText == null) return;
         if (isMainTutorialEnd) return;
 
+        // 현재 필드의 고양이들 중 2레벨 이상이 있는지 확인
+        if (SpawnManager.Instance != null)
+        {
+            var activeCats = SpawnManager.Instance.GetActiveCats();
+            foreach (var cat in activeCats)
+            {
+                if (cat.TryGetComponent<CatData>(out var catData) &&
+                    catData.catData.CatGrade >= 2)
+                {
+                    // 2레벨 이상 고양이가 있으면 메인 튜토리얼 완료 처리
+                    CompleteMainTutorial();
+                    return;
+                }
+            }
+        }
+
         isTutorialActive = true;
         tutorialPanel.SetActive(true);
         StartEnterImageBlink();
@@ -230,6 +246,18 @@ public class TutorialManager : MonoBehaviour, ISaveable
         }
 
         ShowCurrentMessage();
+    }
+
+    // 메인 튜토리얼 완료 처리 함수
+    private void CompleteMainTutorial()
+    {
+        isMainTutorialEnd = true;
+
+        // 도감 버튼 상호작용 업데이트
+        if (DictionaryManager.Instance != null)
+        {
+            DictionaryManager.Instance.UpdateDictionaryButtonInteractable();
+        }
     }
 
     // 현재 메시지 표시 함수

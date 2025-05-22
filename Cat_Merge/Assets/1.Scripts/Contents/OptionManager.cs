@@ -362,9 +362,19 @@ public class OptionManager : MonoBehaviour, ISaveable
         SoundSettings settings = isBgm ? bgmSettings : sfxSettings;
         settings.isOn = !settings.isOn;
 
-        // SFX 토글이고 Off에서 On으로 변경될 때만 소리 재생
-        if (!isBgm && settings.isOn)
-        {
+        if (isBgm)
+        {   // BGM 토글일 경우 재생/정지 처리
+            if (settings.isOn)
+            {
+                settings.controller.Play();
+            }
+            else
+            {
+                settings.controller.Stop();
+            }
+        }
+        else if (!isBgm && settings.isOn)
+        {   // SFX 토글이고 Off에서 On으로 변경될 때만 소리 재생
             if (sfxSettings.controller != null && sfxSettings.controller.GetAudioSource() != null)
             {
                 AudioSource audioSource = sfxSettings.controller.GetAudioSource();
@@ -410,12 +420,24 @@ public class OptionManager : MonoBehaviour, ISaveable
         {
             settings.handle.anchoredPosition = new Vector2(targetX, settings.handle.anchoredPosition.y);
             settings.controller.SetVolume(targetVolume);
+
+            // BGM의 경우 초기 상태에 따라 재생/정지 처리
+            if (isBgm)
+            {
+                if (state)
+                {
+                    settings.controller.Play();
+                }
+                else
+                {
+                    settings.controller.Stop();
+                }
+            }
         }
         else
         {
             StopAndStartCoroutine(ref settings.toggleCoroutine, AnimateToggle(settings.handle, targetX, settings.controller, targetVolume));
         }
-
     }
 
     // 코루틴 정지 후 실행시키는 함수

@@ -11091,8 +11091,8 @@ MonoBehaviour:
   newCatName: {fileID: 1046855099}
   newCatExplain: {fileID: 775198912}
   newCatGetCoin: {fileID: 65192551}
-  submitButton: {fileID: 122737563}
   touchText: {fileID: 1472782626}
+  submitButton: {fileID: 122737563}
   informationCatIcon: {fileID: 1845267676}
   informationCatDetails: {fileID: 5958752624957958901}
   catInformationPanel: {fileID: 245921775097064851}
@@ -11395,7 +11395,7 @@ MonoBehaviour:
     handle: {fileID: 1744564920}
     onOffImage: {fileID: 1397973894}
     toggleButtonImage: {fileID: 0}
-    isOn: 0
+    isOn: 1
   sfxSettings:
     slider: {fileID: 955937724}
     toggleButton: {fileID: 108979623}
@@ -11420,8 +11420,6 @@ MonoBehaviour:
     isOn: 0
   slotPanel: {fileID: 270211957}
   slotButtons:
-  - {fileID: 1281227372}
-  - {fileID: 2073409315}
   - {fileID: 1737706394}
   - {fileID: 2136917526}
   saveButton: {fileID: 936900541}
@@ -11430,8 +11428,6 @@ MonoBehaviour:
   quitButton: {fileID: 966167176}
   informationPanel: {fileID: 720113555}
   informationPanels:
-  - {fileID: 2087267467}
-  - {fileID: 1199680685}
   - {fileID: 680211057}
   - {fileID: 1435090875}
   informationPanelBackButton: {fileID: 1875026450}
@@ -30598,7 +30594,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2986493045968706962, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -55
+      value: 205
       objectReference: {fileID: 0}
     - target: {fileID: 2986493045968706962, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -44117,6 +44113,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: "\uACF5\uC9C0\uC0AC\uD56D"
       objectReference: {fileID: 0}
+    - target: {fileID: 3931628336585984256, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4550343725620668361, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -44135,17 +44135,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2986493045968706962, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
   m_PrefabInstance: {fileID: 1281227370}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1281227372 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5945003218127755203, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
-  m_PrefabInstance: {fileID: 1281227370}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1284941805
 GameObject:
   m_ObjectHideFlags: 0
@@ -59156,7 +59145,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2986493045968706962, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 205
+      value: 465
       objectReference: {fileID: 0}
     - target: {fileID: 2986493045968706962, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -67529,7 +67518,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u25B6 \uC5D0\uC14B \uC0AC\uC6A9 \uC815\uBCF4\u25C0\n\n\uC5D0\uC14B"
+  m_text: "\u25B6 \uC5D0\uC14B \uC0AC\uC6A9 \uC815\uBCF4\u25C0\n\nBGM : Adventure
+    Music and SFX\nSFX : UI 03 by rhodesmas -- https://freesound.org/s/380292/ --
+    License: Attribution 3.0"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c7f9e1d048d0987499eff167c931517f, type: 2}
   m_sharedMaterial: {fileID: -8525234839207697280, guid: c7f9e1d048d0987499eff167c931517f, type: 2}
@@ -67556,7 +67547,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 48
+  m_fontSize: 44.8
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -69679,7 +69670,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3931628336585984256, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4550343725620668361, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
       propertyPath: m_Sprite
@@ -69699,17 +69690,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2986493045968706962, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
   m_PrefabInstance: {fileID: 2073409313}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2073409315 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5945003218127755203, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
-  m_PrefabInstance: {fileID: 2073409313}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &2073703511 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6596196858308126953, guid: f2919b5a5d8e3ee458460fc702a3b940, type: 3}
@@ -71016,7 +70996,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: -15}
-  m_SizeDelta: {x: 0, y: -30}
+  m_SizeDelta: {x: -10, y: -30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2127458865
 MonoBehaviour:
@@ -71266,7 +71246,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2986493045968706962, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 75
+      value: 335
       objectReference: {fileID: 0}
     - target: {fileID: 2986493045968706962, guid: 687e4d9fc214d4e48a803d1eb21c31f4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

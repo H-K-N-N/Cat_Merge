@@ -46,10 +46,6 @@ public class SpawnManager : MonoBehaviour, ISaveable
     private Coroutine createFoodCoroutine;
     private Coroutine autoCollectCoroutine;
 
-
-    [Header("---[ETC]")]
-    private bool isDataLoaded = false;                              // 데이터 로드 확인
-
     private readonly WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
 
     #endregion
@@ -72,12 +68,6 @@ public class SpawnManager : MonoBehaviour, ISaveable
     private void Start()
     {
         panelRectTransform = catUIParent.GetComponent<RectTransform>();
-
-        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
-        if (!isDataLoaded)
-        {
-            NowFood = 5;
-        }
 
         InitializeObjectPool();
         InitializeSpawnSystem();
@@ -159,6 +149,12 @@ public class SpawnManager : MonoBehaviour, ISaveable
         NowFood--;
         SpawnBasicCat();
         RestartFoodCoroutineIfStopped();
+
+        // 튜토리얼 중이라면 스폰 이벤트 알림
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive)
+        {
+            TutorialManager.Instance.OnCatSpawned();
+        }
     }
 
     // 기본 고양이 스폰 함수
@@ -294,6 +290,14 @@ public class SpawnManager : MonoBehaviour, ISaveable
         float halfWidth = panelRectTransform.rect.width * 0.5f;
         float halfHeight = panelRectTransform.rect.height * 0.5f;
 
+        // 튜토리얼의 SpawnCat 상태일 때는 제한된 범위 사용
+        if (TutorialManager.Instance != null &&
+            TutorialManager.Instance.IsTutorialActive &&
+            TutorialManager.Instance.CurrentTutorialStep == TutorialManager.TutorialStep.SpawnCat)
+        {
+            halfHeight = 500f; // 제한된 높이 사용
+        }
+
         return new Vector2(
             UnityEngine.Random.Range(-halfWidth, halfWidth),
             UnityEngine.Random.Range(-halfHeight, halfHeight)
@@ -330,15 +334,16 @@ public class SpawnManager : MonoBehaviour, ISaveable
         }
     }
 
-    // 자동 스폰 코루틴
+    // 기본 N초마다 자동으로 스폰하는 기능 코루틴
     private IEnumerator AutoCollectingTime()
     {
         float elapsed = 0f;
 
         while (true)
         {
-            // 전투중이면 대기
-            if (BattleManager.Instance.IsBattleActive)
+            // 전투중이거나 튜토리얼 중이면 스킵
+            if (BattleManager.Instance.IsBattleActive ||
+                (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive))
             {
                 yield return waitForEndOfFrame;
                 continue;
@@ -347,10 +352,11 @@ public class SpawnManager : MonoBehaviour, ISaveable
             float autoTime = ItemFunctionManager.Instance.autoCollectingList[ItemMenuManager.Instance.AutoCollectingLv].value;
             autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / autoTime);
 
-            // 수집 시간 완료될때까지 대기
+            // 시간 완료될때까지 대기
             while (elapsed < autoTime)
             {
-                if (BattleManager.Instance.IsBattleActive) break;
+                if (BattleManager.Instance.IsBattleActive ||
+                    (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive)) break;
 
                 elapsed += Time.deltaTime;
                 autoFillAmountImg.fillAmount = Mathf.Clamp01(elapsed / autoTime);
@@ -358,7 +364,8 @@ public class SpawnManager : MonoBehaviour, ISaveable
             }
 
             // 완료되면 먹이 줄이고 고양이 생성
-            if (NowFood > 0 && !BattleManager.Instance.IsBattleActive && elapsed >= autoTime)
+            if (NowFood > 0 && !BattleManager.Instance.IsBattleActive && elapsed >= autoTime &&
+                (TutorialManager.Instance == null || !TutorialManager.Instance.IsTutorialActive))
             {
                 if (GameManager.Instance.CanSpawnCat())
                 {
@@ -437,6 +444,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
     private class SaveData
     {
         public int nowFood;                                                     // 현재 음식
+        public long savedTimeStamp;                                             // 저장 시점의 타임스탬프
         public List<CatInstanceData> activeCats = new List<CatInstanceData>();  // 활성화된 고양이 데이터
     }
 
@@ -453,6 +461,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
         SaveData data = new SaveData
         {
             nowFood = this.nowFood,
+            savedTimeStamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             activeCats = new List<CatInstanceData>()
         };
 
@@ -502,8 +511,29 @@ public class SpawnManager : MonoBehaviour, ISaveable
 
         GameManager.Instance.CurrentCatCount = activeCats.Count;
 
+        StartCoroutine(CalculateFoodAfterDelay(savedData.savedTimeStamp));
+    }
+
+    private IEnumerator CalculateFoodAfterDelay(long savedTimeStamp)
+    {
+        yield return null;
+
+        // 저장 시점과 현재 시점의 시간 차이 계산
+        long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        long timeDiff = currentTime - savedTimeStamp;
+
+        // 먹이 생성 시간과 최대 보유 가능 수량 가져오기
+        float producingTime = ItemFunctionManager.Instance.reduceProducingFoodTimeList[ItemMenuManager.Instance.ReduceProducingFoodTimeLv].value;
         int maxFood = (int)ItemFunctionManager.Instance.maxFoodsList[ItemMenuManager.Instance.MaxFoodsLv].value;
-        if (this.nowFood < maxFood)
+
+        // 시간 차이동안 생성된 먹이 수 계산
+        int additionalFood = (int)(timeDiff / producingTime);
+        int totalFood = nowFood + additionalFood;
+        nowFood = Mathf.Min(totalFood, maxFood);
+        UpdateFoodText();
+
+        // 먹이가 최대치가 아닐 때만 코루틴 시작
+        if (nowFood < maxFood)
         {
             if (createFoodCoroutine != null)
             {
@@ -513,8 +543,14 @@ public class SpawnManager : MonoBehaviour, ISaveable
             isStoppedReduceCoroutine = false;
             createFoodCoroutine = StartCoroutine(CreateFoodTime());
         }
-
-        isDataLoaded = true;
+        else
+        {
+            isStoppedReduceCoroutine = true;
+            if (foodFillAmountImg != null)
+            {
+                foodFillAmountImg.fillAmount = 1f;
+            }
+        }
     }
 
     private GameObject LoadAndDisplayCatsRestartGame(Cat cat)

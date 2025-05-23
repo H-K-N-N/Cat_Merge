@@ -19,6 +19,7 @@ public class ItemFunctionManager : MonoBehaviour
     public List<(int step, float value, decimal fee)> foodUpgradeList;
     public List<(int step, float value, decimal fee)> foodUpgrade2List;
     public List<(int step, float value, decimal fee)> autoCollectingList;
+    public List<(int step, float value, decimal fee)> autoMergeList;
 
     // 리스트 초기 용량 설정
     private const int INITIAL_LIST_CAPACITY = 50;
@@ -58,24 +59,26 @@ public class ItemFunctionManager : MonoBehaviour
         foodUpgradeList = new List<(int, float, decimal)>(INITIAL_LIST_CAPACITY);
         foodUpgrade2List = new List<(int, float, decimal)>(INITIAL_LIST_CAPACITY);
         autoCollectingList = new List<(int, float, decimal)>(INITIAL_LIST_CAPACITY);
+        autoMergeList = new List<(int, float, decimal)>(INITIAL_LIST_CAPACITY);
     }
 
     // 각 아이템 업그레이드 데이터를 리스트에 로드하는 함수
     private void InitListContents()
     {
-        LoadItemData(1, maxCatsList);                      // 고양이 최대치 증가
-        LoadItemData(2, reduceCollectingTimeList);         // 재화 획득 시간 감소
-        LoadItemData(3, maxFoodsList);                     // 먹이 최대치 증가
-        LoadItemData(4, reduceProducingFoodTimeList);      // 먹이 생성 시간 감소
-        LoadItemData(5, foodUpgradeList);                  // 먹이 업그레이드
-        LoadItemData(6, foodUpgrade2List);                 // 먹이 업그레이드2
-        LoadItemData(7, autoCollectingList);               // 자동 먹이주기 시간
+        LoadItemData(1, maxCatsList);                       // 고양이 최대치 증가
+        LoadItemData(2, reduceCollectingTimeList);          // 재화 획득 시간 감소
+        LoadItemData(3, maxFoodsList);                      // 먹이 최대치 증가
+        LoadItemData(4, reduceProducingFoodTimeList);       // 먹이 생성 시간 감소
+        LoadItemData(5, foodUpgradeList);                   // 먹이 업그레이드
+        LoadItemData(6, foodUpgrade2List);                  // 먹이 업그레이드2
+        LoadItemData(7, autoCollectingList);                // 자동 먹이주기 시간
+        LoadItemData(8, autoMergeList);                     // 자동 합성 시간
     }
 
     // 아이템 데이터를 로드하여 리스트에 추가하는 함수
     private void LoadItemData(int dataNumber, List<(int step, float value, decimal fee)> targetList)
     {
-        var itemData = ItemItemUpgradeDataLoader.Instance.GetDataByNumber(dataNumber);
+        var itemData = ItemUpgradeDataLoader.Instance.GetDataByNumber(dataNumber);
         if (itemData != null)
         {
             foreach (var item in itemData)

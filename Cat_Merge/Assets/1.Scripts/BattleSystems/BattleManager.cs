@@ -17,8 +17,8 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     private static class BattleConstants
     {
-        public const float DEFAULT_SPAWN_INTERVAL = 300f;       // 보스 등장 주기 (300f)
-        public const float DEFAULT_BOSS_DURATION = 30f;         // 보스 유지 시간 (30f)
+        public const float DEFAULT_SPAWN_INTERVAL = 240f;       // 보스 등장 주기 (240f)
+        public const float DEFAULT_BOSS_DURATION = 24f;         // 보스 유지 시간 (24f)
         public const float GIVEUP_BUTTON_DELAY = 2f;            // 항복 버튼 활성화 딜레이 (2f)
         public const float BOSS_ATTACK_DELAY = 2f;              // 보스 공격 딜레이 (2f)
         public const float WARNING_IMAGE_START_X = -640f;       // 경고 이미지 시작 좌표 (-640f)
@@ -318,11 +318,19 @@ public class BattleManager : MonoBehaviour, ISaveable
             // 보스가 없을 때만 게이지를 충전
             if (currentBoss == null)
             {
-                bossSpawnTimer += Time.deltaTime;
+                // 튜토리얼 중이고 타이머가 180초 이상이면 180초에서 멈춤
+                if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive && bossSpawnTimer >= 180)
+                {
+                    bossSpawnTimer = 180;
+                }
+                else
+                {
+                    bossSpawnTimer += Time.deltaTime;
+                }
                 respawnSlider.value = bossSpawnTimer;
 
                 // 게이지가 꽉 차면 보스 소환
-                if (bossSpawnTimer >= spawnInterval)
+                if (bossSpawnTimer >= spawnInterval && (!TutorialManager.Instance.IsTutorialActive || !TutorialManager.Instance))
                 {
                     bossSpawnTimer = 0f;
 

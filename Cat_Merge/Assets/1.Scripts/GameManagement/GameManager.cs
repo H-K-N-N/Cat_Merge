@@ -104,10 +104,7 @@ public class GameManager : MonoBehaviour, ISaveable
     private bool isBackButtonPressed = false;                               // 뒤로가기 버튼이 눌렸는지 여부
     [HideInInspector] public bool isQuiting = false;                        // 종료 여부
 
-    [Header("---[First Game Panel]")]
-    [SerializeField] private GameObject firstGamePanel;                     // 첫 게임 시작 패널
-
-
+    [Header("---[ETC]")]
     private bool isDataLoaded = false;                                      // 데이터 로드 확인
 
     #endregion
@@ -127,6 +124,9 @@ public class GameManager : MonoBehaviour, ISaveable
             Destroy(gameObject);
             return;
         }
+
+        // 화면 절전 모드 비활성화
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
         InitializeGameData();
     }
@@ -167,19 +167,8 @@ public class GameManager : MonoBehaviour, ISaveable
     {
         currentCatCount = 0;
         maxCats = 8;
-        coin = 0;
+        coin = 250;
         cash = 100;
-    }
-
-    // 첫 게임 시작 패널을 보여주는 코루틴
-    public IEnumerator ShowFirstGamePanel()
-    {
-        if (firstGamePanel != null)
-        {
-            firstGamePanel.SetActive(true);
-            yield return new WaitForSeconds(2f);
-            firstGamePanel.SetActive(false);
-        }
     }
 
     // 게임 데이터 초기 로드 함수
@@ -439,6 +428,18 @@ public class GameManager : MonoBehaviour, ISaveable
     // 종료 입력 체크 함수
     private void CheckQuitInput()
     {
+        // 메인 튜토리얼이 진행 중이면 뒤로가기 버튼 무시
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive)
+        {
+            return;
+        }
+
+        // 도감 튜토리얼이 진행 중이면 뒤로가기 버튼 무시
+        if (TutorialManager.Instance != null && TutorialManager.Instance.isDictionaryTutorialActive)
+        {
+            return;
+        }
+
         // 유니티 에디터 및 안드로이드에서 뒤로가기 버튼
         if ((Application.platform == RuntimePlatform.Android && Input.GetKey(KeyCode.Escape)) ||
             (Application.platform == RuntimePlatform.WindowsEditor && Input.GetKeyDown(KeyCode.Escape)))

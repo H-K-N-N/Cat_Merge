@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using System.Collections;
 
 [Serializable]
 public class CatFriendship
@@ -957,7 +958,47 @@ public class FriendshipManager : MonoBehaviour, ISaveable
             }
         }
 
+        StartCoroutine(UpdateAllFriendshipUI());
+
         isDataLoaded = true;
+    }
+
+    // 데이터 로드 후 애정도 UI 업데이트 코루틴
+    private IEnumerator UpdateAllFriendshipUI()
+    {
+        // 한 프레임 대기
+        yield return null;
+
+        // 해금된 모든 고양이의 애정도 상태 업데이트
+        if (DictionaryManager.Instance != null)
+        {
+            for (int i = 0; i < GameManager.Instance.AllCatData.Length; i++)
+            {
+                if (DictionaryManager.Instance.IsCatUnlocked(i))
+                {
+                    // 각 고양이의 UI 업데이트
+                    if (dictionarySlotParent != null)
+                    {
+                        Transform slot = dictionarySlotParent.GetChild(i);
+                        if (slot != null)
+                        {
+                            GameObject friendshipNewImage = slot.transform.Find("Button/New Image")?.gameObject;
+                            if (friendshipNewImage != null)
+                            {
+                                bool hasRewards = HasUnclaimedFriendshipRewards(i + 1);
+                                friendshipNewImage.SetActive(hasRewards);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 모든 UI 업데이트가 완료된 후 DictionaryManager의 New Image 상태 업데이트
+        if (DictionaryManager.Instance != null)
+        {
+            DictionaryManager.Instance.UpdateNewImageStatus();
+        }
     }
 
     #endregion

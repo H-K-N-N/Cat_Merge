@@ -49,11 +49,19 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     [SerializeField] private TextMeshProUGUI newCatName;            // New Cat Name Text
     [SerializeField] private TextMeshProUGUI newCatExplain;         // New Cat Explanation Text
     [SerializeField] private TextMeshProUGUI newCatGetCoin;         // New Cat Get Coin Text
+    [SerializeField] private TextMeshProUGUI touchText;             // New Cat Panel Touch Text
     [SerializeField] private Button submitButton;                   // New Cat Panel Submit Button
+    private Coroutine highlightRotationCoroutine;                   // Highlight 회전 코루틴 관리용 변수
+    private Coroutine touchTextBlinkCoroutine;                      // Touch Text 깜빡임 코루틴 관리용 변수
 
     // Highlight Image 회전에 사용할 Vector3 캐싱
     private static readonly Vector3 rotationVector = new Vector3(0, 0, 1);
     private static readonly float rotationSpeed = 90f;
+
+    // Touch Text 깜빡임에 사용할 상수
+    private const float BLINK_SPEED = 2f;              // 깜빡임 속도
+    private const float MIN_ALPHA = 0.2f;              // 최소 투명도
+    private const float MAX_ALPHA = 1f;                // 최대 투명도
 
     // Enum으로 메뉴 타입 정의 (서브 메뉴를 구분하기 위해 사용)
     private enum DictionaryMenuType
@@ -211,17 +219,37 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         activePanelManager = FindObjectOfType<ActivePanelManager>();
         activePanelManager.RegisterPanel("DictionaryMenu", dictionaryMenuPanel, dictionaryButtonImage);
 
+        // 메인 튜토리얼 완료 여부에 따라 버튼 상호작용 설정
+        if (TutorialManager.Instance != null)
+        {
+            dictionaryButton.interactable = TutorialManager.Instance.IsMainTutorialEnd;
+        }
+
         dictionaryButton.onClick.AddListener(() =>
         {
             activePanelManager.TogglePanel("DictionaryMenu");
 
-            // DictionaryMenu가 활성화될 때 InformationPanel 업데이트
+            // DictionaryMenu가 활성화될 때만 실행
             if (activePanelManager.ActivePanelName == "DictionaryMenu")
             {
+                // 도감 패널이 처음 열렸을 때 튜토리얼 실행
+                if (TutorialManager.Instance != null && !TutorialManager.Instance.IsDictionaryTutorialEnd)
+                {
+                    TutorialManager.Instance.StartDictionaryTutorial();
+                }
                 UpdateInformationPanel();
             }
         });
         dictionaryBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("DictionaryMenu"));
+    }
+
+    // 도감 버튼 상호작용 업데이트 함수 추가
+    public void UpdateDictionaryButtonInteractable()
+    {
+        if (TutorialManager.Instance != null && dictionaryButton != null)
+        {
+            dictionaryButton.interactable = TutorialManager.Instance.IsMainTutorialEnd;
+        }
     }
 
     // DictionaryButton 초기화 함수
@@ -459,6 +487,13 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         // 이미지 설정
         informationCatIcon.gameObject.SetActive(false);
 
+        // 버튼 이벤트 초기화
+        Button iconButton = informationCatIcon.GetComponent<Button>();
+        if (iconButton != null)
+        {
+            iconButton.onClick.RemoveAllListeners();
+        }
+
         // 텍스트 설정
         informationCatDetails.text = $"고양이를 선택하세요\n";
 
@@ -485,6 +520,20 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         // 기존 정보 표시 코드
         informationCatIcon.gameObject.SetActive(true);
         informationCatIcon.sprite = catData.CatImage;
+
+        // 아이콘 버튼 클릭 이벤트 설정
+        Button iconButton = informationCatIcon.GetComponent<Button>();
+        if (iconButton != null)
+        {
+            iconButton.onClick.RemoveAllListeners();
+            iconButton.onClick.AddListener(() => ShowNewCatPanel(catGrade));
+
+            // 버튼 SFX 등록
+            if (OptionManager.Instance != null)
+            {
+                iconButton.onClick.AddListener(OptionManager.Instance.PlayButtonClickSound);
+            }
+        }
 
         string catInfo = $"이름: {catData.CatName}\n" +
                          $"등급: {catData.CatGrade}\n" +
@@ -516,6 +565,20 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     // 새로운 고양이 해금 효과 함수
     public void ShowNewCatPanel(int catGrade)
     {
+        // 기존 회전 코루틴이 있다면 중지
+        if (highlightRotationCoroutine != null)
+        {
+            StopCoroutine(highlightRotationCoroutine);
+            highlightRotationCoroutine = null;
+        }
+
+        // 기존 깜빡임 코루틴이 있다면 중지
+        if (touchTextBlinkCoroutine != null)
+        {
+            StopCoroutine(touchTextBlinkCoroutine);
+            touchTextBlinkCoroutine = null;
+        }
+
         Cat newCat = GameManager.Instance.AllCatData[catGrade];
 
         newCatPanel.SetActive(true);
@@ -526,7 +589,10 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         newCatGetCoin.text = "재화 획득량: " + newCat.CatGetCoin.ToString();
 
         // Highlight Image 회전 애니메이션 시작
-        StartCoroutine(RotateHighlightImage());
+        highlightRotationCoroutine = StartCoroutine(RotateHighlightImage());
+
+        // Touch Text 깜빡임 애니메이션 시작
+        touchTextBlinkCoroutine = StartCoroutine(BlinkTouchText());
 
         // 확인 버튼을 누르면 패널을 비활성화
         submitButton.onClick.AddListener(CloseNewCatPanel);
@@ -535,16 +601,73 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     // Highlight Image 회전 애니메이션 코루틴
     private IEnumerator RotateHighlightImage()
     {
+        // 회전 각도 초기화
+        if (newCatHighlightImage != null)
+        {
+            newCatHighlightImage.transform.rotation = Quaternion.identity;
+        }
+
         while (newCatPanel.activeSelf)
         {
-            newCatHighlightImage.transform.Rotate(rotationVector, rotationSpeed * Time.deltaTime);
+            if (newCatHighlightImage != null)
+            {
+                newCatHighlightImage.transform.Rotate(rotationVector, rotationSpeed * Time.deltaTime);
+            }
             yield return null;
         }
+
+        highlightRotationCoroutine = null;
+    }
+
+    // Touch Text 깜빡임 애니메이션 코루틴
+    private IEnumerator BlinkTouchText()
+    {
+        if (touchText == null) yield break;
+
+        float currentAlpha = MAX_ALPHA;
+        bool fadeOut = true;
+
+        while (newCatPanel.activeSelf)
+        {
+            if (fadeOut)
+            {
+                currentAlpha = Mathf.MoveTowards(currentAlpha, MIN_ALPHA, BLINK_SPEED * Time.deltaTime);
+                if (currentAlpha <= MIN_ALPHA)
+                {
+                    fadeOut = false;
+                }
+            }
+            else
+            {
+                currentAlpha = Mathf.MoveTowards(currentAlpha, MAX_ALPHA, BLINK_SPEED * Time.deltaTime);
+                if (currentAlpha >= MAX_ALPHA)
+                {
+                    fadeOut = true;
+                }
+            }
+
+            touchText.alpha = currentAlpha;
+            yield return null;
+        }
+
+        touchTextBlinkCoroutine = null;
     }
 
     // New Cat Panel을 닫는 함수
     private void CloseNewCatPanel()
     {
+        if (highlightRotationCoroutine != null)
+        {
+            StopCoroutine(highlightRotationCoroutine);
+            highlightRotationCoroutine = null;
+        }
+
+        if (touchTextBlinkCoroutine != null)
+        {
+            StopCoroutine(touchTextBlinkCoroutine);
+            touchTextBlinkCoroutine = null;
+        }
+
         newCatPanel.SetActive(false);
     }
 

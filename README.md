@@ -374,3 +374,21 @@
   - 퀘스트 보상을 다 받았는데 모두받기 버튼이 활성화 되있는 현상 : 예외처리 강화 및 버튼 상태 변경 함수 호출 시기 추가
 - fix: 전투중 게임종료했을때의 데이터 로드 수정 : 전투중 게임 종료했을때의 AutoMerge, AutoMove, Merge 이 3개의 상태를 더욱 확실하게 제어 : 기존에는 전투시에 false로 해놨어서 true였던것이 false로 강제변환된채로 로드되었던 현상
 </br>
+
+[2024-05-23] - v0.2.5
+- feat: 정해진 시간마다 자동으로 1회 머지하는 기능 및 아이템 추가
+- feat: 새로운 배경 이미지 추가 및 적용
+- feat: 화면 절전 모드 비활성화 기능 추가
+  - 오래 방치해두면 자동으로 휴대폰의 화면이 꺼지는 현상 제거를 위해
+- feat: 메인, 도감 튜토리얼 추가
+- feat: 도감에서 New Cat Panel을 볼 수 있는 기능 추가
+- feat: 옵션의 사운드 추가 및 데이터 삭제하기 기능 추가
+- fix: 전체적인 밸런스 수정
+  - CatDB Reward, FriendshipDB Reward & Balance, BuyCat Price, MouseDB Price, BattleSystem Balance, QuestManager Reward & Balance, ItemUpgradeDB Price, 
+- fix: 고양이 자동이동 버그 : 드래그앤 드랍 이후 해당 고양이의 자동이동은 true가 되어버리는 현상 : 코드 수정
+- fiX: New Cat Panel 하이라이트 이미지 속도 중첩 버그 : 방치하면 하이라이트 이미지가 중첩되어서 배수로 빨라지는 현상 : 예외처리
+- fix: 도감 슬롯의 New Image 짤림 현상 수정 : 이미지 위치 조절
+- fix: 자동합성의 속도 수정 : 좀더 빠르게 조절
+- fix: 데이터 로드 직후 QuestManager 표기 버그 : 게임을 실행하자마자 반복퀘스트를보면 기존 데이터가 0으로 보이는 현상 : UI 업데이트 시기 수정
+- fix: 애정도 New Image 버그 : 애정도 보상을 받지 않은 상태로 게임 시작하자마자 도감쪽을 보면 New Image가 활성화가 되지 않던 현상을 수정 : UI 업데이트 시기 수정
+</br>

@@ -82,6 +82,28 @@ public class ShopManager : MonoBehaviour, ISaveable
     private float passiveDoubleCoinDurationIncrease = 0f;                   // 패시브로 인한 효과지속시간 증가량
     private float CurrentDoubleCoinDuration => doubleCoinDuration + passiveDoubleCoinDurationIncrease;
 
+
+    [Header("---[Diamond Shop]")]
+    [SerializeField] private Button buy100CashToCoinButton;                 // 100다이아 상품 버튼
+    [SerializeField] private Button buy500CashToCoinButton;                 // 500다이아 상품 버튼
+    [SerializeField] private Button buy2500CashToCoinButton;                // 2500다이아 상품 버튼
+    private int selectedCashAmount = 0;                                     // 선택된 다이아 수량
+
+    [SerializeField] private Image cantBuy100CashToCoinImage;               // 100다이아 상품 해금 이미지
+    [SerializeField] private Image cantBuy500CashToCoinImage;               // 500다이아 상품 해금 이미지
+    [SerializeField] private Image cantBuy2500CashToCoinImage;              // 2500다이아 상품 해금 이미지
+    private const int UNLOCK_GRADE_100_CASH = 5;                            // 100다이아 상품 해금 등급
+    private const int UNLOCK_GRADE_500_CASH = 10;                           // 500다이아 상품 해금 등급
+    private const int UNLOCK_GRADE_2500_CASH = 15;                          // 2500다이아 상품 해금 등급
+
+    [SerializeField] private GameObject buyCashToCoinPanel;                 // 상품 구매 확인 Panel
+    [SerializeField] private TextMeshProUGUI buyCashToCoinText;             // 상품 구매 확인 Text
+    [SerializeField] private Button closeBuyCashToCoinPanelButton;          // 상품 구매 패널 닫기 버튼
+    [SerializeField] private Button buyCashToCoinButton;                    // 상품 구매 Yes 버튼
+    private decimal calculatedCoinAmount = 0;                               // 계산된 젤리 수량
+
+
+    [Header("---[ETC]")]
     private float battlePauseTime = 0f;                                     // 전투 중 멈춘 시간
     private bool isBattlePaused = false;                                    // 전투 중 멈춤 상태
 
@@ -108,6 +130,7 @@ public class ShopManager : MonoBehaviour, ISaveable
     {
         InitializeShopManager();
         UpdateAllUI();
+        UpdateDiamondShopUnlockState();
         StartCoroutine(CheckRewardStatus());
     }
 
@@ -163,6 +186,12 @@ public class ShopManager : MonoBehaviour, ISaveable
         cashForTimeRewardButton.onClick.AddListener(OnClickCashForTime);
 
         doubleCoinForAdButton.onClick.AddListener(OnClickDoubleCoinForAd);
+
+        buy100CashToCoinButton.onClick.AddListener(() => OnClickBuyCashToCoin(100));
+        buy500CashToCoinButton.onClick.AddListener(() => OnClickBuyCashToCoin(500));
+        buy2500CashToCoinButton.onClick.AddListener(() => OnClickBuyCashToCoin(2500));
+        closeBuyCashToCoinPanelButton.onClick.AddListener(CloseBuyCashToCoinPanel);
+        buyCashToCoinButton.onClick.AddListener(OnConfirmBuyCashToCoin);
     }
 
     // New 이미지 상태 업데이트 함수
@@ -519,6 +548,148 @@ public class ShopManager : MonoBehaviour, ISaveable
     #endregion
 
 
+    #region Diamond Shop System
+
+    // 다이아 상점 해금 상태 업데이트 함수
+    public void UpdateDiamondShopUnlockState()
+    {
+        int maxUnlockedGrade = GetMaxUnlockedCatGrade();
+
+        // 100 다이아 상품
+        UpdateShopItemUnlockState(buy100CashToCoinButton, cantBuy100CashToCoinImage, maxUnlockedGrade >= UNLOCK_GRADE_100_CASH);
+
+        // 500 다이아 상품
+        UpdateShopItemUnlockState(buy500CashToCoinButton, cantBuy500CashToCoinImage, maxUnlockedGrade >= UNLOCK_GRADE_500_CASH);
+
+        // 2500 다이아 상품
+        UpdateShopItemUnlockState(buy2500CashToCoinButton, cantBuy2500CashToCoinImage, maxUnlockedGrade >= UNLOCK_GRADE_2500_CASH);
+    }
+
+    // 상점 아이템 해금 상태 업데이트 함수
+    private void UpdateShopItemUnlockState(Button button, Image cantBuyImage, bool isUnlocked)
+    {
+        button.interactable = isUnlocked;
+        cantBuyImage.gameObject.SetActive(!isUnlocked);
+    }
+
+    // 최대 해금 고양이 등급 가져오기 함수
+    private int GetMaxUnlockedCatGrade()
+    {
+        for (int i = GameManager.Instance.AllCatData.Length - 1; i >= 0; i--)
+        {
+            if (DictionaryManager.Instance.IsCatUnlocked(i))
+            {
+                return i + 1;
+            }
+        }
+        return 0;
+    }
+
+    // 젤리 교환 수치 계산 함수
+    private decimal CalculateJellyAmount(int diamondAmount)
+    {
+        // 재화 수급 시간 가져오기 (ItemMenuManager의 reduceCollectingTimeLv 사용)
+        var collectingTimeList = ItemFunctionManager.Instance.reduceCollectingTimeList;
+        float collectingTime = collectingTimeList[ItemMenuManager.Instance.ReduceCollectingTimeLv].value;
+
+        // 최대 도감 해금 등급의 기본 재화 수급량 찾기
+        decimal maxUnlockedCatCoin = 0;
+        for (int i = GameManager.Instance.AllCatData.Length - 1; i >= 0; i--)
+        {
+            if (DictionaryManager.Instance.IsCatUnlocked(i))
+            {
+                maxUnlockedCatCoin = GameManager.Instance.AllCatData[i].CatGetCoin;
+                break;
+            }
+        }
+
+        // 배율 결정
+        float multiplier = 1.0f;
+        switch (diamondAmount)
+        {
+            case 100:
+                multiplier = 1.2f;
+                break;
+            case 500:
+                multiplier = 1.3f;
+                break;
+            case 2500:
+                multiplier = 1.4f;
+                break;
+        }
+
+        // 젤리 수량 계산: ((다이아 / 재화 수급 시간) * 최대 도감 해금 등급의 기본 재화 수급량) * 배율
+        decimal jellyAmount = decimal.Round((diamondAmount / (decimal)collectingTime) * maxUnlockedCatCoin * (decimal)multiplier);
+        return jellyAmount;
+    }
+
+    // 다이아 상품 구매 버튼 클릭시 실행되는 함수
+    private void OnClickBuyCashToCoin(int diamondAmount)
+    {
+        // 해금 조건 체크
+        int maxUnlockedGrade = GetMaxUnlockedCatGrade();
+        bool canBuy = diamondAmount switch
+        {
+            100 => maxUnlockedGrade >= UNLOCK_GRADE_100_CASH,
+            500 => maxUnlockedGrade >= UNLOCK_GRADE_500_CASH,
+            2500 => maxUnlockedGrade >= UNLOCK_GRADE_2500_CASH,
+            _ => false
+        };
+
+        if (!canBuy)
+        {
+            int requiredGrade = diamondAmount switch
+            {
+                100 => UNLOCK_GRADE_100_CASH,
+                500 => UNLOCK_GRADE_500_CASH,
+                2500 => UNLOCK_GRADE_2500_CASH,
+                _ => 0
+            };
+            NotificationManager.Instance.ShowNotification($"{requiredGrade}등급 고양이 해금 시 구매 가능!!");
+            return;
+        }
+
+        selectedCashAmount = diamondAmount;
+        calculatedCoinAmount = CalculateJellyAmount(diamondAmount);
+
+        UpdateBuyCashToCoinText();
+        buyCashToCoinPanel.SetActive(true);
+    }
+
+    // 구매 확인 텍스트 업데이트 함수
+    private void UpdateBuyCashToCoinText()
+    {
+        buyCashToCoinText.text = $"[{selectedCashAmount} 다이아]로\n젤리 [{GameManager.Instance.FormatNumber(calculatedCoinAmount)}]개를\n구매하시겠습니까?";
+    }
+
+    // 구매 확인 버튼 클릭시 실행되는 함수
+    private void OnConfirmBuyCashToCoin()
+    {
+        if (GameManager.Instance.Cash < selectedCashAmount)
+        {
+            NotificationManager.Instance.ShowNotification("다이아가 부족합니다!!");
+        }
+        else
+        {
+            GameManager.Instance.Cash -= selectedCashAmount;
+            GameManager.Instance.Coin += calculatedCoinAmount;
+            NotificationManager.Instance.ShowNotification($"젤리 [{GameManager.Instance.FormatNumber(calculatedCoinAmount)}]개 구매 완료!!");
+        }
+
+        CloseBuyCashToCoinPanel();
+    }
+
+    // 구매 확인 패널 닫기 함수
+    private void CloseBuyCashToCoinPanel()
+    {
+        buyCashToCoinPanel.SetActive(false);
+        selectedCashAmount = 0;
+        calculatedCoinAmount = 0;
+    }
+
+    #endregion
+
+
     #region Save System
 
     [Serializable]
@@ -571,6 +742,7 @@ public class ShopManager : MonoBehaviour, ISaveable
         battlePauseTime = 0f;
 
         UpdateAllUI();
+        UpdateDiamondShopUnlockState();
     }
 
     #endregion

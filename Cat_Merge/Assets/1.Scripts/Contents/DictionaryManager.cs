@@ -292,6 +292,9 @@ public class DictionaryManager : MonoBehaviour, ISaveable
 
         // BuyCatManager의 구매 슬롯 상태 업데이트
         BuyCatManager.Instance?.UnlockBuySlot(CatGrade);
+
+        // ShopManager의 다이아 상점 해금 상태 업데이트
+        ShopManager.Instance?.UpdateDiamondShopUnlockState();
     }
 
     // 특정 고양이의 해금 여부 확인 함수

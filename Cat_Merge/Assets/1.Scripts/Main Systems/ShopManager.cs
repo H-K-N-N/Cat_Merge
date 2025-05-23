@@ -395,7 +395,7 @@ public class ShopManager : MonoBehaviour, ISaveable
 
         if (doubleCoinForAdNameText != null)
         {
-            doubleCoinForAdNameText.text = $"{CurrentDoubleCoinDuration}초 동안 재화 수급량 {doubleCoinMultiplier}배";
+            doubleCoinForAdNameText.text = $"{CurrentDoubleCoinDuration}초 동안 젤리 수급량 {doubleCoinMultiplier}배";
         }
 
         // 쿨타임 텍스트 업데이트

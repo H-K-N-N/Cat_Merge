@@ -181,7 +181,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     {
         if (GameManager.Instance.Cash < AUTO_MERGE_COST)
         {
-            NotificationManager.Instance.ShowNotification("재화가 부족합니다!!");
+            NotificationManager.Instance.ShowNotification("다이아가 부족합니다!!");
             return;
         }
 

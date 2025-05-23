@@ -542,7 +542,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
                          $"등급: {catData.CatGrade}\n" +
                          $"공격력: {catData.BaseDamage}%\n" +
                          $"체력: {catData.CatHp}\n" +
-                         $"재화수급량: {catData.CatGetCoin}";
+                         $"젤리수급량: {catData.CatGetCoin}";
         informationCatDetails.text = catInfo;
 
         // 스크롤 설정
@@ -589,7 +589,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         newCatIcon.sprite = newCat.CatImage;
         newCatName.text = newCat.CatGrade.ToString() + ". " + newCat.CatName;
         newCatExplain.text = newCat.CatExplain;
-        newCatGetCoin.text = "재화 획득량: " + newCat.CatGetCoin.ToString();
+        newCatGetCoin.text = "젤리 수급량: " + newCat.CatGetCoin.ToString();
 
         // Highlight Image 회전 애니메이션 시작
         highlightRotationCoroutine = StartCoroutine(RotateHighlightImage());

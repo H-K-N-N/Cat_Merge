@@ -394,7 +394,7 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         decimal fee = itemList[level].fee;
         if (GameManager.Instance.Coin < fee)
         {
-            NotificationManager.Instance.ShowNotification("재화가 부족합니다!!");
+            NotificationManager.Instance.ShowNotification("젤리가 부족합니다!!");
             return;
         }
 

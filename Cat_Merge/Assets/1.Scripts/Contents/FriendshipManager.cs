@@ -324,14 +324,6 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     {
         if (!catFriendships.ContainsKey(catGrade)) return;
 
-        // 현재 Dictionary에서 선택된 고양이와 업데이트하려는 고양이가 다르면 UI 업데이트 스킵
-        if (DictionaryManager.Instance.GetCurrentSelectedCatGrade() != catGrade &&
-            DictionaryManager.Instance.GetCurrentSelectedCatGrade() != -1)
-        {
-            UpdateFriendshipButtonStates(catGrade);
-            return;
-        }
-
         var friendship = catFriendships[catGrade];
         int currentLevel = currentLevels[catGrade];
 
@@ -348,27 +340,30 @@ public class FriendshipManager : MonoBehaviour, ISaveable
             buttonClick = false;
         }
 
-        // UI 텍스트 업데이트
-        if (expRequirementText != null && DictionaryManager.Instance.GetCurrentSelectedCatGrade() == catGrade)
+        // 현재 Dictionary에서 선택된 고양이와 업데이트하려는 고양이가 같을 때만 UI 텍스트 업데이트
+        if (DictionaryManager.Instance.GetCurrentSelectedCatGrade() == catGrade)
         {
-            if (IsMaxLevel(catGrade))
+            if (expRequirementText != null)
             {
-                expRequirementText.text = "MAX";
-                if (expGauge != null)
+                if (IsMaxLevel(catGrade))
                 {
-                    expGauge.value = 1f; // 게이지를 최대로 채움
+                    expRequirementText.text = "MAX";
+                    if (expGauge != null)
+                    {
+                        expGauge.value = 1f; // 게이지를 최대로 채움
+                    }
                 }
-            }
-            else
-            {
-                int nextExp = GetNextLevelExp(catGrade);
-                expRequirementText.text = $"{friendship.currentExp} / {nextExp}";
-
-                // 게이지 업데이트
-                if (expGauge != null)
+                else
                 {
-                    float progress = (float)friendship.currentExp / nextExp;
-                    expGauge.value = Mathf.Clamp01(progress);
+                    int nextExp = GetNextLevelExp(catGrade);
+                    expRequirementText.text = $"{friendship.currentExp} / {nextExp}";
+
+                    // 게이지 업데이트
+                    if (expGauge != null)
+                    {
+                        float progress = (float)friendship.currentExp / nextExp;
+                        expGauge.value = Mathf.Clamp01(progress);
+                    }
                 }
             }
         }
@@ -376,8 +371,11 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         // 레벨 해금 상태 업데이트
         UpdateLevelUnlockStatus(friendship, catGrade);
 
-        // 버튼 상태 업데이트
-        UpdateFriendshipButtonStates(catGrade);
+        // 버튼 상태 업데이트 - 현재 선택된 고양이일 때만
+        if (DictionaryManager.Instance.GetCurrentSelectedCatGrade() == catGrade)
+        {
+            UpdateFriendshipButtonStates(catGrade);
+        }
 
         // 도감 슬롯의 friendshipNewImage 업데이트
         if (dictionarySlotParent != null)

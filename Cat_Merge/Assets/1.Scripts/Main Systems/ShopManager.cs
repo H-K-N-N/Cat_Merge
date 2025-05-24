@@ -604,22 +604,22 @@ public class ShopManager : MonoBehaviour, ISaveable
         }
 
         // 배율 결정
-        float multiplier = 1.0f;
+        float multiplier = 5.0f;
         switch (diamondAmount)
         {
             case 100:
-                multiplier = 1.2f;
+                multiplier = 5.0f;
                 break;
             case 500:
-                multiplier = 1.3f;
+                multiplier = 5.5f;
                 break;
             case 2500:
-                multiplier = 1.4f;
+                multiplier = 6.2f;
                 break;
         }
 
-        // 젤리 수량 계산: (((다이아 / 재화 수급 시간)^1.1) * 최대 도감 해금 등급의 기본 재화 수급량) * 배율
-        decimal jellyAmount = decimal.Round((decimal)Math.Pow(diamondAmount / collectingTime, 1.1) * maxUnlockedCatCoin * (decimal)multiplier);
+        // 젤리 수량 계산: (((다이아 / 재화 수급 시간)^1.05) * 최대 도감 해금 등급의 기본 재화 수급량) * 배율
+        decimal jellyAmount = decimal.Round((decimal)Math.Pow(diamondAmount / collectingTime, 1.05) * maxUnlockedCatCoin * (decimal)multiplier);
         return jellyAmount;
     }
 

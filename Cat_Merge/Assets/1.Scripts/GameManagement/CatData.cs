@@ -416,28 +416,13 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
         if (!isStunned)
         {
-            HealCatHP();
+            ChangeCatState(CatState.isIdle);
 
-            // 전투 중인지 확인
-            if (BattleManager.Instance != null && BattleManager.Instance.IsBattleActive)
+            // 전투 중이 아닐 때만 자동이동 상태 확인
+            if (!BattleManager.Instance.IsBattleActive)
             {
-                ChangeCatState(CatState.isBattle);
-
-                // 전투 중이면 자동 재화 수집과 자동 이동은 비활성화 상태 유지
-                SetCollectingCoinsState(false);
-                SetAutoMoveState(false);
-                SetRaycastTarget(true);  // 드래그는 가능하도록 설정
-
-                // 보스 히트박스 경계로 이동
-                MoveTowardBossBoundary();
-            }
-            else
-            {
-                ChangeCatState(CatState.isIdle);
-
-                // 전투 중이 아니면 모든 기능 활성화
                 SetCollectingCoinsState(true);
-                SetAutoMoveState(true);
+                SetAutoMoveState(AutoMoveManager.Instance.IsAutoMoveEnabled());
                 SetRaycastTarget(true);
             }
         }

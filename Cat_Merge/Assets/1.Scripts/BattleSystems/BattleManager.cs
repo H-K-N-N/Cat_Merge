@@ -1077,16 +1077,16 @@ public class BattleManager : MonoBehaviour, ISaveable
         // 퀘스트 갱신
         QuestManager.Instance.AddBattleCount();
 
+        // 자동이동 상태 복구
+        AutoMoveManager.Instance.EndBattleAutoMoveState();
+
         // 고양이들의 체력 회복
         CatData[] allCats = FindObjectsOfType<CatData>();
         foreach (var cat in allCats)
         {
             cat.HealCatHP();
-
             cat.ChangeCatState(CatState.isIdle);
         }
-
-        AutoMoveManager.Instance.EndBattleAutoMoveState();
 
         // 자동 머지 재개
         AutoMergeManager.Instance.ResumeAutoMerge();

@@ -200,15 +200,18 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     {
         if (!isAutoMergeActive)
         {
-            startTime = Time.time;
-            isAutoMergeActive = true;
             currentAutoMergeDuration = AUTO_MERGE_DURATION;
             UpdateAutoMergeTimerVisibility(true);
+            UpdateTimerDisplay((int)AUTO_MERGE_DURATION);
+
+            startTime = Time.time;
+            isAutoMergeActive = true;
             StartAutoMergeCoroutine();
         }
         else
         {
             currentAutoMergeDuration += AUTO_MERGE_DURATION;
+            UpdateTimerDisplay((int)currentAutoMergeDuration);
         }
     }
 
@@ -434,8 +437,16 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         isPaused = false;
         pausedTimeRemaining = 0f;
         UpdateAutoMergeTimerVisibility(false);
-        StopAllCoroutines();
+
+        if (autoMergeCoroutine != null)
+        {
+            StopCoroutine(autoMergeCoroutine);
+            autoMergeCoroutine = null;
+        }
+
         mergingCats.Clear();
+        currentAutoMergeDuration = 0f;
+        UpdateTimerDisplay(0);
     }
 
     // 합성중인 고양이 정지 함수

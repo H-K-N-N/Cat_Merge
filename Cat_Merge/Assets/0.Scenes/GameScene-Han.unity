@@ -8704,7 +8704,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 894507066, guid: 29556f0876ef2a04b9be91e530bdb640, type: 3}
+  m_Sprite: {fileID: 930257139, guid: 0af37dae5a4434f4091f9b1a833518cb, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -12159,6 +12159,7 @@ MonoBehaviour:
   rewardSlotPrefab: {fileID: 5718073913174564106, guid: 87e6ba076ea9be049a406b369c4ef027, type: 3}
   winRewardPanel: {fileID: 1671200424}
   loseRewardPanel: {fileID: 1842005689}
+  touchText: {fileID: 5413394}
   autoRetryPanelButton: {fileID: 1901785864}
   autoRetryPanelButtonImage: {fileID: 1901785865}
   autoRetryPanel: {fileID: 1360593070}
@@ -16854,7 +16855,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 126759492, guid: 359dd14de3f7b1e42a24ffb28ccab6b3, type: 3}
+  m_Sprite: {fileID: 518040947, guid: 7b41c458eea8ae94fa39d0881ea03d7d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -22447,7 +22448,7 @@ GameObject:
   - component: {fileID: 627140798}
   - component: {fileID: 627140797}
   m_Layer: 5
-  m_Name: AutoFillAmountImg
+  m_Name: MergeAutoFillAmountImg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -22492,7 +22493,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 1313832227, guid: 05cadc5e0264e894c8f7af7575da5423, type: 3}
+  m_Sprite: {fileID: -1095040267, guid: fe08899c9d3d9b240be2fe9a5862f769, type: 3}
   m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -28057,7 +28058,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 93775853, guid: 41ef9b81f2a48d54db45a2cc75462807, type: 3}
+  m_Sprite: {fileID: 1554365973, guid: 699becf59a451764ebc7c49b02afd726, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -31308,7 +31309,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 632637434, guid: b85e96d2a16ed0f4ea4dba3766962a18, type: 3}
+  m_Sprite: {fileID: -64568970, guid: baf7f8aa7e7098843bd029d5eeeb4853, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -39332,7 +39333,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 894507066, guid: 29556f0876ef2a04b9be91e530bdb640, type: 3}
+  m_Sprite: {fileID: 930257139, guid: 0af37dae5a4434f4091f9b1a833518cb, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -44355,7 +44356,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 73573306, guid: a4ee53da3d1f60b4b99a691761196288, type: 3}
+  m_Sprite: {fileID: 1930568403, guid: 434eb93af360b3d42b576b98f8b6b9b7, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -44873,7 +44874,7 @@ GameObject:
   - component: {fileID: 1244551188}
   - component: {fileID: 1244551187}
   m_Layer: 5
-  m_Name: AutoFillAmountImg
+  m_Name: SpawnAutoFillAmountImg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44896,7 +44897,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 275, y: -750}
+  m_AnchoredPosition: {x: 465, y: -750}
   m_SizeDelta: {x: 140, y: 130}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1244551187
@@ -44919,7 +44920,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1586543365, guid: 32f88f2c016f6ed4da9130a75c1b64d5, type: 3}
+  m_Sprite: {fileID: 1036756260, guid: b0b2588bbef5a1d46a1ab8b8923ca36b, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -49120,8 +49121,8 @@ RectTransform:
   - {fileID: 879649312}
   - {fileID: 950510574}
   - {fileID: 835619736}
-  - {fileID: 1244551186}
   - {fileID: 1347997282}
+  - {fileID: 1244551186}
   - {fileID: 1241622845}
   - {fileID: 597641797}
   - {fileID: 2108060640}
@@ -49626,7 +49627,7 @@ GameObject:
   - component: {fileID: 1347997284}
   - component: {fileID: 1347997283}
   m_Layer: 5
-  m_Name: AutoFillAmountImg
+  m_Name: MergeAutoFillAmountImg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -49649,7 +49650,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 465, y: -750}
+  m_AnchoredPosition: {x: 465, y: -650}
   m_SizeDelta: {x: 140, y: 130}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1347997283
@@ -49672,7 +49673,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1586543365, guid: 32f88f2c016f6ed4da9130a75c1b64d5, type: 3}
+  m_Sprite: {fileID: 1335496702, guid: 6284d70f7cf66db419aa9bee9994ad7a, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -65229,7 +65230,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 10}
-  m_SizeDelta: {x: 980, y: 1500}
+  m_SizeDelta: {x: 980, y: 1480}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1808509786
 MonoBehaviour:
@@ -66313,7 +66314,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -220.00002, y: 0}
-  m_SizeDelta: {x: 240, y: 240}
+  m_SizeDelta: {x: 220, y: 220}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1845267676
 MonoBehaviour:
@@ -66531,7 +66532,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 1208823226, guid: 57d9c19aaf5e2ef47a4c35fc21388fb9, type: 3}
+  m_Sprite: {fileID: -469829479, guid: 57d9c19aaf5e2ef47a4c35fc21388fb9, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -72027,7 +72028,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 894507066, guid: 29556f0876ef2a04b9be91e530bdb640, type: 3}
+  m_Sprite: {fileID: 930257139, guid: 0af37dae5a4434f4091f9b1a833518cb, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -72268,7 +72269,7 @@ GameObject:
   - component: {fileID: 1993592712}
   - component: {fileID: 1993592711}
   m_Layer: 5
-  m_Name: AutoFillAmountImg
+  m_Name: SpawnAutoFillAmountImg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -72313,7 +72314,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 1313832227, guid: 05cadc5e0264e894c8f7af7575da5423, type: 3}
+  m_Sprite: {fileID: 2008108956, guid: ccd27d7c6f57bbc47b731ee0175cd94e, type: 3}
   m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1

@@ -375,18 +375,41 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     {
         if (cat1 == null || cat2 == null) yield break;
 
-        mergingCats.Add(cat1);
-        mergingCats.Add(cat2);
+        // 이미 합성 중인 고양이는 제외
+        if (mergingCats.Contains(cat1) || mergingCats.Contains(cat2)) yield break;
 
-        yield return MoveCatsToPosition(cat1, cat2, mergePosition);
-
-        if (cat1 != null && cat2 != null && !cat1.isDragging && !cat2.isDragging)
+        try
         {
-            CompleteMerge(cat1, cat2);
-        }
+            mergingCats.Add(cat1);
+            mergingCats.Add(cat2);
 
-        mergingCats.Remove(cat1);
-        mergingCats.Remove(cat2);
+            // 고양이들의 상태 초기화
+            cat1.GetComponent<CatData>()?.StopAllMovement();
+            cat2.GetComponent<CatData>()?.StopAllMovement();
+
+            yield return MoveCatsToPosition(cat1, cat2, mergePosition);
+
+            if (cat1 != null && cat2 != null && !cat1.isDragging && !cat2.isDragging)
+            {
+                CompleteMerge(cat1, cat2);
+            }
+        }
+        finally
+        {
+            // 무조건 mergingCats에서 제거
+            if (cat1 != null) mergingCats.Remove(cat1);
+            if (cat2 != null) mergingCats.Remove(cat2);
+
+            // 고양이들의 상태 복원
+            if (cat1 != null && cat1.gameObject.activeSelf)
+            {
+                var catData1 = cat1.GetComponent<CatData>();
+                if (catData1 != null)
+                {
+                    catData1.SetAutoMoveState(AutoMoveManager.Instance.IsAutoMoveEnabled());
+                }
+            }
+        }
     }
 
     // 정해진 랜덤위치로 고양이들 이동하는 코루틴

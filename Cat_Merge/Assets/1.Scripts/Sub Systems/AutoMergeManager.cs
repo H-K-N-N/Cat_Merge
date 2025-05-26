@@ -119,9 +119,12 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
                 {
                     remainingTime = Mathf.Max(currentAutoMergeDuration - (Time.time - startTime), 0);
                 }
-                UpdateTimerDisplay((int)remainingTime);
 
-                if (!isPaused && remainingTime <= 0)
+                if (remainingTime > 0)
+                {
+                    UpdateTimerDisplay((int)remainingTime);
+                }
+                else
                 {
                     EndAutoMerge();
                 }
@@ -209,21 +212,47 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     // 자동합성 버튼 클릭 처리 함수
     private void OnClickedAutoMerge()
     {
+        float remainingTime = 0f;
+
+        // 현재 진행 중인 자동 합성이 있다면 남은 시간 계산
+        if (isAutoMergeActive)
+        {
+            if (isPaused)
+            {
+                remainingTime = pausedTimeRemaining;
+            }
+            else
+            {
+                remainingTime = Mathf.Max(currentAutoMergeDuration - (Time.time - startTime), 0);
+            }
+        }
+
+        // 새로운 시간 추가
+        float newDuration = remainingTime + AUTO_MERGE_DURATION;
+
         if (!isAutoMergeActive)
         {
-            currentAutoMergeDuration = AUTO_MERGE_DURATION;
+            currentAutoMergeDuration = newDuration;
             UpdateAutoMergeTimerVisibility(true);
-            UpdateTimerDisplay((int)AUTO_MERGE_DURATION);
-
             startTime = Time.time;
             isAutoMergeActive = true;
             StartAutoMergeCoroutine();
         }
         else
         {
-            currentAutoMergeDuration += AUTO_MERGE_DURATION;
-            UpdateTimerDisplay((int)currentAutoMergeDuration);
+            // 기존 진행 중인 자동 합성에 시간 추가
+            if (isPaused)
+            {
+                pausedTimeRemaining = newDuration;
+            }
+            else
+            {
+                currentAutoMergeDuration = newDuration;
+                startTime = Time.time;
+            }
         }
+
+        UpdateTimerDisplay((int)newDuration);
     }
 
     // 코루틴 시작 전 기존 코루틴 정리 함수

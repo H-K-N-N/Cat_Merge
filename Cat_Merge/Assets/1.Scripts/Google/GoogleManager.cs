@@ -63,8 +63,8 @@ public class GoogleManager : MonoBehaviour
 
     public static GoogleManager Instance { get; private set; }
 
-    private const string SAVE_FILE_NAME = "GoogleCloudSaveState";   // 파일 이름
-    private const string GAME_SCENE = "GameScene-Han";              // GameScene 이름
+    private const string SAVE_FILE_NAME = "GoogleCloudSaveFile";    // 파일 이름
+    private const string GAME_SCENE = "GameScene";                  // GameScene 이름
     private const float AUTO_SAVE_INTERVAL = 30f;                   // 자동 저장 간격
     private float autoSaveTimer = 0f;                               // 자동 저장 타이머
 

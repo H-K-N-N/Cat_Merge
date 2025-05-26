@@ -1,0 +1,833 @@
+fileFormatVersion: 2
+guid: 7ffadeeea814f9742a01c550152de673
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 0
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: 50
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 3750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fbb58806acbe68d4ba7c4f428f2c8d0c
+      internalID: -361511986
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_1
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 3750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c73583e3f5d6a7b479f9dc7b4bd17014
+      internalID: -1566009644
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_2
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 3750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8029deb480b1bac4391f669b0893ac83
+      internalID: 1461786583
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_3
+      rect:
+        serializedVersion: 2
+        x: 2430
+        y: 3750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3c60a1f2965f8e84f9bdf6f48da66f15
+      internalID: 912176717
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_4
+      rect:
+        serializedVersion: 2
+        x: 3240
+        y: 3750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 15205043feef2d247bc6b6fd195ce03b
+      internalID: 570610504
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_5
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 3000
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 01d0e54270c25b34290de3911dd5b7c1
+      internalID: -1127019020
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_6
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 3000
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0fca0c8323281a74c8b27e4f2180843d
+      internalID: 94756492
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_7
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 3000
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b450065743c191a4ab5543527ec029aa
+      internalID: 1512855846
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_8
+      rect:
+        serializedVersion: 2
+        x: 2430
+        y: 3000
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8c852f5684ef3254aa294f1d8f0954ef
+      internalID: 713662522
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_9
+      rect:
+        serializedVersion: 2
+        x: 3240
+        y: 3000
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9c7ac481a1216c24e84c30cec8f75086
+      internalID: -1108664059
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_10
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 2250
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ea7a0489b96613f43bf783d370947cf0
+      internalID: 1195463957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_11
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 2250
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2c69a9131930b2f4a89aa8e7f34e465a
+      internalID: 763712958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_12
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 2250
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f7659b3fc52465948823659522188ef6
+      internalID: -442981299
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_13
+      rect:
+        serializedVersion: 2
+        x: 2430
+        y: 2250
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b1562367f8396c5408561ce8ae8f5a2c
+      internalID: 1219791802
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_14
+      rect:
+        serializedVersion: 2
+        x: 3240
+        y: 2250
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 16c859d7197a2ee4ca998ebd4bff5fb6
+      internalID: -1239206572
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_15
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1500
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 889000f6ce01e8943947e31655f13c5e
+      internalID: -987964242
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_16
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 1500
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 87993623e3fe36e4a91721314010d337
+      internalID: -1717537824
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_17
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 1500
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dbdd09e92cd391b4d87de67e92d20e25
+      internalID: 324004291
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_18
+      rect:
+        serializedVersion: 2
+        x: 2430
+        y: 1500
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 11746ff3018f797429ae0ec82a67a19b
+      internalID: -2100629091
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_19
+      rect:
+        serializedVersion: 2
+        x: 3240
+        y: 1500
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4dd97d47e961a1946a6a8ff62bb15de1
+      internalID: -1871742186
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c089e4845962af144aa818a9930dd380
+      internalID: 303723684
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_21
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: abce8a332fab9e94790c0f326899a6c7
+      internalID: 2130189869
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_22
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b733063550aec2a4e8a0d73228c40f33
+      internalID: 1455834958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_23
+      rect:
+        serializedVersion: 2
+        x: 2430
+        y: 750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 47cbf09bf354baf49b825219e9c43525
+      internalID: 317509488
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_24
+      rect:
+        serializedVersion: 2
+        x: 3240
+        y: 750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e57898c54d415c842901b3890dfed54f
+      internalID: 1135898312
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_25
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e65ce77e215faa74d86560c5978b929e
+      internalID: -56396772
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_26
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 0
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: db41f4b97caafca4885c6d4a5544b8f0
+      internalID: 2058155299
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_27
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 0
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1d71e289628f5c045b48b4edc1173240
+      internalID: 1763025502
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_28
+      rect:
+        serializedVersion: 2
+        x: 2430
+        y: 0
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c9a8ab8975af7464fbd592795fd4806d
+      internalID: -1908670539
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv6_Idle_29
+      rect:
+        serializedVersion: 2
+        x: 3240
+        y: 0
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 33210b19578d27148be7f530cc49e5b3
+      internalID: -64058218
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5da777df1768a64418aca850b98b3f7d
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      SP_Ani_CH_Cat_Lv6_Idle_0: -361511986
+      SP_Ani_CH_Cat_Lv6_Idle_1: -1566009644
+      SP_Ani_CH_Cat_Lv6_Idle_10: 1195463957
+      SP_Ani_CH_Cat_Lv6_Idle_11: 763712958
+      SP_Ani_CH_Cat_Lv6_Idle_12: -442981299
+      SP_Ani_CH_Cat_Lv6_Idle_13: 1219791802
+      SP_Ani_CH_Cat_Lv6_Idle_14: -1239206572
+      SP_Ani_CH_Cat_Lv6_Idle_15: -987964242
+      SP_Ani_CH_Cat_Lv6_Idle_16: -1717537824
+      SP_Ani_CH_Cat_Lv6_Idle_17: 324004291
+      SP_Ani_CH_Cat_Lv6_Idle_18: -2100629091
+      SP_Ani_CH_Cat_Lv6_Idle_19: -1871742186
+      SP_Ani_CH_Cat_Lv6_Idle_2: 1461786583
+      SP_Ani_CH_Cat_Lv6_Idle_20: 303723684
+      SP_Ani_CH_Cat_Lv6_Idle_21: 2130189869
+      SP_Ani_CH_Cat_Lv6_Idle_22: 1455834958
+      SP_Ani_CH_Cat_Lv6_Idle_23: 317509488
+      SP_Ani_CH_Cat_Lv6_Idle_24: 1135898312
+      SP_Ani_CH_Cat_Lv6_Idle_25: -56396772
+      SP_Ani_CH_Cat_Lv6_Idle_26: 2058155299
+      SP_Ani_CH_Cat_Lv6_Idle_27: 1763025502
+      SP_Ani_CH_Cat_Lv6_Idle_28: -1908670539
+      SP_Ani_CH_Cat_Lv6_Idle_29: -64058218
+      SP_Ani_CH_Cat_Lv6_Idle_3: 912176717
+      SP_Ani_CH_Cat_Lv6_Idle_4: 570610504
+      SP_Ani_CH_Cat_Lv6_Idle_5: -1127019020
+      SP_Ani_CH_Cat_Lv6_Idle_6: 94756492
+      SP_Ani_CH_Cat_Lv6_Idle_7: 1512855846
+      SP_Ani_CH_Cat_Lv6_Idle_8: 713662522
+      SP_Ani_CH_Cat_Lv6_Idle_9: -1108664059
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

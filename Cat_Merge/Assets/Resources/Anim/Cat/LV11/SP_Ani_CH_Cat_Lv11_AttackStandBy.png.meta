@@ -1,0 +1,833 @@
+fileFormatVersion: 2
+guid: 5f692c674a3019c4a8a67c509b2b0143
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 0
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: 50
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 3750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5d2de78d446606d40887be84962454d9
+      internalID: -930273740
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_1
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 3750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 65f8f08cd0db6af4d85ab3d61a60b3b9
+      internalID: 478026579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_2
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 3750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a5108fbeeda47d340881ffa44737ac0a
+      internalID: 1773574872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_3
+      rect:
+        serializedVersion: 2
+        x: 2430
+        y: 3750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 00bbe6a14bb1ec14cabf4d100799da92
+      internalID: -971080808
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_4
+      rect:
+        serializedVersion: 2
+        x: 3240
+        y: 3750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bea9ef45723177b4990d52556df61d59
+      internalID: -443057109
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_5
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 3000
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1354dec462e2ba64ea689bfd11b3ae9d
+      internalID: -706338324
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_6
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 3000
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5965ad3ae45be034b9f857e1afa405c6
+      internalID: -161326894
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_7
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 3000
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c3e58652b3701b545a9aa93f47f1fe99
+      internalID: 907013730
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_8
+      rect:
+        serializedVersion: 2
+        x: 2430
+        y: 3000
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b0942dfe4868dc64e827324d11d7bd7e
+      internalID: -1077321828
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_9
+      rect:
+        serializedVersion: 2
+        x: 3240
+        y: 3000
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b2fa42cd6ac3a0c4daf3949a14097351
+      internalID: -1517354695
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_10
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 2250
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8ac5d6c2092376b45bd8e2dc39cc0d95
+      internalID: 652781626
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_11
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 2250
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a160ef9b2f98f4142a49af4a8e8f2021
+      internalID: -1930902414
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_12
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 2250
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 218058e567524d641ad8f051d3268f50
+      internalID: 471221076
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_13
+      rect:
+        serializedVersion: 2
+        x: 2430
+        y: 2250
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b1f262993c26b3749a0a91d168aeef4c
+      internalID: -300649465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_14
+      rect:
+        serializedVersion: 2
+        x: 3240
+        y: 2250
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8b4fed21a96301e43ad00ef2112ec6e4
+      internalID: 1365610420
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_15
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1500
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 73279b97527955644852b94aa327d8e4
+      internalID: 1296405712
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_16
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 1500
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7a93def518051db4eac5f79eff823f9b
+      internalID: 1553866003
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_17
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 1500
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5a876b5dc43bb9c479258bbaf6a1f446
+      internalID: -648742871
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_18
+      rect:
+        serializedVersion: 2
+        x: 2430
+        y: 1500
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7823e531f469d8c4aace23c1e5a52a33
+      internalID: -646055032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_19
+      rect:
+        serializedVersion: 2
+        x: 3240
+        y: 1500
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ee227177a1a53ba469aa296b1e386499
+      internalID: -806046877
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 93b1bced14d6c6d4d83d0849f98528b8
+      internalID: 337020058
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_21
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7d08b9256f36eb34ebcd8695dcae8671
+      internalID: -1314967722
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_22
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 820c03e01f8cf1b41b79a43d8f5655eb
+      internalID: -814336644
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_23
+      rect:
+        serializedVersion: 2
+        x: 2430
+        y: 750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 885c89a647f78394089cf0b2d6e56386
+      internalID: 66348305
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_24
+      rect:
+        serializedVersion: 2
+        x: 3240
+        y: 750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ed50a1ad4fc5e6444a901696f18347b4
+      internalID: -393461303
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_25
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dc98d60b2285dbf40a8a8a396e596302
+      internalID: -587184699
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_26
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 0
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 302c1227a2f73a241a294ae58451b8a4
+      internalID: 1208191008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_27
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 0
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8d8de540bd53fac438b61a4a15a5d190
+      internalID: -566327387
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_28
+      rect:
+        serializedVersion: 2
+        x: 2430
+        y: 0
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2c490908a77c5b048a3582dc68f49aff
+      internalID: 1522675054
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv11_AttackStandBy_29
+      rect:
+        serializedVersion: 2
+        x: 3240
+        y: 0
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4738b56a524e7a044800a80e01ccde26
+      internalID: 1666390181
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 3d97060100b9f674d91b5d607f5e92db
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_0: -930273740
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_1: 478026579
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_10: 652781626
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_11: -1930902414
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_12: 471221076
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_13: -300649465
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_14: 1365610420
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_15: 1296405712
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_16: 1553866003
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_17: -648742871
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_18: -646055032
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_19: -806046877
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_2: 1773574872
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_20: 337020058
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_21: -1314967722
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_22: -814336644
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_23: 66348305
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_24: -393461303
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_25: -587184699
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_26: 1208191008
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_27: -566327387
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_28: 1522675054
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_29: 1666390181
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_3: -971080808
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_4: -443057109
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_5: -706338324
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_6: -161326894
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_7: 907013730
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_8: -1077321828
+      SP_Ani_CH_Cat_Lv11_AttackStandBy_9: -1517354695
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

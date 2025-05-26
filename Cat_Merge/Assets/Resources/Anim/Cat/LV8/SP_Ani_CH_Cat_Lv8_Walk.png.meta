@@ -1,0 +1,833 @@
+fileFormatVersion: 2
+guid: adc28c9f5a675eb49b548bca055234f7
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 0
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: 50
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 3750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5edffe4110acd794484984471614a3ee
+      internalID: -2118879307
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_1
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 3750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cabfd308e2d581c4ba6adad821db97b8
+      internalID: 1563874911
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_2
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 3750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 220b3698d76998847b451764d7da4899
+      internalID: 751766337
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_3
+      rect:
+        serializedVersion: 2
+        x: 2430
+        y: 3750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1d1ce79e5277a7b4c9a02ed56dd0c529
+      internalID: 625283746
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_4
+      rect:
+        serializedVersion: 2
+        x: 3240
+        y: 3750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 63363fc091894504cb2813fbb9f51f84
+      internalID: 103541632
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_5
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 3000
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9613f2adfea28d540b821c2ce804812f
+      internalID: -1521590060
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_6
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 3000
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 670c9fa90d4ec78418963deac7701423
+      internalID: -1036828137
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_7
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 3000
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 21bb834b252c43844b9fdcbb3445f136
+      internalID: 1835089343
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_8
+      rect:
+        serializedVersion: 2
+        x: 2430
+        y: 3000
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0a2ca28857e159d47914be529a7df0f2
+      internalID: -2133220057
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_9
+      rect:
+        serializedVersion: 2
+        x: 3240
+        y: 3000
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 473b28b678d04584b9e90a36945307f5
+      internalID: 403404837
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_10
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 2250
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 46dca9d7f8c92b04f97cdd8f7b46ef9d
+      internalID: -680351625
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_11
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 2250
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 49f317785527dc5458e7c5fbc6c643a0
+      internalID: -805367852
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_12
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 2250
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4eaa0e6f5b9efb3489bc5b796831ce6d
+      internalID: -1614197449
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_13
+      rect:
+        serializedVersion: 2
+        x: 2430
+        y: 2250
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e08d4c1aa4c48b74c9ad573bcf39f6da
+      internalID: 1158374124
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_14
+      rect:
+        serializedVersion: 2
+        x: 3240
+        y: 2250
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1872e1580e125624a88c1284fde72efa
+      internalID: -855257224
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_15
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1500
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b0aabb18270db3f40864cfb15a830c3b
+      internalID: -975603552
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_16
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 1500
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6fbac9ea644077c4c9c9db113eaadf95
+      internalID: -555783785
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_17
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 1500
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 562f14701d22f6f4491cbca5ee289015
+      internalID: -1215261382
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_18
+      rect:
+        serializedVersion: 2
+        x: 2430
+        y: 1500
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4d42f2e979aede74aa1e1381d7296c34
+      internalID: -268849788
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_19
+      rect:
+        serializedVersion: 2
+        x: 3240
+        y: 1500
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4944aba0beeec0c42a0ab124f29abf05
+      internalID: -1394435550
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f3b09a355c8d8f640a9e822416618be4
+      internalID: -496178521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_21
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ae99ffb51475b8b4bbc9e5fae3f3ed26
+      internalID: -2022172814
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_22
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f1bc647889ca4d24f81ba672792f0fcc
+      internalID: -1622392425
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_23
+      rect:
+        serializedVersion: 2
+        x: 2430
+        y: 750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4f9d92c338cdf32498d92c5320248e76
+      internalID: -1118190072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_24
+      rect:
+        serializedVersion: 2
+        x: 3240
+        y: 750
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3eaa3b64b212d1b449a5b7e6880bcc5d
+      internalID: 1780846848
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_25
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eb02f4716cc36ef4b907d8c34d4c3679
+      internalID: -2047756181
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_26
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 0
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 32d5e25605d01394381607edda359b10
+      internalID: 363780517
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_27
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 0
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e91ea1f5c7a28534593ba1414ffbe629
+      internalID: -1697915121
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_28
+      rect:
+        serializedVersion: 2
+        x: 2430
+        y: 0
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6f4abd8a202c7134db890e88da24f1d9
+      internalID: -881288688
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv8_Walk_29
+      rect:
+        serializedVersion: 2
+        x: 3240
+        y: 0
+        width: 810
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1bae63596d36fd44f93a422dcde7f040
+      internalID: 1583039788
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: fdfe100d9444127439f60e3c3ebee776
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      SP_Ani_CH_Cat_Lv8_Walk_0: -2118879307
+      SP_Ani_CH_Cat_Lv8_Walk_1: 1563874911
+      SP_Ani_CH_Cat_Lv8_Walk_10: -680351625
+      SP_Ani_CH_Cat_Lv8_Walk_11: -805367852
+      SP_Ani_CH_Cat_Lv8_Walk_12: -1614197449
+      SP_Ani_CH_Cat_Lv8_Walk_13: 1158374124
+      SP_Ani_CH_Cat_Lv8_Walk_14: -855257224
+      SP_Ani_CH_Cat_Lv8_Walk_15: -975603552
+      SP_Ani_CH_Cat_Lv8_Walk_16: -555783785
+      SP_Ani_CH_Cat_Lv8_Walk_17: -1215261382
+      SP_Ani_CH_Cat_Lv8_Walk_18: -268849788
+      SP_Ani_CH_Cat_Lv8_Walk_19: -1394435550
+      SP_Ani_CH_Cat_Lv8_Walk_2: 751766337
+      SP_Ani_CH_Cat_Lv8_Walk_20: -496178521
+      SP_Ani_CH_Cat_Lv8_Walk_21: -2022172814
+      SP_Ani_CH_Cat_Lv8_Walk_22: -1622392425
+      SP_Ani_CH_Cat_Lv8_Walk_23: -1118190072
+      SP_Ani_CH_Cat_Lv8_Walk_24: 1780846848
+      SP_Ani_CH_Cat_Lv8_Walk_25: -2047756181
+      SP_Ani_CH_Cat_Lv8_Walk_26: 363780517
+      SP_Ani_CH_Cat_Lv8_Walk_27: -1697915121
+      SP_Ani_CH_Cat_Lv8_Walk_28: -881288688
+      SP_Ani_CH_Cat_Lv8_Walk_29: 1583039788
+      SP_Ani_CH_Cat_Lv8_Walk_3: 625283746
+      SP_Ani_CH_Cat_Lv8_Walk_4: 103541632
+      SP_Ani_CH_Cat_Lv8_Walk_5: -1521590060
+      SP_Ani_CH_Cat_Lv8_Walk_6: -1036828137
+      SP_Ani_CH_Cat_Lv8_Walk_7: 1835089343
+      SP_Ani_CH_Cat_Lv8_Walk_8: -2133220057
+      SP_Ani_CH_Cat_Lv8_Walk_9: 403404837
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,39 @@
+# Google Mobile Ads SDK 규칙
+-keep class com.google.android.gms.ads.** { *; }
+-keep class com.google.android.gms.common.** { *; }
+
+# Unity Ads 관련 규칙
+-keep class com.unity.** { *; }
+-keep class com.unity3d.ads.** { *; }
+
+# Google Play Services 규칙
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.android.gms.**
+
+# 광고 관련 클래스들 보존
+-keepclassmembers class * implements android.os.Parcelable {
+    public static final android.os.Parcelable$Creator *;
+}
+
+# RewardedInterstitialAd 관련 클래스 보존
+-keepclassmembers class com.google.android.gms.ads.rewarded.** { *; }
+-keepclassmembers class com.google.android.gms.ads.rewardedinterstitial.** { *; }
+
+# 광고 콜백 메서드 보존
+-keepclassmembers class * {
+    @com.google.android.gms.ads.AdListener *;
+    @com.google.android.gms.ads.rewarded.RewardedAdCallback *;
+    @com.google.android.gms.ads.OnPaidEventListener *;
+    @com.google.android.gms.ads.OnAdMetadataChangedListener *;
+}
+
+# 기타 필요한 클래스들 보존
+-keep public class com.google.android.gms.ads.MobileAds {
+    public *;
+}
+-keep public class com.google.android.gms.ads.initialization.* {
+    public *;
+}
+-keep public class com.google.android.gms.ads.rewarded.* {
+    public *;
+}

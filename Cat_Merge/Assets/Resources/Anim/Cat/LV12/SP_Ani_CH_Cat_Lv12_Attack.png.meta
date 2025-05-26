@@ -1,0 +1,833 @@
+fileFormatVersion: 2
+guid: f51e5890ec366fb4fa896b1fe35875c8
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 0
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: 50
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 3750
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1cf625af63e2b0a45bde8c561f8ff41a
+      internalID: -353853837
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_1
+      rect:
+        serializedVersion: 2
+        x: 825
+        y: 3750
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 291c8f262a57da444bddcefe405d1ffb
+      internalID: 3889128
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_2
+      rect:
+        serializedVersion: 2
+        x: 1650
+        y: 3750
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e5d8a0872afbdce468abbe7d62daa0b5
+      internalID: 1520090444
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_3
+      rect:
+        serializedVersion: 2
+        x: 2475
+        y: 3750
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 67300ed9aba965441b019b1fa9463a37
+      internalID: 1790071067
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_4
+      rect:
+        serializedVersion: 2
+        x: 3300
+        y: 3750
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6b17ea0db487ed24b866ce6bb92b98e1
+      internalID: 2145245993
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_5
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 3000
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 99e095d2f9747294db83cd3fc4bb04a2
+      internalID: -702288337
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_6
+      rect:
+        serializedVersion: 2
+        x: 825
+        y: 3000
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 466fb2c6deb549a4baa83fbc185c7edc
+      internalID: -950075465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_7
+      rect:
+        serializedVersion: 2
+        x: 1650
+        y: 3000
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f22186272923b7e4eadf4b5195bc10cc
+      internalID: 2071643822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_8
+      rect:
+        serializedVersion: 2
+        x: 2475
+        y: 3000
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8a68682c29a511b4faf6d906c0a4ca92
+      internalID: 1769550165
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_9
+      rect:
+        serializedVersion: 2
+        x: 3300
+        y: 3000
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c6f7c3d68746bd346b12126fcd7ce66e
+      internalID: 269382982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_10
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 2250
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f14f9317f2a4afd45a37e9fccf35cc55
+      internalID: 242402793
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_11
+      rect:
+        serializedVersion: 2
+        x: 825
+        y: 2250
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 27b72381820976742af267bc863ceef3
+      internalID: -1830684784
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_12
+      rect:
+        serializedVersion: 2
+        x: 1650
+        y: 2250
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d7ac2ac0f0a16e84aaa12e71562c2714
+      internalID: 263387009
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_13
+      rect:
+        serializedVersion: 2
+        x: 2475
+        y: 2250
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 574bbca09c60d994ab0e4700833211a1
+      internalID: 1731333442
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_14
+      rect:
+        serializedVersion: 2
+        x: 3300
+        y: 2250
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5382b8abf0c1f264980a86f9c7be6fc4
+      internalID: 1313271327
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_15
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1500
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 49dec1e9ed773e947913ae5b3ffc95c1
+      internalID: 1080015666
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_16
+      rect:
+        serializedVersion: 2
+        x: 825
+        y: 1500
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a1bff7de96053d548a29dfb17a788791
+      internalID: 311326412
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_17
+      rect:
+        serializedVersion: 2
+        x: 1650
+        y: 1500
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 26825c60702b2a148a392fc8273b6866
+      internalID: -1900086065
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_18
+      rect:
+        serializedVersion: 2
+        x: 2475
+        y: 1500
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8755a5602d61f714699ac630af7bf401
+      internalID: -1656516546
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_19
+      rect:
+        serializedVersion: 2
+        x: 3300
+        y: 1500
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 69bc3012ff16a6a46a9218e7500e30b5
+      internalID: -666790966
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 750
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a7c14f44c8f46b6439b1b65b21c83699
+      internalID: -95725277
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_21
+      rect:
+        serializedVersion: 2
+        x: 825
+        y: 750
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 03ffc5d63a68e5040ae2de77b9c94bf6
+      internalID: -970969424
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_22
+      rect:
+        serializedVersion: 2
+        x: 1650
+        y: 750
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0745f5fb7961a6d4383529d920c1fbf3
+      internalID: 1308051610
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_23
+      rect:
+        serializedVersion: 2
+        x: 2475
+        y: 750
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 552fa6d3d02a7ce44813728464d90621
+      internalID: 1477878990
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_24
+      rect:
+        serializedVersion: 2
+        x: 3300
+        y: 750
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 26ff4a92ee16ac34ea2df7dd79cbde8e
+      internalID: -1295216843
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_25
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0f0ba75fe0daee343a3d9319b556d602
+      internalID: 1381480730
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_26
+      rect:
+        serializedVersion: 2
+        x: 825
+        y: 0
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 250896487cbe71f448f50fe88f69229a
+      internalID: 1719846609
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_27
+      rect:
+        serializedVersion: 2
+        x: 1650
+        y: 0
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8a160091e79b30744bac74bb64939858
+      internalID: -2081397500
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_28
+      rect:
+        serializedVersion: 2
+        x: 2475
+        y: 0
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7ee5f2a7db0a883499677874a32b2f29
+      internalID: 708398545
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SP_Ani_CH_Cat_Lv12_Attack_29
+      rect:
+        serializedVersion: 2
+        x: 3300
+        y: 0
+        width: 825
+        height: 750
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 513504ee9721c7e4dab51e3957903dc5
+      internalID: 1018837716
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: f086c283d525bec4c8c9ce410c0cf8f7
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      SP_Ani_CH_Cat_Lv12_Attack_0: -353853837
+      SP_Ani_CH_Cat_Lv12_Attack_1: 3889128
+      SP_Ani_CH_Cat_Lv12_Attack_10: 242402793
+      SP_Ani_CH_Cat_Lv12_Attack_11: -1830684784
+      SP_Ani_CH_Cat_Lv12_Attack_12: 263387009
+      SP_Ani_CH_Cat_Lv12_Attack_13: 1731333442
+      SP_Ani_CH_Cat_Lv12_Attack_14: 1313271327
+      SP_Ani_CH_Cat_Lv12_Attack_15: 1080015666
+      SP_Ani_CH_Cat_Lv12_Attack_16: 311326412
+      SP_Ani_CH_Cat_Lv12_Attack_17: -1900086065
+      SP_Ani_CH_Cat_Lv12_Attack_18: -1656516546
+      SP_Ani_CH_Cat_Lv12_Attack_19: -666790966
+      SP_Ani_CH_Cat_Lv12_Attack_2: 1520090444
+      SP_Ani_CH_Cat_Lv12_Attack_20: -95725277
+      SP_Ani_CH_Cat_Lv12_Attack_21: -970969424
+      SP_Ani_CH_Cat_Lv12_Attack_22: 1308051610
+      SP_Ani_CH_Cat_Lv12_Attack_23: 1477878990
+      SP_Ani_CH_Cat_Lv12_Attack_24: -1295216843
+      SP_Ani_CH_Cat_Lv12_Attack_25: 1381480730
+      SP_Ani_CH_Cat_Lv12_Attack_26: 1719846609
+      SP_Ani_CH_Cat_Lv12_Attack_27: -2081397500
+      SP_Ani_CH_Cat_Lv12_Attack_28: 708398545
+      SP_Ani_CH_Cat_Lv12_Attack_29: 1018837716
+      SP_Ani_CH_Cat_Lv12_Attack_3: 1790071067
+      SP_Ani_CH_Cat_Lv12_Attack_4: 2145245993
+      SP_Ani_CH_Cat_Lv12_Attack_5: -702288337
+      SP_Ani_CH_Cat_Lv12_Attack_6: -950075465
+      SP_Ani_CH_Cat_Lv12_Attack_7: 2071643822
+      SP_Ani_CH_Cat_Lv12_Attack_8: 1769550165
+      SP_Ani_CH_Cat_Lv12_Attack_9: 269382982
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

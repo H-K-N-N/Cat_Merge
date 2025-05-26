@@ -1,15 +1,16 @@
 # Cat_Merge (쥐잡는 고양이 대작전) 
 
-
-
+<img src="https://github.com/user-attachments/assets/ed35e8e8-97b3-4a62-899d-970cdc010b72" width="250"></img>
+<img src="https://github.com/user-attachments/assets/38258ff3-3eff-4d4b-ab04-3535122dc757" width="250"></img>
+<img src="https://github.com/user-attachments/assets/4c9fb017-8036-470f-b8ee-73d74ec68069" width="250"></img>
 </br>
 
 
 ## 1. 게임 메커니즘
-  - 같은 등급의 고양이를 합치는 게임
-  - 정해진 시간마다 등장하는 쥐를 잡는 게임
+  - 같은 등급의 고양이를 드래그 앤 드랍을 통해 합치기
+  - 정해진 시간마다 등장하는 쥐를 잡기
 ## 2. 주요 목표
-  - 보다 더 높은 등급의 고양이를 수집하며 성장하는 게임
+  - 더 높은 등급의 고양이를 수집하며 성장하는 게임
 ## 3. 개발 환경
   - Unity, C#
 </br>

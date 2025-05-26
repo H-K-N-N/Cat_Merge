@@ -24,6 +24,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     [SerializeField] private TextMeshProUGUI autoMergeCostText;     // 자동 합성 비용 텍스트
     [SerializeField] private TextMeshProUGUI autoMergeTimerText;    // 자동 합성 타이머 텍스트
     [SerializeField] private TextMeshProUGUI explainText;           // 자동 합성 설명 텍스트
+    [SerializeField] private Image itemAutoMergeFillImage;          // 아이템 자동 합성 쿨타임 이미지
 
 
     [Header("---[Auto Merge Settings]")]
@@ -46,6 +47,9 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     private Vector2 panelHalfSize;      // Panel Size / 2
 
     private HashSet<DragAndDropManager> mergingCats = new HashSet<DragAndDropManager>();
+
+    private float itemAutoMergeElapsedTime = 0f;    // 아이템 자동 합성 진행 시간
+    private Coroutine itemAutoMergeCoroutine;       // 아이템 자동 합성 코루틴
 
 
     [Header("---[ETC]")]
@@ -87,9 +91,16 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
 
         // 타이머 체크 코루틴 시작
         StartCoroutine(TimerCheckRoutine());
-        
-        // 자동 합성 코루틴 시작(N초마다 자동으로 합성하는 아이템)
-        StartCoroutine(ItemAutoMergeTime());
+
+        // 자동 합성 코루틴 시작(한 프레임 후에 시작)
+        StartCoroutine(StartItemAutoMergeDelayed());
+    }
+
+    // 아이템 자동 합성 코루틴
+    private IEnumerator StartItemAutoMergeDelayed()
+    {
+        yield return waitForEndOfFrame;
+        itemAutoMergeCoroutine = StartCoroutine(ItemAutoMergeTime());
     }
 
     // 타이머 체크 코루틴
@@ -181,7 +192,7 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     {
         if (GameManager.Instance.Cash < AUTO_MERGE_COST)
         {
-            NotificationManager.Instance.ShowNotification("재화가 부족합니다!!");
+            NotificationManager.Instance.ShowNotification("다이아가 부족합니다!!");
             return;
         }
 
@@ -200,18 +211,20 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     {
         if (!isAutoMergeActive)
         {
-            startTime = Time.time;
-            isAutoMergeActive = true;
             currentAutoMergeDuration = AUTO_MERGE_DURATION;
             UpdateAutoMergeTimerVisibility(true);
+            UpdateTimerDisplay((int)AUTO_MERGE_DURATION);
+
+            startTime = Time.time;
+            isAutoMergeActive = true;
             StartAutoMergeCoroutine();
         }
         else
         {
             currentAutoMergeDuration += AUTO_MERGE_DURATION;
+            UpdateTimerDisplay((int)currentAutoMergeDuration);
         }
     }
-
 
     // 코루틴 시작 전 기존 코루틴 정리 함수
     private void StartAutoMergeCoroutine()
@@ -243,7 +256,8 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             var allCats = FindObjectsOfType<DragAndDropManager>()
                 .Where(cat => cat != null &&
                        cat.gameObject.activeSelf &&
-                       !cat.isDragging)
+                       !cat.isDragging &&
+                       !mergingCats.Contains(cat))
                 .OrderBy(cat => cat.catData.CatGrade)
                 .ToList();
 
@@ -259,7 +273,8 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
                     .Where(cat => cat != null &&
                            cat.gameObject.activeSelf &&
                            cat != allCats[i] &&
-                           cat.catData.CatGrade == allCats[i].catData.CatGrade)
+                           cat.catData.CatGrade == allCats[i].catData.CatGrade &&
+                           !mergingCats.Contains(cat))
                     .ToList();
 
                 if (sameLevelCats.Count > 0)
@@ -434,8 +449,16 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         isPaused = false;
         pausedTimeRemaining = 0f;
         UpdateAutoMergeTimerVisibility(false);
-        StopAllCoroutines();
+
+        if (autoMergeCoroutine != null)
+        {
+            StopCoroutine(autoMergeCoroutine);
+            autoMergeCoroutine = null;
+        }
+
         mergingCats.Clear();
+        currentAutoMergeDuration = 0f;
+        UpdateTimerDisplay(0);
     }
 
     // 합성중인 고양이 정지 함수
@@ -458,12 +481,10 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     // 기본 N초마다 자동으로 합성하는 기능 코루틴
     private IEnumerator ItemAutoMergeTime()
     {
-        float elapsed = 0f;
-
         while (true)
         {
             // 전투중이거나 튜토리얼 중이면 스킵
-            if (BattleManager.Instance.IsBattleActive ||
+            if (BattleManager.Instance.IsBattleActive || 
                 (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive))
             {
                 yield return waitForEndOfFrame;
@@ -471,24 +492,25 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             }
 
             float autoTime = ItemFunctionManager.Instance.autoMergeList[ItemMenuManager.Instance.AutoMergeLv].value;
+            itemAutoMergeFillImage.fillAmount = Mathf.Clamp01(itemAutoMergeElapsedTime / autoTime);
 
             // 시간 완료될때까지 대기
-            while (elapsed < autoTime)
+            while (itemAutoMergeElapsedTime < autoTime)
             {
-                if (BattleManager.Instance.IsBattleActive ||
+                if (BattleManager.Instance.IsBattleActive || 
                     (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive)) break;
 
-                elapsed += Time.deltaTime;
+                itemAutoMergeElapsedTime += Time.deltaTime;
+                itemAutoMergeFillImage.fillAmount = Mathf.Clamp01(itemAutoMergeElapsedTime / autoTime);
                 yield return waitForEndOfFrame;
             }
 
             // 완료되면 자동 합성 실행
-            if (!BattleManager.Instance.IsBattleActive && elapsed >= autoTime &&
+            if (!BattleManager.Instance.IsBattleActive && itemAutoMergeElapsedTime >= autoTime && 
                 (TutorialManager.Instance == null || !TutorialManager.Instance.IsTutorialActive))
             {
                 TryAutoMerge();
-                elapsed = 0f;
-
+                itemAutoMergeElapsedTime = 0f;
             }
 
             yield return waitForEndOfFrame;
@@ -498,13 +520,12 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
     // 자동 합성 시도 함수 (아이템 기능)
     private void TryAutoMerge()
     {
-        //CleanupMergingCats();
-
         // 활성화된 고양이를 등급순으로 정렬하여 가져옴
         var allCats = FindObjectsOfType<DragAndDropManager>()
             .Where(cat => cat != null &&
                    cat.gameObject.activeSelf &&
-                   !cat.isDragging)
+                   !cat.isDragging &&
+                   !mergingCats.Contains(cat))
             .OrderBy(cat => cat.catData.CatGrade)
             .ToList();
 
@@ -518,7 +539,8 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
                 .Where(cat => cat != null &&
                        cat.gameObject.activeSelf &&
                        cat != allCats[i] &&
-                       cat.catData.CatGrade == allCats[i].catData.CatGrade)
+                       cat.catData.CatGrade == allCats[i].catData.CatGrade &&
+                       !mergingCats.Contains(cat))
                 .ToList();
 
             if (sameLevelCats.Count > 0)
@@ -628,6 +650,13 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
             openAutoMergePanelButton.interactable = false;
             DisableAutoMergeUI();
         }
+
+        // 아이템 자동 합성 일시정지
+        if (itemAutoMergeCoroutine != null)
+        {
+            StopCoroutine(itemAutoMergeCoroutine);
+            itemAutoMergeCoroutine = null;
+        }
     }
 
     // 자동합성 이어하기 함수
@@ -645,6 +674,9 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         {
             EnableAutoMergeUI();
         }
+
+        // 아이템 자동 합성 재개
+        itemAutoMergeCoroutine = StartCoroutine(ItemAutoMergeTime());
     }
 
     // 전투 시작시 자동합성 UI 비활성화 함수
@@ -727,6 +759,12 @@ public class AutoMergeManager : MonoBehaviour, ISaveable
         }
 
         isDataLoaded = true;
+
+        if (itemAutoMergeCoroutine != null)
+        {
+            StopCoroutine(itemAutoMergeCoroutine);
+            StartCoroutine(StartItemAutoMergeDelayed());
+        }
     }
 
     #endregion

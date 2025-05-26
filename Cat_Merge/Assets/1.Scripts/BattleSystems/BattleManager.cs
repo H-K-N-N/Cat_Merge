@@ -17,8 +17,8 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     private static class BattleConstants
     {
-        public const float DEFAULT_SPAWN_INTERVAL = 240f;       // 보스 등장 주기 (240f)
-        public const float DEFAULT_BOSS_DURATION = 24f;         // 보스 유지 시간 (24f)
+        public const float DEFAULT_SPAWN_INTERVAL = 300f;       // 보스 등장 주기 (300f)
+        public const float DEFAULT_BOSS_DURATION = 30f;         // 보스 유지 시간 (30f)
         public const float GIVEUP_BUTTON_DELAY = 2f;            // 항복 버튼 활성화 딜레이 (2f)
         public const float BOSS_ATTACK_DELAY = 2f;              // 보스 공격 딜레이 (2f)
         public const float WARNING_IMAGE_START_X = -640f;       // 경고 이미지 시작 좌표 (-640f)
@@ -93,6 +93,14 @@ public class BattleManager : MonoBehaviour, ISaveable
     private Sprite cashSprite;                                              // 캐시 이미지
     private Sprite coinSprite;                                              // 코인 이미지
     private List<GameObject> activeRewardSlots = new List<GameObject>();    // 현재 활성화된 보상 슬롯들
+
+    [SerializeField] private TextMeshProUGUI touchText;                     // BossResult Panel Touch Text
+    private Coroutine touchTextBlinkCoroutine;                              // Touch Text 깜빡임 코루틴 관리용 변수
+
+    // Touch Text 깜빡임에 사용할 상수
+    private const float BLINK_SPEED = 2f;              // 깜빡임 속도
+    private const float MIN_ALPHA = 0.2f;              // 최소 투명도
+    private const float MAX_ALPHA = 1f;                // 최대 투명도
 
 
     [Header("---[Boss AutoRetry UI]")]
@@ -835,9 +843,18 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 전투 결과 보여주는 함수
     private void ShowBattleResult(bool isVictory, bool isAutoRetryEnabled)
     {
+        if (touchTextBlinkCoroutine != null)
+        {
+            StopCoroutine(touchTextBlinkCoroutine);
+            touchTextBlinkCoroutine = null;
+        }
+
         battleResultPanel.SetActive(true);
         winPanel.SetActive(isVictory);
         losePanel.SetActive(!isVictory);
+
+        // Touch Text 깜빡임 애니메이션 시작
+        touchTextBlinkCoroutine = StartCoroutine(BlinkTouchText());
 
         ClearRewardSlots();
 
@@ -893,14 +910,38 @@ public class BattleManager : MonoBehaviour, ISaveable
         resultPanelCoroutine = StartCoroutine(AutoCloseBattleResultPanel());
     }
 
-    // 보상 슬롯 제거 함수
-    private void ClearRewardSlots()
+    // Touch Text 깜빡임 애니메이션 코루틴
+    private IEnumerator BlinkTouchText()
     {
-        foreach (GameObject slot in activeRewardSlots)
+        if (touchText == null) yield break;
+
+        float currentAlpha = MAX_ALPHA;
+        bool fadeOut = true;
+
+        while (battleResultPanel.activeSelf)
         {
-            Destroy(slot);
+            if (fadeOut)
+            {
+                currentAlpha = Mathf.MoveTowards(currentAlpha, MIN_ALPHA, BLINK_SPEED * Time.deltaTime);
+                if (currentAlpha <= MIN_ALPHA)
+                {
+                    fadeOut = false;
+                }
+            }
+            else
+            {
+                currentAlpha = Mathf.MoveTowards(currentAlpha, MAX_ALPHA, BLINK_SPEED * Time.deltaTime);
+                if (currentAlpha >= MAX_ALPHA)
+                {
+                    fadeOut = true;
+                }
+            }
+
+            touchText.alpha = currentAlpha;
+            yield return null;
         }
-        activeRewardSlots.Clear();
+
+        touchTextBlinkCoroutine = null;
     }
 
     // 전투 결과 패널 닫는 함수
@@ -911,8 +952,26 @@ public class BattleManager : MonoBehaviour, ISaveable
             StopCoroutine(resultPanelCoroutine);
             resultPanelCoroutine = null;
         }
+
+        // 깜빡임 코루틴 중지
+        if (touchTextBlinkCoroutine != null)
+        {
+            StopCoroutine(touchTextBlinkCoroutine);
+            touchTextBlinkCoroutine = null;
+        }
+
         ClearRewardSlots();
         battleResultPanel.SetActive(false);
+    }
+
+    // 보상 슬롯 제거 함수
+    private void ClearRewardSlots()
+    {
+        foreach (GameObject slot in activeRewardSlots)
+        {
+            Destroy(slot);
+        }
+        activeRewardSlots.Clear();
     }
 
     // 전투 결과 패널 자동으로 닫는 코루틴
@@ -1077,16 +1136,16 @@ public class BattleManager : MonoBehaviour, ISaveable
         // 퀘스트 갱신
         QuestManager.Instance.AddBattleCount();
 
+        // 자동이동 상태 복구
+        AutoMoveManager.Instance.EndBattleAutoMoveState();
+
         // 고양이들의 체력 회복
         CatData[] allCats = FindObjectsOfType<CatData>();
         foreach (var cat in allCats)
         {
             cat.HealCatHP();
-
             cat.ChangeCatState(CatState.isIdle);
         }
-
-        AutoMoveManager.Instance.EndBattleAutoMoveState();
 
         // 자동 머지 재개
         AutoMergeManager.Instance.ResumeAutoMerge();

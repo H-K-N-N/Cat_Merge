@@ -13,8 +13,9 @@ public class AnimationManager : MonoBehaviour
     private float duration = 0.125f;        // 크기 변화 시간
     private float maxLifetime = 2f;         // 최대 생존 시간 (안전장치)
 
-    private bool isAnimating = false;       // 애니메이션 진행 상태
     private bool isDestroyed = false;       // 파괴 예약 상태
+    private Coroutine scaleAnimationCoroutine;
+    private Coroutine safetyTimeoutCoroutine;
 
     #endregion
 
@@ -25,9 +26,8 @@ public class AnimationManager : MonoBehaviour
     {
         if (!isDestroyed)
         {
-            isAnimating = true;
-            StartCoroutine(ScaleAnimation());
-            StartCoroutine(SafetyTimeout());
+            scaleAnimationCoroutine = StartCoroutine(ScaleAnimation());
+            safetyTimeoutCoroutine = StartCoroutine(SafetyTimeout());
         }
     }
 
@@ -37,6 +37,11 @@ public class AnimationManager : MonoBehaviour
     }
 
     private void OnDestroy()
+    {
+        CleanupAnimation();
+    }
+
+    private void OnApplicationQuit()
     {
         CleanupAnimation();
     }
@@ -70,7 +75,7 @@ public class AnimationManager : MonoBehaviour
 
         if (isDestroyed)
         {
-            if (scaleUp != null) StopCoroutine(scaleUp);
+            StopCoroutine(scaleUp);
             DestroyEffect();
             yield break;
         }
@@ -81,7 +86,7 @@ public class AnimationManager : MonoBehaviour
 
         if (isDestroyed)
         {
-            if (scaleDown != null) StopCoroutine(scaleDown);
+            StopCoroutine(scaleDown);
         }
 
         DestroyEffect();
@@ -98,11 +103,10 @@ public class AnimationManager : MonoBehaviour
             elapsedTime += Time.deltaTime;
             float t = elapsedTime / time;
 
+            if (target == null) break;  // 추가 검사
+
             // 크기 조절
-            if (target != null)
-            {
-                target.sizeDelta = Vector2.Lerp(startSize, endSize, t);
-            }
+            target.sizeDelta = Vector2.Lerp(startSize, endSize, t);
 
             // 투명도 조절 (fadeOut이 true일 때만)
             if (fadeOut)
@@ -113,13 +117,10 @@ public class AnimationManager : MonoBehaviour
             yield return null;
         }
 
-        if (!isDestroyed)
+        if (!isDestroyed && target != null)
         {
             // 최종 크기와 투명도 설정
-            if (target != null)
-            {
-                target.sizeDelta = endSize;
-            }
+            target.sizeDelta = endSize;
             if (fadeOut)
             {
                 SetAlpha(0f);
@@ -144,7 +145,19 @@ public class AnimationManager : MonoBehaviour
         if (!isDestroyed)
         {
             isDestroyed = true;
-            isAnimating = false;
+
+            if (scaleAnimationCoroutine != null)
+            {
+                StopCoroutine(scaleAnimationCoroutine);
+                scaleAnimationCoroutine = null;
+            }
+
+            if (safetyTimeoutCoroutine != null)
+            {
+                StopCoroutine(safetyTimeoutCoroutine);
+                safetyTimeoutCoroutine = null;
+            }
+
             StopAllCoroutines();
         }
     }
@@ -155,9 +168,11 @@ public class AnimationManager : MonoBehaviour
         if (!isDestroyed)
         {
             isDestroyed = true;
-            isAnimating = false;
-            StopAllCoroutines();
-            Destroy(gameObject);
+            CleanupAnimation();
+            if (gameObject != null)
+            {
+                Destroy(gameObject);
+            }
         }
     }
 

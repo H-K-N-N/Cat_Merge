@@ -35,7 +35,6 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     private Image catImage;                         // 고양이 이미지 컴포넌트
     public double catHp;                            // 현재 고양이 체력
     public bool isStuned = false;                   // 기절 상태 여부
-    private const float STUN_TIME = 10f;            // 기절 시간
 
     [Header("HP UI")]
     [SerializeField] private GameObject hpImage;    // HP 이미지 오브젝트
@@ -394,12 +393,12 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
         if (catHp <= 0)
         {
-            StartCoroutine(StunAndRecover(STUN_TIME));
+            StartCoroutine(StunAndRecover());
         }
     }
 
     // 기절 및 회복 처리 함수
-    private IEnumerator StunAndRecover(float stunTime)
+    private IEnumerator StunAndRecover()
     {
         SetStunState(true);
         yield return STUN_DELAY;
@@ -412,25 +411,28 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
         UpdateHPBar();
         isStuned = isStunned;
 
-        ChangeCatState(CatState.isFaint);
-
         if (!isStunned)
         {
-            ChangeCatState(CatState.isIdle);
-
-            // 전투 중이 아닐 때만 자동이동 상태 확인
-            if (!BattleManager.Instance.IsBattleActive)
+            // 기절에서 회복될 때
+            if (BattleManager.Instance.IsBattleActive)
             {
+                // 전투 중이면 전투 상태로
+                ChangeCatState(CatState.isBattle);
+            }
+            else
+            {
+                // 전투 중이 아니면 기본 상태로
+                ChangeCatState(CatState.isIdle);
                 SetCollectingCoinsState(true);
                 SetAutoMoveState(AutoMoveManager.Instance.IsAutoMoveEnabled());
-                SetRaycastTarget(true);
             }
+            // 어떤 상태든 레이캐스트는 활성화
+            SetRaycastTarget(true);
         }
         else
         {
+            // 기절 상태로 진입할 때
             ChangeCatState(CatState.isFaint);
-
-            // 기절 상태로 진입할 때는 모든 기능 비활성화
             SetCollectingCoinsState(false);
             SetAutoMoveState(false);
             SetRaycastTarget(false);
@@ -448,7 +450,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     {
         if (isStuned)
         {
-            StopCoroutine(StunAndRecover(STUN_TIME));
+            StopCoroutine(StunAndRecover());
             SetStunState(false);
         }
         catHp = catData.CatHp;

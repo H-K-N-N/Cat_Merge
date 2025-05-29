@@ -883,6 +883,7 @@ public class QuestManager : MonoBehaviour, ISaveable
 
         UpdateDailySpecialRewardUI();
         UpdateAllDailyRewardButtonState();
+        UpdateNewImageStatus();
     }
 
     // 모든 Daily 퀘스트가 완료되었는지 확인하는 함수
@@ -951,6 +952,7 @@ public class QuestManager : MonoBehaviour, ISaveable
 
         UpdateWeeklySpecialRewardUI();
         UpdateAllWeeklyRewardButtonState();
+        UpdateNewImageStatus();
     }
 
     // 모든 Weekly 퀘스트가 완료되었는지 확인하는 함수

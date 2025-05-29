@@ -549,11 +549,11 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         "공격 속도 0.05초 증가",
         "젤리 획득 속도 0.05초 증가",
         "무료 다이아 획득량 1 증가",
-        "무료 다이아 획득 쿨타임 1초 감소",
+        "무료 다이아 획득 쿨타임 2초 감소",
         "광고 다이아 획득량 5 증가",
-        "광고 다이아 획득 쿨타임 1초 감소",
-        "젤리 획득 버프 지속 시간 1초 증가",
-        "젤리 획득 버프 쿨타임 1초 감소"
+        "광고 다이아 획득 쿨타임 2초 감소",
+        "젤리 획득 버프 지속 시간 2초 증가",
+        "젤리 획득 버프 쿨타임 2초 감소"
     };
 
     // 패시브 효과 적용 함수
@@ -690,10 +690,10 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         ShopManager.Instance.AddPassiveCashForTimeAmount(1);
     }
 
-    // 무료 다이아 획득 쿨타임 1초 감소 패시브 함수
+    // 무료 다이아 획득 쿨타임 2초 감소 패시브 함수
     private void ApplyCashForTimeCoolTimeBuff()
     {
-        ShopManager.Instance.AddPassiveCashForTimeCoolTimeReduction(1);
+        ShopManager.Instance.AddPassiveCashForTimeCoolTimeReduction(2);
     }
 
     // 광고 다이아 획득량 5 증가 패시브 함수
@@ -702,22 +702,22 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         ShopManager.Instance.AddPassiveCashForAdAmount(5);
     }
 
-    // 광고 다이아 획득 쿨타임 1초 감소 패시브 함수
+    // 광고 다이아 획득 쿨타임 2초 감소 패시브 함수
     private void ApplyCashForAdCoolTimeBuff()
     {
-        ShopManager.Instance.AddPassiveCashForAdCoolTimeReduction(1);
+        ShopManager.Instance.AddPassiveCashForAdCoolTimeReduction(2);
     }
 
-    // 젤리 획득 버프 지속 시간 1초 증가 패시브 함수
+    // 젤리 획득 버프 지속 시간 2초 증가 패시브 함수
     private void ApplyDoubleCoinForAdDurationBuff()
     {
-        ShopManager.Instance.AddPassiveDoubleCoinDurationIncrease(1f);
+        ShopManager.Instance.AddPassiveDoubleCoinDurationIncrease(2f);
     }
 
-    // 젤리 획득 버프 쿨타임 1초 감소 패시브 함수
+    // 젤리 획득 버프 쿨타임 2초 감소 패시브 함수
     private void ApplyDoubleCoinForAdCoolTimeBuff()
     {
-        ShopManager.Instance.AddPassiveDoubleCoinForAdCoolTimeReduction(1);
+        ShopManager.Instance.AddPassiveDoubleCoinForAdCoolTimeReduction(2);
     }
 
     #endregion

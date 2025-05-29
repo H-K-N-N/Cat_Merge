@@ -13,10 +13,11 @@ public class GoogleAdsManager : MonoBehaviour
 
     // 실제 광고 ID
 #if UNITY_ANDROID
-    private string _productionAdUnitId = "여기에_실제_광고_ID_입력";
+    private string _productionAdUnitId = "ca-app-pub-6387288948977074/9379084963";
     private string _testAdUnitId = "ca-app-pub-3940256099942544/5354046379";
 #elif UNITY_IPHONE
-    private string _productionAdUnitId = "여기에_실제_광고_ID_입력";
+    // IPHONE은 지원하지 않으므로 둘다 테스트로 대체
+    private string _productionAdUnitId = "ca-app-pub-3940256099942544/6978759866";
     private string _testAdUnitId = "ca-app-pub-3940256099942544/6978759866";
 #else
     private string _productionAdUnitId = "unused";
@@ -39,12 +40,11 @@ public class GoogleAdsManager : MonoBehaviour
 
     public void Awake()
     {
-        //#if UNITY_EDITOR
-        //        _adUnitId = _testAdUnitId;
-        //#else
-        //        _adUnitId = _productionAdUnitId;
-        //#endif
+#if UNITY_EDITOR
         _adUnitId = _testAdUnitId;
+#else
+        _adUnitId = _productionAdUnitId;
+#endif
 
         // Google Mobile Ads SDK 초기화
         MobileAds.Initialize((InitializationStatus initStatus) =>

@@ -322,7 +322,42 @@ public class GameManager : MonoBehaviour, ISaveable
     // decimal 타입 오버로딩 추가
     public string FormatNumber(decimal number)
     {
-        return FormatNumber((long)number);
+        //return FormatNumber((long)number);
+
+        if (number < 1000)
+        {
+            return number.ToString(); // 999까지는 그대로 출력
+        }
+
+        List<string> suffixes = new List<string>();
+
+        // 1글자 단위 생성 (A-Z)
+        for (char c = 'A'; c <= 'Z'; c++)
+        {
+            suffixes.Add(c.ToString());
+        }
+
+        // 2글자 단위 생성 (AA-ZZ)
+        for (char c1 = 'A'; c1 <= 'Z'; c1++)
+        {
+            for (char c2 = 'A'; c2 <= 'Z'; c2++)
+            {
+                suffixes.Add(c1.ToString() + c2.ToString());
+            }
+        }
+
+        int suffixIndex = 0;
+        decimal value = number;
+
+        // 1,000씩 나누며 접미사를 선택 (접미사 A부터 시작)
+        while (value >= 1000 && suffixIndex < suffixes.Count)
+        {
+            value /= 1000;
+            suffixIndex++;
+        }
+
+        // 소수점 2자리까지 표시하며 반올림 없이 출력
+        return $"{Math.Floor(value * 100) / 100:F2}{suffixes[suffixIndex - 1]}";
     }
 
     #endregion

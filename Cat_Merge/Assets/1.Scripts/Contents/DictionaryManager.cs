@@ -540,9 +540,9 @@ public class DictionaryManager : MonoBehaviour, ISaveable
 
         string catInfo = $"이름: {catData.CatName}\n" +
                          $"등급: {catData.CatGrade}\n" +
-                         $"공격력: {catData.BaseDamage}%\n" +
-                         $"체력: {catData.CatHp}\n" +
-                         $"젤리수급량: {catData.CatGetCoin}";
+                         $"공격력: {GameManager.Instance.FormatNumber((long)catData.BaseDamage)}%\n" +
+                         $"체력: {GameManager.Instance.FormatNumber((long)catData.CatHp)}\n" +
+                         $"젤리수급량: {GameManager.Instance.FormatNumber((long)catData.CatGetCoin)}";
         informationCatDetails.text = catInfo;
 
         // 스크롤 설정
@@ -589,7 +589,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         newCatIcon.sprite = newCat.CatImage;
         newCatName.text = newCat.CatGrade.ToString() + ". " + newCat.CatName;
         newCatExplain.text = newCat.CatExplain;
-        newCatGetCoin.text = "젤리 수급량: " + newCat.CatGetCoin.ToString();
+        newCatGetCoin.text = "젤리 수급량: " + GameManager.Instance.FormatNumber((long)newCat.CatGetCoin);
 
         // Highlight Image 회전 애니메이션 시작
         highlightRotationCoroutine = StartCoroutine(RotateHighlightImage());

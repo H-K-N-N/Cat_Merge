@@ -598,7 +598,7 @@ public class ShopManager : MonoBehaviour, ISaveable
         {
             if (DictionaryManager.Instance.IsCatUnlocked(i))
             {
-                maxUnlockedCatCoin = GameManager.Instance.AllCatData[i].CatGetCoin;
+                maxUnlockedCatCoin = (decimal)GameManager.Instance.AllCatData[i].CatGetCoin;
                 break;
             }
         }

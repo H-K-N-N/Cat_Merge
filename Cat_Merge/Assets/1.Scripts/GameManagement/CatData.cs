@@ -331,8 +331,8 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     // HP 바 업데이트 함수
     private void UpdateHPBar()
     {
-        float hpRatio = (float)catHp / catData.CatHp;
-        hpFillImage.fillAmount = hpRatio;
+        double hpRatio = catHp / catData.CatHp;
+        hpFillImage.fillAmount = (float)hpRatio;
 
         // 전투중이고, 체력이 최대치가 아닐 때 HP 바 표시
         if (BattleManager.Instance != null && BattleManager.Instance.IsBattleActive && hpRatio < 1f && hpRatio > 0f)
@@ -824,21 +824,21 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
 
             if (catData != null)
             {
-                float currentMultiplier = ShopManager.Instance.CurrentCoinMultiplier;
+                double currentMultiplier = ShopManager.Instance.CurrentCoinMultiplier;
+                double baseCoins = catData.CatGetCoin;
+                double multipliedCoins = baseCoins * currentMultiplier;
+                //decimal multipliedCoins = tempResult;
 
-                int baseCoins = catData.CatGetCoin;
-                int multipliedCoins = Mathf.RoundToInt(baseCoins * currentMultiplier);
-
-                GameManager.Instance.Coin += multipliedCoins;
+                GameManager.Instance.Coin += (decimal)multipliedCoins;
 
                 // 전투 중이거나 드래그 중이 아닐 때만 애니메이션 실행
                 if (!BattleManager.Instance.IsBattleActive && !dragAndDropManager.isDragging)
                 {
-                    StartCoroutine(PlayCollectingAnimation(multipliedCoins));
+                    StartCoroutine(PlayCollectingAnimation((long)multipliedCoins));
                 }
                 else
                 {
-                    UpdateCollectUI(multipliedCoins);
+                    UpdateCollectUI((long)multipliedCoins);
                 }
             }
         }
@@ -847,7 +847,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     }
 
     // UI 업데이트 전용 함수 (애니메이션 없이)
-    private void UpdateCollectUI(int coins)
+    private void UpdateCollectUI(long coins)
     {
         if (collectCoinText != null)
         {
@@ -871,7 +871,7 @@ public class CatData : MonoBehaviour, ICanvasRaycastFilter
     }
 
     // 재화 수집 애니메이션 코루틴
-    private IEnumerator PlayCollectingAnimation(int collectedCoins)
+    private IEnumerator PlayCollectingAnimation(long collectedCoins)
     {
         // 이동 중이거나 드래그 중이면 애니메이션 상태를 변경하지 않음
         if (!BattleManager.Instance.isBattleActive && !GetComponent<DragAndDropManager>().isDragging && !isMoveAnimating)

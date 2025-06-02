@@ -22,17 +22,17 @@ public class Cat
 
     #region Combat Stats
 
-    private int baseDamage;     // 기본 공격력 (기본값 100%)
-    public int BaseDamage { get => baseDamage; set => baseDamage = value; }
+    private double baseDamage;     // 기본 공격력 (기본값 100%)
+    public double BaseDamage { get => baseDamage; set => baseDamage = value; }
 
-    private int baseHp;         // 기본 체력
-    public int BaseHp { get => baseHp; set => baseHp = value; }
+    private double baseHp;         // 기본 체력
+    public double BaseHp { get => baseHp; set => baseHp = value; }
 
-    private int growthDamage;   // 성장한 공격력
-    public int GrowthDamage { get => growthDamage; set => growthDamage = value; }
+    private double growthDamage;   // 성장한 공격력
+    public double GrowthDamage { get => growthDamage; set => growthDamage = value; }
 
-    private int growthHp;       // 성장한 체력
-    public int GrowthHp { get => growthHp; set => growthHp = value; }
+    private double growthHp;       // 성장한 체력
+    public double GrowthHp { get => growthHp; set => growthHp = value; }
 
     private int catAttackSpeed;     // 고양이 공격속도
     public int CatAttackSpeed { get => catAttackSpeed; set => catAttackSpeed = value; }
@@ -63,16 +63,16 @@ public class Cat
     #region Calculated Stats
 
     // 최종 스탯 계산
-    public int CatDamage => (int)((GrowthDamage * (BaseDamage * 0.01) + GrowthDamage) * PassiveAttackDamage);
-    public int CatHp => (int)(GrowthHp * (BaseHp * 0.01)) + GrowthHp;
+    public float CatDamage => (float)((GrowthDamage * (BaseDamage * 0.01) + GrowthDamage) * PassiveAttackDamage);
+    public double CatHp => (GrowthHp * (BaseHp * 0.01)) + GrowthHp;
 
     #endregion
 
 
     #region Additional Properties
 
-    private int catGetCoin;         // 고양이 자동 재화 획득량
-    public int CatGetCoin { get => catGetCoin; set => catGetCoin = value; }
+    private double catGetCoin;         // 고양이 자동 재화 획득량
+    public double CatGetCoin { get => catGetCoin; set => catGetCoin = value; }
 
     private Sprite catImage;        // 고양이 이미지
     public Sprite CatImage { get => catImage; set => catImage = value; }
@@ -92,7 +92,7 @@ public class Cat
     #region Constructor
 
     // 고양이 객체 생성자
-    public Cat(int catId, string catName, int catGrade, int catDamage, int catGetCoin, int catHp, Sprite catImage,
+    public Cat(int catId, string catName, int catGrade, double catDamage, double catGetCoin, double catHp, Sprite catImage,
         string catExplain, int catAttackSpeed, int catArmor, int catMoveSpeed, int canOpener, int catFirstOpenCash)
     {
         CatId = catId;

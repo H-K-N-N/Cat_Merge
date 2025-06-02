@@ -814,14 +814,27 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     private void LoadCatUnlockData(SaveData savedData)
     {
         // 데이터 복원
-        int length = GameManager.Instance.AllCatData.Length;
-        isCatUnlocked = new bool[length];
-        isGetFirstUnlockedReward = new bool[length];
+        int currentLength = GameManager.Instance.AllCatData.Length;
+        int savedLength = savedData.isCatUnlocked?.Length ?? 0;
 
-        for (int i = 0; i < length; i++)
+        isCatUnlocked = new bool[currentLength];
+        isGetFirstUnlockedReward = new bool[currentLength];
+
+        // 저장된 데이터가 있는 만큼만 복원하고, 나머지는 false로 초기화
+        for (int i = 0; i < currentLength; i++)
         {
-            isCatUnlocked[i] = savedData.isCatUnlocked[i];
-            isGetFirstUnlockedReward[i] = savedData.isGetFirstUnlockedReward[i];
+            // 저장된 데이터의 범위 내에 있는 경우에만 저장된 값을 사용
+            if (i < savedLength)
+            {
+                isCatUnlocked[i] = savedData.isCatUnlocked[i];
+                isGetFirstUnlockedReward[i] = savedData.isGetFirstUnlockedReward[i];
+            }
+            else
+            {
+                // 저장된 데이터 범위를 벗어난 경우 false로 초기화
+                isCatUnlocked[i] = false;
+                isGetFirstUnlockedReward[i] = false;
+            }
         }
     }
 

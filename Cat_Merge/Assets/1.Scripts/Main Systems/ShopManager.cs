@@ -41,7 +41,7 @@ public class ShopManager : MonoBehaviour, ISaveable
     private long cashForTimeCoolTime = DEFAULT_CASH_FOR_TIME_COOLTIME;  // 무료 캐쉬 획득 쿨타임(게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
     private long lastTimeReward = 0;                                    // 마지막 cashForTime 보상 시간 저장
     private long passiveCashForTimeCoolTimeReduction = 0;               // 패시브로 인한 cashForTime 쿨타임 감소량
-    private int cashForTimePrice = 5;                                   // cashForTime 보상
+    private int cashForTimePrice = 20;                                  // cashForTime 보상
     private int passiveCashForTimeAmount = 0;                           // 패시브로 인한 cashForTime 추가 무료 캐쉬 획득량
     public int CashForTimePrice => cashForTimePrice + passiveCashForTimeAmount;
 
@@ -58,7 +58,7 @@ public class ShopManager : MonoBehaviour, ISaveable
     private long cashForAdCoolTime = DEFAULT_CASH_FOR_AD_COOLTIME;      // 광고 시청 쿨타임 (게임이 종료되도 시간이 흐르도록 실제 시간을 바탕으로 계산)
     private long lastAdTimeReward = 0;                                  // 마지막 cashForAd 보상 시간 저장
     private long passiveCashForAdCoolTimeReduction = 0;                 // 패시브로 인한 cashForAd 쿨타임 감소량
-    private int cashForAdPrice = 30;                                    // cashForAd 보상
+    private int cashForAdPrice = 50;                                    // cashForAd 보상
     private int passiveCashForAdAmount = 0;                             // 패시브로 인한 cashForAd 추가 광고 캐쉬 획득량
     public int CashForAdPrice => cashForAdPrice + passiveCashForAdAmount;
 
@@ -604,17 +604,17 @@ public class ShopManager : MonoBehaviour, ISaveable
         }
 
         // 배율 결정
-        float multiplier = 5.0f;
+        float multiplier = 5.2f;
         switch (diamondAmount)
         {
             case 100:
-                multiplier = 5.0f;
+                multiplier = 5.2f;
                 break;
             case 500:
-                multiplier = 5.5f;
+                multiplier = 5.8f;
                 break;
             case 2500:
-                multiplier = 6.2f;
+                multiplier = 6.3f;
                 break;
         }
 

@@ -51,7 +51,7 @@ public class CatDataLoader : MonoBehaviour
 
             lineNumber++;
             if (lineNumber <= 1) continue;
-            if (lineNumber >= 32) continue;
+            //if (lineNumber >= 32) continue;
 
             // CSV 파싱 전에 List 초기화 (재사용)
             values.Clear();
@@ -93,7 +93,7 @@ public class CatDataLoader : MonoBehaviour
 
             try
             {
-                ParseAndAddCatData(validValues, lineNumber);
+                ParseAndAddCatData(validValues);
             }
             catch (System.Exception ex)
             {
@@ -103,14 +103,14 @@ public class CatDataLoader : MonoBehaviour
     }
 
     // 파싱된 데이터로 Cat 객체 생성 및 추가하는 함수
-    private void ParseAndAddCatData(List<string> data, int lineNumber)
+    private void ParseAndAddCatData(List<string> data)
     {
         int catId = int.Parse(data[0]);
         string catName = data[1];
         int catGrade = int.Parse(data[2]);
-        int catDamage = int.Parse(data[3]);
-        int catGetCoin = int.Parse(data[4]);
-        int catHp = int.Parse(data[5]);
+        double catDamage = double.Parse(data[3]);
+        double catGetCoin = double.Parse(data[4]);
+        double catHp = double.Parse(data[5]);
         Sprite catImage = LoadSprite(data[6]);
         string catExplain = data[7];
         int catAttackSpeed = int.Parse(data[8]);

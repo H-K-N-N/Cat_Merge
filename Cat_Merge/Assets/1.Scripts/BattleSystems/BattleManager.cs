@@ -518,8 +518,8 @@ public class BattleManager : MonoBehaviour, ISaveable
 
         double hpPercentage = (currentBossHP / maxBossHP) * 100f;
 
-        bossHPText.text = $"{GameManager.Instance.FormatNumber((decimal)currentBossHP)} / {GameManager.Instance.FormatNumber((decimal)maxBossHP)}";
-        bossHPPercentText.text = $"({GameManager.Instance.FormatNumber((decimal)hpPercentage)}%)";
+        bossHPText.text = $"{GameManager.Instance.FormatNumber((long)currentBossHP)} / {GameManager.Instance.FormatNumber((long)maxBossHP)}";
+        bossHPPercentText.text = $"({(int)hpPercentage}%)";
     }
 
     // 전투 시작 함수
@@ -727,16 +727,16 @@ public class BattleManager : MonoBehaviour, ISaveable
         bossHPSlider.value = (float)currentBossHP;
 
         double hpPercentage = (currentBossHP / maxBossHP) * 100f;
-        hpPercentage = Math.Max(0, hpPercentage);
+        hpPercentage = Math.Max(0, (int)hpPercentage);
         if (currentBossHP <= 0)
         {
             bossHPText.text = $"0 / {GameManager.Instance.FormatNumber((decimal)maxBossHP)}";
-            bossHPPercentText.text = $"({GameManager.Instance.FormatNumber((decimal)hpPercentage)}%)";
+            bossHPPercentText.text = $"({hpPercentage}%)";
         }
         else
         {
             bossHPText.text = $"{GameManager.Instance.FormatNumber((decimal)currentBossHP)} / {GameManager.Instance.FormatNumber((decimal)maxBossHP)}";
-            bossHPPercentText.text = $"({GameManager.Instance.FormatNumber((decimal)hpPercentage)}%)";
+            bossHPPercentText.text = $"({hpPercentage}%)";
         }
     }
 

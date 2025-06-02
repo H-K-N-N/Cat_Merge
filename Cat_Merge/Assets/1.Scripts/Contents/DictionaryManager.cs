@@ -540,9 +540,9 @@ public class DictionaryManager : MonoBehaviour, ISaveable
 
         string catInfo = $"이름: {catData.CatName}\n" +
                          $"등급: {catData.CatGrade}\n" +
-                         $"공격력: {catData.BaseDamage}%\n" +
-                         $"체력: {catData.CatHp}\n" +
-                         $"젤리수급량: {catData.CatGetCoin}";
+                         $"공격력: {GameManager.Instance.FormatNumber((long)catData.BaseDamage)}%\n" +
+                         $"체력: {GameManager.Instance.FormatNumber((long)catData.CatHp)}\n" +
+                         $"젤리수급량: {GameManager.Instance.FormatNumber((long)catData.CatGetCoin)}";
         informationCatDetails.text = catInfo;
 
         // 스크롤 설정
@@ -589,7 +589,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
         newCatIcon.sprite = newCat.CatImage;
         newCatName.text = newCat.CatGrade.ToString() + ". " + newCat.CatName;
         newCatExplain.text = newCat.CatExplain;
-        newCatGetCoin.text = "젤리 수급량: " + newCat.CatGetCoin.ToString();
+        newCatGetCoin.text = "젤리 수급량: " + GameManager.Instance.FormatNumber((long)newCat.CatGetCoin);
 
         // Highlight Image 회전 애니메이션 시작
         highlightRotationCoroutine = StartCoroutine(RotateHighlightImage());
@@ -814,14 +814,27 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     private void LoadCatUnlockData(SaveData savedData)
     {
         // 데이터 복원
-        int length = GameManager.Instance.AllCatData.Length;
-        isCatUnlocked = new bool[length];
-        isGetFirstUnlockedReward = new bool[length];
+        int currentLength = GameManager.Instance.AllCatData.Length;
+        int savedLength = savedData.isCatUnlocked?.Length ?? 0;
 
-        for (int i = 0; i < length; i++)
+        isCatUnlocked = new bool[currentLength];
+        isGetFirstUnlockedReward = new bool[currentLength];
+
+        // 저장된 데이터가 있는 만큼만 복원하고, 나머지는 false로 초기화
+        for (int i = 0; i < currentLength; i++)
         {
-            isCatUnlocked[i] = savedData.isCatUnlocked[i];
-            isGetFirstUnlockedReward[i] = savedData.isGetFirstUnlockedReward[i];
+            // 저장된 데이터의 범위 내에 있는 경우에만 저장된 값을 사용
+            if (i < savedLength)
+            {
+                isCatUnlocked[i] = savedData.isCatUnlocked[i];
+                isGetFirstUnlockedReward[i] = savedData.isGetFirstUnlockedReward[i];
+            }
+            else
+            {
+                // 저장된 데이터 범위를 벗어난 경우 false로 초기화
+                isCatUnlocked[i] = false;
+                isGetFirstUnlockedReward[i] = false;
+            }
         }
     }
 

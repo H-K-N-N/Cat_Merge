@@ -6,6 +6,7 @@ using TMPro;
 using System;
 using System.Linq;
 
+// 보스 전투 스크립트
 [DefaultExecutionOrder(-1)]
 public class BattleManager : MonoBehaviour, ISaveable
 {
@@ -138,14 +139,14 @@ public class BattleManager : MonoBehaviour, ISaveable
 
 
     [Header("---[ETC]")]
-    [SerializeField] public GameObject effectPrefab;
+    [SerializeField] public GameObject effectPrefab;            // 구름 이펙트
+    private List<CatData> cachedCatDatas = new List<CatData>(); // 고양이 정보 캐시 리스트
 
-    private Coroutine bossBattleCoroutine;                      // BossBattleRoutine 코루틴 추적을 위한 변수 추가
-    private Coroutine bossSpawnRoutine;                         // BossSpawnRoutine 코루틴 추적을 위한 변수 추가
-    private Coroutine bossAttackRoutine;                        // BossAttackRoutine 코루틴 추적을 위한 변수 추가
+    private Coroutine bossBattleCoroutine;                      // BossBattleRoutine 코루틴
+    private Coroutine bossSpawnRoutine;                         // BossSpawnRoutine 코루틴
+    private Coroutine bossAttackRoutine;                        // BossAttackRoutine 코루틴
 
     private bool isDataLoaded = false;                          // 데이터 로드 확인
-
 
     #endregion
 
@@ -157,8 +158,6 @@ public class BattleManager : MonoBehaviour, ISaveable
         if (Instance == null)
         {
             Instance = this;
-
-            
         }
         else
         {
@@ -170,7 +169,6 @@ public class BattleManager : MonoBehaviour, ISaveable
     {
         InitializeBattleManager();
 
-        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
         if (!isDataLoaded)
         {
             bossStage = 1;
@@ -182,7 +180,6 @@ public class BattleManager : MonoBehaviour, ISaveable
         UpdateAutoRetryUI(isAutoRetryEnabled, true);
         bossSpawnRoutine = StartCoroutine(BossSpawnRoutine());
 
-        // AutoRetryPanel 등록
         ActivePanelManager.Instance.RegisterPanel("AutoRetryPanel", autoRetryPanel, null, ActivePanelManager.PanelPriority.Medium);
         ActivePanelManager.Instance.RegisterPanel("GiveUpPanel", giveUpPanel, null, ActivePanelManager.PanelPriority.High);
     }
@@ -375,7 +372,6 @@ public class BattleManager : MonoBehaviour, ISaveable
         bossDangerImage.rectTransform.anchoredPosition = new Vector2(BattleConstants.BOSS_DANGER_START_X, BattleConstants.WARNING_IMAGE_Y);
         bottomWarningImage.rectTransform.anchoredPosition = new Vector2(BattleConstants.WARNING_IMAGE_START_X, BattleConstants.WARNING_IMAGE_Y);
 
-
         // 첫 1초: 투명 -> 반투명
         while (elapsedTime < halfDuration)
         {
@@ -495,7 +491,6 @@ public class BattleManager : MonoBehaviour, ISaveable
         UpdateBossUI();
     }
 
-
     // 해당 스테이지와 동일한 등급을 갖는 보스 데이터 불러오는 함수 (MouseGrade)
     private Mouse GetBossData()
     {
@@ -525,8 +520,8 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 전투 시작 함수
     private void StartBattle()
     {
-        CatData[] allCats = FindObjectsOfType<CatData>();
-        foreach (var cat in allCats)
+        UpdateCachedCatDatas();
+        foreach (var cat in cachedCatDatas)
         {
             cat.SetDragState(false);                // 드래그 상태 해제하고
             cat.ChangeCatState(CatState.isBattle);  // 전투 상태로 변경
@@ -661,8 +656,8 @@ public class BattleManager : MonoBehaviour, ISaveable
             return;
         }
 
-        CatData[] allCats = FindObjectsOfType<CatData>();
-        foreach (var cat in allCats)
+        UpdateCachedCatDatas();
+        foreach (var cat in cachedCatDatas)
         {
             RectTransform catRectTransform = cat.GetComponent<RectTransform>();
             Vector3 catPosition = catRectTransform.anchoredPosition;
@@ -683,8 +678,8 @@ public class BattleManager : MonoBehaviour, ISaveable
             return;
         }
 
-        CatData[] allCats = FindObjectsOfType<CatData>();
-        foreach (var cat in allCats)
+        UpdateCachedCatDatas();
+        foreach (var cat in cachedCatDatas)
         {
             RectTransform catRectTransform = cat.GetComponent<RectTransform>();
             Vector3 catPosition = catRectTransform.anchoredPosition;
@@ -760,8 +755,8 @@ public class BattleManager : MonoBehaviour, ISaveable
 
         // 히트박스 경계에 있는 고양이를 찾음
         List<CatData> catsAtBoundary = new List<CatData>();
-        CatData[] allCats = FindObjectsOfType<CatData>();
-        foreach (var cat in allCats)
+        UpdateCachedCatDatas();
+        foreach (var cat in cachedCatDatas)
         {
             if (cat.isStuned)
             {
@@ -1099,10 +1094,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 전투 종료 함수
     public void EndBattle(bool isVictory)
     {
-        if (!isBattleActive)
-        {
-            return;
-        }
+        if (!isBattleActive) return;
 
         isBattleActive = false;
 
@@ -1118,7 +1110,6 @@ public class BattleManager : MonoBehaviour, ISaveable
         {
             currentMaxBossStage = Mathf.Max(currentMaxBossStage, bossStage + 1);
             UpdateCurrentMaxBossStageText();
-            //QuestManager.Instance.AddStageCount();
         }
 
         Destroy(currentBoss);
@@ -1140,8 +1131,8 @@ public class BattleManager : MonoBehaviour, ISaveable
         AutoMoveManager.Instance.EndBattleAutoMoveState();
 
         // 고양이들의 체력 회복
-        CatData[] allCats = FindObjectsOfType<CatData>();
-        foreach (var cat in allCats)
+        UpdateCachedCatDatas();
+        foreach (var cat in cachedCatDatas)
         {
             cat.HealCatHP();
             cat.ChangeCatState(CatState.isIdle);
@@ -1160,10 +1151,7 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 보상 지급 함수
     private void GiveStageReward(bool isVictory, bool isAutoRetryEnabled)
     {
-        if (currentBossData == null)
-        {
-            return;
-        }
+        if (currentBossData == null) return;
 
         if (isVictory)
         {
@@ -1259,11 +1247,17 @@ public class BattleManager : MonoBehaviour, ISaveable
 
     #region State Management
 
+    // 고양이 정보 업데이트 함수
+    private void UpdateCachedCatDatas()
+    {
+        cachedCatDatas = SpawnManager.Instance.GetActiveCatDatas();
+    }
+
     // 모든 고양이의 자동 재화 수집 비활성화 함수
     private void SetStartBattleAutoCollectState()
     {
-        CatData[] allCats = FindObjectsOfType<CatData>();
-        foreach (var cat in allCats)
+        UpdateCachedCatDatas();
+        foreach (var cat in cachedCatDatas)
         {
             if (!cat.isStuned)
             {
@@ -1276,8 +1270,8 @@ public class BattleManager : MonoBehaviour, ISaveable
     // 모든 고양이의 자동 재화 수집 원래 상태로 복구 함수 (활성화)
     private void SetEndBattleAutoCollectState()
     {
-        CatData[] allCats = FindObjectsOfType<CatData>();
-        foreach (var cat in allCats)
+        UpdateCachedCatDatas();
+        foreach (var cat in cachedCatDatas)
         {
             if (!cat.isStuned)
             {

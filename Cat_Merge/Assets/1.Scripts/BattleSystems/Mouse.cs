@@ -1,5 +1,6 @@
 using UnityEngine;
 
+// 쥐(보스)의 정보를 담는 스크립트
 [System.Serializable]
 public class Mouse
 {

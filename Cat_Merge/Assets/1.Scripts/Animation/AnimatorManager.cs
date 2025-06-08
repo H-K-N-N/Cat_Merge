@@ -21,6 +21,7 @@ public struct GradeOverrideData
     public AnimatorOverrideController overrideController;
 }
 
+// 고양이 상태 애니메이션 스크립트
 public class AnimatorManager : MonoBehaviour
 {
 

@@ -639,7 +639,8 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         var activeCats = SpawnManager.Instance.GetActiveCats();
         foreach (var catObj in activeCats)
         {
-            catObj.GetComponent<CatData>().SetCatData(catObj.GetComponent<CatData>().catData);
+            var catData = catObj.GetComponent<CatData>();
+            catData.SetCatData(catData.catData);
         }
     }
 
@@ -664,7 +665,8 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         var activeCats = SpawnManager.Instance.GetActiveCats();
         foreach (var catObj in activeCats)
         {
-            catObj.GetComponent<CatData>().SetCatData(catObj.GetComponent<CatData>().catData);
+            var catData = catObj.GetComponent<CatData>();
+            catData.SetCatData(catData.catData);
         }
     }
 

@@ -311,10 +311,10 @@ public class QuestManager : MonoBehaviour, ISaveable
     // Weekly Quest 설정 함수
     private void InitializeWeeklyQuestManager()
     {
-        InitializeQuest("플레이 시간", 3000, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 합성 횟수", 600, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
-        InitializeQuest("고양이 소환 횟수", 600, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
-        InitializeQuest("전투 횟수", 5, 50, QuestMenuType.Weekly, "I_UI_Mission_Daily.9");
+        InitializeQuest("플레이 시간", 3000, 50, QuestMenuType.Weekly, "I_UI_Mission_Weekly.9");
+        InitializeQuest("고양이 합성 횟수", 600, 50, QuestMenuType.Weekly, "I_UI_Mission_Weekly.9");
+        InitializeQuest("고양이 소환 횟수", 600, 50, QuestMenuType.Weekly, "I_UI_Mission_Weekly.9");
+        InitializeQuest("전투 횟수", 5, 50, QuestMenuType.Weekly, "I_UI_Mission_Weekly.9");
 
         InitializeWeeklySpecialReward();
 

@@ -115,14 +115,13 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         for (int i = 1; i <= GameManager.Instance.AllCatData.Length; i++)
         {
             catFriendships[i] = new CatFriendship(i);
-            buttonUnlockStatus[i] = new bool[5]; // 각 고양이별로 5개의 버튼 상태 저장
+            buttonUnlockStatus[i] = new bool[5];
         }
     }
 
     // 모든 고양이의 현재 레벨 초기화 함수
     private void InitializeCurrentLevels()
     {
-        // 모든 고양이의 현재 레벨을 0으로 초기화
         for (int i = 1; i <= GameManager.Instance.AllCatData.Length; i++)
         {
             currentLevels[i] = 0;
@@ -134,7 +133,11 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     {
         InitializeFriendshipButtons();
         InitializeFullStars();
-        if (expGauge != null) expGauge.value = 0f;
+
+        if (expGauge != null)
+        {
+            expGauge.value = 0f;
+        }
     }
 
     // 애정도 버튼 생성 및 초기화 함수
@@ -636,7 +639,8 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         var activeCats = SpawnManager.Instance.GetActiveCats();
         foreach (var catObj in activeCats)
         {
-            catObj.GetComponent<CatData>().SetCatData(catObj.GetComponent<CatData>().catData);
+            var catData = catObj.GetComponent<CatData>();
+            catData.SetCatData(catData.catData);
         }
     }
 
@@ -661,7 +665,8 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         var activeCats = SpawnManager.Instance.GetActiveCats();
         foreach (var catObj in activeCats)
         {
-            catObj.GetComponent<CatData>().SetCatData(catObj.GetComponent<CatData>().catData);
+            var catData = catObj.GetComponent<CatData>();
+            catData.SetCatData(catData.catData);
         }
     }
 
@@ -885,6 +890,9 @@ public class FriendshipManager : MonoBehaviour, ISaveable
         currentLevels.Clear();
         buttonUnlockStatus.Clear();
 
+        // 전체 고양이 수 가져오기 - 새로 추가한 고양이 판별을 위해
+        int totalCats = GameManager.Instance.AllCatData.Length;
+
         foreach (var savedItem in savedData.friendshipList)
         {
             catFriendships[savedItem.catGrade] = new CatFriendship(savedItem.catGrade)
@@ -953,6 +961,18 @@ public class FriendshipManager : MonoBehaviour, ISaveable
                         }
                     }
                 }
+            }
+        }
+
+        // 새로 추가된 고양이 등급에 대한 데이터 초기화
+        for (int catGrade = 1; catGrade <= totalCats; catGrade++)
+        {
+            if (!catFriendships.ContainsKey(catGrade))
+            {
+                // 새로운 고양이 등급에 대한 데이터 초기화
+                catFriendships[catGrade] = new CatFriendship(catGrade);
+                currentLevels[catGrade] = 0;
+                buttonUnlockStatus[catGrade] = new bool[5];
             }
         }
 

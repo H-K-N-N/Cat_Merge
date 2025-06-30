@@ -2,8 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 
+// 쥐(보스)의 정보와 행동을 관리하는 스크립트
 public class MouseData : MonoBehaviour
 {
 
@@ -16,14 +16,14 @@ public class MouseData : MonoBehaviour
 
     [Header("---[Damage Text]")]
     [SerializeField] private GameObject damageTextPrefab;   // 데미지 텍스트 프리펩
-    private Queue<GameObject> damageTextPool;               // 데미지 텍스트 오브젝트 풀
+    private Queue<DamageTextObject> damageTextPool;         // 데미지 텍스트 오브젝트 풀
     private const int POOL_SIZE = 200;                      // 풀 사이즈
 
     private const float DAMAGE_TEXT_START_Y = 200f;         // 데미지 텍스트 시작 Y 위치
     private const float DAMAGE_TEXT_MOVE_DISTANCE = 50f;    // 데미지 텍스트 이동 거리
     private const float DAMAGE_TEXT_DURATION = 1f;          // 데미지 텍스트 지속 시간
 
-    private readonly Vector3 damageTextMoveOffset = Vector3.up * DAMAGE_TEXT_MOVE_DISTANCE;
+    private readonly Vector3 damageTextMoveOffset = Vector3.up * DAMAGE_TEXT_MOVE_DISTANCE; // 데미지 텍스트 실제 이동 거리
 
     #endregion
 
@@ -50,12 +50,13 @@ public class MouseData : MonoBehaviour
     // 데미지 텍스트 풀 초기화 함수
     private void InitializeDamageTextPool()
     {
-        damageTextPool = new Queue<GameObject>();
+        damageTextPool = new Queue<DamageTextObject>();
         for (int i = 0; i < POOL_SIZE; i++)
         {
             GameObject damageTextObj = Instantiate(damageTextPrefab, transform);
+            var damageTextComponent = damageTextObj.GetComponent<DamageTextObject>();
             damageTextObj.SetActive(false);
-            damageTextPool.Enqueue(damageTextObj);
+            damageTextPool.Enqueue(damageTextComponent);
         }
     }
 
@@ -85,7 +86,7 @@ public class MouseData : MonoBehaviour
     // 데미지 텍스트 생성 함수
     public void ShowDamageText(float damage)
     {
-        GameObject damageTextObj;
+        DamageTextObject damageTextObj;
         if (damageTextPool.Count > 0)
         {
             damageTextObj = damageTextPool.Dequeue();
@@ -93,48 +94,45 @@ public class MouseData : MonoBehaviour
         else
         {
             // 풀이 비어있으면 가장 오래된 텍스트를 재활용
-            damageTextObj = transform.GetChild(0).gameObject;
+            damageTextObj = transform.GetChild(0).GetComponent<DamageTextObject>();
             transform.GetChild(0).SetSiblingIndex(transform.childCount - 1);
         }
 
-        damageTextObj.SetActive(true);
+        damageTextObj.gameObject.SetActive(true);
 
-        RectTransform textRect = damageTextObj.GetComponent<RectTransform>();
         Vector3 startPosition = rectTransform.anchoredPosition;
         startPosition.y = DAMAGE_TEXT_START_Y;
-        textRect.anchoredPosition = startPosition;
+        damageTextObj.rectTransform.anchoredPosition = startPosition;
 
-        TextMeshProUGUI damageText = damageTextObj.GetComponent<TextMeshProUGUI>();
-        damageText.text = GameManager.Instance.FormatNumber((decimal)damage);
+        damageTextObj.text.text = GameManager.Instance.FormatNumber((decimal)damage);
 
-        StartCoroutine(AnimateDamageText(damageTextObj, textRect));
+        StartCoroutine(AnimateDamageText(damageTextObj));
     }
 
     // 데미지 텍스트 애니메이션 코루틴
-    private IEnumerator AnimateDamageText(GameObject textObj, RectTransform textRect)
+    private IEnumerator AnimateDamageText(DamageTextObject textObj)
     {
         float elapsedTime = 0f;
-        Vector3 startPos = textRect.anchoredPosition;
+        Vector3 startPos = textObj.rectTransform.anchoredPosition;
         Vector3 endPos = startPos + damageTextMoveOffset;
 
-        TextMeshProUGUI text = textObj.GetComponent<TextMeshProUGUI>();
-        Color originalColor = text.color;
+        Color originalColor = textObj.text.color;
 
         while (elapsedTime < DAMAGE_TEXT_DURATION)
         {
             elapsedTime += Time.deltaTime;
             float progress = elapsedTime / DAMAGE_TEXT_DURATION;
 
-            textRect.anchoredPosition = Vector3.Lerp(startPos, endPos, progress);
+            textObj.rectTransform.anchoredPosition = Vector3.Lerp(startPos, endPos, progress);
 
             Color newColor = originalColor;
             newColor.a = 1 - progress;
-            text.color = newColor;
+            textObj.text.color = newColor;
 
             yield return null;
         }
 
-        textObj.SetActive(false);
+        textObj.gameObject.SetActive(false);
         damageTextPool.Enqueue(textObj);
     }
 

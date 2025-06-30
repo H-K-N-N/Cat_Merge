@@ -4,6 +4,7 @@ using System.Collections;
 using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 // 고양이 스폰 스크립트
 [DefaultExecutionOrder(-5)]
@@ -23,10 +24,10 @@ public class SpawnManager : MonoBehaviour, ISaveable
     [SerializeField] private Image foodFillAmountImg;               // 소환 이미지
     [SerializeField] public Image autoFillAmountImg;                // 자동소환 이미지
 
-    [SerializeField] public GameObject effectPrefab;
+    [SerializeField] public GameObject effectPrefab;                // 구름 이펙트 프리펩
 
     // 오브젝트 풀 관련 변수
-    private const int POOL_SIZE = 60;                               // 풀 크기
+    private const int POOL_SIZE = 60;                               // 고양이 풀 크기
     private Queue<GameObject> catPool = new Queue<GameObject>();    // 고양이 오브젝트 풀
     private List<GameObject> activeCats = new List<GameObject>();   // 활성화된 고양이 목록
 
@@ -43,8 +44,8 @@ public class SpawnManager : MonoBehaviour, ISaveable
 
     private bool isStoppedReduceCoroutine = false;                  // 코루틴 종료 판별
 
-    private Coroutine createFoodCoroutine;
-    private Coroutine autoCollectCoroutine;
+    private Coroutine createFoodCoroutine;                          // 먹이 코루틴
+    private Coroutine autoCollectCoroutine;                         // 자동 소환 코루틴
 
     private readonly WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
 
@@ -186,16 +187,6 @@ public class SpawnManager : MonoBehaviour, ISaveable
         if (!GameManager.Instance.CanSpawnCat()) return;
 
         SpawnBasicCat();
-
-        //Cat catData = GetCatDataForSpawn();
-        //GameObject newCat = LoadAndDisplayCats(catData);
-
-        //if (newCat != null)
-        //{
-        //    GameManager.Instance.AddCatCount();
-        //    QuestManager.Instance.AddSpawnCount();
-        //    FriendshipManager.Instance.AddExperience(catData.CatGrade, 1);
-        //}
     }
 
     // 구매한 고양이 스폰 함수 (BuyCat)
@@ -220,6 +211,12 @@ public class SpawnManager : MonoBehaviour, ISaveable
         return activeCats;
     }
 
+    // 활성화된 고양이들의 CatData 컴포넌트 반환 함수
+    public List<CatData> GetActiveCatDatas()
+    {
+        return activeCats.Select(cat => cat.GetComponent<CatData>()).Where(catData => catData != null).ToList();
+    }
+
     // 고양이 데이터 설정 함수
     private void SetupCatData(GameObject cat, int grade)
     {
@@ -233,24 +230,17 @@ public class SpawnManager : MonoBehaviour, ISaveable
     // 스폰할 고양이 데이터 반환 함수
     private Cat GetCatDataForSpawn()
     {
-        // ※ 1등급 고양이 부터 먹이 레벨 등급까지 소환인데 등급 통일을 좀 해야할듯
-        // 어디 함수가면 1등급 고양이는 매개변수에 1 넣어야 하는데 여기는 0을 넣어야지 1등급 고양이가 나옴 
-        // 1등급 나오고 싶으면 0 
-        // 먹이업글 2를 개방 했을때 최소 2등급 부터 나와야하는데? 2등급이 나오려면 여기서는 1을 넣어야하고 ...
-
         int basicCatGrade;
         if (ItemMenuManager.Instance.maxFoodLv >= 15)
         {
             basicCatGrade = UnityEngine.Random.Range(ItemMenuManager.Instance.minFoodLv - 2, ItemMenuManager.Instance.maxFoodLv);
-            //Debug.Log($"[15레벨 이상] {ItemMenuManager.Instance.minFoodLv - 1} ~ {ItemMenuManager.Instance.maxFoodLv} 소환");
         }
         else
         {
             basicCatGrade = UnityEngine.Random.Range(0, ItemMenuManager.Instance.maxFoodLv);
-            //Debug.Log($"[15레벨 미만] 1 ~ {ItemMenuManager.Instance.maxFoodLv} 소환");
         }
 
-        // 이건 나중에 고양이들 많아지면 빼도됌. (예외처리: 현재 마지막고양이보다 값이 높으면 마지막고양이로 대체)
+        // 예외처리: 현재 마지막고양이보다 값이 높으면 마지막고양이로 대체
         if (GameManager.Instance.AllCatData.Length <= basicCatGrade)
         {
             basicCatGrade = GameManager.Instance.AllCatData.Length - 1;
@@ -266,14 +256,12 @@ public class SpawnManager : MonoBehaviour, ISaveable
         GameObject catUIObject = GetCatFromPool();
         if (catUIObject == null) return null;
 
-        // CatData 설정
         if (catUIObject.TryGetComponent<CatData>(out var catUIData))
         {
             catUIData.SetCatData(catData);
             catUIData.SetAutoMoveState(AutoMoveManager.Instance.IsAutoMoveEnabled());
         }
 
-        // 랜덤 위치 설정
         if (catUIObject.TryGetComponent<RectTransform>(out var rectTransform))
         {
             rectTransform.anchoredPosition = GetRandomPosition();
@@ -295,7 +283,7 @@ public class SpawnManager : MonoBehaviour, ISaveable
             TutorialManager.Instance.IsTutorialActive &&
             TutorialManager.Instance.CurrentTutorialStep == TutorialManager.TutorialStep.SpawnCat)
         {
-            halfHeight = 500f; // 제한된 높이 사용
+            halfHeight = 500f;
         }
 
         return new Vector2(
@@ -397,7 +385,6 @@ public class SpawnManager : MonoBehaviour, ISaveable
     {
         int maxFood;
 
-        // 현재 레벨이 최대 레벨보다 크거나 같으면 최대 레벨의 값을 가져옴
         if (ItemMenuManager.Instance.MaxFoodsLv >= ItemFunctionManager.Instance.maxFoodsList.Count)
         {
             maxFood = (int)ItemFunctionManager.Instance.maxFoodsList[ItemFunctionManager.Instance.maxFoodsList.Count - 1].value;

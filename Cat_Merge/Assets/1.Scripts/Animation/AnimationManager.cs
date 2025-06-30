@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
+// 고양이 소환/합성 구름 이펙트 애니메이션 스크립트
 public class AnimationManager : MonoBehaviour
 {
 
@@ -14,8 +15,14 @@ public class AnimationManager : MonoBehaviour
     private float maxLifetime = 2f;         // 최대 생존 시간 (안전장치)
 
     private bool isDestroyed = false;       // 파괴 예약 상태
-    private Coroutine scaleAnimationCoroutine;
-    private Coroutine safetyTimeoutCoroutine;
+
+    private Coroutine scaleAnimationCoroutine;  // 구름 애니메이션 코루틴
+    private Coroutine safetyTimeoutCoroutine;   // 최대 생성 시간 코루틴
+
+    // 구름 사이즈
+    private readonly Vector2 INITIAL_SIZE = new Vector2(30, 30);
+    private readonly Vector2 PEAK_SIZE = new Vector2(175, 175);
+    private readonly Vector2 FINAL_SIZE = new Vector2(150, 150);
 
     #endregion
 
@@ -67,10 +74,10 @@ public class AnimationManager : MonoBehaviour
             yield break;
         }
 
-        // 1. 크기 30 → 175 (투명도 1 유지)
         SetAlpha(1f);
 
-        var scaleUp = StartCoroutine(ChangeSize(spriteRect, new Vector2(30, 30), new Vector2(175, 175), duration, false));
+        // 1. 크기 30 → 175 (투명도 1 유지)
+        var scaleUp = StartCoroutine(ChangeSize(spriteRect, INITIAL_SIZE, PEAK_SIZE, duration, false));
         yield return scaleUp;
 
         if (isDestroyed)
@@ -81,7 +88,7 @@ public class AnimationManager : MonoBehaviour
         }
 
         // 2. 크기 175 → 150 (투명도 1 → 0)
-        var scaleDown = StartCoroutine(ChangeSize(spriteRect, new Vector2(175, 175), new Vector2(150, 150), duration * 0.5f, true));
+        var scaleDown = StartCoroutine(ChangeSize(spriteRect, PEAK_SIZE, FINAL_SIZE, duration * 0.5f, true));
         yield return scaleDown;
 
         if (isDestroyed)
@@ -103,12 +110,10 @@ public class AnimationManager : MonoBehaviour
             elapsedTime += Time.deltaTime;
             float t = elapsedTime / time;
 
-            if (target == null) break;  // 추가 검사
+            if (target == null) break;
 
-            // 크기 조절
             target.sizeDelta = Vector2.Lerp(startSize, endSize, t);
 
-            // 투명도 조절 (fadeOut이 true일 때만)
             if (fadeOut)
             {
                 SetAlpha(Mathf.Lerp(1f, 0f, t));
@@ -119,7 +124,6 @@ public class AnimationManager : MonoBehaviour
 
         if (!isDestroyed && target != null)
         {
-            // 최종 크기와 투명도 설정
             target.sizeDelta = endSize;
             if (fadeOut)
             {

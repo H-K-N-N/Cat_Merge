@@ -1,5 +1,6 @@
 using UnityEngine;
 
+// 보스 히트박스 스크립트
 public class BossHitbox : MonoBehaviour
 {
 

@@ -9,6 +9,7 @@ public enum MouseState
     isAttack3,
 }
 
+// 쥐 상태 애니메이션 스크립트
 public class MouseAnimatorManager : MonoBehaviour
 {
 

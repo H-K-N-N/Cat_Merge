@@ -76,10 +76,10 @@ public class DictionaryManager : MonoBehaviour, ISaveable
 
 
     [Header("---[Information Panel UI]")]
-    [SerializeField] private Image informationCatIcon;              // Information Cat Icon
-    [SerializeField] private TextMeshProUGUI informationCatDetails; // informationCatDetails Text
-    [SerializeField] private GameObject catInformationPanel;        // catInformation Panel (상세정보 칸 Panel)
-    [SerializeField] private RectTransform fullInformationPanel;    // fullInformation Panel (상세정보 스크롤 Panel)
+    [SerializeField] private Image informationCatIcon;                                          // Information Cat Icon
+    [SerializeField] private TextMeshProUGUI informationCatDetails;                             // informationCatDetails Text
+    [SerializeField] private GameObject catInformationPanel;                                    // catInformation Panel (상세정보 칸 Panel)
+    [SerializeField] private RectTransform fullInformationPanel;                                // fullInformation Panel (상세정보 스크롤 Panel)
     private static readonly Vector2 defaultInformationPanelPosition = new Vector2(0, -312.5f);  // Information Panel 위치 상수
 
 
@@ -89,7 +89,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     private const int VIEWPORT_HEIGHT = 680;                        // viewport height
 
 
-    // 임시 (다른 서브 메뉴들을 추가한다면 어떻게 정리 할까 고민)
+    // 임시 (아직 서브메뉴가 하나뿐)
     [Header("---[Sub Contents]")]
     [SerializeField] private Transform scrollRectContents;          // 노말 고양이 scrollRectContents (도감에서 노말 고양이의 정보를 초기화 하기 위해)
                                                                     // 희귀 고양이 scrollRectContents
@@ -189,11 +189,6 @@ public class DictionaryManager : MonoBehaviour, ISaveable
 
                 // 행의 개수 계산 (3개씩 한 줄)
                 int rowCount = adjustedTotalSlots / 3;
-
-                // Grid Layout Group 설정값
-                const int SPACING_Y = 30;           // y spacing
-                const int CELL_SIZE_Y = 280;        // y cell size
-                const int VIEWPORT_HEIGHT = 680;    // viewport height
 
                 // 전체 컨텐츠 높이 계산: (행 간격 * (행 개수-1)) + (셀 높이 * 행 개수)
                 float contentHeight = (SPACING_Y * (rowCount - 1)) + (CELL_SIZE_Y * rowCount);
@@ -327,8 +322,8 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     // 모든 해금 상태 저장 함수
     public void SaveUnlockedCats(int CatGrade)
     {
-        GetComponent<DictionaryManager>().UpdateDictionary(CatGrade);
-        GetComponent<DictionaryManager>().ShowNewCatPanel(CatGrade);
+        UpdateDictionary(CatGrade);
+        ShowNewCatPanel(CatGrade);
     }
 
     #endregion

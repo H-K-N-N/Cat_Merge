@@ -15,7 +15,7 @@
   - Unity, C#
 ## 4. 구글 플레이 스토어 링크 (2025.07.04 게시 중단 > 사진 자료 첨부)
   - ~~https://play.google.com/store/apps/details?id=com.HKNNM.CatMergeGame~~
-<img src="https://github.com/user-attachments/assets/6d25d52b-929c-4c5e-a98a-dda72ae62e5e" width="500"></img>
+<img src="https://github.com/user-attachments/assets/6d25d52b-929c-4c5e-a98a-dda72ae62e5e" width="700"></img>
 
 </br>
 </br>

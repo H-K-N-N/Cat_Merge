@@ -655,4 +655,20 @@ public class GameManager : MonoBehaviour, ISaveable
     #endregion
 
 
+    #region Test
+
+    public void PlusCoinButtonClick()
+    {
+        Coin += 10000000000000000;
+    }
+
+
+    public void PlusCashButtonClick()
+    {
+        Cash += 10000;
+    }
+
+    #endregion
+
+
 }

@@ -231,13 +231,22 @@ public class SpawnManager : MonoBehaviour, ISaveable
     private Cat GetCatDataForSpawn()
     {
         int basicCatGrade;
-        if (ItemMenuManager.Instance.maxFoodLv >= 15)
+
+        // 먹이 업그레이드 적용값 가져오기
+        int actualMinFood = ItemMenuManager.Instance.GetActualMinFoodLevel();
+        int actualMaxFood = ItemMenuManager.Instance.GetActualMaxFoodLevel();
+
+        if (actualMaxFood >= 15)
         {
-            basicCatGrade = UnityEngine.Random.Range(ItemMenuManager.Instance.minFoodLv - 2, ItemMenuManager.Instance.maxFoodLv);
+            // 먹이 업그레이드 2가 활성화된 상태: minFood ~ maxFood 범위에서 스폰
+            basicCatGrade = UnityEngine.Random.Range(actualMinFood - 1, actualMaxFood);
+            //Debug.Log($"{actualMinFood - 1}초과 {actualMaxFood}이하");
         }
         else
         {
-            basicCatGrade = UnityEngine.Random.Range(0, ItemMenuManager.Instance.maxFoodLv);
+            // 기본 상태: 0 ~ maxFood 범위에서 스폰
+            basicCatGrade = UnityEngine.Random.Range(0, actualMaxFood);
+            //Debug.Log($"{0}초과 {actualMaxFood}이하");
         }
 
         // 예외처리: 현재 마지막고양이보다 값이 높으면 마지막고양이로 대체

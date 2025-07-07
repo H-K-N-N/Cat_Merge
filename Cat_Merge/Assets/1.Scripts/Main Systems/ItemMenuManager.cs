@@ -108,8 +108,8 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
     [Header("---[ETC]")]
     private bool isDataLoaded = false;              // 데이터 로드 확인
 
-    [HideInInspector] public int minFoodLv = 2;
-    [HideInInspector] public int maxFoodLv = 0;
+    [HideInInspector] public int minFoodLv = 1;
+    [HideInInspector] public int maxFoodLv = 1;
 
     #endregion
 
@@ -130,7 +130,6 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
 
     private void Start()
     {
-        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
         if (!isDataLoaded)
         {
             InitializeDefaultValues();
@@ -157,8 +156,9 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         autoCollectingLv = 0;
         autoMergeLv = 0;
 
-        minFoodLv = 2;
-        maxFoodLv = 0;
+        // 먹이 업그레이드 기본값 (실제 적용값 기준)
+        minFoodLv = 1;  // DB에서 2-1
+        maxFoodLv = 1;  // DB에서 2-1 
     }
 
     // 기본 ItemMenuManager 초기화 함수
@@ -293,7 +293,24 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         disabledBg[index].SetActive(true);
 
         itemMenuesLvText[index].text = $"Lv.{level}";
-        itemMenuesValueText[index].text = $"{value}";
+
+        if (index == 4)
+        {
+            int actualValue = (int)value - 1;
+            itemMenuesValueText[index].text = $"{actualValue}";
+            maxFoodLv = actualValue;
+        }
+        else if (index == 5)
+        {
+            int actualValue = (int)value - 1;
+            minFoodLv = actualValue;
+            itemMenuesValueText[index].text = $"{actualValue}";
+        }
+        else
+        {
+            itemMenuesValueText[index].text = $"{value}";
+        }
+
         itemMenuesFeeText[index].text = "구매완료";
     }
     
@@ -301,12 +318,16 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
     private void SetNormalLevelUI(int index, int level, List<(int step, float value, decimal fee)> itemList)
     {
         itemMenuesLvText[index].text = $"Lv.{itemList[level].step - 1}";
+
         if (index == 4)
         {
-            itemMenuesValueText[index].text = $"{itemList[level].value - 1} → {itemList[level + 1].value - 1}"; // 1(2-1) -> 2(3-1)
-            maxFoodLv = (int)itemList[level].value - 1;
+            int currentMaxFood = GetActualMaxFoodLevel();
+            int nextMaxFood = GetNextActualMaxFoodLevel();
+            itemMenuesValueText[index].text = $"{currentMaxFood} → {nextMaxFood}";
+            maxFoodLv = currentMaxFood;
 
-            itemMenuesValueText[5].text = $"{minFoodLv-1}~{maxFoodLv} → {minFoodLv}~{maxFoodLv}";
+            int currentMinFood = GetActualMinFoodLevel();
+            itemMenuesValueText[5].text = $"{currentMinFood}~{maxFoodLv} → {currentMinFood}~{maxFoodLv}";
 
             if (maxFoodLv >= 15)
             {
@@ -316,8 +337,10 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         }
         else if (index == 5)
         {
-            minFoodLv = (int)itemList[level].value;
-            itemMenuesValueText[index].text = $"{minFoodLv - 1}~{maxFoodLv} → {minFoodLv}~{maxFoodLv}";
+            int currentMinFood = GetActualMinFoodLevel();
+            int nextMinFood = GetNextActualMinFoodLevel();
+            minFoodLv = currentMinFood;
+            itemMenuesValueText[index].text = $"{currentMinFood}~{maxFoodLv} → {nextMinFood}~{maxFoodLv}";
         }
         else
         {
@@ -425,13 +448,14 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
             {
                 GameManager.Instance.MaxCats = (int)ItemFunctionManager.Instance.maxCatsList[maxCatsLv].value;
 
+                //Debug.Log($"고양이 최대치 증가 적용 수치 : {ItemFunctionManager.Instance.maxCatsList[maxCatsLv].value}");
+
                 // 튜토리얼 중이라면 아이템 구매 이벤트 알림
                 if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive)
                 {
                     TutorialManager.Instance.OnMaxCatItemPurchased();
                 }
             });
-
     }
 
     // 재화 획득 시간 감소 함수
@@ -441,8 +465,11 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
             1, 
             ref reduceCollectingTimeLv,
             ItemFunctionManager.Instance.reduceCollectingTimeList,
-            reduceCollectingTimeButton
-            );
+            reduceCollectingTimeButton,
+            () =>
+            {
+                //Debug.Log($"재화 획득 시간 감소 적용 수치 : {ItemFunctionManager.Instance.reduceCollectingTimeList[reduceCollectingTimeLv].value}");
+            });
     }
 
     // 먹이 최대치 증가 함수
@@ -455,6 +482,8 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
             increaseFoodMaximumButton,
             () => 
             {
+                //Debug.Log($"먹이 최대치 증가 적용 수치 : {ItemFunctionManager.Instance.maxFoodsList[maxFoodsLv].value}");
+
                 SpawnManager.Instance.UpdateFoodText();
                 SpawnManager.Instance.OnMaxFoodIncreased();
             });
@@ -467,30 +496,54 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
             3, 
             ref reduceProducingFoodTimeLv,
             ItemFunctionManager.Instance.reduceProducingFoodTimeList,
-            reduceProducingFoodTimeButton
-            );
+            reduceProducingFoodTimeButton,
+            () =>
+            {
+                //Debug.Log($"먹이 생성 시간 감소 적용 수치 : {ItemFunctionManager.Instance.reduceProducingFoodTimeList[reduceProducingFoodTimeLv].value}");
+            });
     }
 
-    // 먹이 업그레이드 함수 (소환할때 더 높은 등급의 고양이가 생성될 확률이 생김)
+    // 먹이 업그레이드 1 함수 (소환할때 더 높은 등급의 고양이가 생성될 확률이 생김)
     private void FoodUpgrade()
     {
         ProcessUpgrade(
             4,
             ref foodUpgradeLv,
             ItemFunctionManager.Instance.foodUpgradeList,
-            foodUpgradeButton
-            );
+            foodUpgradeButton,
+            () =>
+            {
+                //Debug.Log($"먹이 업그레이드 1 적용 수치 : {ItemFunctionManager.Instance.foodUpgradeList[foodUpgradeLv].value-1}");
+            });
     }
 
-    // 먹이 업그레이드2 함수 (소환할때 낮은 등급의 고양이가 나오지 않게 함)
+    // 먹이 업그레이드 2 함수 (소환할때 낮은 등급의 고양이가 나오지 않게 함)
     private void FoodUpgrade2()
     {
+        // 먹이 업그레이드 2의 레벨이 먹이 업그레이드 1의 레벨과 같거나 높다면 구매 불가
+        if (foodUpgrade2Lv >= foodUpgradeLv-1)
+        {
+            NotificationManager.Instance.ShowNotification("먹이 업그레이드 1을 먼저 구매해 주세요!!");
+            return;
+        }
+
+        // 먹이 업그레이드 2의 마지막 레벨(24) 구매 시 먹이 업그레이드 1이 최대 레벨(38)인지 체크
+        if (foodUpgrade2Lv == ItemFunctionManager.Instance.foodUpgrade2List.Count - 2 &&
+            foodUpgradeLv < ItemFunctionManager.Instance.foodUpgradeList.Count - 1)
+        {
+            NotificationManager.Instance.ShowNotification("먹이 업그레이드 1을 먼저 구매해 주세요!!");
+            return;
+        }
+
         ProcessUpgrade(
             5,
             ref foodUpgrade2Lv,
             ItemFunctionManager.Instance.foodUpgrade2List,
-            foodUpgrade2Button
-            );
+            foodUpgrade2Button,
+            () =>
+            {
+                //Debug.Log($"먹이 업그레이드 2 적용 수치 : {ItemFunctionManager.Instance.foodUpgrade2List[foodUpgrade2Lv].value-1}");
+            });
     }
 
     // 자동 먹이주기 시간 감소 함수
@@ -500,8 +553,11 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
             6, 
             ref autoCollectingLv,
             ItemFunctionManager.Instance.autoCollectingList,
-            autoCollectingButton
-            );
+            autoCollectingButton,
+            () =>
+            {
+                //Debug.Log($"자동 먹이주기 시간 감소 적용 수치 : {ItemFunctionManager.Instance.autoCollectingList[autoCollectingLv].value}");
+            });
     }
 
     // 자동 합성 시간 감소 함수
@@ -511,8 +567,60 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
             7,
             ref autoMergeLv,
             ItemFunctionManager.Instance.autoMergeList,
-            autoMergeButton
-            );
+            autoMergeButton,
+            () =>
+            {
+                //Debug.Log($"자동 합성 시간 감소 적용 수치 : {ItemFunctionManager.Instance.autoMergeList[autoMergeLv].value}");
+            });
+    }
+
+    #endregion
+
+
+    #region Food Upgrade Helper Functions
+
+    // 먹이 업그레이드 1의 실제 적용값 반환 (DB값 - 1)
+    public int GetActualMaxFoodLevel()
+    {
+        if (foodUpgradeLv >= ItemFunctionManager.Instance.foodUpgradeList.Count)
+        {
+            return (int)ItemFunctionManager.Instance.foodUpgradeList[ItemFunctionManager.Instance.foodUpgradeList.Count - 1].value - 1;
+        }
+
+        return (int)ItemFunctionManager.Instance.foodUpgradeList[foodUpgradeLv].value - 1;
+    }
+
+    // 먹이 업그레이드 2의 실제 적용값 반환 (DB값 - 1)
+    public int GetActualMinFoodLevel()
+    {
+        if (foodUpgrade2Lv >= ItemFunctionManager.Instance.foodUpgrade2List.Count)
+        {
+            return (int)ItemFunctionManager.Instance.foodUpgrade2List[ItemFunctionManager.Instance.foodUpgrade2List.Count - 1].value - 1;
+        }
+
+        return (int)ItemFunctionManager.Instance.foodUpgrade2List[foodUpgrade2Lv].value - 1;
+    }
+
+    // 먹이 업그레이드 1의 다음 레벨 실제 적용값 반환
+    private int GetNextActualMaxFoodLevel()
+    {
+        if (foodUpgradeLv + 1 >= ItemFunctionManager.Instance.foodUpgradeList.Count)
+        {
+            return GetActualMaxFoodLevel();
+        }
+
+        return (int)ItemFunctionManager.Instance.foodUpgradeList[foodUpgradeLv + 1].value - 1;
+    }
+
+    // 먹이 업그레이드 2의 다음 레벨 실제 적용값 반환
+    private int GetNextActualMinFoodLevel()
+    {
+        if (foodUpgrade2Lv + 1 >= ItemFunctionManager.Instance.foodUpgrade2List.Count)
+        {
+            return GetActualMinFoodLevel();
+        }
+
+        return (int)ItemFunctionManager.Instance.foodUpgrade2List[foodUpgrade2Lv + 1].value - 1;
     }
 
     #endregion
@@ -589,8 +697,8 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
         this.foodUpgrade2Lv = savedData.foodUpgrade2Lv;
         this.autoCollectingLv = savedData.autoCollectingLv;
         this.autoMergeLv = savedData.autoMergeLv;
-        this.minFoodLv = savedData.minFoodLv;
-        this.maxFoodLv = savedData.maxFoodLv;
+        this.minFoodLv = GetActualMinFoodLevel();
+        this.maxFoodLv = GetActualMaxFoodLevel();
 
         UpdateAllUI();
 

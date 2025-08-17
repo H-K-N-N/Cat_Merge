@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 
-// 터치 가능한 패널 관리 스크립트
+// 패널 관리 스크립트
 public class ActivePanelManager : MonoBehaviour
 {
 
@@ -26,12 +26,20 @@ public class ActivePanelManager : MonoBehaviour
         public GameObject Panel { get; }
         public Image ButtonImage { get; }
         public PanelPriority Priority { get; }
+        public CanvasGroup CanvasGroup { get; }
 
         public PanelInfo(GameObject panel, Image buttonImage, PanelPriority priority)
         {
             Panel = panel;
             ButtonImage = buttonImage;
             Priority = priority;
+            CanvasGroup = panel.GetComponent<CanvasGroup>();
+
+            // CanvasGroup이 없으면 추가
+            if (CanvasGroup == null)
+            {
+                CanvasGroup = panel.AddComponent<CanvasGroup>();
+            }
         }
     }
 
@@ -47,6 +55,12 @@ public class ActivePanelManager : MonoBehaviour
 
     // 임시 스택 재사용을 위한 객체
     private readonly Stack<string> tempStack = new Stack<string>();
+
+    // UI Disable GameObject들의 CanvasGroup 컴포넌트들
+    [Header("---[UI Disable]")]
+    [SerializeField] private CanvasGroup mainUIPanelCanvasGroup;
+    [SerializeField] private CanvasGroup mergeAutoFillAmountImgCanvasGroup;
+    [SerializeField] private CanvasGroup spawnAutoFillAmountImgCanvasGroup;
 
     #endregion
 
@@ -99,7 +113,10 @@ public class ActivePanelManager : MonoBehaviour
     // 패널 열기 함수
     public void OpenPanel(string panelName)
     {
-        if (!panels.ContainsKey(panelName)) return;
+        if (!panels.ContainsKey(panelName))
+        {
+            return;
+        }
 
         var newPanel = panels[panelName];
 
@@ -118,19 +135,35 @@ public class ActivePanelManager : MonoBehaviour
 
         // 새 패널 열기
         newPanel.Panel.SetActive(true);
+        if (newPanel.CanvasGroup != null)
+        {
+            newPanel.CanvasGroup.alpha = 1f;
+            newPanel.CanvasGroup.blocksRaycasts = true;
+        }
+
         activePanelStack.Push(panelName);
         UpdateButtonColors();
+        UpdateUIDisableVisibility();
     }
 
     // 패널 닫기 함수
     public void ClosePanel(string panelName)
     {
-        if (!panels.ContainsKey(panelName)) return;
+        if (!panels.ContainsKey(panelName))
+        {
+            return;
+        }
 
         PanelInfo panelInfo = panels[panelName];
         if (panelInfo.Panel.activeSelf)
         {
-            panelInfo.Panel.SetActive(false);
+            // 패널을 비활성화하되 그리기를 방지하기 위해 CanvasGroup alpha를 0으로 설정
+            if (panelInfo.CanvasGroup != null)
+            {
+                panelInfo.CanvasGroup.alpha = 0f;
+                panelInfo.CanvasGroup.blocksRaycasts = false;
+            }
+
             if (activePanelStack.Contains(panelName))
             {
                 tempStack.Clear();
@@ -151,17 +184,26 @@ public class ActivePanelManager : MonoBehaviour
             // 스택의 최상위 패널 활성화
             if (activePanelStack.Count > 0)
             {
-                panels[activePanelStack.Peek()].Panel.SetActive(true);
+                var topPanel = panels[activePanelStack.Peek()];
+                if (topPanel.CanvasGroup != null)
+                {
+                    topPanel.CanvasGroup.alpha = 1f;
+                    topPanel.CanvasGroup.blocksRaycasts = true;
+                }
             }
 
             UpdateButtonColors();
+            UpdateUIDisableVisibility();
         }
     }
 
     // 패널 토글 함수
     public void TogglePanel(string panelName)
     {
-        if (!panels.ContainsKey(panelName)) return;
+        if (!panels.ContainsKey(panelName))
+        {
+            return;
+        }
 
         if (IsPanelActive(panelName))
         {
@@ -203,11 +245,41 @@ public class ActivePanelManager : MonoBehaviour
     // 단일 버튼 색상 업데이트 함수
     private void UpdateButtonColor(Image buttonImage, bool isActive)
     {
-        if (buttonImage == null) return;
+        if (buttonImage == null)
+        {
+            return;
+        }
 
         Color color = buttonImage.color;
         color.a = isActive ? 1f : inactiveAlpha;
         buttonImage.color = color;
+    }
+
+    // UI Disable GameObject들의 가시성 업데이트
+    private void UpdateUIDisableVisibility()
+    {
+        // UI Disable을 적용할 특정 패널들
+        string[] uiDisablePanels = { "BottomItemMenu", "BuyCatMenu", "ShopMenu", "DictionaryMenu", "QuestMenu", "OptionMenu" };
+
+        // 현재 활성화된 패널 중에서 UI Disable을 적용할 패널이 있는지 확인
+        bool hasUIDisablePanel = activePanelStack.Any(panelName => uiDisablePanels.Contains(panelName));
+
+        // 메인 패널 이미지 가시성 제어
+        if (mainUIPanelCanvasGroup != null)
+        {
+            mainUIPanelCanvasGroup.alpha = hasUIDisablePanel ? 0f : 1f;
+            mainUIPanelCanvasGroup.blocksRaycasts = !hasUIDisablePanel;
+        }
+        if (mergeAutoFillAmountImgCanvasGroup != null)
+        {
+            mergeAutoFillAmountImgCanvasGroup.alpha = hasUIDisablePanel ? 0f : 1f;
+            mergeAutoFillAmountImgCanvasGroup.blocksRaycasts = !hasUIDisablePanel;
+        }
+        if (spawnAutoFillAmountImgCanvasGroup != null)
+        {
+            spawnAutoFillAmountImgCanvasGroup.alpha = hasUIDisablePanel ? 0f : 1f;
+            spawnAutoFillAmountImgCanvasGroup.blocksRaycasts = !hasUIDisablePanel;
+        }
     }
 
     #endregion
@@ -230,8 +302,12 @@ public class ActivePanelManager : MonoBehaviour
     // 특정 패널이 활성화되어 있는지 확인하는 함수
     public bool IsPanelActive(string panelName)
     {
-        if (!panels.ContainsKey(panelName)) return false;
-        return panels[panelName].Panel.activeSelf;
+        if (!panels.ContainsKey(panelName))
+        {
+            return false;
+        }
+
+        return panels[panelName].Panel.activeSelf && (panels[panelName].CanvasGroup == null || panels[panelName].CanvasGroup.alpha > 0f);
     }
 
     #endregion

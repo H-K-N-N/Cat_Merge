@@ -27,8 +27,6 @@ public class BuyCatManager : MonoBehaviour, ISaveable
     private Button[] buyCatCoinButtons;                         // 고양이 재화로 구매 버튼
     private Button[] buyCatCashButtons;                         // 크리스탈 재화로 구매 버튼
 
-    private ActivePanelManager activePanelManager;              // ActivePanelManager
-
     // 개별 고양이 등급에 대한 구매 정보 클래스
     [Serializable]
     public class CatPurchaseInfo
@@ -99,7 +97,6 @@ public class BuyCatManager : MonoBehaviour, ISaveable
 
     private void Start()
     {
-        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
         if (!isDataLoaded)
         {
             InitializeCatPurchaseInfos();
@@ -128,11 +125,10 @@ public class BuyCatManager : MonoBehaviour, ISaveable
     // ActivePanel 초기화 함수
     private void InitializeActivePanel()
     {
-        activePanelManager = FindObjectOfType<ActivePanelManager>();
-        activePanelManager.RegisterPanel("BuyCatMenu", buyCatMenuPanel, bottomBuyCatButtonImg);
+        ActivePanelManager.Instance.RegisterPanel("BuyCatMenu", buyCatMenuPanel, bottomBuyCatButtonImg);
 
-        bottomBuyCatButton.onClick.AddListener(() => activePanelManager.TogglePanel("BuyCatMenu"));
-        buyCatBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("BuyCatMenu"));
+        bottomBuyCatButton.onClick.AddListener(() => ActivePanelManager.Instance.TogglePanel("BuyCatMenu"));
+        buyCatBackButton.onClick.AddListener(() => ActivePanelManager.Instance.ClosePanel("BuyCatMenu"));
     }
 
     // 고양이 구매 슬롯 초기화 함수
@@ -397,7 +393,7 @@ public class BuyCatManager : MonoBehaviour, ISaveable
 
         if (buyCatMenuPanel.activeSelf == true)
         {
-            activePanelManager.TogglePanel("BuyCatMenu");
+            ActivePanelManager.Instance.TogglePanel("BuyCatMenu");
         }
     }
 

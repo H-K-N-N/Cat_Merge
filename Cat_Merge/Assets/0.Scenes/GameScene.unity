@@ -12089,6 +12089,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffe8b461e17275246ab225d4ae6fadd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainUIPanelCanvasGroup: {fileID: 835619739}
+  mergeAutoFillAmountImgCanvasGroup: {fileID: 1347997285}
+  spawnAutoFillAmountImgCanvasGroup: {fileID: 1244551189}
 --- !u!114 &331588653
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29915,6 +29918,7 @@ GameObject:
   - component: {fileID: 835619736}
   - component: {fileID: 835619738}
   - component: {fileID: 835619737}
+  - component: {fileID: 835619739}
   m_Layer: 5
   m_Name: Main UI Panel
   m_TagString: Untagged
@@ -29984,6 +29988,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 835619735}
   m_CullTransparentMesh: 1
+--- !u!225 &835619739
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 835619735}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &838233941
 GameObject:
   m_ObjectHideFlags: 0
@@ -45312,6 +45328,7 @@ GameObject:
   - component: {fileID: 1244551186}
   - component: {fileID: 1244551188}
   - component: {fileID: 1244551187}
+  - component: {fileID: 1244551189}
   m_Layer: 5
   m_Name: SpawnAutoFillAmountImg
   m_TagString: Untagged
@@ -45377,6 +45394,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1244551185}
   m_CullTransparentMesh: 1
+--- !u!225 &1244551189
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1244551185}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1245110616
 GameObject:
   m_ObjectHideFlags: 0
@@ -50068,6 +50097,7 @@ GameObject:
   - component: {fileID: 1347997282}
   - component: {fileID: 1347997284}
   - component: {fileID: 1347997283}
+  - component: {fileID: 1347997285}
   m_Layer: 5
   m_Name: MergeAutoFillAmountImg
   m_TagString: Untagged
@@ -50133,6 +50163,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1347997281}
   m_CullTransparentMesh: 1
+--- !u!225 &1347997285
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1347997281}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1351750147
 GameObject:
   m_ObjectHideFlags: 0

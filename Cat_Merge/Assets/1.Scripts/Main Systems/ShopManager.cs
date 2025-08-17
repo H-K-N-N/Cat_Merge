@@ -21,8 +21,6 @@ public class ShopManager : MonoBehaviour, ISaveable
     [SerializeField] private Button shopBackButton;                 // 상점 메뉴 뒤로가기 버튼
     [SerializeField] private GameObject shopNewImage;               // 상점 버튼 New 이미지 오브젝트
 
-    private ActivePanelManager activePanelManager;                  // ActivePanelManager
-
     private bool isWaitingForAd = false;                            // 광고 대기 중인지 확인하는 변수 추가
 
 
@@ -161,11 +159,10 @@ public class ShopManager : MonoBehaviour, ISaveable
     // ActivePanel 초기화 함수
     private void InitializeActivePanel()
     {
-        activePanelManager = FindObjectOfType<ActivePanelManager>();
-        activePanelManager.RegisterPanel("Shop", shopPanel, shopButtonImg);
+        ActivePanelManager.Instance.RegisterPanel("ShopMenu", shopPanel, shopButtonImg);
 
-        shopButton.onClick.AddListener(() => activePanelManager.TogglePanel("Shop"));
-        shopBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("Shop"));
+        shopButton.onClick.AddListener(() => ActivePanelManager.Instance.TogglePanel("ShopMenu"));
+        shopBackButton.onClick.AddListener(() => ActivePanelManager.Instance.ClosePanel("ShopMenu"));
     }
 
     // 전체 UI 업데이트 함수

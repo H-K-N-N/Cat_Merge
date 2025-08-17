@@ -70,8 +70,6 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
     private Color activeColor;                                          // 활성화 색상
     private Color inactiveColor;                                        // 비활성화 색상
 
-    private ActivePanelManager activePanelManager;                      // ActivePanelManager
-
     // 고양이 최대치
     private int maxCatsLv = 0;
     public int MaxCatsLv { get => maxCatsLv; set => maxCatsLv = value; }
@@ -176,17 +174,16 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
     // ActivePanel 초기화 함수
     private void InitializeActivePanel()
     {
-        activePanelManager = FindObjectOfType<ActivePanelManager>();
-        activePanelManager.RegisterPanel("BottomItemMenu", itemMenuPanel, bottomItemButtonImg);
+        ActivePanelManager.Instance.RegisterPanel("BottomItemMenu", itemMenuPanel, bottomItemButtonImg);
 
         bottomItemButton.onClick.AddListener(() => {
-            activePanelManager.TogglePanel("BottomItemMenu");
-            if (activePanelManager.IsPanelActive("BottomItemMenu") && TutorialManager.Instance != null)
+            ActivePanelManager.Instance.TogglePanel("BottomItemMenu");
+            if (ActivePanelManager.Instance.IsPanelActive("BottomItemMenu") && TutorialManager.Instance != null)
             {
                 TutorialManager.Instance.OnOpenItemMenu();
             }
         });
-        itemBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("BottomItemMenu"));
+        itemBackButton.onClick.AddListener(() => ActivePanelManager.Instance.ClosePanel("BottomItemMenu"));
     }
 
     // 메뉴 버튼 초기화 함수
@@ -635,7 +632,7 @@ public class ItemMenuManager : MonoBehaviour, ISaveable
 
         if (itemMenuPanel.activeSelf == true)
         {
-            activePanelManager.TogglePanel("BottomItemMenu");
+            ActivePanelManager.Instance.TogglePanel("BottomItemMenu");
         }
     }
 

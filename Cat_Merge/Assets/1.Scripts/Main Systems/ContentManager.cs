@@ -13,7 +13,6 @@ public class ContentManager : MonoBehaviour
     [SerializeField] private Image contentButtonImage;          // ÄÁÅÙÃ÷ ¹öÆ° ÀÌ¹ÌÁö
     [SerializeField] private GameObject contentPanel;           // ÄÁÅÙÃ÷ ÆĞ³Î
     [SerializeField] private Button contentBackButton;          // ÄÁÅÙÃ÷ µÚ·Î°¡±â ¹öÆ°
-    private ActivePanelManager activePanelManager;              // ActivePanelManager
 
     [Header("---[Sub Menu Settings]")]
     [SerializeField] private GameObject[] mainContentMenus;     // ¸ŞÀÎ ÄÁÅÙÃ÷ ¸Ş´º Panels
@@ -68,8 +67,7 @@ public class ContentManager : MonoBehaviour
 
     private void Start()
     {
-        activePanelManager = FindObjectOfType<ActivePanelManager>();
-        activePanelManager.RegisterPanel("ContentMenu", contentPanel, contentButtonImage);
+        ActivePanelManager.Instance.RegisterPanel("ContentMenu", contentPanel, contentButtonImage);
     }
     #endregion
 
@@ -87,12 +85,12 @@ public class ContentManager : MonoBehaviour
     {
         contentButton.onClick.AddListener(() =>
         {
-            activePanelManager.TogglePanel("ContentMenu");
+            ActivePanelManager.Instance.TogglePanel("ContentMenu");
         });
 
         contentBackButton.onClick.AddListener(() =>
         {
-            activePanelManager.ClosePanel("ContentMenu");
+            ActivePanelManager.Instance.ClosePanel("ContentMenu");
         });
     }
 

@@ -20,7 +20,6 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     [SerializeField] private Image dictionaryButtonImage;           // 도감 버튼 이미지
     [SerializeField] private GameObject dictionaryMenuPanel;        // 도감 메뉴 Panel
     [SerializeField] private Button dictionaryBackButton;           // 도감 뒤로가기 버튼
-    private ActivePanelManager activePanelManager;                  // ActivePanelManager
 
     [SerializeField] private GameObject slotPrefab;                 // 도감 슬롯 프리팹
     [SerializeField] private GameObject[] dictionaryMenus;          // 도감 메뉴 Panels
@@ -125,7 +124,6 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     {
         InitializeDictionaryManager();
 
-        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
         if (!isDataLoaded)
         {
             InitializeCatUnlockData();
@@ -211,8 +209,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
     // ActivePanel 초기화 함수
     private void InitializeActivePanel()
     {
-        activePanelManager = FindObjectOfType<ActivePanelManager>();
-        activePanelManager.RegisterPanel("DictionaryMenu", dictionaryMenuPanel, dictionaryButtonImage);
+        ActivePanelManager.Instance.RegisterPanel("DictionaryMenu", dictionaryMenuPanel, dictionaryButtonImage);
 
         // 메인 튜토리얼 완료 여부에 따라 버튼 상호작용 설정
         if (TutorialManager.Instance != null)
@@ -222,10 +219,10 @@ public class DictionaryManager : MonoBehaviour, ISaveable
 
         dictionaryButton.onClick.AddListener(() =>
         {
-            activePanelManager.TogglePanel("DictionaryMenu");
+            ActivePanelManager.Instance.TogglePanel("DictionaryMenu");
 
             // DictionaryMenu가 활성화될 때만 실행
-            if (activePanelManager.ActivePanelName == "DictionaryMenu")
+            if (ActivePanelManager.Instance.ActivePanelName == "DictionaryMenu")
             {
                 // 도감 패널이 처음 열렸을 때 튜토리얼 실행
                 if (TutorialManager.Instance != null && !TutorialManager.Instance.IsDictionaryTutorialEnd)
@@ -235,7 +232,7 @@ public class DictionaryManager : MonoBehaviour, ISaveable
                 UpdateInformationPanel();
             }
         });
-        dictionaryBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("DictionaryMenu"));
+        dictionaryBackButton.onClick.AddListener(() => ActivePanelManager.Instance.ClosePanel("DictionaryMenu"));
     }
 
     // 도감 버튼 상호작용 업데이트 함수 추가

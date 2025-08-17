@@ -13,7 +13,9 @@ public class GoogleAdsManager : MonoBehaviour
 
     // 실제 광고 ID
 #if UNITY_ANDROID
-    private string _productionAdUnitId = "ca-app-pub-6387288948977074/4325853233";
+    // 광고 게시 중단으로 인해 테스트 광고로 대체
+    //private string _productionAdUnitId = "ca-app-pub-6387288948977074/4325853233";
+    private string _productionAdUnitId = "ca-app-pub-3940256099942544/5354046379";
     private string _testAdUnitId = "ca-app-pub-3940256099942544/5354046379";
 #elif UNITY_IPHONE
     // IPHONE은 지원하지 않으므로 둘다 테스트로 대체

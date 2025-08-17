@@ -69,8 +69,8 @@ public class ItemFunctionManager : MonoBehaviour
         LoadItemData(2, reduceCollectingTimeList);          // 재화 획득 시간 감소
         LoadItemData(3, maxFoodsList);                      // 먹이 최대치 증가
         LoadItemData(4, reduceProducingFoodTimeList);       // 먹이 생성 시간 감소
-        LoadItemData(5, foodUpgradeList);                   // 먹이 업그레이드
-        LoadItemData(6, foodUpgrade2List);                  // 먹이 업그레이드2
+        LoadItemData(5, foodUpgradeList);                   // 먹이 업그레이드 1
+        LoadItemData(6, foodUpgrade2List);                  // 먹이 업그레이드 2
         LoadItemData(7, autoCollectingList);                // 자동 먹이주기 시간
         LoadItemData(8, autoMergeList);                     // 자동 합성 시간
     }

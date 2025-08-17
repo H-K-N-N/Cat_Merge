@@ -21,7 +21,6 @@ public class OptionManager : MonoBehaviour, ISaveable
     [SerializeField] private Image optionButtonImage;           // 옵션 버튼 이미지
     [SerializeField] private GameObject optionMenuPanel;        // 옵션 메뉴 Panel
     [SerializeField] private Button optionBackButton;           // 옵션 뒤로가기 버튼
-    private ActivePanelManager activePanelManager;              // ActivePanelManager
 
     [SerializeField] private GameObject[] mainOptionMenus;      // 메인 옵션 메뉴 Panels
     [SerializeField] private Button[] subOptionMenuButtons;     // 서브 옵션 메뉴 버튼 배열
@@ -211,10 +210,8 @@ public class OptionManager : MonoBehaviour, ISaveable
     {
         optionMenuPanel.SetActive(false);
 
-        activePanelManager = FindObjectOfType<ActivePanelManager>();
-        activePanelManager.RegisterPanel("OptionMenu", optionMenuPanel, optionButtonImage);
+        ActivePanelManager.Instance.RegisterPanel("OptionMenu", optionMenuPanel, optionButtonImage);
 
-        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
         if (!isDataLoaded)
         {
             InitializeOptionManager();
@@ -250,13 +247,13 @@ public class OptionManager : MonoBehaviour, ISaveable
         optionButton.onClick.AddListener(() =>
         {
             handleOptionMenu();
-            activePanelManager.TogglePanel("OptionMenu");
+            ActivePanelManager.Instance.TogglePanel("OptionMenu");
         });
 
         optionBackButton.onClick.AddListener(() =>
         {
             handleOptionMenu();
-            activePanelManager.ClosePanel("OptionMenu");
+            ActivePanelManager.Instance.ClosePanel("OptionMenu");
         });
     }
 
@@ -654,7 +651,6 @@ public class OptionManager : MonoBehaviour, ISaveable
         {
             deleteConfirmPanel.SetActive(false);
             ActivePanelManager.Instance.RegisterPanel("DeleteConfirmPanel", deleteConfirmPanel, null, ActivePanelManager.PanelPriority.High);
-
 
             // 삭제 확인 버튼 이벤트 설정
             if (deleteConfirmYesButton != null)

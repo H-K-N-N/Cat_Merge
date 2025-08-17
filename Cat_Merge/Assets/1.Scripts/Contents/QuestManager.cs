@@ -48,7 +48,6 @@ public class QuestManager : MonoBehaviour, ISaveable
     [SerializeField] private Image questButtonImage;                            // 퀘스트 버튼 이미지
     [SerializeField] private GameObject questMenuPanel;                         // 퀘스트 메뉴 Panel
     [SerializeField] private Button questBackButton;                            // 퀘스트 뒤로가기 버튼
-    private ActivePanelManager activePanelManager;                              // ActivePanelManager
     [SerializeField] private GameObject questSlotPrefab;                        // Quest Slot Prefab
 
     [SerializeField] private GameObject[] mainQuestMenus;                       // 메인 퀘스트 메뉴 Panels
@@ -175,7 +174,6 @@ public class QuestManager : MonoBehaviour, ISaveable
         InitializeDebugControls();
 #endif
 
-        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
         if (!isDataLoaded)
         {
             lastDailyReset = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -283,15 +281,14 @@ public class QuestManager : MonoBehaviour, ISaveable
     // ActivePanel 초기화 함수
     private void InitializeActivePanel()
     {
-        activePanelManager = FindObjectOfType<ActivePanelManager>();
-        activePanelManager.RegisterPanel("QuestMenu", questMenuPanel, questButtonImage);
+        ActivePanelManager.Instance.RegisterPanel("QuestMenu", questMenuPanel, questButtonImage);
 
         questButton.onClick.AddListener(() =>
         {
-            activePanelManager.TogglePanel("QuestMenu");
+            ActivePanelManager.Instance.TogglePanel("QuestMenu");
             InitializeRepeatQuestUIFromSortedList();
         });
-        questBackButton.onClick.AddListener(() => activePanelManager.ClosePanel("QuestMenu"));
+        questBackButton.onClick.AddListener(() => ActivePanelManager.Instance.ClosePanel("QuestMenu"));
     }
 
     // Daily Quest 설정 함수

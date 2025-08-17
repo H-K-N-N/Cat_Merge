@@ -89,7 +89,6 @@ public class FriendshipManager : MonoBehaviour, ISaveable
     {
         InitializeFriendshipData();
 
-        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
         if (!isDataLoaded)
         {
             InitializeCatFriendships();

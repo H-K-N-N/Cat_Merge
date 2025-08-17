@@ -1,7 +1,7 @@
 # 우당탕탕 고양이 대소동 (Cat Merge Game)
 
 <img src="https://github.com/user-attachments/assets/ed35e8e8-97b3-4a62-899d-970cdc010b72" width="250"></img>
-<img src="https://github.com/user-attachments/assets/38258ff3-3eff-4d4b-ab04-3535122dc757" width="250"></img>
+<img src="https://github.com/user-attachments/assets/fe85f7ad-8bed-44a4-bb49-282a53c4225f" width="250"></img>
 <img src="https://github.com/user-attachments/assets/4c9fb017-8036-470f-b8ee-73d74ec68069" width="250"></img>
 </br>
 

@@ -133,9 +133,8 @@ public class GameManager : MonoBehaviour, ISaveable
 
     private void Start()
     {
-        Application.targetFrameRate = 60;
+        //Application.targetFrameRate = 60;
 
-        // GoogleManager에서 데이터를 로드하지 못한 경우에만 초기화
         if (!isDataLoaded)
         {
             InitializeDefaultValues();
@@ -650,6 +649,22 @@ public class GameManager : MonoBehaviour, ISaveable
         {
             cash = parsedCash;
         }
+    }
+
+    #endregion
+
+
+    #region Test
+
+    public void PlusCoinButtonClick()
+    {
+        Coin += 10000000000000000;
+    }
+
+
+    public void PlusCashButtonClick()
+    {
+        Cash += 10000;
     }
 
     #endregion

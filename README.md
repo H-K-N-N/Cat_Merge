@@ -13,7 +13,7 @@
   - 더 높은 등급의 고양이를 아이템들을 활용하며 수집하여 성장하는 게임
 ## 3. 개발 환경
   - Unity, C#
-## 4. 구글 플레이 스토어 링크 (2025.07.04 게시 중단 > 사진 자료 첨부)
+## 4. 구글 플레이스토어 링크 (2025.07.04 사업자 폐업으로 인해 게시 중단)
   - ~~https://play.google.com/store/apps/details?id=com.HKNNM.CatMergeGame~~
 <img src="https://github.com/user-attachments/assets/6d25d52b-929c-4c5e-a98a-dda72ae62e5e" width="700"></img>
 

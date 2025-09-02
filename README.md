@@ -19,6 +19,19 @@
 
 </br>
 </br>
+
+## [스크립트 폴더 요약] (경로: Cat_Merge/Assets/1.Scripts/)
+
+- Animation : 고양이 이동 & 소환 & 보스 상태 애니메이션
+- BattleSystems : 전투 시스템, 보스, 히트박스, 데미지 텍스트
+- Contents : 도감, 애정도, 퀘스트, 옵션 메뉴
+- DataLoader : csv 파일 로드
+- GameManagement : GameManager, 튜토리얼 시스템, 고양이 정보, 드래그 앤 드랍 시스템
+- Google : GPGS 연동 및 구글 로그인 & Google Ads 광고
+- Main Systems : 아이템, 고양이 구매, 상점, 고양이 소환
+- Sub Systems : 자동머지, 자동이동, 정렬, 머지 시스템
+- Title : 타이틀 메뉴 & 애니메이션
+- UI : 카메라, 알림 시스템, 패널 관리 시스템, 로딩화면, 버튼 클릭 효과
 </br>
 
 ## [개발 일지]

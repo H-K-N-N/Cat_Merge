@@ -15,8 +15,8 @@ public class GoogleAdsManager : MonoBehaviour
 #if UNITY_ANDROID
     // 광고 게시 중단으로 인해 테스트 광고로 대체
     //private string _productionAdUnitId = "ca-app-pub-6387288948977074/4325853233";
-    private string _productionAdUnitId = "ca-app-pub-3940256099942544/5354046379";
-    private string _testAdUnitId = "ca-app-pub-3940256099942544/5354046379";
+    private string _productionAdUnitId = "ca-app-pub-6387288948977074/5875297683";
+    private string _testAdUnitId = "ca-app-pub-3940256099942544/5224354917";
 #elif UNITY_IPHONE
     // IPHONE은 지원하지 않으므로 둘다 테스트로 대체
     private string _productionAdUnitId = "ca-app-pub-3940256099942544/6978759866";
@@ -31,7 +31,7 @@ public class GoogleAdsManager : MonoBehaviour
     private int retryAttempt;
     private const int MAX_RETRY_ATTEMPTS = 3;
 
-    private RewardedInterstitialAd rewardedInterstitialAd;
+    private RewardedAd rewardedAd;
     private bool isRewardEarned = false;
     private bool isLoadingAd = false;
 
@@ -64,12 +64,12 @@ public class GoogleAdsManager : MonoBehaviour
 
         while (initialLoadAttempts < MAX_INITIAL_ATTEMPTS)
         {
-            if (!isLoadingAd && (rewardedInterstitialAd == null || !rewardedInterstitialAd.CanShowAd()))
+            if (!isLoadingAd && (rewardedAd == null || !rewardedAd.CanShowAd()))
             {
-                LoadRewardedInterstitialAd();
+                LoadRewardedAd();
                 yield return new WaitForSeconds(2f);
             }
-            else if (rewardedInterstitialAd != null && rewardedInterstitialAd.CanShowAd())
+            else if (rewardedAd != null && rewardedAd.CanShowAd())
             {
                 break;
             }
@@ -87,94 +87,94 @@ public class GoogleAdsManager : MonoBehaviour
 
     #region Load Ad
 
-    public void LoadRewardedInterstitialAd()
+    public void LoadRewardedAd()
     {
         if (!isInitialized || isLoadingAd)
         {
-            //Debug.Log("AdMob SDK가 아직 초기화되지 않았습니다.");
+            Debug.Log("AdMob SDK가 아직 초기화되지 않았습니다.");
             return;
         }
 
         isLoadingAd = true;
 
         // 새로운 광고를 로드하기 전에 이전 광고 정리
-        if (rewardedInterstitialAd != null)
+        if (rewardedAd != null)
         {
-            rewardedInterstitialAd.Destroy();
-            rewardedInterstitialAd = null;
+            rewardedAd.Destroy();
+            rewardedAd = null;
         }
 
-        //Debug.Log($"보상형 전면 광고를 로딩합니다. 시도 #{retryAttempt + 1}");
+        Debug.Log($"보상형 전면 광고를 로딩합니다. 시도 #{retryAttempt + 1}");
 
         var adRequest = new AdRequest();
         //adRequest.Keywords.Add("unity-admob-sample");
 
-        RewardedInterstitialAd.Load(_adUnitId, adRequest,
-            (RewardedInterstitialAd ad, LoadAdError error) =>
+        RewardedAd.Load(_adUnitId, adRequest,
+            (RewardedAd ad, LoadAdError error) =>
             {
                 isLoadingAd = false;
 
                 if (error != null || ad == null)
                 {
-                    //Debug.Log($"보상형 전면 광고 로딩 실패. 에러: {error?.GetMessage()}");
+                    Debug.Log($"보상형 전면 광고 로딩 실패. 에러: {error?.GetMessage()}");
 
                     // 재시도 로직
                     if (retryAttempt < MAX_RETRY_ATTEMPTS)
                     {
                         retryAttempt++;
                         float delay = Mathf.Pow(2, retryAttempt);
-                        //Debug.Log($"{delay}초 후 재시도합니다...");
-                        Invoke(nameof(LoadRewardedInterstitialAd), delay);
+                        Debug.Log($"{delay}초 후 재시도합니다...");
+                        Invoke(nameof(LoadRewardedAd), delay);
                     }
                     else
                     {
-                        //Debug.Log("최대 재시도 횟수를 초과했습니다.");
+                        Debug.Log("최대 재시도 횟수를 초과했습니다.");
                         ShopManager.Instance?.ResetAdState();
                     }
                     return;
                 }
 
-                //Debug.Log("보상형 전면 광고가 성공적으로 로딩되었습니다.");
-                rewardedInterstitialAd = ad;
+                Debug.Log("보상형 전면 광고가 성공적으로 로딩되었습니다.");
+                rewardedAd = ad;
                 retryAttempt = 0;
 
                 // 광고 이벤트 핸들러 등록
-                RegisterEventHandlers(rewardedInterstitialAd);
+                RegisterEventHandlers(rewardedAd);
             });
     }
 
-    private void RegisterEventHandlers(RewardedInterstitialAd ad)
+    private void RegisterEventHandlers(RewardedAd ad)
     {
         // 광고가 시작될 때 보상 플래그 초기화
         ad.OnAdFullScreenContentOpened += () =>
         {
             isRewardEarned = false;
-            //Debug.Log("광고가 표시되었습니다.");
+            Debug.Log("광고가 표시되었습니다.");
         };
 
         // 광고가 닫힐 때
         ad.OnAdFullScreenContentClosed += () =>
         {
-            //Debug.Log("광고가 닫혔습니다.");
+            Debug.Log("광고가 닫혔습니다.");
             if (!isRewardEarned)
             {
                 ShopManager.Instance?.ResetAdState();
             }
-            LoadRewardedInterstitialAd();
+            LoadRewardedAd();
         };
 
         // 광고 표시 실패시
         ad.OnAdFullScreenContentFailed += (AdError error) =>
         {
-            //Debug.Log($"광고 표시 실패: {error.GetMessage()}");
-            LoadRewardedInterstitialAd();
+            Debug.Log($"광고 표시 실패: {error.GetMessage()}");
+            LoadRewardedAd();
         };
 
         // 보상 획득시
         ad.OnAdPaid += (AdValue adValue) =>
         {
-            //string msg = string.Format("광고 보상이 지급되었습니다. (통화: {0}, 값: {1}, 정밀도: {2})", adValue.CurrencyCode, adValue.Value, adValue.Precision);
-            //Debug.Log(msg);
+            string msg = string.Format("광고 보상이 지급되었습니다. (통화: {0}, 값: {1}, 정밀도: {2})", adValue.CurrencyCode, adValue.Value, adValue.Precision);
+            Debug.Log(msg);
         };
     }
 
@@ -188,34 +188,34 @@ public class GoogleAdsManager : MonoBehaviour
     {
         if (!isInitialized)
         {
-            //Debug.Log("AdMob SDK가 아직 초기화되지 않았습니다.");
+            Debug.Log("AdMob SDK가 아직 초기화되지 않았습니다.");
             ShopManager.Instance?.ResetAdState();
             return;
         }
 
-        if (rewardedInterstitialAd != null && rewardedInterstitialAd.CanShowAd())
+        if (rewardedAd != null && rewardedAd.CanShowAd())
         {
             try
             {
-                rewardedInterstitialAd.Show((Reward reward) =>
+                rewardedAd.Show((Reward reward) =>
                 {
                     isRewardEarned = true;  // 보상 획득 시 플래그 설정
-                    //Debug.Log($"CashForAd 보상이 지급됩니다: {reward.Type}");
+                    Debug.Log($"CashForAd 보상이 지급됩니다: {reward.Type}");
                     ShopManager.Instance.OnCashForAdRewardComplete();
                 });
             }
             catch (Exception e)
             {
-                //Debug.Log($"광고 표시 중 오류 발생: {e.Message}");
+                Debug.Log($"광고 표시 중 오류 발생: {e.Message}");
                 ShopManager.Instance?.ResetAdState();
-                LoadRewardedInterstitialAd();
+                LoadRewardedAd();
             }
         }
         else
         {
-            //Debug.Log("광고가 준비되지 않았습니다. 새로운 광고를 로드합니다.");
+            Debug.Log("광고가 준비되지 않았습니다. 새로운 광고를 로드합니다.");
             ShopManager.Instance?.ResetAdState();
-            LoadRewardedInterstitialAd();
+            LoadRewardedAd();
         }
     }
 
@@ -224,34 +224,35 @@ public class GoogleAdsManager : MonoBehaviour
     {
         if (!isInitialized)
         {
-            //Debug.Log("AdMob SDK가 아직 초기화되지 않았습니다.");
+            Debug.Log("AdMob SDK가 아직 초기화되지 않았습니다.");
             ShopManager.Instance?.ResetAdState();
             return;
         }
 
-        if (rewardedInterstitialAd != null && rewardedInterstitialAd.CanShowAd())
+        if (rewardedAd != null && rewardedAd.CanShowAd())
         {
             try
             {
-                rewardedInterstitialAd.Show((Reward reward) =>
+                rewardedAd.Show((Reward reward) =>
                 {
-                    //Debug.Log($"DoubleCoinForAd 보상이 지급됩니다: {reward.Type}");
+                    Debug.Log($"DoubleCoinForAd 보상이 지급됩니다: {reward.Type}");
+                    isRewardEarned = true;
                     ShopManager.Instance.OnDoubleCoinAdRewardComplete();
-                    LoadRewardedInterstitialAd();
+                    // OnAdFullScreenContentClosed already reloads the next ad; avoid loading twice per ad watch.
                 });
             }
             catch (Exception e)
             {
-                //Debug.Log($"광고 표시 중 오류 발생: {e.Message}");
+                Debug.Log($"광고 표시 중 오류 발생: {e.Message}");
                 ShopManager.Instance?.ResetAdState();
-                LoadRewardedInterstitialAd();
+                LoadRewardedAd();
             }
         }
         else
         {
-            //Debug.Log("광고가 준비되지 않았습니다. 새로운 광고를 로드합니다.");
+            Debug.Log("광고가 준비되지 않았습니다. 새로운 광고를 로드합니다.");
             ShopManager.Instance?.ResetAdState();
-            LoadRewardedInterstitialAd();
+            LoadRewardedAd();
         }
     }
 

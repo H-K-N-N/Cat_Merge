@@ -480,35 +480,32 @@ public class ShopManager : MonoBehaviour, ISaveable
     // DoubleCoinForAd 광고 시청 완료 시 실행되는 함수
     public void OnDoubleCoinAdRewardComplete()
     {
-        if (isWaitingForAd)
+        // 기존 효과 지속시간 계산
+        float remainingTime = GetRemainingEffectTime();
+
+        // 광고 보상 지급 - 모든 고양이의 재화 수급량 지정된 시간동안 2배로 증가
+        coinMultiplier = doubleCoinMultiplier;
+
+        // 기존 효과 지속시간이 있으면 그 시간에 새로운 지속시간을 더함
+        if (remainingTime > 0)
         {
-            // 기존 효과 지속시간 계산
-            float remainingTime = GetRemainingEffectTime();
-
-            // 광고 보상 지급 - 모든 고양이의 재화 수급량 지정된 시간동안 2배로 증가
-            coinMultiplier = doubleCoinMultiplier;
-
-            // 기존 효과 지속시간이 있으면 그 시간에 새로운 지속시간을 더함
-            if (remainingTime > 0)
-            {
-                multiplierEndTime = Time.time + remainingTime + CurrentDoubleCoinDuration;
-            }
-            else
-            {
-                multiplierEndTime = Time.time + CurrentDoubleCoinDuration;
-            }
-
-            // 전투 관련 상태 초기화
-            isBattlePaused = false;
-            battlePauseTime = 0f;
-
-            // 마지막 광고 시청 시간 저장
-            lastDoubleCoinTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-            isWaitingForAd = false;
-
-            UpdateDoubleCoinForAdUI();
+            multiplierEndTime = Time.time + remainingTime + CurrentDoubleCoinDuration;
         }
+        else
+        {
+            multiplierEndTime = Time.time + CurrentDoubleCoinDuration;
+        }
+
+        // 전투 관련 상태 초기화
+        isBattlePaused = false;
+        battlePauseTime = 0f;
+
+        // 마지막 광고 시청 시간 저장
+        lastDoubleCoinTimeReward = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+        isWaitingForAd = false;
+
+        UpdateDoubleCoinForAdUI();
     }
 
     // 패시브로 인한 DoubleCoinForAd 효과 지속시간 증가 함수
